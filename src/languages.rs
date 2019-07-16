@@ -17,7 +17,7 @@ mk_langs!(
         JavascriptCode,
         JavascriptParser,
         tree_sitter_javascript,
-        [js]
+        [js, jsm]
     ),
     (Java, JavaCode, JavaParser, tree_sitter_java, [java]),
     (Go, GoCode, GoParser, tree_sitter_go, [go]),
