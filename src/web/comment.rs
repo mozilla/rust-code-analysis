@@ -8,7 +8,7 @@ use crate::traits::{Callback, TSParserTrait};
 #[derive(Debug, Deserialize)]
 pub struct WebCommentPayload {
     pub id: String,
-    pub language: String,
+    pub file_name: String,
     pub code: String,
 }
 

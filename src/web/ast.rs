@@ -10,7 +10,7 @@ type Span = Option<(usize, usize, usize, usize)>;
 #[derive(Debug, Deserialize)]
 pub struct AstPayload {
     pub id: String,
-    pub language: String,
+    pub file_name: String,
     pub code: String,
     pub comment: bool,
     pub span: bool,
