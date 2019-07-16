@@ -1,0 +1,32 @@
+{
+  "name": "tree-sitter-go",
+  "version": "0.15.0",
+  "description": "Go grammar for tree-sitter",
+  "main": "index.js",
+  "keywords": [
+    "parser",
+    "go"
+  ],
+  "author": "Max Brunsfeld",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^2.10.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.15.3",
+    "tree-sitter-highlight-schema": "^0.1.1"
+  },
+  "scripts": {
+    "build": "tree-sitter generate && node-gyp build",
+    "test": "tree-sitter test && script/parse-examples"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.go",
+      "file-types": [
+        "go"
+      ],
+      "highlights": "src/highlights.json"
+    }
+  ]
+}

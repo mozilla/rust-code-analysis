@@ -1,0 +1,469 @@
+===
+local variable
+===
+
+class A {
+  int b() {
+    int c = 5;
+  }
+}
+
+---
+
+(program
+  (class_declaration
+    (identifier)
+    (class_body
+      (method_declaration
+        (method_header
+          (integral_type)
+        (method_declarator
+          (identifier)))
+        (method_body
+          (block
+            (local_variable_declaration_statement
+              (local_variable_declaration
+                (integral_type)
+                (variable_declarator_list
+                  (variable_declarator
+                    (variable_declarator_id
+                      (identifier))
+                    (integer_literal
+                      (decimal_integer_literal))))))))))))
+
+===
+module
+===
+
+module com.foo { }
+open module com.foo { }
+
+---
+
+(program
+  (module_declaration
+    (scoped_identifier (identifier) (identifier)))
+  (module_declaration
+    (scoped_identifier (identifier) (identifier))))
+
+===
+module with normal annotation
+===
+
+@RequestForEnhancement(
+    id       = 2868724,
+    synopsis = "Provide time-travel functionality",
+    engineer = "Mr. Peabody",
+    date     = "4/1/2004"
+)
+module com.foo { }
+
+---
+
+(program
+  (module_declaration
+    (normal_annotation
+      (identifier)
+      (element_value_pair_list
+        (element_value_pair (identifier) (element_value (integer_literal (decimal_integer_literal))))
+        (element_value_pair (identifier) (element_value (string_literal)))
+        (element_value_pair (identifier) (element_value (string_literal)))
+        (element_value_pair (identifier) (element_value (string_literal)))))
+    (scoped_identifier (identifier) (identifier))))
+
+===
+module with marker annotation
+===
+
+@Preliminary module com.foo { }
+@Preliminary open module com.foo { }
+
+---
+
+(program
+  (module_declaration (marker_annotation (identifier)) (scoped_identifier (identifier) (identifier)))
+  (module_declaration (marker_annotation (identifier)) (scoped_identifier (identifier) (identifier))))
+
+===
+module with single element annotation
+===
+
+@Copyright("a") module com.foo { }
+
+---
+
+(program
+  (module_declaration
+    (single_element_annotation
+      (identifier)
+    (element_value
+      (string_literal)))
+    (scoped_identifier
+      (identifier)
+      (identifier))))
+
+===
+package_declaration
+===
+
+package myVector;
+
+---
+
+ (program (package_declaration (identifier)))
+
+===
+module directive
+===
+
+module com.example.foo {
+    requires com.example.foo.http;
+}
+
+---
+
+(program
+  (module_declaration
+  (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier))
+  (module_directive
+    (module_name
+      (module_name
+        (module_name
+          (module_name (identifier)) (identifier)) (identifier)) (identifier)))))
+
+===
+module directive with requires, exports, opens, uses and provides
+===
+
+module com.example.foo {
+    requires com.example.foo.http;
+    requires java.logging;
+
+    requires transitive com.example.foo.network;
+
+    exports com.example.foo.bar;
+    exports com.example.foo.internal to com.example.foo.probe;
+
+    opens com.example.foo.quux;
+    opens com.example.foo.internal to com.example.foo.network,
+                                      com.example.foo.probe;
+
+    uses com.example.foo.spi.Intf;
+    provides com.example.foo.spi.Intf with com.example.foo.Impl;
+}
+---
+
+(program
+  (module_declaration
+    (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier))
+    (module_directive
+      (module_name (module_name (module_name (module_name (identifier)) (identifier)) (identifier)) (identifier)))
+    (module_directive
+      (module_name (module_name (identifier)) (identifier)))
+    (module_directive
+      (requires_modifier)
+      (module_name (module_name (module_name (module_name (identifier)) (identifier)) (identifier)) (identifier)))
+    (module_directive
+      (scoped_identifier (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (identifier)))
+    (module_directive
+      (scoped_identifier (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (identifier))
+      (module_name (module_name (module_name (module_name (identifier)) (identifier)) (identifier)) (identifier)))
+    (module_directive
+      (scoped_identifier (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (identifier)))
+    (module_directive
+      (scoped_identifier (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (identifier))
+      (module_name (module_name (module_name (module_name (identifier)) (identifier)) (identifier)) (identifier))
+      (module_name (module_name (module_name (module_name (identifier)) (identifier)) (identifier)) (identifier)))
+    (module_directive
+      (scoped_identifier (scoped_identifier (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (identifier)) (identifier)))
+    (module_directive
+      (scoped_identifier (scoped_identifier (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (identifier)) (identifier))
+      (scoped_identifier (scoped_identifier (scoped_identifier (identifier) (identifier)) (identifier)) (identifier)))))
+
+===
+single type import declaration
+===
+
+import java.util.Vector;
+
+---
+
+(program (import_declaration (identifier) (identifier) (identifier)))
+
+===
+type_import_on_declaraction
+===
+
+import java.util.*;
+
+---
+
+(program (import_declaration (identifier) (identifier) (asterisk)))
+
+===
+single static import declaration
+===
+
+import static java.util.Vector;
+
+---
+
+(program (import_declaration (identifier) (identifier) (identifier)))
+
+===
+static import on demand declaration
+===
+
+import static java.util.*;
+
+---
+
+(program (import_declaration (identifier) (identifier) (asterisk)))
+
+===
+class declaration
+===
+
+class Point {
+}
+
+---
+
+(program
+  (class_declaration
+    (identifier)
+      (class_body)))
+
+===
+class declaration involving public, private, abstract and superclass
+===
+
+public class Point {
+}
+
+private class Point {
+}
+
+abstract class ColoredPoint extends Point {
+}
+
+---
+
+(program
+  (class_declaration (modifier) (identifier) (class_body))
+  (class_declaration (modifier) (identifier) (class_body))
+  (class_declaration (modifier) (identifier) (superclass (type_identifier)) (class_body)))
+
+===
+class declaration with implements
+===
+
+public class Dog implements ISpeak {
+}
+
+---
+
+(program
+  (class_declaration
+     (modifier) (identifier)
+     (super_interfaces (interface_type_list (type_identifier))) (class_body)))
+
+===
+class declaration with body
+===
+
+class Point {
+  int x;
+
+  void bar() {
+    x = 2;
+  }
+}
+
+---
+
+(program (class_declaration (identifier) (class_body (field_declaration (integral_type) (variable_declarator_list (variable_declarator (variable_declarator_id (identifier))))) (method_declaration (method_header (void_type) (method_declarator (identifier))) (method_body (block (assignment_expression (lhs (identifier)) (integer_literal (decimal_integer_literal)))))))))
+
+===
+interface declaration
+===
+
+interface Top {
+}
+
+---
+
+(program
+  (interface_declaration
+    (normal_interface_declaration (identifier) (interface_body))))
+
+===
+interface declaration with extends
+===
+
+interface Left extends Top {
+}
+
+interface Bottom extends Left, Right {}
+
+---
+
+(program
+  (interface_declaration
+    (normal_interface_declaration (identifier)
+      (extends_interfaces (interface_type_list (type_identifier))) (interface_body)))
+  (interface_declaration
+    (normal_interface_declaration (identifier)
+      (extends_interfaces (interface_type_list (type_identifier) (type_identifier))) (interface_body))))
+
+===
+interface with annotation type declaration
+===
+
+@interface SelfRef {}
+
+---
+
+(program
+  (interface_declaration (annotation_type_declaration (identifier) (annotation_type_body))))
+
+===
+method declaration
+===
+
+class Beyonce {
+  void calculateAnswer(double wingSpan, int numberOfEngines,
+                                double length, double grossTons) {
+      //do the calculation here
+  }
+}
+
+---
+
+(program (class_declaration (identifier) (class_body (method_declaration (method_header (void_type) (method_declarator (identifier) (formal_parameter (floating_point_type) (variable_declarator_id (identifier))) (formal_parameter (integral_type) (variable_declarator_id (identifier))) (formal_parameter (floating_point_type) (variable_declarator_id (identifier))) (formal_parameter (floating_point_type) (variable_declarator_id (identifier))))) (method_body (block (comment)))))))
+
+===
+constructor declaration
+===
+
+class Point {
+    int x, y;
+    Point(int x, int y) { this.x = x; this.y = y; }
+}
+
+---
+
+(program (class_declaration (identifier) (class_body (field_declaration (integral_type) (variable_declarator_list (variable_declarator (variable_declarator_id (identifier))) (variable_declarator (variable_declarator_id (identifier))))) (constructor_declaration (constructor_declarator (identifier) (formal_parameter (integral_type) (variable_declarator_id (identifier))) (formal_parameter (integral_type) (variable_declarator_id (identifier)))) (constructor_body (assignment_expression (lhs (field_access (this) (identifier))) (identifier)) (assignment_expression (lhs (field_access (this) (identifier))) (identifier)))))))
+
+===
+throws
+===
+
+class Beyonce {
+  BufferedReader newReader() throws FileNotFoundException {
+      new BufferedReader(new InputStreamReader(new FileInputStream(file), charset));
+    }
+}
+
+---
+
+(program
+  (class_declaration
+    (identifier)
+      (class_body
+        (method_declaration
+          (method_header
+            (type_identifier)
+            (method_declarator
+              (identifier))
+            (throws
+              (exception_type_list
+                (exception_type
+                  (type_identifier)))))
+          (method_body
+            (block
+              (class_instance_creation_expression
+                (unqualified_class_instance_creation_expression
+                  (type_identifier)
+                (argument_list
+                  (class_instance_creation_expression
+                    (unqualified_class_instance_creation_expression
+                      (type_identifier)
+                      (argument_list
+                        (class_instance_creation_expression
+                          (unqualified_class_instance_creation_expression
+                            (type_identifier)
+                              (argument_list
+                                (identifier))))
+                        (identifier)))))))))))))
+
+===
+object instantiation
+===
+
+class Point {
+
+  public double Foo() {
+    new BufferedWriter();
+  }
+}
+
+---
+
+(program
+  (class_declaration
+    (identifier)
+    (class_body
+      (method_declaration
+        (modifier)
+        (method_header
+          (floating_point_type)
+          (method_declarator
+            (identifier)))
+        (method_body
+          (block
+            (class_instance_creation_expression
+              (unqualified_class_instance_creation_expression
+                (type_identifier)))))))))
+===
+variable declaration
+===
+
+class JayZ {
+  public void Beyonce() {
+    int blue_ivy_carter;
+  };
+}
+
+---
+
+(program
+  (class_declaration
+    (identifier)
+    (class_body
+      (method_declaration
+        (modifier)
+        (method_header
+          (void_type)
+          (method_declarator
+            (identifier)))
+        (method_body
+          (block
+            (local_variable_declaration_statement
+              (local_variable_declaration
+                (integral_type)
+                (variable_declarator_list
+                  (variable_declarator
+                    (variable_declarator_id (identifier))))))))))))
+
+===
+enum declaration
+===
+
+enum HandSign {
+   SCISSOR, PAPER, STONE
+}
+
+---
+
+(program (enum_declaration (identifier) (enum_constant (identifier)) (enum_constant (identifier)) (enum_constant (identifier)))) 

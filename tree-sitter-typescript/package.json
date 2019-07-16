@@ -1,0 +1,28 @@
+{
+  "name": "tree-sitter-typescript",
+  "version": "0.15.1",
+  "description": "Typescript grammar for tree-sitter",
+  "keywords": [
+    "parser",
+    "tree-sitter",
+    "typescript"
+  ],
+  "author": "Max Brunsfeld",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^2.10.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.15.3",
+    "tree-sitter-javascript": "tree-sitter/tree-sitter-javascript"
+  },
+  "scripts": {
+    "build": "npm run build-typescript && npm run build-tsx",
+    "build-typescript": "cd typescript && tree-sitter generate",
+    "build-tsx": "cd tsx && tree-sitter generate",
+    "test": "npm run test-typescript && npm run test-tsx",
+    "test-typescript": "cd typescript && tree-sitter test && script/parse-examples",
+    "test-tsx": "cd tsx && tree-sitter test",
+    "test-windows": "pushd typescript && tree-sitter test && popd && pushd tsx && tree-sitter test"
+  }
+}

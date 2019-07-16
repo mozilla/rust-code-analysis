@@ -1,0 +1,7 @@
+[
+    {% for (name, dup, ts_name) in names -%}
+    {% if !dup %}
+    ["{{ name }}", "{{ ts_name }}"]{% if !loop.last %},{% endif %}
+    {%- endif -%}
+    {% endfor %}
+]

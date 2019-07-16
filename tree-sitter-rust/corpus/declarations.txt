@@ -1,0 +1,1048 @@
+============================================
+Modules
+============================================
+
+mod english;
+
+mod english {}
+
+mod english {
+    mod greetings {}
+    mod farewells {}
+}
+
+pub mod english;
+
+---
+
+(source_file
+  (mod_item (identifier))
+  (mod_item (identifier) (declaration_list))
+  (mod_item (identifier) (declaration_list
+    (mod_item (identifier) (declaration_list))
+    (mod_item (identifier) (declaration_list))))
+  (mod_item (visibility_modifier) (identifier)))
+
+============================================
+Extern crate declarations
+============================================
+
+extern crate std;
+extern crate std as ruststd;
+pub extern crate futures;
+
+---
+
+(source_file
+  (extern_crate_declaration (crate) (identifier))
+  (extern_crate_declaration (crate) (identifier) (identifier))
+  (extern_crate_declaration (visibility_modifier) (crate) (identifier)))
+
+============================================
+Function declarations
+============================================
+
+fn main() {}
+
+fn add(x: i32, y: i32) -> i32 {
+    return x + y;
+}
+
+fn takes_slice(slice: &str) {
+    println!("Got: {}", slice);
+}
+
+fn foo() -> [u32; 2] {
+    return [1, 2];
+}
+
+fn foo() -> (u32, u16) {
+    return (1, 2);
+}
+
+fn foo() {
+    return
+}
+
+---
+
+(source_file
+  (function_item (identifier) (parameters) (block))
+  (function_item (identifier)
+    (parameters
+      (parameter (identifier) (primitive_type))
+      (parameter (identifier) (primitive_type)))
+    (primitive_type)
+    (block
+      (return_expression (binary_expression (identifier) (identifier)))))
+  (function_item (identifier)
+    (parameters
+      (parameter (identifier) (reference_type (primitive_type))))
+    (block (macro_invocation (identifier) (token_tree (string_literal) (identifier)))))
+  (function_item (identifier) (parameters) (array_type (primitive_type) (integer_literal))
+    (block (return_expression (array_expression (integer_literal) (integer_literal)))))
+  (function_item (identifier) (parameters) (tuple_type (primitive_type) (primitive_type))
+    (block (return_expression (tuple_expression (integer_literal) (integer_literal)))))
+  (function_item (identifier) (parameters)
+    (block (return_expression))))
+
+============================================
+Const function declarations
+============================================
+
+const fn main() {}
+
+---
+
+(source_file
+  (function_item (function_modifiers) (identifier) (parameters) (block)))
+
+============================================
+Functions with abstract return types
+============================================
+
+fn triples(a: impl B) -> impl Iterator<Item=(usize)> {
+}
+
+---
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (abstract_type (type_identifier))))
+    (abstract_type (generic_type
+      (type_identifier)
+      (type_arguments (type_binding (type_identifier) (tuple_type (primitive_type))))))
+    (block)))
+
+============================================
+Diverging functions
+============================================
+
+fn aborts() -> ! {
+}
+
+---
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters)
+    (empty_type)
+    (block)))
+
+============================================
+Extern function declarations
+============================================
+
+extern "C" fn foo() {}
+extern "C" fn printf(
+    *const c_char,
+    ...,
+) {}
+
+---
+
+(source_file
+  (function_item
+    (function_modifiers (extern_modifier (string_literal)))
+    (identifier)
+    (parameters)
+    (block))
+  (function_item
+    (function_modifiers (extern_modifier (string_literal)))
+    (identifier)
+    (parameters (pointer_type (type_identifier)) (variadic_parameter))
+    (block)))
+
+============================================
+Use declarations
+============================================
+
+use abc;
+use phrases::japanese;
+use sayings::english::greetings;
+use sayings::english::greetings as en_greetings ;
+use phrases::english::{greetings,farewells};
+use sayings::japanese::farewells::*;
+pub use self::greetings::hello;
+use sayings::english::{self, greetings as en_greetings, farewells as en_farewells};
+use three::{ dot::{one, four} };
+
+---
+
+(source_file
+  (use_declaration (identifier))
+  (use_declaration (scoped_identifier (identifier) (identifier)))
+  (use_declaration
+    (scoped_identifier
+      (scoped_identifier (identifier) (identifier))
+      (identifier)))
+  (use_declaration
+    (use_as_clause
+      (scoped_identifier
+        (scoped_identifier (identifier) (identifier))
+        (identifier))
+      (identifier)))
+  (use_declaration
+    (scoped_use_list
+      (scoped_identifier (identifier) (identifier))
+      (use_list (identifier) (identifier))))
+  (use_declaration
+    (use_wildcard
+      (scoped_identifier
+        (scoped_identifier (identifier) (identifier))
+        (identifier))))
+  (use_declaration
+    (visibility_modifier)
+    (scoped_identifier
+      (scoped_identifier (self) (identifier))
+      (identifier)))
+  (use_declaration
+    (scoped_use_list
+      (scoped_identifier (identifier) (identifier))
+      (use_list
+        (self)
+        (use_as_clause (identifier) (identifier))
+        (use_as_clause (identifier) (identifier)))))
+  (use_declaration
+    (scoped_use_list
+      (identifier)
+      (use_list
+        (scoped_use_list
+          (identifier)
+          (use_list
+            (identifier) (identifier)))))))
+
+============================================
+Variable bindings
+============================================
+
+let x;
+let x = 42;
+let x: i32;
+let x: i8 = 42;
+let mut x = 5;
+let y: bool = false;
+let bool: bool = false;
+let u32: str = "";
+
+---
+
+(source_file
+  (let_declaration (identifier))
+  (let_declaration (identifier) (integer_literal))
+  (let_declaration (identifier) (primitive_type))
+  (let_declaration (identifier) (primitive_type) (integer_literal))
+  (let_declaration (mutable_specifier) (identifier) (integer_literal))
+  (let_declaration (identifier) (primitive_type) (boolean_literal))
+  (let_declaration (identifier) (primitive_type) (boolean_literal))
+  (let_declaration (identifier) (primitive_type) (string_literal)))
+
+============================================
+Structs
+============================================
+
+struct Proton;
+struct Electron {}
+struct Person {pub name: String, pub age: u32}
+struct Point {
+  x: i32,
+
+  #[attribute1]
+  y: i32,
+}
+struct Color(pub i32, i32, i32);
+struct Inches(i32);
+
+---
+
+(source_file
+  (struct_item (type_identifier))
+  (struct_item (type_identifier) (field_declaration_list))
+  (struct_item (type_identifier) (field_declaration_list
+    (field_declaration (visibility_modifier) (field_identifier) (type_identifier))
+    (field_declaration (visibility_modifier) (field_identifier) (primitive_type))))
+  (struct_item (type_identifier) (field_declaration_list
+    (field_declaration (field_identifier) (primitive_type))
+    (attribute_item (meta_item (identifier)))
+    (field_declaration (field_identifier) (primitive_type))))
+  (struct_item (type_identifier) (ordered_field_declaration_list
+    (visibility_modifier) (primitive_type) (primitive_type) (primitive_type)))
+  (struct_item (type_identifier) (ordered_field_declaration_list
+    (primitive_type))))
+
+============================================
+Unions
+============================================
+
+pub union in6_addr__bindgen_ty_1 {
+    pub __u6_addr8: [__uint8_t; 16usize],
+    pub __u6_addr16: [__uint16_t; 8usize],
+    pub __u6_addr32: [__uint32_t; 4usize],
+    _bindgen_union_align: [u32; 4usize],
+}
+
+---
+
+(source_file
+  (union_item (visibility_modifier) (type_identifier) (field_declaration_list
+    (field_declaration (visibility_modifier) (field_identifier) (array_type (type_identifier) (integer_literal)))
+    (field_declaration (visibility_modifier) (field_identifier) (array_type (type_identifier) (integer_literal)))
+    (field_declaration (visibility_modifier) (field_identifier) (array_type (type_identifier) (integer_literal)))
+    (field_declaration (field_identifier) (array_type (primitive_type) (integer_literal))))))
+
+============================================
+Generic structs
+============================================
+
+struct A<B> {}
+struct C<'a, 'b> {}
+struct C<'a,> {}
+
+---
+
+(source_file
+  (struct_item
+    (type_identifier)
+    (type_parameters (type_identifier))
+    (field_declaration_list))
+  (struct_item
+    (type_identifier)
+    (type_parameters (lifetime (identifier)) (lifetime (identifier)))
+    (field_declaration_list))
+  (struct_item
+    (type_identifier)
+    (type_parameters (lifetime (identifier)))
+    (field_declaration_list)))
+
+============================================
+Enums
+============================================
+
+pub enum Option<T> {
+    None,
+    Some(T),
+}
+
+pub enum Node<T: Item> {
+    Internal {
+        children: Vec<Tree<T>>,
+        height: u16
+    },
+    #[attribute1]
+    #[attribute2]
+    Leaf {
+        value: T
+    }
+}
+
+---
+
+(source_file
+  (enum_item
+    (visibility_modifier)
+    (type_identifier)
+    (type_parameters (type_identifier))
+    (enum_variant_list
+      (enum_variant (identifier))
+      (enum_variant (identifier) (ordered_field_declaration_list (type_identifier)))))
+  (enum_item
+    (visibility_modifier)
+    (type_identifier)
+    (type_parameters (constrained_type_parameter
+      (type_identifier)
+      (trait_bounds (type_identifier))))
+    (enum_variant_list
+      (enum_variant
+        (identifier)
+        (field_declaration_list
+          (field_declaration (field_identifier) (generic_type
+            (type_identifier)
+            (type_arguments
+              (generic_type (type_identifier) (type_arguments (type_identifier))))))
+          (field_declaration (field_identifier) (primitive_type))))
+      (attribute_item (meta_item (identifier)))
+      (attribute_item (meta_item (identifier)))
+      (enum_variant
+        (identifier)
+        (field_declaration_list
+          (field_declaration (field_identifier) (type_identifier)))))))
+
+============================================
+Enums with values specified
+============================================
+
+pub enum c_style_enum {
+    val1 = 1,
+    val2 = 2
+}
+
+---
+
+(source_file
+  (enum_item
+    (visibility_modifier)
+    (type_identifier)
+    (enum_variant_list
+      (enum_variant (identifier) (integer_literal))
+      (enum_variant (identifier) (integer_literal)))))
+
+============================================
+Generic functions
+============================================
+
+pub fn splice<T: Into<Text>>(&mut self, old_range: Range<usize>, new_text: T) {
+}
+
+---
+
+(source_file
+  (function_item
+    (visibility_modifier)
+    (identifier)
+    (type_parameters
+      (constrained_type_parameter
+        (type_identifier)
+        (trait_bounds
+          (generic_type (type_identifier) (type_arguments (type_identifier))))))
+    (parameters
+      (self_parameter (mutable_specifier) (self))
+      (parameter (identifier) (generic_type (type_identifier) (type_arguments (primitive_type))))
+      (parameter (identifier) (type_identifier)))
+    (block)))
+
+============================================
+Functions with mutable parameters
+============================================
+
+fn foo(mut x : u32) {
+}
+
+---
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters (parameter (mutable_specifier) (identifier) (primitive_type)))
+    (block)))
+
+============================================
+Functions with destructured parameters
+============================================
+
+fn f1([x, y]: [u32; 2]) {}
+fn f2(&x: &Y) {}
+fn f3((x, y): (T, U)) {}
+
+---
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters
+      (parameter
+        (slice_pattern (identifier) (identifier))
+        (array_type (primitive_type) (integer_literal))))
+    (block))
+  (function_item
+    (identifier)
+    (parameters
+      (parameter
+        (reference_pattern (identifier))
+        (reference_type (type_identifier))))
+    (block))
+  (function_item
+    (identifier)
+    (parameters
+      (parameter
+        (tuple_pattern (identifier) (identifier))
+        (tuple_type (type_identifier) (type_identifier))))
+    (block)))
+
+============================================
+Functions with custom types for self
+============================================
+
+trait Callback {
+    fn call(self: Box<Self>);
+}
+
+---
+
+(source_file
+  (trait_item
+    (type_identifier)
+    (declaration_list
+      (function_signature_item
+        (identifier)
+        (parameters
+          (parameter
+            (self)
+            (generic_type (type_identifier) (type_arguments (type_identifier)))))))))
+
+============================================
+Constant items
+============================================
+
+const N: i32 = 5;
+
+trait Foo {
+    const X: u8;
+}
+
+---
+
+(source_file
+  (const_item (identifier) (primitive_type) (integer_literal))
+  (trait_item
+    (type_identifier)
+    (declaration_list (const_item (identifier) (primitive_type)))))
+
+============================================
+Static items
+============================================
+
+static N: i32 = 5;
+static mut __progname: *mut ::c_char;
+
+---
+
+(source_file
+  (static_item
+    (identifier)
+    (primitive_type)
+    (integer_literal))
+  (static_item
+    (mutable_specifier)
+    (identifier)
+    (pointer_type (mutable_specifier) (scoped_type_identifier (type_identifier)))))
+
+============================================
+Static 'ref' items using lazy_static
+============================================
+
+static ref ONE: usize = 0;
+
+---
+
+(source_file
+  (static_item (identifier) (primitive_type) (integer_literal)))
+
+============================================
+Type aliases
+============================================
+
+type Inch = u64;
+type Name<T> = Vec<T>;
+
+---
+
+(source_file
+  (type_item (type_identifier) (primitive_type))
+  (type_item (type_identifier) (type_parameters (type_identifier)) (generic_type (type_identifier) (type_arguments (type_identifier)))))
+
+============================================
+Empty statements
+============================================
+
+fn main() {
+    ;
+}
+
+---
+
+(source_file
+  (function_item (identifier) (parameters) (block
+    (empty_statement))))
+
+============================================
+Attributes
+============================================
+
+#[test]
+fn test_foo() {}
+
+#[derive(Debug)]
+struct Baz;
+
+#[derive(Debug, Eq,)]
+struct Foo;
+
+#[cfg(target_os = "macos")]
+mod macos_only {}
+
+#![allow(clippy::useless_transmute)]
+
+#[clippy::cyclomatic_complexity = "100"]
+
+---
+
+(source_file
+  (attribute_item (meta_item (identifier)))
+  (function_item (identifier) (parameters) (block))
+
+  (attribute_item (meta_item (identifier) (meta_item (identifier))))
+  (struct_item (type_identifier))
+
+  (attribute_item (meta_item (identifier) (meta_item (identifier)) (meta_item (identifier))))
+  (struct_item (type_identifier))
+
+  (attribute_item (meta_item (identifier) (meta_item (identifier) (string_literal))))
+  (mod_item (identifier) (declaration_list))
+
+  (inner_attribute_item (meta_item (identifier) (meta_item (scoped_identifier (identifier) (identifier)))))
+
+  (attribute_item (meta_item (scoped_identifier (identifier) (identifier)) (string_literal))))
+
+============================================
+Inner attributes
+============================================
+
+mod macos_only {
+  #![cfg(target_os = "macos")]
+}
+
+---
+
+(source_file
+  (mod_item (identifier) (declaration_list
+    (inner_attribute_item (meta_item (identifier) (meta_item (identifier) (string_literal)))))))
+
+============================================
+Attributes and Expressions
+============================================
+
+fn foo() {
+   bar(x,
+       #[cfg(foo = "bar")]
+       y);
+   let z = [#[hello] 2, 7, 8];
+   let t = (#[hello] 2, 7, 8);
+}
+
+---
+
+(source_file
+  (function_item (identifier) (parameters)
+    (block
+      (call_expression (identifier)
+        (arguments
+          (identifier)
+            (attribute_item (meta_item (identifier) (meta_item (identifier) (string_literal)))) (identifier)))
+      (let_declaration (identifier)
+        (array_expression (attribute_item (meta_item (identifier))) (integer_literal) (integer_literal) (integer_literal)))
+      (let_declaration (identifier)
+        (tuple_expression (attribute_item (meta_item (identifier))) (integer_literal) (integer_literal) (integer_literal))))))
+
+===========================================
+Inherent Impls
+===========================================
+
+impl Person {
+  const leg_count : u32 = 2;
+
+  fn walk(self) {}
+  fn walk_mut(mut self) {}
+  fn talk(& self) {}
+  fn talk_mut(&'a mut self) {}
+}
+
+---
+
+(source_file
+  (impl_item (type_identifier) (declaration_list
+    (const_item (identifier) (primitive_type) (integer_literal))
+    (function_item (identifier) (parameters (self_parameter (self))) (block))
+    (function_item (identifier) (parameters (self_parameter (mutable_specifier) (self))) (block))
+    (function_item (identifier) (parameters (self_parameter (self))) (block))
+    (function_item (identifier) (parameters (self_parameter (lifetime (identifier)) (mutable_specifier) (self))) (block)))))
+
+===========================================
+Trait impls
+===========================================
+
+impl<'a> iter::Iterator for Self::Iter<'a> {
+}
+
+impl ConvertTo<i64> for i32 {
+    fn convert(&self) -> i64 { *self as i64 }
+}
+
+---
+
+(source_file
+  (impl_item
+    (type_parameters (lifetime (identifier)))
+    (scoped_type_identifier (identifier) (type_identifier))
+    (impl_for_clause
+      (generic_type
+        (scoped_type_identifier (identifier) (type_identifier))
+        (type_arguments (lifetime (identifier)))))
+    (declaration_list))
+  (impl_item
+    (type_identifier)
+    (type_arguments (primitive_type))
+    (impl_for_clause (primitive_type))
+    (declaration_list
+      (function_item
+        (identifier)
+        (parameters (self_parameter (self)))
+        (primitive_type)
+        (block
+          (binary_expression (type_cast_expression (unary_expression (self)) (primitive_type))))))))
+
+===========================================
+Unsafe impls
+===========================================
+
+unsafe impl Foo {
+}
+
+---
+
+(source_file (impl_item (type_identifier) (declaration_list)))
+
+===========================================
+Impls with default functions
+===========================================
+
+impl Foo {
+  const default fn bar() -> i32 {
+    // Make 'default' still works as an identifier
+    default.bar();
+  }
+}
+
+---
+
+(source_file
+  (impl_item (type_identifier) (declaration_list
+    (function_item
+      (function_modifiers)
+      (identifier)
+      (parameters)
+      (primitive_type)
+      (block
+        (line_comment)
+        (call_expression
+          (field_expression (identifier) (field_identifier))
+          (arguments)))))))
+
+============================================
+Trait declarations
+============================================
+
+pub trait Item: Clone + Eq + fmt::Debug {
+    fn summarize(&self) -> Self::Summary;
+}
+
+unsafe trait Foo { }
+
+---
+
+(source_file
+  (trait_item
+    (visibility_modifier)
+    (type_identifier)
+    (trait_bounds
+      (type_identifier)
+      (type_identifier)
+      (scoped_type_identifier (identifier) (type_identifier)))
+    (declaration_list
+      (function_signature_item
+        (identifier)
+        (parameters (self_parameter (self)))
+        (scoped_type_identifier (identifier) (type_identifier)))))
+   (trait_item (type_identifier) (declaration_list)))
+
+============================================
+Trait declarations with optional type parameters
+============================================
+
+trait Add<RHS=Self> {
+    type Output;
+    fn add(self, rhs: RHS) -> Self::Output;
+}
+
+---
+
+(source_file
+  (trait_item
+    (type_identifier)
+    (type_parameters (optional_type_parameter (type_identifier) (type_identifier)))
+    (declaration_list
+      (associated_type (type_identifier))
+      (function_signature_item
+        (identifier)
+        (parameters (self_parameter (self)) (parameter (identifier) (type_identifier)))
+        (scoped_type_identifier (identifier) (type_identifier))))))
+
+============================================
+Unsized types in trait bounds
+============================================
+
+trait Foo<T: ?Sized> {
+}
+
+---
+
+(source_file
+  (trait_item
+    (type_identifier)
+    (type_parameters
+      (constrained_type_parameter
+        (type_identifier)
+        (trait_bounds (removed_trait_bound (type_identifier)))))
+    (declaration_list)))
+
+============================================
+Macro invocations inside trait declarations
+============================================
+
+
+pub trait A: B + C + D {
+    private_decl!{}
+    fn f(&self);
+}
+
+---
+
+(source_file
+  (trait_item
+    (visibility_modifier)
+    (type_identifier)
+    (trait_bounds (type_identifier) (type_identifier) (type_identifier))
+    (declaration_list
+      (macro_invocation (identifier) (token_tree))
+      (function_signature_item (identifier) (parameters (self_parameter (self)))))))
+
+============================================
+Associated Types
+============================================
+
+pub trait Graph {
+    type N: fmt::Display;
+    type E;
+}
+
+---
+
+(source_file
+  (trait_item
+    (visibility_modifier)
+    (type_identifier)
+    (declaration_list
+      (associated_type (type_identifier) (trait_bounds (scoped_type_identifier (identifier) (type_identifier))))
+      (associated_type (type_identifier)))))
+
+=====================
+Higher-ranked types
+=====================
+
+trait T: for<'a> AddAssign<&'a usize> {
+}
+
+---
+
+(source_file
+  (trait_item
+    (type_identifier)
+    (trait_bounds
+      (higher_ranked_trait_bound
+        (type_parameters (lifetime (identifier)))
+        (generic_type (type_identifier) (type_arguments (reference_type (lifetime (identifier)) (primitive_type))))))
+    (declaration_list)))
+
+=====================
+Visibility modifiers
+=====================
+
+pub fn a() {}
+pub(super) fn b() {}
+pub(self) fn c() {}
+pub(crate) fn c() {}
+pub(in crate::d) fn e() {}
+
+---
+
+(source_file
+  (function_item (visibility_modifier) (identifier) (parameters) (block))
+  (function_item (visibility_modifier (super)) (identifier) (parameters) (block))
+  (function_item (visibility_modifier (self)) (identifier) (parameters) (block))
+  (function_item (visibility_modifier (crate)) (identifier) (parameters) (block))
+  (function_item
+    (visibility_modifier (scoped_identifier (crate) (identifier)))
+    (identifier)
+    (parameters)
+    (block)))
+
+========================================================
+Function parameter names that match built-in type names
+========================================================
+
+fn foo(str: *const c_char) {}
+fn bar(bool: bool) {}
+
+---
+
+(source_file
+  (function_item (identifier) (parameters (parameter (identifier) (pointer_type (type_identifier)))) (block))
+  (function_item (identifier) (parameters (parameter (identifier) (primitive_type))) (block)))
+
+
+=====================
+Where clauses
+=====================
+
+fn walk<F>(&self, it: &mut F) -> bool
+    where F: FnMut(&Pat) -> bool
+{
+  return false
+}
+
+impl<'a, T: 'a + Item> Iterator for Iter<'a, T> where Self: 'a {
+}
+
+impl<T> A for B<T>
+    where C<T>: D,
+          T: 'c,
+          'c: 'b,
+{
+}
+
+impl<'a, E> Read
+where &'a E: Read,
+{
+}
+
+impl<T> A for B<T> where (T, T, T): C, {}
+
+impl<T> A for B<T>
+    where for<'a> D<T>: E<'a>,
+{
+}
+
+pub trait A<B> where B: C,
+{
+}
+
+---
+
+(source_file
+  (function_item
+    (identifier)
+    (type_parameters (type_identifier))
+    (parameters
+      (self_parameter (self))
+      (parameter (identifier) (reference_type (mutable_specifier) (type_identifier))))
+    (primitive_type)
+    (where_clause
+      (where_predicate
+        (type_identifier)
+        (trait_bounds (function_type (type_identifier) (parameters (reference_type (type_identifier))) (primitive_type)))))
+    (block (return_expression (boolean_literal))))
+  (impl_item
+    (type_parameters
+      (lifetime (identifier))
+      (constrained_type_parameter
+        (type_identifier)
+        (trait_bounds
+          (lifetime (identifier))
+          (type_identifier))))
+    (type_identifier)
+    (impl_for_clause (generic_type (type_identifier) (type_arguments (lifetime (identifier)) (type_identifier))))
+    (where_clause (where_predicate (type_identifier) (trait_bounds (lifetime (identifier)))))
+    (declaration_list))
+  (impl_item
+    (type_parameters (type_identifier))
+    (type_identifier)
+    (impl_for_clause
+      (generic_type (type_identifier) (type_arguments (type_identifier))))
+    (where_clause
+      (where_predicate
+        (generic_type (type_identifier) (type_arguments (type_identifier)))
+        (trait_bounds (type_identifier)))
+      (where_predicate
+        (type_identifier)
+        (trait_bounds (lifetime (identifier))))
+      (where_predicate
+        (lifetime (identifier))
+        (trait_bounds (lifetime (identifier)))))
+    (declaration_list))
+  (impl_item
+    (type_parameters (lifetime (identifier)) (type_identifier))
+    (type_identifier)
+    (where_clause
+      (where_predicate (reference_type (lifetime (identifier)) (type_identifier)) (trait_bounds (type_identifier))))
+    (declaration_list))
+  (impl_item
+    (type_parameters (type_identifier))
+    (type_identifier)
+    (impl_for_clause
+      (generic_type (type_identifier) (type_arguments (type_identifier))))
+    (where_clause
+      (where_predicate
+        (tuple_type (type_identifier) (type_identifier) (type_identifier))
+        (trait_bounds (type_identifier))))
+    (declaration_list))
+  (impl_item
+    (type_parameters (type_identifier))
+    (type_identifier)
+    (impl_for_clause (generic_type (type_identifier) (type_arguments (type_identifier))))
+    (where_clause
+      (where_predicate
+        (higher_ranked_trait_bound
+          (type_parameters (lifetime (identifier)))
+          (generic_type (type_identifier) (type_arguments (type_identifier))))
+        (trait_bounds (generic_type (type_identifier) (type_arguments (lifetime (identifier)))))))
+    (declaration_list))
+  (trait_item
+    (visibility_modifier)
+    (type_identifier)
+    (type_parameters (type_identifier))
+    (where_clause (where_predicate (type_identifier) (trait_bounds (type_identifier))))
+    (declaration_list)))
+
+===================================
+External Modules
+===================================
+
+pub extern {
+  pub fn napi_module_register(mod_: *mut napi_module);
+}
+
+extern "C" {}
+
+---
+
+(source_file
+  (foreign_mod_item (visibility_modifier) (extern_modifier) (declaration_list
+    (function_signature_item (visibility_modifier) (identifier) (parameters (parameter (identifier) (pointer_type (mutable_specifier) (type_identifier)))))))
+  (foreign_mod_item (extern_modifier (string_literal)) (declaration_list)))
+
+===================================
+Crate visibility
+===================================
+
+crate mod foo;
+crate struct Foo(crate crate::Bar);
+crate fn foo() { }
+crate const X: u32 = 0;
+
+---
+
+(source_file
+  (mod_item
+    (visibility_modifier (crate)) (identifier))
+  (struct_item
+    (visibility_modifier (crate))
+    (type_identifier)
+    (ordered_field_declaration_list (visibility_modifier (crate)) (scoped_type_identifier (crate) (type_identifier))))
+  (function_item
+    (visibility_modifier (crate)) (identifier) (parameters) (block))
+  (const_item
+    (visibility_modifier (crate)) (identifier) (primitive_type) (integer_literal)))

@@ -1,0 +1,221 @@
+===========================================
+Returning braced initializer lists
+===========================================
+
+T main() {
+  return {0, 5};
+}
+
+---
+
+(translation_unit
+  (function_definition
+    (type_identifier)
+    (function_declarator (identifier) (parameter_list))
+    (compound_statement
+      (return_statement (initializer_list (number_literal) (number_literal))))))
+
+===========================================
+Range-based for loops
+===========================================
+
+T main() {
+  for (Value &value : values) {
+    cout << value;
+  }
+
+  for (const auto &value : values) {
+    cout << value;
+  }
+
+  for (const auto &value : {1, 2, 3}) {
+    cout << value;
+  }
+}
+
+---
+
+(translation_unit
+  (function_definition
+    type: (type_identifier)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list))
+    body: (compound_statement
+      (for_range_loop
+        type: (type_identifier)
+        declarator: (reference_declarator (identifier))
+        right: (identifier)
+        body: (compound_statement
+          (expression_statement (binary_expression
+            left: (identifier)
+            right: (identifier)))))
+      (for_range_loop
+        (type_qualifier)
+        type: (auto)
+        declarator: (reference_declarator (identifier))
+        right: (identifier)
+        body: (compound_statement
+          (expression_statement (binary_expression
+            left: (identifier)
+            right: (identifier)))))
+      (for_range_loop
+        (type_qualifier)
+        type: (auto)
+        declarator: (reference_declarator (identifier))
+        right: (initializer_list (number_literal) (number_literal) (number_literal))
+        body: (compound_statement
+          (expression_statement (binary_expression
+            left: (identifier)
+            right: (identifier))))))))
+
+===========================================
+Constexpr if statements
+===========================================
+
+T f() {
+  if constexpr (std::is_pointer_v<T>)
+    return *t;
+  else
+    return t;
+}
+
+---
+
+(translation_unit
+  (function_definition
+    type: (type_identifier)
+    declarator: (function_declarator
+      declarator: (identifier)
+      parameters: (parameter_list))
+    body: (compound_statement
+      (if_statement
+        condition: (parenthesized_expression
+          (template_function
+            name: (scoped_identifier
+              namespace: (namespace_identifier)
+              name: (identifier))
+          arguments: (template_argument_list
+            (type_descriptor type: (type_identifier)))))
+        consequence: (return_statement
+          (pointer_expression argument: (identifier)))
+        alternative: (return_statement (identifier))))))
+
+===========================================
+Try/catch statements
+===========================================
+
+void main() {
+  try {
+      f();
+  } catch (const std::overflow_error) {
+      // f() throws std::overflow_error (same type rule)
+  } catch (const exception &e) {
+      // f() throws std::logic_error (base class rule)
+  } catch (...) {
+      // f() throws std::string or int or any other unrelated type
+  }
+}
+
+---
+
+(translation_unit
+  (function_definition
+    (primitive_type)
+    (function_declarator (identifier) (parameter_list))
+    (compound_statement
+      (try_statement
+        (compound_statement
+          (expression_statement (call_expression (identifier) (argument_list))))
+        (catch_clause
+          (parameter_list (parameter_declaration (type_qualifier) (scoped_type_identifier (namespace_identifier) (type_identifier))))
+          (compound_statement (comment)))
+        (catch_clause
+          (parameter_list (parameter_declaration (type_qualifier) (type_identifier) (reference_declarator (identifier))))
+          (compound_statement (comment)))
+        (catch_clause
+          (parameter_list)
+          (compound_statement (comment)))))))
+
+===========================================
+Throw statements
+===========================================
+
+void main() {
+     throw e;
+     throw x + 1;
+     throw "exception";
+}
+
+---
+
+(translation_unit
+  (function_definition
+    (primitive_type)
+    (function_declarator
+      (identifier)
+      (parameter_list))
+      (compound_statement
+        (throw_statement (identifier))
+        (throw_statement (binary_expression (identifier) (number_literal)))
+        (throw_statement (string_literal)))))
+
+===========================================
+Noexcept specifier
+===========================================
+
+void foo() noexcept;
+void foo() noexcept(true);
+template<class T> T foo() noexcept(sizeof(T) < 4);
+
+---
+
+(translation_unit
+  (declaration
+    (primitive_type)
+    (function_declarator (identifier) (parameter_list)
+      (noexcept)))
+  (declaration
+    (primitive_type)
+    (function_declarator (identifier) (parameter_list)
+      (noexcept (true))))
+  (template_declaration
+    (template_parameter_list
+      (type_parameter_declaration (type_identifier)))
+    (declaration
+      (type_identifier)
+      (function_declarator (identifier) (parameter_list)
+        (noexcept
+          (binary_expression (sizeof_expression (parenthesized_expression (identifier))) (number_literal)))))))
+
+===========================================
+Throw specifier
+===========================================
+
+void foo() throw();
+void foo() throw(int);
+void foo() throw(std::string, char *);
+void foo() throw(float) { }
+
+---
+
+(translation_unit
+  (declaration
+    (primitive_type)
+    (function_declarator (identifier) (parameter_list)
+      (throw_specifier)))
+  (declaration
+  (primitive_type)
+  (function_declarator (identifier) (parameter_list)
+    (throw_specifier (type_descriptor (primitive_type)))))
+  (declaration
+    (primitive_type)
+    (function_declarator (identifier) (parameter_list)
+      (throw_specifier
+        (type_descriptor (scoped_type_identifier (namespace_identifier) (type_identifier)))
+        (type_descriptor (primitive_type) (abstract_pointer_declarator)))))
+  (function_definition
+    (primitive_type)
+    (function_declarator (identifier) (parameter_list)
+      (throw_specifier (type_descriptor (primitive_type))))
+      (compound_statement)))
