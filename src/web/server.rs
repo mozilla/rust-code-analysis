@@ -4,9 +4,10 @@ use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer};
 use std::path::PathBuf;
 
 use super::ast::{AstCallback, AstCfg, AstPayload};
+use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentPayload};
 use crate::languages::{action, get_from_ext};
 
-fn ast_parser(item: web::Json<AstPayload>, req: HttpRequest) -> HttpResponse {
+fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
     let language = get_from_ext(&item.language);
     let payload = item.into_inner();
     let cfg = AstCfg {
@@ -24,14 +25,33 @@ fn ast_parser(item: web::Json<AstPayload>, req: HttpRequest) -> HttpResponse {
     ))
 }
 
+fn comment_removal(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> HttpResponse {
+    let language = get_from_ext(&item.language);
+    let payload = item.into_inner();
+    let cfg = WebCommentCfg { id: payload.id };
+    HttpResponse::Ok().json(action::<WebCommentCallback>(
+        &language.unwrap(),
+        payload.code.into_bytes(),
+        &PathBuf::from(""),
+        None,
+        cfg,
+    ))
+}
+
 pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
     println!("Run server");
     HttpServer::new(|| {
-        App::new().service(
-            web::resource("/ast")
-                .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
-                .route(web::post().to(ast_parser)),
-        )
+        App::new()
+            .service(
+                web::resource("/ast")
+                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                    .route(web::post().to(ast_parser)),
+            )
+            .service(
+                web::resource("/comment")
+                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                    .route(web::post().to(comment_removal)),
+            )
     })
     .workers(n_threads)
     .bind(format!("{}:{}", host, port))?
