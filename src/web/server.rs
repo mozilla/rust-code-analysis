@@ -39,7 +39,6 @@ fn comment_removal(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> Htt
 }
 
 pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
-    println!("Run server");
     HttpServer::new(|| {
         App::new()
             .service(

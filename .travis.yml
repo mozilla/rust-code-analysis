@@ -1,0 +1,142 @@
+sudo: false
+language: rust
+matrix:
+  include:
+    - os: linux
+      rust: stable
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+          packages:
+            - llvm-7-dev
+            - clang-7
+            - g++-5
+      env:
+        - GCC_CXX=g++-5
+        - GCOV=gcov-5
+        - CLANG_CXX=clang++-7
+        - DEPLOY=0
+
+    - os: linux
+      rust: nightly
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+          packages:
+            - llvm-7-dev
+            - clang-7
+            - g++-5
+      env:
+        - GCC_CXX=g++-5
+        - GCOV=gcov-5
+        - CLANG_CXX=clang++-7
+        - DEPLOY=0
+
+    - os: linux
+      rust: nightly
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+          packages:
+            - llvm-7-dev
+            - clang-7
+            - g++-6
+      env:
+        - GCC_CXX=g++-6
+        - GCOV=gcov-6
+        - CLANG_CXX=clang++-7
+        - DEPLOY=0
+
+    - os: linux
+      rust: nightly
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+          packages:
+            - llvm-7-dev
+            - clang-7
+            - g++-7
+      env:
+        - GCC_CXX=g++-7
+        - GCOV=gcov-7
+        - CLANG_CXX=clang++-7
+        - DEPLOY=1
+
+    - os: linux
+      rust: nightly
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-8
+          packages:
+            - llvm-8-dev
+            - clang-8
+            - g++-7
+      env:
+        - GCC_CXX=g++-7
+        - GCOV=gcov-7
+        - CLANG_CXX=clang++-8
+        - DEPLOY=0
+
+    - os: linux
+      rust: nightly
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty
+          packages:
+            - llvm-dev
+            - clang
+            - g++-7
+      env:
+        - GCC_CXX=g++-7
+        - GCOV=gcov-7
+        - CLANG_CXX=clang++-9
+        - DEPLOY=0
+
+    - os: osx
+      rust: nightly
+      env:
+        - CLANG_CXX=clang++
+        - DEPLOY=1
+install:
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4"; fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew cask uninstall --force oclint; fi
+script:
+    - $CLANG_CXX --version
+    - |
+      if [ "$TRAVIS_RUST_VERSION" = "nightly" ] && [ -z "$TRAVIS_TAG" ]; then
+        export CARGO_INCREMENTAL=0;
+        export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads";
+      fi
+    - if [ "$TRAVIS_TAG" ]; then export CARGO_OPTIONS="--release"; fi
+    - cargo build --verbose $CARGO_OPTIONS
+    - cargo test --verbose $CARGO_OPTIONS
+    - |
+      if [ "$TRAVIS_RUST_VERSION" = "nightly" ] && [ -z "$TRAVIS_TAG" ]; then
+        zip -0 ccov.zip `find . \( -name "grcov*.gc*" -o -name "llvmgcov.gc*" \) -print`;
+        ./target/debug/grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore-dir "/*" -o lcov.info;
+        bash <(curl -s https://codecov.io/bash) -f lcov.info;
+      fi
+before_deploy:
+    - tar -cvjSf grcov-${TRAVIS_OS_NAME}-x86_64.tar.bz2 -C target/release/ grcov
+deploy:
+  api_key:
+    secure: by7CZhF9PTfQMbIlOIO/AuhnNv6YhgXLgDuMJurW0Z/3fDuAQG0zRHYAdvgbvwVa0KTQWamJbo1HD9LYGdACwNyO4uJWN+Zek3p/OM+axTk3/UZlr3UnGizk3UHM/Z1+awHsMYghk4UoGc8795x3iZs+PF2+lqMHGgBfpWRP5IP5PHCX93D7W0myTi4c2hu8Ufb5rC44vQ2EvuThYiX3UQ2BQVv0jaRdp9hT5XChJH8fmGZRq46yK7XCpCWSKN+29dn3/5/4b2mLN7DaTQB60DFaQPZKORva4ISUByk4EnzI7JAW9/6yT2tsiwvUkZuKoPNyv4yPGqu/QdROriUajFeu8bLVfAkxzKjVYNU0Cu4NCC84VVf2rP6YxZwUXBnBRL9qTHYgZZ8MLRC43bPF9s4mI8XR02DQtC/xajgnusxL3qEovxNnETCC0xXdMqw063o37IQLa8XkdAvQ5fB4QBeiX+8YBZwIFZO3wXKFbCkbx7ocigpfBTMh7tNdK457n5o3NILMKL2SyibI0sriXZ7qJUDwUHSoECRfivjdkdgQMBqTaVQAsQIT9Cpm+G2DI1QPXJC8xtCqEpKjExNMQeOUChs43O7XqIt5TffP2U2cAuAQTJKDDrPzJLxWK7tNeU8crmBG1s4tQDJZki4JxPwLBrLInw3YC9TD3A3YA3Y=
+  file: grcov-${TRAVIS_OS_NAME}-x86_64.tar.bz2
+  on:
+    rust: nightly
+    tags: true
+    condition: $DEPLOY = 1
+  provider: releases
+  skip_cleanup: true

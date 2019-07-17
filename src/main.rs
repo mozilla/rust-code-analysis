@@ -345,7 +345,9 @@ fn main() {
             eprintln!("Invalid port number");
             return;
         };
-        server::run(&host, port, num_jobs);
+        if let Err(e) = server::run(&host, port, num_jobs) {
+            eprintln!("Cannot run the server at {}:{}: {}", host, port, e);
+        }
         return;
     }
 
