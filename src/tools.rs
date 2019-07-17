@@ -35,8 +35,8 @@ pub fn write_file(path: &PathBuf, data: &[u8]) -> std::io::Result<()> {
 
 pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
     if let Some(ext) = path.extension() {
-        let ext = ext.to_str().unwrap();
-        get_from_ext(ext)
+        let ext = ext.to_str().unwrap().to_lowercase();
+        get_from_ext(&ext)
     } else {
         None
     }

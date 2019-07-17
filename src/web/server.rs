@@ -13,6 +13,14 @@ use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebComme
 use crate::languages::action;
 use crate::tools::get_language_for_file;
 
+const INVALID_LANGUAGE: &str = "The file extension doesn't correspond to a valid language";
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Error {
+    id: String,
+    error: &'static str,
+}
+
 fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
     let language = get_language_for_file(&PathBuf::from(&item.file_name));
     let payload = item.into_inner();
@@ -34,34 +42,47 @@ fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
 fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> HttpResponse {
     let language = get_language_for_file(&PathBuf::from(&item.file_name));
     let payload = item.into_inner();
-    let cfg = WebCommentCfg { id: payload.id };
-    HttpResponse::Ok().json(action::<WebCommentCallback>(
-        &language.unwrap(),
-        payload.code.into_bytes(),
-        &PathBuf::from(""),
-        None,
-        cfg,
-    ))
+    if let Some(language) = language {
+        let cfg = WebCommentCfg { id: payload.id };
+        HttpResponse::Ok().json(action::<WebCommentCallback>(
+            &language,
+            payload.code.into_bytes(),
+            &PathBuf::from(""),
+            None,
+            cfg,
+        ))
+    } else {
+        HttpResponse::NotFound().json(Error {
+            id: payload.id,
+            error: INVALID_LANGUAGE,
+        })
+    }
 }
 
 fn comment_removal_plain(code: String, info: Query<WebCommentInfo>) -> HttpResponse {
     let language = get_language_for_file(&PathBuf::from(&info.file_name));
-    let cfg = WebCommentCfg { id: "".to_string() };
-    let res = action::<WebCommentCallback>(
-        &language.unwrap(),
-        code.into_bytes(),
-        &PathBuf::from(""),
-        None,
-        cfg,
-    );
-    if let Some(res_code) = res.code {
-        HttpResponse::Ok()
-            .header(http::header::CONTENT_TYPE, "text/plain")
-            .body(res_code)
+    if let Some(language) = language {
+        let cfg = WebCommentCfg { id: "".to_string() };
+        let res = action::<WebCommentCallback>(
+            &language,
+            code.into_bytes(),
+            &PathBuf::from(""),
+            None,
+            cfg,
+        );
+        if let Some(res_code) = res.code {
+            HttpResponse::Ok()
+                .header(http::header::CONTENT_TYPE, "text/plain")
+                .body(res_code)
+        } else {
+            HttpResponse::NoContent()
+                .header(http::header::CONTENT_TYPE, "text/plain")
+                .body(Body::Empty)
+        }
     } else {
-        HttpResponse::NoContent()
+        HttpResponse::NotFound()
             .header(http::header::CONTENT_TYPE, "text/plain")
-            .body(Body::Empty)
+            .body(format!("error: {}", INVALID_LANGUAGE))
     }
 }
 
@@ -220,6 +241,30 @@ mod tests {
     }
 
     #[test]
+    fn test_web_comment_json_invalid() {
+        let mut app = test::init_service(
+            App::new()
+                .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/comment")
+            .set_json(&WebCommentPayload {
+                id: "1234".to_string(),
+                file_name: "foo.unexisting_extension".to_string(),
+                code: "int x = 1; // hello".to_string(),
+            })
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "1234",
+            "error": INVALID_LANGUAGE,
+        });
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
     fn test_web_comment_json_no_comment() {
         let mut app = test::init_service(
             App::new()
@@ -246,7 +291,7 @@ mod tests {
     }
 
     #[test]
-    fn test_comment_plain() {
+    fn test_web_comment_plain() {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
@@ -262,6 +307,27 @@ mod tests {
 
         let res = test::read_body(resp);
         let expected = Bytes::from_static(b"int x = 1; ");
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_comment_plain_invalid() {
+        let mut app = test::init_service(
+            App::new()
+                .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/comment?file_name=foo.unexisting_extension")
+            .set(ContentType::plaintext())
+            .set_payload("int x = 1; // hello")
+            .to_request();
+
+        let resp = test::call_service(&mut app, req);
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
+
+        let res = test::read_body(resp);
+        let expected = Bytes::from(format!("error: {}", INVALID_LANGUAGE).as_bytes());
 
         assert_eq!(res, expected);
     }
