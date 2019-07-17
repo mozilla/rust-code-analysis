@@ -5,10 +5,11 @@ use std::path::PathBuf;
 
 use super::ast::{AstCallback, AstCfg, AstPayload};
 use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentPayload};
-use crate::languages::{action, get_from_ext};
+use crate::languages::action;
+use crate::tools::get_language_for_file;
 
 fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
-    let language = get_from_ext(&item.language);
+    let language = get_language_for_file(&PathBuf::from(&item.file_name));
     let payload = item.into_inner();
     let cfg = AstCfg {
         id: payload.id,
@@ -26,7 +27,7 @@ fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
 }
 
 fn comment_removal(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> HttpResponse {
-    let language = get_from_ext(&item.language);
+    let language = get_language_for_file(&PathBuf::from(&item.file_name));
     let payload = item.into_inner();
     let cfg = WebCommentCfg { id: payload.id };
     HttpResponse::Ok().json(action::<WebCommentCallback>(
@@ -57,4 +58,4 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
     .run()
 }
 
-// curl --header "Content-Type: application/json" --request POST --data '{"id": "1234", "language": "cpp", "code": "int x = 1;", "comment": true, "span": true}' http://127.0.0.1:8080/ast
+// curl --header "Content-Type: application/json" --request POST --data '{"id": "1234", "file_name": "prova.cpp", "code": "int x = 1;", "comment": true, "span": true}' http://127.0.0.1:8080/ast
