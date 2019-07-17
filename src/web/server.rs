@@ -1,10 +1,15 @@
 extern crate actix_web;
 
-use actix_web::{dev::Body, web, App, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{
+    dev::{Body, MessageBody},
+    guard, http, web,
+    web::Query,
+    App, FromRequest, HttpRequest, HttpResponse, HttpServer,
+};
 use std::path::PathBuf;
 
 use super::ast::{AstCallback, AstCfg, AstPayload};
-use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentPayload};
+use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebCommentPayload};
 use crate::languages::action;
 use crate::tools::get_language_for_file;
 
@@ -26,7 +31,7 @@ fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
     ))
 }
 
-fn comment_removal(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> HttpResponse {
+fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> HttpResponse {
     let language = get_language_for_file(&PathBuf::from(&item.file_name));
     let payload = item.into_inner();
     let cfg = WebCommentCfg { id: payload.id };
@@ -37,6 +42,27 @@ fn comment_removal(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> Htt
         None,
         cfg,
     ))
+}
+
+fn comment_removal_plain(code: String, info: Query<WebCommentInfo>) -> HttpResponse {
+    let language = get_language_for_file(&PathBuf::from(&info.file_name));
+    let cfg = WebCommentCfg { id: "".to_string() };
+    let res = action::<WebCommentCallback>(
+        &language.unwrap(),
+        code.into_bytes(),
+        &PathBuf::from(""),
+        None,
+        cfg,
+    );
+    if let Some(res_code) = res.code {
+        HttpResponse::Ok()
+            .header(http::header::CONTENT_TYPE, "text/plain")
+            .body(res_code)
+    } else {
+        HttpResponse::NoContent()
+            .header(http::header::CONTENT_TYPE, "text/plain")
+            .body(Body::Empty)
+    }
 }
 
 fn ping() -> HttpResponse {
@@ -53,8 +79,15 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
             )
             .service(
                 web::resource("/comment")
+                    .guard(guard::Header("content-type", "application/json"))
                     .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
-                    .route(web::post().to(comment_removal)),
+                    .route(web::post().to(comment_removal_json)),
+            )
+            .service(
+                web::resource("/comment")
+                    .guard(guard::Header("content-type", "text/plain"))
+                    .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                    .route(web::post().to(comment_removal_plain)),
             )
             .service(web::resource("/ping").route(web::get().to(ping)))
     })
@@ -67,13 +100,18 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use actix_web::{http::StatusCode, test};
+    use actix_web::{
+        http::header::{ContentType, Header},
+        http::StatusCode,
+        test,
+    };
+    use bytes::Bytes;
     use serde_json::value::Value;
 
     use super::*;
 
     #[test]
-    fn test_ping() {
+    fn test_web_ping() {
         let mut app = test::init_service(
             App::new().service(web::resource("/ping").route(web::get().to(ping))),
         );
@@ -84,7 +122,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ast() {
+    fn test_web_ast() {
         let mut app = test::init_service(
             App::new().service(web::resource("/ast").route(web::post().to(ast_parser))),
         );
@@ -154,6 +192,100 @@ mod tests {
                 ]
             }
         });
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_comment_json() {
+        let mut app = test::init_service(
+            App::new()
+                .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/comment")
+            .set_json(&WebCommentPayload {
+                id: "1234".to_string(),
+                file_name: "foo.c".to_string(),
+                code: "int x = 1; // hello".to_string(),
+            })
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "1234",
+            "code": "int x = 1; ",
+        });
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_comment_json_no_comment() {
+        let mut app = test::init_service(
+            App::new()
+                .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/comment")
+            .set_json(&WebCommentPayload {
+                id: "1234".to_string(),
+                file_name: "foo.c".to_string(),
+                code: "int x = 1;".to_string(),
+            })
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+
+        // No comment in the code so the code is null
+        let expected = json!({
+            "id": "1234",
+            "code": (),
+        });
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_comment_plain() {
+        let mut app = test::init_service(
+            App::new()
+                .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/comment?file_name=foo.c")
+            .set(ContentType::plaintext())
+            .set_payload("int x = 1; // hello")
+            .to_request();
+
+        let resp = test::call_service(&mut app, req);
+        assert_eq!(resp.status(), StatusCode::OK);
+
+        let res = test::read_body(resp);
+        let expected = Bytes::from_static(b"int x = 1; ");
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_comment_plain_no_comment() {
+        let mut app = test::init_service(
+            App::new()
+                .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/comment?file_name=foo.c")
+            .set(ContentType::plaintext())
+            .set_payload("int x = 1;")
+            .to_request();
+
+        let resp = test::call_service(&mut app, req);
+        assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+
+        let res = test::read_body(resp);
+
+        // No comment in the code so the code is empty
+        let expected = Bytes::from_static(b"");
+
         assert_eq!(res, expected);
     }
 }

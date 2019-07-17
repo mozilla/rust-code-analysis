@@ -5,7 +5,7 @@ use crate::checker::Checker;
 use crate::comment_rm::rm_comments;
 use crate::traits::{Callback, TSParserTrait};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct WebCommentPayload {
     pub id: String,
     pub file_name: String,
@@ -14,8 +14,13 @@ pub struct WebCommentPayload {
 
 #[derive(Debug, Serialize)]
 pub struct WebCommentResponse {
-    id: String,
-    code: Option<String>,
+    pub id: String,
+    pub code: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct WebCommentInfo {
+    pub file_name: String,
 }
 
 pub struct WebCommentCallback {}
