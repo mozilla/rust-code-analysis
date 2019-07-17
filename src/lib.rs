@@ -15,6 +15,7 @@ extern crate bytes;
 extern crate futures;
 extern crate openssl;
 extern crate petgraph;
+#[macro_use]
 extern crate serde_json;
 extern crate termcolor;
 extern crate tree_sitter;

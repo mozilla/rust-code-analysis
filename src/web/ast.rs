@@ -7,7 +7,7 @@ use crate::traits::{Callback, TSParserTrait};
 
 type Span = Option<(usize, usize, usize, usize)>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AstPayload {
     pub id: String,
     pub file_name: String,
