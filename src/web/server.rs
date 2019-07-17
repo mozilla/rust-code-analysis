@@ -1,5 +1,3 @@
-extern crate actix_web;
-
 use actix_web::{
     dev::Body, guard, http, web, web::Query, App, FromRequest, HttpRequest, HttpResponse,
     HttpServer,

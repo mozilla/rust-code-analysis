@@ -1,25 +1,13 @@
 #![recursion_limit = "128"]
 #![allow(clippy::implicit_hasher)]
+//#![warn(unused_extern_crates)]
 
-extern crate aho_corasick;
-extern crate enum_iterator;
-extern crate json;
 #[macro_use]
 extern crate lazy_static;
-extern crate libc;
-extern crate phf;
-extern crate regex;
 #[macro_use]
 extern crate serde;
-extern crate actix_web;
-extern crate bytes;
-extern crate futures;
-extern crate openssl;
-extern crate petgraph;
 #[cfg_attr(test, macro_use)]
 extern crate serde_json;
-extern crate termcolor;
-extern crate tree_sitter;
 
 #[macro_use]
 mod macros;
