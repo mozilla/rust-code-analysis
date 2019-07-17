@@ -12,7 +12,7 @@ impl Into<&'static str> for {{ c_name }} {
         match self {
             {% for (name, _, ts_name) in names -%}
             {{ c_name }}::{{ name }} => "{{ ts_name }}",
-            {% endfor %}
+            {% endfor -%}
         }
     }
 }

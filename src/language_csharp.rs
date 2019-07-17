@@ -641,8 +641,7 @@ impl Into<&'static str> for CSharp {
             CSharp::LocalVariableDeclaratorsRepeat1 => "_local_variable_declarators_repeat1",
             CSharp::LabelName => "label_name",
             CSharp::Error => "ERROR",
-            
-        }
+            }
     }
 }
 
