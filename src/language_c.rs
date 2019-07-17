@@ -489,6 +489,7 @@ impl Into<&'static str> for C {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, C> = ::phf::Map {
     key: 3347381344252206323,
     disps: ::phf::Slice::Static(&[

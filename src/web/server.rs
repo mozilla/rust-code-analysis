@@ -1,10 +1,8 @@
 extern crate actix_web;
 
 use actix_web::{
-    dev::{Body, MessageBody},
-    guard, http, web,
-    web::Query,
-    App, FromRequest, HttpRequest, HttpResponse, HttpServer,
+    dev::Body, guard, http, web, web::Query, App, FromRequest, HttpRequest, HttpResponse,
+    HttpServer,
 };
 use std::path::PathBuf;
 
@@ -121,11 +119,7 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use actix_web::{
-        http::header::{ContentType, Header},
-        http::StatusCode,
-        test,
-    };
+    use actix_web::{http::header::ContentType, http::StatusCode, test};
     use bytes::Bytes;
     use serde_json::value::Value;
 

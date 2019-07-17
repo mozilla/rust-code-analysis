@@ -93,6 +93,7 @@ impl Into<&'static str> for Html {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Html> = ::phf::Map {
     key: 732231254413039614,
     disps: ::phf::Slice::Static(&[(0, 0), (1, 0), (0, 1), (2, 3), (7, 16), (0, 17), (26, 0)]),

@@ -2,6 +2,7 @@
 macro_rules! mk_checker {
     ( $lang:ident, $name:ident, $( $type:ident ),* ) => {
         #[inline(always)]
+        #[allow(unused_variables)]
         fn $name(node: &Node) -> bool {
             let typ = node.kind_id();
             false

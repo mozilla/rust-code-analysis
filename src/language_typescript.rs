@@ -625,6 +625,7 @@ impl Into<&'static str> for Typescript {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
     key: 3213172566270843353,
     disps: ::phf::Slice::Static(&[

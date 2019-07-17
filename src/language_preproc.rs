@@ -81,6 +81,7 @@ impl Into<&'static str> for Preproc {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Preproc> = ::phf::Map {
     key: 2575009635930530140,
     disps: ::phf::Slice::Static(&[(1, 0), (3, 0), (0, 19), (1, 1), (1, 1), (9, 1), (19, 28)]),

@@ -70,7 +70,7 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         let lang = get_language_for_file(&path);
         let cfg = CommentRmCfg {
             in_place: cfg.in_place,
-            path: path,
+            path,
         };
         if let Some(lang) = lang {
             if lang == LANG::C || lang == LANG::Cpp {
@@ -142,7 +142,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with("."))
+        .map(|s| s.starts_with('.'))
         .unwrap_or(false)
 }
 
@@ -189,13 +189,11 @@ fn explore(
                     send_file(path, &cfg, &language, &sender);
                 }
             }
-        } else {
-            if (include.is_empty() || include.is_match(&path))
-                && (exclude.is_empty() || !exclude.is_match(&path))
-                && path.is_file()
-            {
-                send_file(path, &cfg, &language, &sender);
-            }
+        } else if (include.is_empty() || include.is_match(&path))
+            && (exclude.is_empty() || !exclude.is_match(&path))
+            && path.is_file()
+        {
+            send_file(path, &cfg, &language, &sender);
         }
     }
 
@@ -377,7 +375,7 @@ fn main() {
         eprintln!("Load preproc data: finished");
         x
     } else if matches.occurrences_of("preproc") != 0 {
-        (Some(Arc::new(Mutex::new(PreprocResults::new()))), None)
+        (Some(Arc::new(Mutex::new(PreprocResults::default()))), None)
     } else {
         (None, None)
     };
@@ -471,7 +469,7 @@ fn main() {
             println!("{}", data);
         } else {
             let output = PathBuf::from(output);
-            write_file(&output, format!("{}", data).as_str().as_bytes());
+            write_file(&output, data.to_string().as_bytes()).unwrap();
         }
     }
 }

@@ -45,6 +45,7 @@ impl Into<&'static str> for Ccomment {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Ccomment> = ::phf::Map {
     key: 3213172566270843353,
     disps: ::phf::Slice::Static(&[(4, 13), (2, 0), (2, 0), (8, 0)]),

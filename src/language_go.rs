@@ -427,6 +427,7 @@ impl Into<&'static str> for Go {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Go> = ::phf::Map {
     key: 8726423004985182586,
     disps: ::phf::Slice::Static(&[

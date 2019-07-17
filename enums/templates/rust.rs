@@ -17,6 +17,7 @@ impl Into<&'static str> for {{ c_name }} {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, {{ c_name }}> = {{ phf_map }};
 
 impl From<&str> for {{ c_name }} {

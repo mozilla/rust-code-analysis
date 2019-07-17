@@ -647,6 +647,7 @@ impl Into<&'static str> for Tsx {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Tsx> = ::phf::Map {
     key: 3347381344252206323,
     disps: ::phf::Slice::Static(&[

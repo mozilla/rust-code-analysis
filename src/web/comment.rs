@@ -1,7 +1,5 @@
-use serde::ser::{SerializeStruct, Serializer};
 use serde::{Deserialize, Serialize};
 
-use crate::checker::Checker;
 use crate::comment_rm::rm_comments;
 use crate::traits::{Callback, TSParserTrait};
 

@@ -12,37 +12,21 @@ use crate::traits::*;
 
 include!(concat!(env!("OUT_DIR"), "/gen_c_specials.rs"));
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct PreprocFile {
     pub includes: HashSet<String>,
     pub extra_includes: HashSet<String>,
     pub macros: HashSet<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct PreprocResults {
     pub files: HashMap<PathBuf, PreprocFile>,
 }
 
-impl PreprocResults {
-    pub fn new() -> Self {
-        Self {
-            files: HashMap::new(),
-        }
-    }
-}
-
 impl PreprocFile {
-    pub fn new() -> Self {
-        Self {
-            includes: HashSet::new(),
-            extra_includes: HashSet::new(),
-            macros: HashSet::new(),
-        }
-    }
-
     pub fn new_macros(macros: &[&str]) -> Self {
-        let mut pf = Self::new();
+        let mut pf = Self::default();
         for m in macros {
             pf.macros.insert(m.to_string());
         }
@@ -79,8 +63,8 @@ pub fn fix_includes(
     // First we build a graph of include dependencies
     for (file, pf) in files.iter() {
         let node = match nodes.entry(file.clone()) {
-            hash_map::Entry::Occupied(l) => l.get().clone(),
-            hash_map::Entry::Vacant(p) => p.insert(g.add_node(file.clone())).clone(),
+            hash_map::Entry::Occupied(l) => *l.get(),
+            hash_map::Entry::Vacant(p) => *p.insert(g.add_node(file.clone())),
         };
         let includes = &pf.includes;
         for i in includes {
@@ -88,8 +72,8 @@ pub fn fix_includes(
             for i in possibilities {
                 if &i != file {
                     let i = match nodes.entry(i.clone()) {
-                        hash_map::Entry::Occupied(l) => l.get().clone(),
-                        hash_map::Entry::Vacant(p) => p.insert(g.add_node(i)).clone(),
+                        hash_map::Entry::Occupied(l) => *l.get(),
+                        hash_map::Entry::Vacant(p) => *p.insert(g.add_node(i)),
                     };
                     g.add_edge(node, i, 0);
                 } else {
@@ -138,7 +122,7 @@ pub fn fix_includes(
             for c in component.drain(..) {
                 let path = g.remove_node(c).unwrap();
                 paths.insert(path.to_str().unwrap().to_string());
-                *nodes.get_mut(&path).unwrap() = replacement.clone();
+                *nodes.get_mut(&path).unwrap() = replacement;
             }
 
             eprintln!("Warning: possible include cycle:");
@@ -181,7 +165,7 @@ pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: Arc<Mutex<Pre
     let mut cursor = node.walk();
     let mut stack = Vec::new();
     let code = parser.get_code();
-    let mut file_result = PreprocFile::new();
+    let mut file_result = PreprocFile::default();
 
     //dump_node(code, &node, -1, None, None);
     //eprintln!("DEBUG {:?}", path);
@@ -222,7 +206,7 @@ pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: Arc<Mutex<Pre
                     let file = &code[file.start_byte() + 1..file.end_byte() - 1];
                     let start = file.iter().position(|&c| c != b' ' && c != b'\t').unwrap();
                     let end = file.iter().rposition(|&c| c != b' ' && c != b'\t').unwrap();
-                    let file = &file[start..end + 1];
+                    let file = &file[start..=end];
                     let file = String::from_utf8(file.to_vec()).unwrap();
                     file_result.includes.insert(file);
                 }

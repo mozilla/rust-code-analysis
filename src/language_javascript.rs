@@ -473,6 +473,7 @@ impl Into<&'static str> for Javascript {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
     key: 732231254413039614,
     disps: ::phf::Slice::Static(&[

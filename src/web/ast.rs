@@ -36,10 +36,10 @@ impl Serialize for AstNode {
         S: Serializer,
     {
         let mut st = serializer.serialize_struct("Node", 4)?;
-        st.serialize_field("Type", &self.r#type);
-        st.serialize_field("TextValue", &self.value);
-        st.serialize_field("Span", &self.span);
-        st.serialize_field("Children", &self.children);
+        st.serialize_field("Type", &self.r#type)?;
+        st.serialize_field("TextValue", &self.value)?;
+        st.serialize_field("Span", &self.span)?;
+        st.serialize_field("Children", &self.children)?;
         st.end()
     }
 }

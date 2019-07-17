@@ -625,6 +625,7 @@ impl Into<&'static str> for Rust {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Rust> = ::phf::Map {
     key: 732231254413039614,
     disps: ::phf::Slice::Static(&[

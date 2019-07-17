@@ -8,7 +8,7 @@ use crate::rust_code_analysis::*;
 fn parse(samples: &[&str], debug: bool, c: bool) {
     let macros = vec!["AA", "BB", "CC"];
     let path = PathBuf::from("foo.c");
-    let mut pr = preproc::PreprocResults::new();
+    let mut pr = preproc::PreprocResults::default();
     pr.files
         .insert(path.clone(), preproc::PreprocFile::new_macros(&macros));
     let pr = Arc::new(pr);

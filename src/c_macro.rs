@@ -4,31 +4,31 @@ const DOLLARS: [u8; 2048] = [b'$'; 2048];
 include!(concat!(env!("OUT_DIR"), "/gen_c_macros.rs"));
 
 #[inline(always)]
-fn is_identifier_part(c: &u8) -> bool {
-    (b'A'..=b'Z').contains(c)
-        || (b'a'..=b'z').contains(c)
-        || (b'0'..=b'9').contains(c)
-        || *c == b'_'
+fn is_identifier_part(c: u8) -> bool {
+    (b'A' <= c && b'Z' >= c) || (b'a' <= c && b'z' >= c) || (b'0' <= c && b'9' >= c) || c == b'_'
 }
 
 #[inline(always)]
-fn is_identifier_starter(c: &u8) -> bool {
-    (b'A'..=b'Z').contains(c) || (b'a'..=b'z').contains(c) || *c == b'_'
+fn is_identifier_starter(c: u8) -> bool {
+    (b'A' <= c && b'Z' >= c) || (b'a' <= c && b'z' >= c) || c == b'_'
 }
 
 #[inline(always)]
-fn is_macro(mac: &str, macros: &HashSet<String>) -> bool {
+fn is_macro<S: ::std::hash::BuildHasher>(mac: &str, macros: &HashSet<String, S>) -> bool {
     macros.contains(mac) || PREDEFINED_MACROS.contains(mac)
 }
 
-pub fn replace(code: &[u8], macros: &HashSet<String>) -> Option<Vec<u8>> {
+pub fn replace<S: ::std::hash::BuildHasher>(
+    code: &[u8],
+    macros: &HashSet<String, S>,
+) -> Option<Vec<u8>> {
     let mut new_code = Vec::with_capacity(code.len());
     let mut code_start = 0;
     let mut k_start = 0;
 
     for (i, c) in code.iter().enumerate() {
         if k_start != 0 {
-            if !is_identifier_part(c) {
+            if !is_identifier_part(*c) {
                 let start = k_start - 1;
                 k_start = 0;
                 let keyword = String::from_utf8(code[start..i].to_vec()).unwrap();
@@ -38,7 +38,7 @@ pub fn replace(code: &[u8], macros: &HashSet<String>) -> Option<Vec<u8>> {
                     code_start = i;
                 }
             }
-        } else if is_identifier_starter(c) {
+        } else if is_identifier_starter(*c) {
             k_start = i + 1;
         }
     }
