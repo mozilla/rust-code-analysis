@@ -1,4 +1,5 @@
 #![recursion_limit = "128"]
+#![allow(clippy::implicit_hasher)]
 
 extern crate aho_corasick;
 extern crate enum_iterator;
@@ -15,7 +16,7 @@ extern crate bytes;
 extern crate futures;
 extern crate openssl;
 extern crate petgraph;
-#[macro_use]
+#[cfg_attr(test, macro_use)]
 extern crate serde_json;
 extern crate termcolor;
 extern crate tree_sitter;

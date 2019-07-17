@@ -16,7 +16,7 @@ pub fn dump_node(
     dump_tree_helper(
         &code,
         &node,
-        "".to_string(),
+        "",
         true,
         &mut stdout,
         depth,
@@ -28,10 +28,11 @@ pub fn dump_node(
         .unwrap();
 }
 
+#[allow(clippy::too_many_arguments)]
 fn dump_tree_helper(
     code: &[u8],
     node: &Node,
-    prefix: String,
+    prefix: &str,
     last: bool,
     mut stdout: &mut StandardStreamLock,
     depth: i32,
@@ -112,7 +113,7 @@ fn dump_tree_helper(
 
     let count = node.child_count();
     if count != 0 {
-        let prefix = prefix + pref_child;
+        let prefix = format!("{}{}", prefix, pref_child);
         let mut i = count;
         let mut cursor = node.walk();
         cursor.goto_first_child();
@@ -122,7 +123,7 @@ fn dump_tree_helper(
             dump_tree_helper(
                 &code,
                 &cursor.node(),
-                prefix.to_string(),
+                &prefix,
                 i == 0,
                 &mut stdout,
                 depth - 1,

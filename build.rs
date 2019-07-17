@@ -11,6 +11,10 @@ fn get_opt_level() -> u32 {
     env::var("OPT_LEVEL").unwrap().parse::<u32>().unwrap()
 }
 
+fn get_debug() -> bool {
+    env::var("DEBUG").unwrap() == "true"
+}
+
 fn get_cwd() -> &'static str {
     if is_enums() {
         ".."
@@ -95,7 +99,8 @@ fn build_c(files: Vec<String>, language: &str) {
             .include(PathBuf::from(file).parent().unwrap())
             .pic(true)
             .opt_level(get_opt_level())
-            .debug(true)
+            .debug(get_debug())
+            .warnings(false)
             .flag("-std=c99");
     }
     build.compile(&format!("tree-sitter-{}-c", language));
@@ -109,7 +114,8 @@ fn build_cpp(files: Vec<String>, language: &str) {
             .include(PathBuf::from(file).parent().unwrap())
             .pic(true)
             .opt_level(get_opt_level())
-            .debug(true)
+            .debug(get_debug())
+            .warnings(false)
             .cpp(true);
     }
     build.compile(&format!("tree-sitter-{}-cpp", language));

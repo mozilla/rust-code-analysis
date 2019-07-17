@@ -14,14 +14,11 @@ fn is_identifier_starter(c: u8) -> bool {
 }
 
 #[inline(always)]
-fn is_macro<S: ::std::hash::BuildHasher>(mac: &str, macros: &HashSet<String, S>) -> bool {
+fn is_macro(mac: &str, macros: &HashSet<String>) -> bool {
     macros.contains(mac) || PREDEFINED_MACROS.contains(mac)
 }
 
-pub fn replace<S: ::std::hash::BuildHasher>(
-    code: &[u8],
-    macros: &HashSet<String, S>,
-) -> Option<Vec<u8>> {
+pub fn replace(code: &[u8], macros: &HashSet<String>) -> Option<Vec<u8>> {
     let mut new_code = Vec::with_capacity(code.len());
     let mut code_start = 0;
     let mut k_start = 0;
@@ -73,28 +70,28 @@ mod tests {
         let mut mac = HashSet::new();
         mac.insert("abc".to_string());
 
-        assert!(replace("def ghi jkl".as_bytes(), &mac).is_none());
-        assert!(
-            "$$$ def ghi jkl".as_bytes().to_vec()
-                == replace("abc def ghi jkl".as_bytes(), &mac).unwrap()
+        assert!(replace(b"def ghi jkl", &mac).is_none());
+        assert_eq!(
+            b"$$$ def ghi jkl".to_vec(),
+            replace(b"abc def ghi jkl", &mac).unwrap()
         );
-        assert!(
-            "def $$$ ghi jkl".as_bytes().to_vec()
-                == replace("def abc ghi jkl".as_bytes(), &mac).unwrap()
+        assert_eq!(
+            b"def $$$ ghi jkl".to_vec(),
+            replace(b"def abc ghi jkl", &mac).unwrap()
         );
-        assert!(
-            "def ghi $$$ jkl".as_bytes().to_vec()
-                == replace("def ghi abc jkl".as_bytes(), &mac).unwrap()
+        assert_eq!(
+            b"def ghi $$$ jkl".to_vec(),
+            replace(b"def ghi abc jkl", &mac).unwrap()
         );
-        assert!(
-            "def ghi jkl $$$".as_bytes().to_vec()
-                == replace("def ghi jkl abc".as_bytes(), &mac).unwrap()
+        assert_eq!(
+            b"def ghi jkl $$$".to_vec(),
+            replace(b"def ghi jkl abc", &mac).unwrap()
         );
 
         mac.insert("z9_".to_string());
-        assert!(
-            "$$$ def ghi $$$ jkl".as_bytes().to_vec()
-                == replace("abc def ghi z9_ jkl".as_bytes(), &mac).unwrap()
+        assert_eq!(
+            b"$$$ def ghi $$$ jkl".to_vec(),
+            replace(b"abc def ghi z9_ jkl", &mac).unwrap()
         );
     }
 }

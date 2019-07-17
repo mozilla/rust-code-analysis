@@ -16,11 +16,11 @@ repos:
         exclude: '.*/templates/.*\.rs$'
         entry: rustup run nightly rustfmt
 
-      - id: check
-        name: check
+      - id: clippy
+        name: clippy
         language: system
-        files: '[.]rs$'
-        entry: cargo clippy --all-targets
+        files: '\.rs$'
+        entry: cargo clippy --all-targets --all -- -Dwarnings 
         pass_filenames: false
 
       - id: test
