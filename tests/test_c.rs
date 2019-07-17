@@ -9,7 +9,8 @@ fn parse(samples: &[&str], debug: bool, c: bool) {
     let macros = vec!["AA", "BB", "CC"];
     let path = PathBuf::from("foo.c");
     let mut pr = preproc::PreprocResults::new();
-    pr.files.insert(path.clone(), preproc::PreprocFile::new_macros(&macros));
+    pr.files
+        .insert(path.clone(), preproc::PreprocFile::new_macros(&macros));
     let pr = Arc::new(pr);
 
     for (n, sample) in samples.iter().enumerate() {
@@ -132,4 +133,3 @@ fn test_fn_cpp() {
     ];
     parse(&samples, false, false);
 }
-

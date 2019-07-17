@@ -1,9 +1,9 @@
 extern crate cc;
 extern crate phf_codegen;
 
-use std::{env, fs};
 use std::io::{BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 
 const TREE_SITTER: &str = "tree-sitter-";
 

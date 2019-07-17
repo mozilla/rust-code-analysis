@@ -1,4 +1,4 @@
-#![feature(hash_set_entry)]
+#![recursion_limit = "128"]
 
 extern crate aho_corasick;
 extern crate enum_iterator;
