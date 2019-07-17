@@ -1,0 +1,58 @@
+version: 1
+policy:
+  pullRequests: public
+tasks:
+  $let:
+    user: ${event.sender.login}
+
+    head_branch:
+      $if: 'tasks_for == "github-pull-request"'
+      then: ${event.pull_request.head.ref}
+      else:
+        $if: 'tasks_for == "github-push"'
+        then: ${event.ref}
+        else: ${event.release.target_commitish}
+
+    head_rev:
+      $if: 'tasks_for == "github-pull-request"'
+      then: ${event.pull_request.head.sha}
+      else:
+        $if: 'tasks_for == "github-push"'
+        then: ${event.after}
+        else: ${event.release.tag_name}
+
+    repository:
+      $if: 'tasks_for == "github-pull-request"'
+      then: ${event.pull_request.head.repo.html_url}
+      else: ${event.repository.html_url}
+  in:
+    $if: 'tasks_for in ["github-pull-request", "github-push"]'
+    then:
+      - taskId: {$eval: as_slugid("lint_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: aws-provisioner-v1
+        workerType: github-worker
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-lcx"
+            - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py"
+            - "rustup toolchain install nightly &&
+               rustup default nightly &&
+               rustup component add clippy &&
+               rustup component add rustfmt"
+            - "git clone --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               pip3 install --quiet pre-commit &&
+               pre-commit run -a"
+            - "rustup default stable &&
+               cargo test"
+        metadata:
+          name: rust-code-analysis lint and test
+          description: rust-code-analysis lint and test
+          owner: ${user}@users.noreply.github.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml

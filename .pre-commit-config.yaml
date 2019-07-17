@@ -1,0 +1,34 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.2.3
+    hooks:
+    -   id: check-yaml
+-   repo: https://github.com/marco-c/taskcluster_yml_validator
+    rev: v0.0.2
+    hooks:
+      - id: taskcluster_yml
+-   repo: local
+    hooks:
+      - id: fmt
+        name: fmt
+        language: system
+        files: '\.rs$'
+        exclude: '.*/templates/.*\.rs$'
+        entry: rustup run nightly rustfmt
+
+      - id: check
+        name: check
+        language: system
+        files: '[.]rs$'
+        entry: cargo clippy --all-targets
+        pass_filenames: false
+
+      - id: test
+        name: test
+        language: system
+        files: '\.rs$'
+        entry: cargo test
+        pass_filenames: false
+
+default_language_version:
+    python: python3.7
