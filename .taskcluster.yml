@@ -42,9 +42,9 @@ tasks:
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup toolchain install stable &&
                rustup toolchain install nightly &&
+               rustup default nightly &&
                rustup component add clippy --toolchain=nightly || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy &&
                rustup component add rustfmt --toolchain nightly  &&
-               rustup default nightly &&
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
