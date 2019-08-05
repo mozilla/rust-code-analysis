@@ -41,9 +41,9 @@ tasks:
             - "-cx"
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup toolchain install nightly &&
-               rustup default nightly &&
                rustup component add clippy &&
                rustup component add rustfmt &&
+               rustup default nightly &&
                git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
