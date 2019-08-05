@@ -37,6 +37,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "undef"
+        },
+        {
+          "type": "SYMBOL",
           "name": "preproc_if"
         },
         {
@@ -244,6 +248,34 @@
         }
       ]
     },
+    "undef": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "PATTERN",
+          "value": "[ \\t]*#[ \\t]*undef[ \\t]+"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "preproc_continuation_line"
+          }
+        },
+        {
+          "type": "SYMBOL",
+          "name": "preproc_line"
+        },
+        {
+          "type": "STRING",
+          "value": "\n"
+        }
+      ]
+    },
     "preproc_nothing": {
       "type": "SEQ",
       "members": [
@@ -251,7 +283,7 @@
           "type": "IMMEDIATE_TOKEN",
           "content": {
             "type": "PATTERN",
-            "value": "[ \\t]*#[ \\t]*(error|pragma|undef|line)"
+            "value": "[ \\t]*#[ \\t]*(error|pragma|line)"
           }
         },
         {

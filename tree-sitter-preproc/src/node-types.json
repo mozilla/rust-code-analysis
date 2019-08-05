@@ -74,6 +74,10 @@
         {
           "type": "string_literal",
           "named": true
+        },
+        {
+          "type": "undef",
+          "named": true
         }
       ]
     }
@@ -124,6 +128,10 @@
         },
         {
           "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "undef",
           "named": true
         }
       ]
@@ -183,6 +191,10 @@
         },
         {
           "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "undef",
           "named": true
         }
       ]
@@ -281,6 +293,33 @@
         },
         {
           "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "undef",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "undef",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "preproc_continuation_line",
+          "named": true
+        },
+        {
+          "type": "preproc_line",
           "named": true
         }
       ]

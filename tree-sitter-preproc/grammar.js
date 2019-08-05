@@ -15,6 +15,7 @@ module.exports = grammar({
       $.comment,
       $.nothing,
       $.define,
+      $.undef,
       $.preproc_if,
       $.preproc_include,
       $.preproc_nothing,
@@ -84,8 +85,16 @@ module.exports = grammar({
       repeat($._top_level_item),
     ),
 
+    undef: $ => seq(
+      /[ \t]*#[ \t]*undef[ \t]+/,
+      $.identifier,
+      repeat($.preproc_continuation_line),
+      $.preproc_line,
+      '\n',
+    ),
+
     preproc_nothing: $ => seq(
-      token.immediate(/[ \t]*#[ \t]*(error|pragma|undef|line)/),
+      token.immediate(/[ \t]*#[ \t]*(error|pragma|line)/),
       repeat($.preproc_continuation_line),
       $.preproc_line,
     ),
@@ -101,8 +110,6 @@ module.exports = grammar({
     integer_literal: $ => token.immediate(
       /[0-9]+[0-9']*/
     ),
-
-    // static constexpr uint8_t Global = 0b0'0010; ^^ pas compatible avec char
 
     // http://stackoverflow.com/questions/13014947/regex-to-match-a-c-style-multiline-comment/36328890#36328890
     comment: $ => token(choice(

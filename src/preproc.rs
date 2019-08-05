@@ -184,7 +184,7 @@ pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: Arc<Mutex<Pre
 
         let id = Preproc::from(node.kind_id());
         match id {
-            Preproc::Define => {
+            Preproc::Define | Preproc::Undef => {
                 cursor.reset(node);
                 cursor.goto_first_child();
                 let identifier = cursor.node();
