@@ -23,11 +23,13 @@ struct Config {
     dump: bool,
     in_place: bool,
     comments: bool,
-    find: Vec<String>,
+    find_filter: Vec<String>,
+    count_filter: Vec<String>,
     line_start: Option<usize>,
     line_end: Option<usize>,
     preproc_lock: Option<Arc<Mutex<PreprocResults>>>,
     preproc: Option<Arc<PreprocResults>>,
+    count_lock: Option<Arc<Mutex<Count>>>,
 }
 
 struct JobItem {
@@ -81,15 +83,23 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         } else {
             action::<CommentRm>(&language, source, &cfg.path.clone(), pr, cfg)
         }
-    } else if !cfg.find.is_empty() {
+    } else if !cfg.find_filter.is_empty() {
         let source = read_file_with_eol(&path)?;
         let cfg = FindCfg {
             path: Some(path.clone()),
-            filters: cfg.find,
+            filters: cfg.find_filter,
             line_start: cfg.line_start,
             line_end: cfg.line_end,
         };
         action::<Find>(&language, source, &path, pr, cfg)
+    } else if cfg.count_lock.is_some() {
+        let source = read_file_with_eol(&path)?;
+        let cfg = CountCfg {
+            path: Some(path.clone()),
+            filters: cfg.count_filter,
+            stats: cfg.count_lock.unwrap().clone(),
+        };
+        action::<Count>(&language, source, &path, pr, cfg)
     } else if cfg.preproc_lock.is_some() {
         if let Some(lang) = get_language_for_file(&path) {
             if lang == LANG::C || lang == LANG::Cpp {
@@ -234,6 +244,14 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("count")
+                .help("Count nodes of the given type: comma separated list")
+                .short("C")
+                .long("count")
+                .default_value("")
+                .takes_value(true),
+        )
+        .arg(
             Arg::with_name("in_place")
                 .help("Do action in place")
                 .short("i"),
@@ -355,11 +373,22 @@ fn main() {
     let in_place = matches.is_present("in_place");
     let comments = matches.is_present("remove_comments");
     let find = matches.value_of("find").unwrap();
-    let find: Vec<_> = find
+    let find_filter: Vec<_> = find
         .split(|c| c == ',')
         .filter(|k| !k.is_empty())
         .map(|s| s.to_string())
         .collect();
+    let count = matches.value_of("count").unwrap();
+    let count_filter: Vec<_> = count
+        .split(|c| c == ',')
+        .filter(|k| !k.is_empty())
+        .map(|s| s.to_string())
+        .collect();
+    let count_lock = if matches.occurrences_of("count") != 0 {
+        Some(Arc::new(Mutex::new(Count::default())))
+    } else {
+        None
+    };
     let typ = matches.value_of("type").unwrap();
     let preproc_value = matches.value_of("preproc").unwrap();
     let (preproc_lock, preproc) = if !preproc_value.is_empty() {
@@ -409,11 +438,13 @@ fn main() {
         dump,
         in_place,
         comments,
-        find,
+        find_filter,
+        count_filter,
         line_start,
         line_end,
         preproc_lock: preproc_lock.clone(),
         preproc,
+        count_lock: count_lock.clone(),
     };
 
     let (sender, receiver) = unbounded();
@@ -458,6 +489,11 @@ fn main() {
         if receiver.join().is_err() {
             process::exit(1);
         }
+    }
+
+    if let Some(count) = count_lock {
+        let count = Arc::try_unwrap(count).unwrap().into_inner().unwrap();
+        println!("{}", count);
     }
 
     if let Some(preproc) = preproc_lock {

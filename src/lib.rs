@@ -18,6 +18,9 @@ pub mod web;
 pub mod find;
 pub use crate::find::*;
 
+pub mod count;
+pub use crate::count::*;
+
 pub mod c_macro;
 
 pub mod preproc;
