@@ -38,7 +38,7 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-lcx"
+            - "-cx"
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup toolchain install nightly &&
                rustup default nightly &&
