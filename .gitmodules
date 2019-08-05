@@ -13,3 +13,6 @@
 [submodule "tree-sitter-java"]
 	path = tree-sitter-java
 	url = https://github.com/tree-sitter/tree-sitter-java/
+[submodule "tree-sitter-html"]
+	path = tree-sitter-html
+	url = https://github.com/tree-sitter/tree-sitter-html/
