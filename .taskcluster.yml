@@ -43,13 +43,12 @@ tasks:
                rustup toolchain install nightly &&
                rustup component add clippy &&
                rustup component add rustfmt &&
-               rustup default nightly &&
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a &&
-               rustup default stable &&
+               rustup default nightly &&
                cargo test"
         metadata:
           name: rust-code-analysis lint and test
