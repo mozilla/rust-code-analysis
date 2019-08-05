@@ -1,8 +1,0 @@
-node_modules
-build
-*.log
-script/javaparser-test/target
-test.java
-/examples/elasticsearch
-/examples/guava
-/examples/RxJava
