@@ -44,7 +44,7 @@ tasks:
                rustup component add clippy &&
                rustup component add rustfmt &&
                rustup default nightly &&
-               git clone --quiet ${repository} &&
+               git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
                pip3 install --quiet pre-commit &&
