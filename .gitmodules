@@ -7,3 +7,6 @@
 [submodule "tree-sitter-rust"]
 	path = tree-sitter-rust
 	url = https://github.com/tree-sitter/tree-sitter-rust/
+[submodule "tree-sitter-typescript"]
+	path = tree-sitter-typescript
+	url = https://github.com/tree-sitter/tree-sitter-typescript/
