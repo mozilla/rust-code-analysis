@@ -33,6 +33,9 @@ module.exports = grammar(C, {
     [$._declaration_specifiers, $._declaration_specifiers_no_type, $._expression, $.constructor_or_destructor_definition],
     [$._declarator],
     [$._declaration_specifiers, $._declarator, $.constructor_or_destructor_definition],
+    [$.pointer_declarator, $._expression],
+    [$._declarator, $.pointer_declarator, $._expression],
+    [$._declarator, $.pointer_declarator],
   ]),
 
   inline: ($, original) => original.concat([
@@ -293,6 +296,7 @@ module.exports = grammar(C, {
       repeat($.attribute),
       optional($.virtual_function_specifier),
       choice($._declaration_specifiers, $._declaration_specifiers_no_type),
+      optional($.call_convention),
       commaSep(field('declarator', $._field_declarator)),
       optional(choice(
         $.bitfield_clause,
@@ -306,6 +310,7 @@ module.exports = grammar(C, {
       repeat($.attribute),
       optional($.virtual_function_specifier),
       choice($._declaration_specifiers, $._declaration_specifiers_no_type),
+      optional($.call_convention),
       field('declarator', $._field_declarator),
       choice(
         field('body', $.compound_statement),
@@ -323,6 +328,7 @@ module.exports = grammar(C, {
       )),
       prec(1, seq(
         optional($.virtual_function_specifier),
+        optional($.call_convention),
         field('declarator', $.function_declarator),
         optional($.field_initializer_list)
       )),
@@ -335,6 +341,7 @@ module.exports = grammar(C, {
 
     constructor_or_destructor_declaration: $ => seq(
       optional($.virtual_function_specifier),
+      optional($.call_convention),
       field('declarator', $.function_declarator),
       ';'
     ),

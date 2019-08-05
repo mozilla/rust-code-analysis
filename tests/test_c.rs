@@ -43,6 +43,7 @@ fn test_fn_def() {
         "void AA BB() f() { }",
         "AA BB() f() { }",
         "AA BB() f() CC AA() { }",
+        "void f(void * AA a, int * AA(b) b) { }",
     ];
     parse(&samples, false, true);
     parse(&samples, false, false);
@@ -121,6 +122,18 @@ fn test_preproc() {
 }
 
 #[test]
+fn test_only_macros() {
+    let samples = vec![
+        "AA\nint x = 1;",
+        "AA(ab)\nint x = 1;",
+        "AA(ab)\n +2;",
+        "switch(x) {\ncase 1:\nAA\nint x = 1;}",
+    ];
+    parse(&samples, false, true);
+    parse(&samples, false, false);
+}
+
+#[test]
 fn test_fn_cpp() {
     let samples = vec![
         "AA(x)\nstatic T<U> f() { }",
@@ -129,6 +142,7 @@ fn test_fn_cpp() {
         "class C { public:\nAA\nBB\n};",
         "class C { void f() override;};",
         "class C { AA f() override;};",
+        "AA()\n<< \"aaa\";",
         //"AA(a, b, c) { }",
     ];
     parse(&samples, false, false);

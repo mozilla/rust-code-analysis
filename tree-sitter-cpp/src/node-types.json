@@ -288,6 +288,38 @@
         "named": true
       },
       {
+        "type": "only_macro",
+        "named": true
+      },
+      {
+        "type": "only_macro_call",
+        "named": true
+      },
+      {
+        "type": "preproc_call",
+        "named": true
+      },
+      {
+        "type": "preproc_def",
+        "named": true
+      },
+      {
+        "type": "preproc_function_def",
+        "named": true
+      },
+      {
+        "type": "preproc_if",
+        "named": true
+      },
+      {
+        "type": "preproc_ifdef",
+        "named": true
+      },
+      {
+        "type": "preproc_include",
+        "named": true
+      },
+      {
         "type": "return_statement",
         "named": true
       },
@@ -507,6 +539,14 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "macro",
+          "named": true
+        },
+        {
+          "type": "macro_call",
+          "named": true
+        },
         {
           "type": "type_qualifier",
           "named": true
@@ -741,6 +781,14 @@
           {
             "type": "_expression",
             "named": true
+          },
+          {
+            "type": "only_macro",
+            "named": true
+          },
+          {
+            "type": "only_macro_call",
+            "named": true
           }
         ]
       },
@@ -851,6 +899,11 @@
   },
   {
     "type": "break_statement",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "call_convention",
     "named": true,
     "fields": {}
   },
@@ -1208,6 +1261,10 @@
       "required": false,
       "types": [
         {
+          "type": "call_convention",
+          "named": true
+        },
+        {
           "type": "virtual_function_specifier",
           "named": true
         }
@@ -1247,39 +1304,7 @@
           "named": true
         },
         {
-          "type": "macro",
-          "named": true
-        },
-        {
-          "type": "macro_call",
-          "named": true
-        },
-        {
           "type": "namespace_definition",
-          "named": true
-        },
-        {
-          "type": "preproc_call",
-          "named": true
-        },
-        {
-          "type": "preproc_def",
-          "named": true
-        },
-        {
-          "type": "preproc_function_def",
-          "named": true
-        },
-        {
-          "type": "preproc_if",
-          "named": true
-        },
-        {
-          "type": "preproc_ifdef",
-          "named": true
-        },
-        {
-          "type": "preproc_include",
           "named": true
         },
         {
@@ -1521,6 +1546,10 @@
         },
         {
           "type": "bitfield_clause",
+          "named": true
+        },
+        {
+          "type": "call_convention",
           "named": true
         },
         {
@@ -1952,6 +1981,10 @@
       "types": [
         {
           "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "call_convention",
           "named": true
         },
         {
@@ -2399,6 +2432,36 @@
     }
   },
   {
+    "type": "only_macro",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "macro",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "only_macro_call",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "macro_call",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "optional_parameter_declaration",
     "named": true,
     "fields": {
@@ -2622,6 +2685,14 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "macro",
+          "named": true
+        },
+        {
+          "type": "macro_call",
+          "named": true
+        },
         {
           "type": "type_qualifier",
           "named": true
@@ -4105,39 +4176,7 @@
           "named": true
         },
         {
-          "type": "macro",
-          "named": true
-        },
-        {
-          "type": "macro_call",
-          "named": true
-        },
-        {
           "type": "namespace_definition",
-          "named": true
-        },
-        {
-          "type": "preproc_call",
-          "named": true
-        },
-        {
-          "type": "preproc_def",
-          "named": true
-        },
-        {
-          "type": "preproc_function_def",
-          "named": true
-        },
-        {
-          "type": "preproc_if",
-          "named": true
-        },
-        {
-          "type": "preproc_ifdef",
-          "named": true
-        },
-        {
-          "type": "preproc_include",
           "named": true
         },
         {
@@ -4535,12 +4574,12 @@
     }
   },
   {
-    "type": "\n",
-    "named": false
-  },
-  {
     "type": "macro",
     "named": true
+  },
+  {
+    "type": "\n",
+    "named": false
   },
   {
     "type": "(",
@@ -4655,6 +4694,38 @@
     "named": false
   },
   {
+    "type": "__cdecl",
+    "named": false
+  },
+  {
+    "type": "__clrcall",
+    "named": false
+  },
+  {
+    "type": "__stdcall",
+    "named": false
+  },
+  {
+    "type": "__fastcall",
+    "named": false
+  },
+  {
+    "type": "__thiscall",
+    "named": false
+  },
+  {
+    "type": "__vectorcall",
+    "named": false
+  },
+  {
+    "type": "WINAPI",
+    "named": false
+  },
+  {
+    "type": "CALLBACK",
+    "named": false
+  },
+  {
     "type": ";",
     "named": false
   },
@@ -4707,11 +4778,19 @@
     "named": false
   },
   {
+    "type": "CONST",
+    "named": false
+  },
+  {
     "type": "volatile",
     "named": false
   },
   {
     "type": "restrict",
+    "named": false
+  },
+  {
+    "type": "vector",
     "named": false
   },
   {

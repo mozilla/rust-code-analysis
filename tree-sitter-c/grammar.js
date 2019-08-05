@@ -31,7 +31,6 @@ module.exports = grammar({
   /* TODO:
      __try, __except (Microsoft C)
      inlined assembly
-     enum foo: uint32_t...
      namespace A = B;
      int64_t(...)
    */
@@ -60,6 +59,7 @@ module.exports = grammar({
     [$._declaration_specifiers_no_type, $._expression],
     [$._declaration_specifiers, $._declaration_specifiers_no_type],
     [$._declaration_specifiers, $._declaration_specifiers_no_type, $._expression],
+    [$._declarator, $.pointer_declarator, $.abstract_pointer_declarator],
   ],
 
   word: $ => $.identifier,
@@ -74,23 +74,25 @@ module.exports = grammar({
       $._statement,
       $.type_definition,
       $._empty_declaration,
-      $.preproc_if,
-      $.preproc_ifdef,
-      $.preproc_include,
-      $.preproc_def,
-      $.preproc_function_def,
-      $.preproc_call,
-      seq($.macro_call, '\n'),
-      seq($.macro, '\n'),
     ),
 
     macro: $ => prec(-1, token(
       /\$+/
     )),
 
+    only_macro: $ => seq(
+      $.macro,
+      '\n',
+    ),
+
     macro_call: $ => prec(PREC.CALL, seq(
       seq($.macro, $.argument_list),
     )),
+
+    only_macro_call: $ => seq(
+      $.macro_call,
+      '\n',
+    ),
 
     // Preprocesser
     preproc_include: $ => seq(
@@ -203,14 +205,27 @@ module.exports = grammar({
 
     // Main Grammar
 
+    call_convention: $ => choice(
+      '__cdecl',
+      '__clrcall',
+      '__stdcall',
+      '__fastcall',
+      '__thiscall',
+      '__vectorcall',
+      'WINAPI',
+      'CALLBACK',
+    ),
+
     function_definition: $ => seq(
       choice($._declaration_specifiers, $._declaration_specifiers_no_type),
+      optional($.call_convention),
       field('declarator', $._declarator),
       field('body', $.compound_statement)
     ),
 
     declaration: $ => seq(
       choice($._declaration_specifiers, $._declaration_specifiers_no_type),
+      optional($.call_convention),
       commaSep1(field('declarator', choice(
         $._declarator,
         $.init_declarator
@@ -332,21 +347,21 @@ module.exports = grammar({
 
     pointer_declarator: $ => prec.dynamic(1, prec.right(seq(
       '*',
-      repeat($.type_qualifier),
+      repeat(choice($.macro, $.macro_call, $.type_qualifier)),
       field('declarator', $._declarator)
     ))),
     pointer_field_declarator: $ => prec.dynamic(1, prec.right(seq(
       '*',
-      repeat($.type_qualifier),
+      repeat(choice($.macro, $.macro_call, $.type_qualifier)),
       field('declarator', $._field_declarator)
     ))),
     pointer_type_declarator: $ => prec.dynamic(1, prec.right(seq(
       '*',
-      repeat($.type_qualifier),
+      repeat(choice($.macro, $.macro_call, $.type_qualifier)),
       field('declarator', $._type_declarator)
     ))),
     abstract_pointer_declarator: $ => prec.dynamic(1, prec.right(seq('*',
-                                                                     repeat($.type_qualifier),
+                                                                     repeat(choice($.macro, $.macro_call, $.type_qualifier)),
                                                                      field('declarator', optional($._abstract_declarator))
     ))),
 
@@ -419,8 +434,10 @@ module.exports = grammar({
 
     type_qualifier: $ => choice(
       'const',
+      'CONST',
       'volatile',
       'restrict',
+      'vector',
       '_Atomic'
     ),
 
@@ -447,6 +464,173 @@ module.exports = grammar({
     ),
 
     primitive_type: $ => token(choice(
+      'APIENTRY',
+      'ATOM',
+      'BOOL',
+      'BOOLEAN',
+      'BYTE',
+      'CCHAR',
+      'CHAR',
+      'COLORREF',
+      'DWORD',
+      'DWORDLONG',
+      'DWORD_PTR',
+      'DWORD32',
+      'DWORD64',
+      'FLOAT',
+      'HACCEL',
+      'HALF_PTR',
+      'HANDLE',
+      'HBITMAP',
+      'HBRUSH',
+      'HCOLORSPACE',
+      'HCONV',
+      'HCONVLIST',
+      'HCURSOR',
+      'HDC',
+      'HDDEDATA',
+      'HDESK',
+      'HDROP',
+      'HDWP',
+      'HENHMETAFILE',
+      'HFILE',
+      'HFONT',
+      'HGDIOBJ',
+      'HGLOBAL',
+      'HHOOK',
+      'HICON',
+      'HINSTANCE',
+      'HKEY',
+      'HKL',
+      'HLOCAL',
+      'HMENU',
+      'HMETAFILE',
+      'HMODULE',
+      'HMONITOR',
+      'HPALETTE',
+      'HPEN',
+      'HRESULT',
+      'HRGN',
+      'HRSRC',
+      'HSZ',
+      'HWINSTA',
+      'HWND',
+      'INT',
+      'INT_PTR',
+      'INT8',
+      'INT16',
+      'INT32',
+      'INT64',
+      'LANGID',
+      'LCID',
+      'LCTYPE',
+      'LGRPID',
+      'LONG',
+      'LONGLONG',
+      'LONG_PTR',
+      'LONG32',
+      'LONG64',
+      'LPARAM',
+      'LPBOOL',
+      'LPBYTE',
+      'LPCOLORREF',
+      'LPCSTR',
+      'LPCVOID',
+      'LPCWSTR',
+      'LPDWORD',
+      'LPHANDLE',
+      'LPINT',
+      'LPLONG',
+      'LPSTR',
+      'LPTSTR',
+      'LPWOID',
+      'LPWORD',
+      'LPWSTR',
+      'LRESULT',
+      'PBOOL',
+      'PBOOLEAN',
+      'PBYTE',
+      'PCHAR',
+      'PCSTR',
+      'PCTSTR',
+      'PCWSTR',
+      'PDWORD',
+      'PDWORDLONG',
+      'PDWORD_PTR',
+      'PDWORD32',
+      'PDWORD64',
+      'PFLOAT',
+      'PHALF_PTR',
+      'PHANDLE',
+      'PHKEY',
+      'PINT',
+      'PINT_PTR',
+      'PINT8',
+      'PINT16',
+      'PINT32',
+      'PINT64',
+      'PLCID',
+      'PLONG',
+      'PLONGLONG',
+      'PLONG32',
+      'PLONG64',
+      'POINTER_32',
+      'POINTER_64',
+      'POINTER_SIGNED',
+      'POINTER_UNSIGNED',
+      'PSHORT',
+      'PSIZE_T',
+      'PSSIZE_T',
+      'PSTR',
+      'PTBYTE',
+      'PTCHAR',
+      'PTSTR',
+      'PUCHAR',
+      'PUHALF_PTR',
+      'PUINT',
+      'PUINT_PTR',
+      'PUINT8',
+      'PUINT16',
+      'PUINT32',
+      'PUINT64',
+      'PULONG',
+      'PULONGLONG',
+      'PULONG32',
+      'PULONG64',
+      'PUSHORT',
+      'PVOID',
+      'PWCHAR',
+      'PWORD',
+      'PWSTR',
+      'QWORD',
+      'SC_HANDLE',
+      'SC_LOCK',
+      'SERVICE_STATUS_HANDLE',
+      'SHORT',
+      'SIZE_T',
+      'SSIZE_T',
+      'TBYTE',
+      'TCHAR',
+      'UCHAR',
+      'UHALF_PTR',
+      'UINT',
+      'UINT_PTR',
+      'UINT8',
+      'UINT16',
+      'UINT32',
+      'UINT64',
+      'ULONG',
+      'ULONGLONG',
+      'ULONG_PTR',
+      'ULONG32',
+      'ULONG64',
+      'UNICODE_STRING',
+      'USHORT',
+      'USN',
+      'VOID',
+      'WCHAR',
+      'WORD',
+      'WPARAM',
       'bool',
       'char',
       'int',
@@ -532,6 +716,7 @@ module.exports = grammar({
 
     field_declaration: $ => seq(
       $._declaration_specifiers,
+      optional($.call_convention),
       commaSep(field('declarator', $._field_declarator)),
       optional($.bitfield_clause),
       ';'
@@ -572,7 +757,15 @@ module.exports = grammar({
       $.return_statement,
       $.break_statement,
       $.continue_statement,
-      $.goto_statement
+      $.goto_statement,
+      $.only_macro,
+      $.only_macro_call,
+      $.preproc_if,
+      $.preproc_ifdef,
+      $.preproc_include,
+      $.preproc_def,
+      $.preproc_function_def,
+      $.preproc_call,
     ),
 
     labeled_statement: $ => seq(
@@ -773,7 +966,7 @@ module.exports = grammar({
 
       return choice(...table.map(([operator, precedence]) => {
         return prec.left(precedence, seq(
-          field('left', $._expression),
+          field('left', choice($.only_macro, $.only_macro_call, $._expression)),
           field('operator', operator),
           field('right', $._expression)
         ))
