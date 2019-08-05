@@ -16,3 +16,6 @@
 [submodule "tree-sitter-html"]
 	path = tree-sitter-html
 	url = https://github.com/tree-sitter/tree-sitter-html/
+[submodule "tree-sitter-go"]
+	path = tree-sitter-go
+	url = https://github.com/tree-sitter/tree-sitter-go/
