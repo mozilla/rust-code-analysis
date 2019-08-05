@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::path::PathBuf;
 use tree_sitter::Node;
 
@@ -9,22 +8,26 @@ pub fn find<'a, T: TSParserTrait>(parser: &'a T, filters: &[String]) -> Option<V
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
     let mut cursor = node.walk();
-    let mut stack = VecDeque::new();
+    let mut stack = Vec::new();
     let mut good = Vec::new();
+    let mut children = Vec::new();
 
-    stack.push_back(node);
+    stack.push(node);
 
-    while let Some(node) = stack.pop_front() {
+    while let Some(node) = stack.pop() {
         if filters.any(&node) {
             good.push(node);
         }
         cursor.reset(node);
         if cursor.goto_first_child() {
             loop {
-                stack.push_back(cursor.node());
+                children.push(cursor.node());
                 if !cursor.goto_next_sibling() {
                     break;
                 }
+            }
+            for child in children.drain(..).rev() {
+                stack.push(child);
             }
         }
     }
