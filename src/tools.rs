@@ -15,12 +15,32 @@ pub fn read_file(path: &PathBuf) -> std::io::Result<Vec<u8>> {
 pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Vec<u8>> {
     let mut file = File::open(path)?;
     let mut data = Vec::new();
+
+    let mut bom = [0; 3];
+    if let Ok(n) = file.read(&mut bom) {
+        // Skip the bom if one
+        if n == 3 {
+            if bom[..2] == [b'\xFE', b'\xFF'] || bom[..2] == [b'\xFF', b'\xFE'] {
+                data.push(bom[2]);
+            } else if bom != [b'\xEF', b'\xBB', b'\xBF'] {
+                data.extend_from_slice(&bom);
+            }
+        } else if n == 2 {
+            if bom[..2] != [b'\xFE', b'\xFF'] && bom[..2] != [b'\xFF', b'\xFE'] {
+                data.extend_from_slice(&bom[..2]);
+            }
+        } else if n == 1 {
+            data.push(bom[0]);
+        }
+    }
     file.read_to_end(&mut data)?;
 
     if let Some(c) = data.last() {
         if *c != b'\n' {
             data.push(b'\n');
         }
+    } else {
+        data.push(b'\n');
     }
 
     Ok(data)
@@ -124,8 +144,6 @@ pub fn guess_file(
             new_possibilities.clear();
         }
 
-        //eprintln!("On a trouve {:?} {:?}\n{:?}\n{:?}\n", current_path, rpath, new_possibilities, possibilities);
-
         let mut dist_min = std::usize::MAX;
         let mut path_min = Vec::new();
         for p in possibilities.iter() {
@@ -144,28 +162,37 @@ pub fn guess_file(
         }
 
         let path_min: Vec<_> = path_min.drain(..).map(|p| p.to_path_buf()).collect();
-
-        //eprintln!("On a trouve {:?} {:?}\n{:?}\n{:?}\n", current_path, rpath, path_min, possibilities);
-
-        if path_min.len() > 1 {
-            //eprintln!("FAIS CHIER {:?} {:?}\n{:?}\n", current_path, rpath, path_min);
-        }
-
-        //eprintln!("On a trouve {:?} {:?}", current_path, path_min);
         return path_min;
     }
 
-    //eprintln!("FAIS GRAVEMENT CHIER {:?} {:?}", current_path, path);
-
     vec![]
 }
-/*
-include/X.h
 
-/a/b/titi.c
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-/a/include/X.h
-/a/b/c/include/X.h
-/a/b/d/include/X.h
+    #[test]
+    fn test_read() {
+        let tmp_dir = std::env::temp_dir();
+        let tmp_path = tmp_dir.join("test_read");
+        let data = vec![
+            (b"\xFF\xFEabc".to_vec(), b"abc\n".to_vec()),
+            (b"\xFE\xFFabc".to_vec(), b"abc\n".to_vec()),
+            (b"\xFE\xFF".to_vec(), b"\n".to_vec()),
+            (b"\xFE".to_vec(), b"\xFE\n".to_vec()),
+            (b"\xEF\xBB\xBFabc".to_vec(), b"abc\n".to_vec()),
+            (b"\xEF\xBB\xBFabc\n".to_vec(), b"abc\n".to_vec()),
+            (b"\xEF\xBBabc\n".to_vec(), b"\xEF\xBBabc\n".to_vec()),
+            (b"abcdef\n".to_vec(), b"abcdef\n".to_vec()),
+            (b"abcdef".to_vec(), b"abcdef\n".to_vec()),
+            (b"ab".to_vec(), b"ab\n".to_vec()),
+        ];
+        for (d, expected) in data {
+            write_file(&tmp_path, &d).unwrap();
+            let res = read_file_with_eol(&tmp_path).unwrap();
+            assert!(res == expected);
+        }
+    }
 
-*/
+}
