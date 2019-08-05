@@ -38,18 +38,19 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-lcx"
-            - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py"
-            - "rustup toolchain install nightly &&
-               rustup default nightly &&
+            - "-cx"
+            - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
+               rustup toolchain install stable &&
+               rustup toolchain install nightly &&
+               rustup default stable &&
                rustup component add clippy &&
-               rustup component add rustfmt"
-            - "git clone --quiet ${repository} &&
+               rustup component add rustfmt &&
+               git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
                pip3 install --quiet pre-commit &&
-               pre-commit run -a"
-            - "rustup default stable &&
+               pre-commit run -a &&
+               rustup default nightly &&
                cargo test"
         metadata:
           name: rust-code-analysis lint and test
