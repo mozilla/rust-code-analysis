@@ -209,6 +209,7 @@ pub enum Go {
     LabelName = 204,
     TypeIdentifier = 205,
     Error = 206,
+    
 }
 
 impl Into<&'static str> for Go {
@@ -421,7 +422,7 @@ impl Into<&'static str> for Go {
             Go::LabelName => "label_name",
             Go::TypeIdentifier => "type_identifier",
             Go::Error => "ERROR",
-        }
+            }
     }
 }
 
@@ -482,10 +483,7 @@ static KEYS: phf::Map<&'static str, Go> = ::phf::Map {
         ("else_clause", Go::ElseClause),
         ("block", Go::Block),
         ("slice_expression", Go::SliceExpression),
-        (
-            "variadic_parameter_declaration",
-            Go::VariadicParameterDeclaration,
-        ),
+        ("variadic_parameter_declaration", Go::VariadicParameterDeclaration),
         (">=", Go::GTEQ),
         ("interface", Go::Interface),
         ("assignment_statement", Go::AssignmentStatement),
@@ -503,10 +501,7 @@ static KEYS: phf::Map<&'static str, Go> = ::phf::Map {
         (")", Go::RPAREN),
         ("interface_type", Go::InterfaceType),
         ("method_declaration", Go::MethodDeclaration),
-        (
-            "interpreted_string_literal_token1",
-            Go::InterpretedStringLiteralToken1,
-        ),
+        ("interpreted_string_literal_token1", Go::InterpretedStringLiteralToken1),
         ("expression_list_repeat1", Go::ExpressionListRepeat1),
         ("range_clause", Go::RangeClause),
         ("goto", Go::Goto),
@@ -607,10 +602,7 @@ static KEYS: phf::Map<&'static str, Go> = ::phf::Map {
         ("defer", Go::Defer),
         ("else", Go::Else),
         ("chan", Go::Chan),
-        (
-            "interpreted_string_literal_repeat1",
-            Go::InterpretedStringLiteralRepeat1,
-        ),
+        ("interpreted_string_literal_repeat1", Go::InterpretedStringLiteralRepeat1),
         ("*=", Go::STAREQ),
         ("|=", Go::PIPEEQ),
         ("parenthesized_type", Go::ParenthesizedType),
@@ -629,10 +621,7 @@ static KEYS: phf::Map<&'static str, Go> = ::phf::Map {
         ("default", Go::Default),
         ("method_spec", Go::MethodSpec),
         ("communication_clause", Go::CommunicationClause),
-        (
-            "expression_switch_statement_repeat1",
-            Go::ExpressionSwitchStatementRepeat1,
-        ),
+        ("expression_switch_statement_repeat1", Go::ExpressionSwitchStatementRepeat1),
         ("implicit_length_array_type", Go::ImplicitLengthArrayType),
         ("expression_case", Go::ExpressionCase),
         ("fallthrough_statement", Go::FallthroughStatement),
@@ -669,17 +658,11 @@ static KEYS: phf::Map<&'static str, Go> = ::phf::Map {
         ("var_declaration", Go::VarDeclaration),
         ("type_declaration", Go::TypeDeclaration),
         ("selector_expression", Go::SelectorExpression),
-        (
-            "type_switch_statement_repeat1",
-            Go::TypeSwitchStatementRepeat1,
-        ),
+        ("type_switch_statement_repeat1", Go::TypeSwitchStatementRepeat1),
         ("go_statement", Go::GoStatement),
         ("parameter_list_repeat1", Go::ParameterListRepeat1),
         ("package_clause", Go::PackageClause),
-        (
-            "field_declaration_list_repeat1",
-            Go::FieldDeclarationListRepeat1,
-        ),
+        ("field_declaration_list_repeat1", Go::FieldDeclarationListRepeat1),
         ("literal_value_repeat1", Go::LiteralValueRepeat1),
         ("!", Go::BANG),
         ("for_statement", Go::ForStatement),

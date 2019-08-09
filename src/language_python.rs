@@ -220,6 +220,7 @@ pub enum Python {
     StringRepeat1 = 215,
     FormatSpecifierRepeat1 = 216,
     Error = 217,
+    
 }
 
 impl Into<&'static str> for Python {
@@ -443,7 +444,7 @@ impl Into<&'static str> for Python {
             Python::StringRepeat1 => "string_repeat1",
             Python::FormatSpecifierRepeat1 => "format_specifier_repeat1",
             Python::Error => "ERROR",
-        }
+            }
     }
 }
 
@@ -500,10 +501,7 @@ static KEYS: phf::Map<&'static str, Python> = ::phf::Map {
         ("set", Python::Set),
         ("named_expression", Python::NamedExpression),
         ("and", Python::And),
-        (
-            "concatenated_string_repeat1",
-            Python::ConcatenatedStringRepeat1,
-        ),
+        ("concatenated_string_repeat1", Python::ConcatenatedStringRepeat1),
         ("_import_list", Python::ImportList),
         ("tuple", Python::Tuple),
         ("false", Python::False),
@@ -527,20 +525,14 @@ static KEYS: phf::Map<&'static str, Python> = ::phf::Map {
         ("nonlocal_statement", Python::NonlocalStatement),
         ("parenthesized_expression", Python::ParenthesizedExpression),
         ("@", Python::AT),
-        (
-            "_comprehension_clauses_repeat1",
-            Python::ComprehensionClausesRepeat1,
-        ),
+        ("_comprehension_clauses_repeat1", Python::ComprehensionClausesRepeat1),
         ("chevron", Python::Chevron),
         ("(", Python::LPAREN),
         ("if_statement", Python::IfStatement),
         ("*", Python::STAR),
         ("->", Python::DASHGT),
         ("format_specifier_repeat1", Python::FormatSpecifierRepeat1),
-        (
-            "decorated_definition_repeat1",
-            Python::DecoratedDefinitionRepeat1,
-        ),
+        ("decorated_definition_repeat1", Python::DecoratedDefinitionRepeat1),
         ("true", Python::True),
         ("==", Python::EQEQ),
         ("^=", Python::CARETEQ),
@@ -592,10 +584,7 @@ static KEYS: phf::Map<&'static str, Python> = ::phf::Map {
         ("function_definition", Python::FunctionDefinition),
         ("list", Python::List),
         ("if_clause", Python::IfClause),
-        (
-            "comparison_operator_repeat1",
-            Python::ComparisonOperatorRepeat1,
-        ),
+        ("comparison_operator_repeat1", Python::ComparisonOperatorRepeat1),
         ("not_operator", Python::NotOperator),
         ("_primary_expression", Python::PrimaryExpression),
         ("dictionary_comprehension", Python::DictionaryComprehension),
@@ -690,10 +679,7 @@ static KEYS: phf::Map<&'static str, Python> = ::phf::Map {
         ("subscript", Python::Subscript),
         ("binary_operator", Python::BinaryOperator),
         ("integer", Python::Integer),
-        (
-            "_expression_within_for_in_clause",
-            Python::ExpressionWithinForInClause,
-        ),
+        ("_expression_within_for_in_clause", Python::ExpressionWithinForInClause),
         ("decorated_definition", Python::DecoratedDefinition),
         ("attribute", Python::Attribute),
         ("_expression", Python::Expression),
@@ -704,10 +690,7 @@ static KEYS: phf::Map<&'static str, Python> = ::phf::Map {
         ("<", Python::LT),
         ("augmented_assignment", Python::AugmentedAssignment),
         ("argument_list_repeat1", Python::ArgumentListRepeat1),
-        (
-            "_simple_statements_repeat1",
-            Python::SimpleStatementsRepeat1,
-        ),
+        ("_simple_statements_repeat1", Python::SimpleStatementsRepeat1),
         ("@=", Python::ATEQ),
         ("import", Python::Import),
         ("not", Python::Not),

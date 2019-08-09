@@ -284,6 +284,7 @@ pub enum Java {
     FormalParametersRepeat1 = 279,
     TypeIdentifier = 280,
     Error = 281,
+    
 }
 
 impl Into<&'static str> for Java {
@@ -571,7 +572,7 @@ impl Into<&'static str> for Java {
             Java::FormalParametersRepeat1 => "formal_parameters_repeat1",
             Java::TypeIdentifier => "type_identifier",
             Java::Error => "ERROR",
-        }
+            }
     }
 }
 
@@ -678,10 +679,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("_type", Java::Type),
         ("dimensions", Java::Dimensions),
         ("binary_expression", Java::BinaryExpression),
-        (
-            "interface_member_declaration",
-            Java::InterfaceMemberDeclaration,
-        ),
+        ("interface_member_declaration", Java::InterfaceMemberDeclaration),
         ("character_literal_token1", Java::CharacterLiteralToken1),
         ("try_statement_repeat1", Java::TryStatementRepeat1),
         ("enhanced_for_statement", Java::EnhancedForStatement),
@@ -693,10 +691,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("field_declaration", Java::FieldDeclaration),
         ("_variable_declarator_list", Java::VariableDeclaratorList),
         ("break", Java::Break),
-        (
-            "annotation_type_element_declaration",
-            Java::AnnotationTypeElementDeclaration,
-        ),
+        ("annotation_type_element_declaration", Java::AnnotationTypeElementDeclaration),
         ("formal_parameters_repeat1", Java::FormalParametersRepeat1),
         ("formal_parameters", Java::FormalParameters),
         ("*", Java::STAR),
@@ -704,10 +699,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("module_directive_repeat2", Java::ModuleDirectiveRepeat2),
         ("]", Java::RBRACK),
         ("modifiers", Java::Modifiers),
-        (
-            "array_creation_expression_repeat1",
-            Java::ArrayCreationExpressionRepeat1,
-        ),
+        ("array_creation_expression_repeat1", Java::ArrayCreationExpressionRepeat1),
         ("resource", Java::Resource),
         ("abstract", Java::Abstract),
         ("_method_header", Java::MethodHeader),
@@ -715,17 +707,11 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("~", Java::TILDE),
         ("modifiers_repeat1", Java::ModifiersRepeat1),
         ("block", Java::Block),
-        (
-            "normal_interface_declaration",
-            Java::NormalInterfaceDeclaration,
-        ),
+        ("normal_interface_declaration", Java::NormalInterfaceDeclaration),
         ("hex_floating_point_literal", Java::HexFloatingPointLiteral),
         ("&=", Java::AMPEQ),
         ("method_declaration", Java::MethodDeclaration),
-        (
-            "_variable_declarator_list_repeat1",
-            Java::VariableDeclaratorListRepeat1,
-        ),
+        ("_variable_declarator_list_repeat1", Java::VariableDeclaratorListRepeat1),
         ("enum_constant", Java::EnumConstant),
         ("class_literal_repeat1", Java::ClassLiteralRepeat1),
         ("object_creation_expression", Java::ObjectCreationExpression),
@@ -750,10 +736,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("update_expression", Java::UpdateExpression),
         ("+=", Java::PLUSEQ),
         ("short", Java::Short),
-        (
-            "annotation_type_body_repeat1",
-            Java::AnnotationTypeBodyRepeat1,
-        ),
+        ("annotation_type_body_repeat1", Java::AnnotationTypeBodyRepeat1),
         ("finally_clause", Java::FinallyClause),
         ("return", Java::Return),
         ("extends", Java::Extends),
@@ -781,10 +764,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("throw_statement", Java::ThrowStatement),
         ("switch_label", Java::SwitchLabel),
         ("_expression", Java::Expression),
-        (
-            "enum_body_declarations_repeat1",
-            Java::EnumBodyDeclarationsRepeat1,
-        ),
+        ("enum_body_declarations_repeat1", Java::EnumBodyDeclarationsRepeat1),
         ("&&", Java::AMPAMP),
         (">>>=", Java::GTGTGTEQ),
         ("_variable_declarator_id", Java::VariableDeclaratorId),
@@ -796,10 +776,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("package", Java::Package),
         ("super_interfaces", Java::SuperInterfaces),
         ("!", Java::BANG),
-        (
-            "annotation_type_declaration",
-            Java::AnnotationTypeDeclaration,
-        ),
+        ("annotation_type_declaration", Java::AnnotationTypeDeclaration),
         ("interface_body", Java::InterfaceBody),
         ("finally", Java::Finally),
         ("identifier", Java::Identifier),
@@ -817,10 +794,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("module_directive_repeat3", Java::ModuleDirectiveRepeat3),
         ("constant_declaration", Java::ConstantDeclaration),
         ("interface_body_repeat1", Java::InterfaceBodyRepeat1),
-        (
-            "inferred_parameters_repeat1",
-            Java::InferredParametersRepeat1,
-        ),
+        ("inferred_parameters_repeat1", Java::InferredParametersRepeat1),
         ("do_statement", Java::DoStatement),
         ("module_declaration_repeat1", Java::ModuleDeclarationRepeat1),
         ("catch", Java::Catch),
@@ -841,10 +815,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         (">>>", Java::GTGTGT),
         ("cast_expression_repeat1", Java::CastExpressionRepeat1),
         ("int", Java::Int),
-        (
-            "_unqualified_object_creation_expression",
-            Java::UnqualifiedObjectCreationExpression,
-        ),
+        ("_unqualified_object_creation_expression", Java::UnqualifiedObjectCreationExpression),
         ("lambda_expression", Java::LambdaExpression),
         ("comment", Java::Comment),
         ("scoped_type_identifier", Java::ScopedTypeIdentifier),
@@ -857,10 +828,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("_literal", Java::Literal),
         ("assignment_expression", Java::AssignmentExpression),
         ("module_directive", Java::ModuleDirective),
-        (
-            "resource_specification_repeat1",
-            Java::ResourceSpecificationRepeat1,
-        ),
+        ("resource_specification_repeat1", Java::ResourceSpecificationRepeat1),
         ("switch", Java::Switch),
         ("void_type", Java::VoidType),
         ("module_directive_repeat1", Java::ModuleDirectiveRepeat1),
@@ -890,10 +858,7 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("receiver_parameter", Java::ReceiverParameter),
         ("module", Java::Module),
         ("constructor_declarator", Java::ConstructorDeclarator),
-        (
-            "interface_type_list_repeat1",
-            Java::InterfaceTypeListRepeat1,
-        ),
+        ("interface_type_list_repeat1", Java::InterfaceTypeListRepeat1),
         ("@", Java::AT),
         ("character_literal", Java::CharacterLiteral),
         ("interface_declaration", Java::InterfaceDeclaration),
@@ -908,41 +873,23 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("string_literal", Java::StringLiteral),
         ("_wildcard_bounds", Java::WildcardBounds),
         ("binary_integer_literal", Java::BinaryIntegerLiteral),
-        (
-            "decimal_floating_point_literal",
-            Java::DecimalFloatingPointLiteral,
-        ),
+        ("decimal_floating_point_literal", Java::DecimalFloatingPointLiteral),
         ("annotation_argument_list", Java::AnnotationArgumentList),
         ("float", Java::Float),
-        (
-            "annotation_type_member_declaration",
-            Java::AnnotationTypeMemberDeclaration,
-        ),
+        ("annotation_type_member_declaration", Java::AnnotationTypeMemberDeclaration),
         ("for_init", Java::ForInit),
-        (
-            "explicit_constructor_invocation",
-            Java::ExplicitConstructorInvocation,
-        ),
+        ("explicit_constructor_invocation", Java::ExplicitConstructorInvocation),
         ("octal_integer_literal", Java::OctalIntegerLiteral),
         ("private", Java::Private),
         ("boolean_type", Java::BooleanType),
         ("byte", Java::Byte),
-        (
-            "element_value_array_initializer_repeat1",
-            Java::ElementValueArrayInitializerRepeat1,
-        ),
+        ("element_value_array_initializer_repeat1", Java::ElementValueArrayInitializerRepeat1),
         ("uses", Java::Uses),
         ("type_arguments", Java::TypeArguments),
         ("character_literal_token2", Java::CharacterLiteralToken2),
-        (
-            "annotation_argument_list_repeat1",
-            Java::AnnotationArgumentListRepeat1,
-        ),
+        ("annotation_argument_list_repeat1", Java::AnnotationArgumentListRepeat1),
         ("formal_parameter", Java::FormalParameter),
-        (
-            "try_with_resources_statement",
-            Java::TryWithResourcesStatement,
-        ),
+        ("try_with_resources_statement", Java::TryWithResourcesStatement),
         (">>", Java::GTGT),
         ("||", Java::PIPEPIPE),
         (",", Java::COMMA),
@@ -958,14 +905,8 @@ static KEYS: phf::Map<&'static str, Java> = ::phf::Map {
         ("static", Java::Static),
         ("array_initializer_repeat1", Java::ArrayInitializerRepeat1),
         ("...", Java::DOTDOTDOT),
-        (
-            "element_value_array_initializer",
-            Java::ElementValueArrayInitializer,
-        ),
-        (
-            "local_variable_declaration_statement",
-            Java::LocalVariableDeclarationStatement,
-        ),
+        ("element_value_array_initializer", Java::ElementValueArrayInitializer),
+        ("local_variable_declaration_statement", Java::LocalVariableDeclarationStatement),
         ("switch_block_repeat1", Java::SwitchBlockRepeat1),
         ("null_literal", Java::NullLiteral),
         ("_method_declarator", Java::MethodDeclarator),

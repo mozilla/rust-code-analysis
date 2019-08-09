@@ -39,6 +39,7 @@ pub enum Preproc {
     DefineRepeat1 = 34,
     PreprocIfRepeat1 = 35,
     Error = 36,
+    
 }
 
 impl Into<&'static str> for Preproc {
@@ -81,7 +82,7 @@ impl Into<&'static str> for Preproc {
             Preproc::DefineRepeat1 => "define_repeat1",
             Preproc::PreprocIfRepeat1 => "preproc_if_repeat1",
             Preproc::Error => "ERROR",
-        }
+            }
     }
 }
 
@@ -106,10 +107,7 @@ static KEYS: phf::Map<&'static str, Preproc> = ::phf::Map {
         ("define_token1", Preproc::DefineToken1),
         ("nothing", Preproc::Nothing),
         ("preproc_nothing_token1", Preproc::PreprocNothingToken1),
-        (
-            "preproc_continuation_line",
-            Preproc::PreprocContinuationLine,
-        ),
+        ("preproc_continuation_line", Preproc::PreprocContinuationLine),
         ("path", Preproc::Path),
         ("ERROR", Preproc::Error),
         ("preproc_line", Preproc::PreprocLine),

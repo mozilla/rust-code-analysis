@@ -309,6 +309,7 @@ pub enum Typescript {
     ExportSpecifier = 304,
     StatementIdentifier = 305,
     Error = 306,
+    
 }
 
 impl Into<&'static str> for Typescript {
@@ -621,7 +622,7 @@ impl Into<&'static str> for Typescript {
             Typescript::ExportSpecifier => "export_specifier",
             Typescript::StatementIdentifier => "statement_identifier",
             Typescript::Error => "ERROR",
-        }
+            }
     }
 }
 
@@ -711,10 +712,7 @@ static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
         (",", Typescript::COMMA),
         ("call_expression", Typescript::CallExpression),
         ("import_statement", Typescript::ImportStatement),
-        (
-            "export_statement_repeat1",
-            Typescript::ExportStatementRepeat1,
-        ),
+        ("export_statement_repeat1", Typescript::ExportStatementRepeat1),
         ("type_assertion", Typescript::TypeAssertion),
         ("super", Typescript::Super),
         ("lexical_declaration", Typescript::LexicalDeclaration),
@@ -802,10 +800,7 @@ static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
         ("|=", Typescript::PIPEEQ),
         ("extends", Typescript::Extends),
         ("interface", Typescript::Interface),
-        (
-            "variable_declaration_repeat1",
-            Typescript::VariableDeclarationRepeat1,
-        ),
+        ("variable_declaration_repeat1", Typescript::VariableDeclarationRepeat1),
         ("intersection_type", Typescript::IntersectionType),
         ("lookup_type", Typescript::LookupType),
         ("false", Typescript::False),
@@ -846,14 +841,8 @@ static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
         ("template_string", Typescript::TemplateString),
         ("object_type", Typescript::ObjectType),
         ("do", Typescript::Do),
-        (
-            "shorthand_property_identifier",
-            Typescript::ShorthandPropertyIdentifier,
-        ),
-        (
-            "augmented_assignment_expression",
-            Typescript::AugmentedAssignmentExpression,
-        ),
+        ("shorthand_property_identifier", Typescript::ShorthandPropertyIdentifier),
+        ("augmented_assignment_expression", Typescript::AugmentedAssignmentExpression),
         ("end", Typescript::End),
         ("new_expression", Typescript::NewExpression),
         ("comment", Typescript::Comment),
@@ -905,10 +894,7 @@ static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
         ("if_statement", Typescript::IfStatement),
         ("^=", Typescript::CARETEQ),
         ("=>", Typescript::EQGT),
-        (
-            "implements_clause_repeat1",
-            Typescript::ImplementsClauseRepeat1,
-        ),
+        ("implements_clause_repeat1", Typescript::ImplementsClauseRepeat1),
         ("in", Typescript::In),
         ("array", Typescript::Array),
         ("finally", Typescript::Finally),
@@ -918,10 +904,7 @@ static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
         ("_expression", Typescript::Expression),
         ("debugger", Typescript::Debugger),
         ("/=", Typescript::SLASHEQ),
-        (
-            "formal_parameters_repeat1",
-            Typescript::FormalParametersRepeat1,
-        ),
+        ("formal_parameters_repeat1", Typescript::FormalParametersRepeat1),
         ("extends_clause_repeat1", Typescript::ExtendsClauseRepeat1),
         ("assignment_pattern", Typescript::AssignmentPattern),
         ("...", Typescript::DOTDOTDOT),
@@ -939,20 +922,14 @@ static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
         ("**=", Typescript::STARSTAREQ),
         ("extends_clause", Typescript::ExtendsClause),
         ("object_type_repeat1", Typescript::ObjectTypeRepeat1),
-        (
-            "abstract_method_signature",
-            Typescript::AbstractMethodSignature,
-        ),
+        ("abstract_method_signature", Typescript::AbstractMethodSignature),
         ("labeled_statement", Typescript::LabeledStatement),
         ("method_definition", Typescript::MethodDefinition),
         ("index_signature", Typescript::IndexSignature),
         ("=", Typescript::EQ),
         ("from", Typescript::From),
         ("_identifier_reference", Typescript::IdentifierReference),
-        (
-            "parenthesized_expression",
-            Typescript::ParenthesizedExpression,
-        ),
+        ("parenthesized_expression", Typescript::ParenthesizedExpression),
         ("[", Typescript::LBRACK),
         ("}", Typescript::RBRACE),
         ("object", Typescript::Object),
@@ -987,10 +964,7 @@ static KEYS: phf::Map<&'static str, Typescript> = ::phf::Map {
         ("*=", Typescript::STAREQ),
         ("yield_expression", Typescript::YieldExpression),
         ("constraint", Typescript::Constraint),
-        (
-            "_import_export_specifier",
-            Typescript::ImportExportSpecifier,
-        ),
+        ("_import_export_specifier", Typescript::ImportExportSpecifier),
         ("regex_flags", Typescript::RegexFlags),
         ("_initializer", Typescript::Initializer),
         ("formal_parameters", Typescript::FormalParameters),

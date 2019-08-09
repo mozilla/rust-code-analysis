@@ -115,6 +115,7 @@ pub enum Css {
     FunctionName = 110,
     KeyframesName = 111,
     Error = 112,
+    
 }
 
 impl Into<&'static str> for Css {
@@ -233,7 +234,7 @@ impl Into<&'static str> for Css {
             Css::FunctionName => "function_name",
             Css::KeyframesName => "keyframes_name",
             Css::Error => "ERROR",
-        }
+            }
     }
 }
 
@@ -268,10 +269,7 @@ static KEYS: phf::Map<&'static str, Css> = ::phf::Map {
         (">", Css::GT),
         ("important", Css::Important),
         ("{", Css::LBRACE),
-        (
-            "pseudo_class_arguments_repeat1",
-            Css::PseudoClassArgumentsRepeat1,
-        ),
+        ("pseudo_class_arguments_repeat1", Css::PseudoClassArgumentsRepeat1),
         ("float_value", Css::FloatValue),
         ("+", Css::PLUS),
         ("property_name", Css::PropertyName),
@@ -316,10 +314,7 @@ static KEYS: phf::Map<&'static str, Css> = ::phf::Map {
         ("adjacent_sibling_selector", Css::AdjacentSiblingSelector),
         ("*=", Css::STAREQ),
         ("feature_query", Css::FeatureQuery),
-        (
-            "pseudo_class_arguments_repeat2",
-            Css::PseudoClassArgumentsRepeat2,
-        ),
+        ("pseudo_class_arguments_repeat2", Css::PseudoClassArgumentsRepeat2),
         ("@charset", Css::ATcharset),
         ("keyframes_statement", Css::KeyframesStatement),
         ("declaration_repeat1", Css::DeclarationRepeat1),
