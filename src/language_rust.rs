@@ -309,7 +309,6 @@ pub enum Rust {
     TypeIdentifier = 304,
     ShorthandFieldIdentifier = 305,
     Error = 306,
-    
 }
 
 impl Into<&'static str> for Rust {
@@ -622,7 +621,7 @@ impl Into<&'static str> for Rust {
             Rust::TypeIdentifier => "type_identifier",
             Rust::ShorthandFieldIdentifier => "shorthand_field_identifier",
             Rust::Error => "ERROR",
-            }
+        }
     }
 }
 
@@ -751,7 +750,10 @@ static KEYS: phf::Map<&'static str, Rust> = ::phf::Map {
         ("index_expression", Rust::IndexExpression),
         ("default", Rust::Default),
         ("token_tree", Rust::TokenTree),
-        ("ordered_field_declaration_list_repeat1", Rust::OrderedFieldDeclarationListRepeat1),
+        (
+            "ordered_field_declaration_list_repeat1",
+            Rust::OrderedFieldDeclarationListRepeat1,
+        ),
         ("source_file_repeat1", Rust::SourceFileRepeat1),
         ("enum_variant_list_repeat1", Rust::EnumVariantListRepeat1),
         ("arguments", Rust::Arguments),
@@ -805,7 +807,10 @@ static KEYS: phf::Map<&'static str, Rust> = ::phf::Map {
         ("type_item", Rust::TypeItem),
         ("parameters", Rust::Parameters),
         ("attribute_item", Rust::AttributeItem),
-        ("generic_type_with_turbofish", Rust::GenericTypeWithTurbofish),
+        (
+            "generic_type_with_turbofish",
+            Rust::GenericTypeWithTurbofish,
+        ),
         ("-=", Rust::DASHEQ),
         ("foreign_mod_item", Rust::ForeignModItem),
         ("self", Rust::Zelf),
@@ -834,7 +839,10 @@ static KEYS: phf::Map<&'static str, Rust> = ::phf::Map {
         ("base_field_initializer", Rust::BaseFieldInitializer),
         ("macro_rule", Rust::MacroRule),
         ("match_block", Rust::MatchBlock),
-        ("field_declaration_list_repeat1", Rust::FieldDeclarationListRepeat1),
+        (
+            "field_declaration_list_repeat1",
+            Rust::FieldDeclarationListRepeat1,
+        ),
         ("match_pattern", Rust::MatchPattern),
         ("function_signature_item", Rust::FunctionSignatureItem),
         ("await_expression", Rust::AwaitExpression),
@@ -916,7 +924,10 @@ static KEYS: phf::Map<&'static str, Rust> = ::phf::Map {
         ("unit_expression", Rust::UnitExpression),
         ("array_expression", Rust::ArrayExpression),
         (">>", Rust::GTGT),
-        ("ordered_field_declaration_list", Rust::OrderedFieldDeclarationList),
+        (
+            "ordered_field_declaration_list",
+            Rust::OrderedFieldDeclarationList,
+        ),
         ("dynamic_type", Rust::DynamicType),
         ("bounded_type", Rust::BoundedType),
         ("static_item", Rust::StaticItem),
@@ -936,7 +947,10 @@ static KEYS: phf::Map<&'static str, Rust> = ::phf::Map {
         ("struct_pattern_repeat1", Rust::StructPatternRepeat1),
         ("type_identifier", Rust::TypeIdentifier),
         ("_", Rust::UNDERSCORE),
-        ("token_repetition_pattern_token1", Rust::TokenRepetitionPatternToken1),
+        (
+            "token_repetition_pattern_token1",
+            Rust::TokenRepetitionPatternToken1,
+        ),
         ("continue_expression", Rust::ContinueExpression),
         ("while_let_expression", Rust::WhileLetExpression),
         ("@", Rust::AT),
@@ -958,7 +972,10 @@ static KEYS: phf::Map<&'static str, Rust> = ::phf::Map {
         ("slice_pattern", Rust::SlicePattern),
         ("struct", Rust::Struct),
         ("tt", Rust::Tt),
-        ("field_initializer_list_repeat1", Rust::FieldInitializerListRepeat1),
+        (
+            "field_initializer_list_repeat1",
+            Rust::FieldInitializerListRepeat1,
+        ),
         ("function_type", Rust::FunctionType),
         ("range_pattern", Rust::RangePattern),
         ("\\\"", Rust::DQUOTE),

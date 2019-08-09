@@ -43,7 +43,6 @@ pub enum Html {
     FragmentRepeat1 = 38,
     StartTagRepeat1 = 39,
     Error = 40,
-    
 }
 
 impl Into<&'static str> for Html {
@@ -90,22 +89,14 @@ impl Into<&'static str> for Html {
             Html::FragmentRepeat1 => "fragment_repeat1",
             Html::StartTagRepeat1 => "start_tag_repeat1",
             Html::Error => "ERROR",
-            }
+        }
     }
 }
 
 #[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Html> = ::phf::Map {
     key: 732231254413039614,
-    disps: ::phf::Slice::Static(&[
-        (0, 0),
-        (1, 0),
-        (0, 1),
-        (2, 3),
-        (7, 16),
-        (0, 17),
-        (26, 0),
-    ]),
+    disps: ::phf::Slice::Static(&[(0, 0), (1, 0), (0, 1), (2, 3), (7, 16), (0, 17), (26, 0)]),
     entries: ::phf::Slice::Static(&[
         ("fragment", Html::Fragment),
         ("doctype_token1", Html::DoctypeToken1),

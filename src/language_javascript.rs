@@ -235,7 +235,6 @@ pub enum Javascript {
     ExportSpecifier = 230,
     StatementIdentifier = 231,
     Error = 232,
-    
 }
 
 impl Into<&'static str> for Javascript {
@@ -474,7 +473,7 @@ impl Into<&'static str> for Javascript {
             Javascript::ExportSpecifier => "export_specifier",
             Javascript::StatementIdentifier => "statement_identifier",
             Javascript::Error => "ERROR",
-            }
+        }
     }
 }
 
@@ -566,7 +565,10 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         ("regex_pattern", Javascript::RegexPattern),
         ("catch", Javascript::Catch),
         ("debugger", Javascript::Debugger),
-        ("jsx_opening_element_repeat1", Javascript::JsxOpeningElementRepeat1),
+        (
+            "jsx_opening_element_repeat1",
+            Javascript::JsxOpeningElementRepeat1,
+        ),
         ("switch_default", Javascript::SwitchDefault),
         ("template_string", Javascript::TemplateString),
         ("regex", Javascript::Regex),
@@ -596,7 +598,10 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         (">=", Javascript::GTEQ),
         ("for_in_statement", Javascript::ForInStatement),
         ("switch", Javascript::Switch),
-        ("shorthand_property_identifier", Javascript::ShorthandPropertyIdentifier),
+        (
+            "shorthand_property_identifier",
+            Javascript::ShorthandPropertyIdentifier,
+        ),
         ("call_expression", Javascript::CallExpression),
         ("export_clause", Javascript::ExportClause),
         ("for", Javascript::For),
@@ -606,7 +611,10 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         ("%", Javascript::PERCENT),
         (">>", Javascript::GTGT),
         ("|", Javascript::PIPE),
-        ("augmented_assignment_expression", Javascript::AugmentedAssignmentExpression),
+        (
+            "augmented_assignment_expression",
+            Javascript::AugmentedAssignmentExpression,
+        ),
         ("unary_expression", Javascript::UnaryExpression),
         ("class_body_repeat1", Javascript::ClassBodyRepeat1),
         ("break", Javascript::Break),
@@ -615,7 +623,10 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         ("const", Javascript::Const),
         ("_property_name", Javascript::PropertyName),
         ("null", Javascript::Null),
-        ("parenthesized_expression", Javascript::ParenthesizedExpression),
+        (
+            "parenthesized_expression",
+            Javascript::ParenthesizedExpression,
+        ),
         ("object_repeat1", Javascript::ObjectRepeat1),
         ("method_definition", Javascript::MethodDefinition),
         ("program", Javascript::Program),
@@ -648,7 +659,10 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         ("new", Javascript::New),
         ("labeled_statement", Javascript::LabeledStatement),
         ("continue", Javascript::Continue),
-        ("export_statement_repeat1", Javascript::ExportStatementRepeat1),
+        (
+            "export_statement_repeat1",
+            Javascript::ExportStatementRepeat1,
+        ),
         ("class_declaration", Javascript::ClassDeclaration),
         ("|=", Javascript::PIPEEQ),
         ("else", Javascript::Else),
@@ -669,15 +683,24 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         ("<", Javascript::LT),
         ("array_repeat1", Javascript::ArrayRepeat1),
         ("generator_function", Javascript::GeneratorFunction),
-        ("jsx_self_closing_element", Javascript::JsxSelfClosingElement),
+        (
+            "jsx_self_closing_element",
+            Javascript::JsxSelfClosingElement,
+        ),
         ("finally", Javascript::Finally),
         ("target", Javascript::Target),
         (">", Javascript::GT),
-        ("generator_function_declaration", Javascript::GeneratorFunctionDeclaration),
+        (
+            "generator_function_declaration",
+            Javascript::GeneratorFunctionDeclaration,
+        ),
         ("[", Javascript::LBRACK),
         ("^", Javascript::CARET),
         ("/", Javascript::SLASH),
-        ("formal_parameters_repeat1", Javascript::FormalParametersRepeat1),
+        (
+            "formal_parameters_repeat1",
+            Javascript::FormalParametersRepeat1,
+        ),
         ("nested_identifier", Javascript::NestedIdentifier),
         ("jsx_closing_element", Javascript::JsxClosingElement),
         ("}", Javascript::RBRACE),
@@ -698,7 +721,10 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         ("this", Javascript::This),
         ("delete", Javascript::Delete),
         ("member_expression", Javascript::MemberExpression),
-        ("variable_declaration_repeat1", Javascript::VariableDeclarationRepeat1),
+        (
+            "variable_declaration_repeat1",
+            Javascript::VariableDeclarationRepeat1,
+        ),
         ("computed_property_name", Javascript::ComputedPropertyName),
         ("(", Javascript::LPAREN),
         ("~", Javascript::TILDE),
@@ -745,7 +771,10 @@ static KEYS: phf::Map<&'static str, Javascript> = ::phf::Map {
         ("jsx_opening_element", Javascript::JsxOpeningElement),
         ("\\\"", Javascript::DQUOTE),
         ("assignment_expression", Javascript::AssignmentExpression),
-        ("_import_export_specifier", Javascript::ImportExportSpecifier),
+        (
+            "_import_export_specifier",
+            Javascript::ImportExportSpecifier,
+        ),
         ("class_heritage", Javascript::ClassHeritage),
         ("break_statement", Javascript::BreakStatement),
         ("**", Javascript::STARSTAR),

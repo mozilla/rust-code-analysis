@@ -320,7 +320,6 @@ pub enum Tsx {
     ExportSpecifier = 315,
     StatementIdentifier = 316,
     Error = 317,
-    
 }
 
 impl Into<&'static str> for Tsx {
@@ -644,7 +643,7 @@ impl Into<&'static str> for Tsx {
             Tsx::ExportSpecifier => "export_specifier",
             Tsx::StatementIdentifier => "statement_identifier",
             Tsx::Error => "ERROR",
-            }
+        }
     }
 }
 
@@ -735,7 +734,10 @@ static KEYS: phf::Map<&'static str, Tsx> = ::phf::Map {
         ("\\\"", Tsx::DQUOTE),
         ("function_type", Tsx::FunctionType),
         ("export_clause_repeat1", Tsx::ExportClauseRepeat1),
-        ("shorthand_property_identifier", Tsx::ShorthandPropertyIdentifier),
+        (
+            "shorthand_property_identifier",
+            Tsx::ShorthandPropertyIdentifier,
+        ),
         ("while", Tsx::While),
         ("generic_type", Tsx::GenericType),
         ("union_type", Tsx::UnionType),
@@ -812,7 +814,10 @@ static KEYS: phf::Map<&'static str, Tsx> = ::phf::Map {
         ("type_query", Tsx::TypeQuery),
         ("type_alias_declaration", Tsx::TypeAliasDeclaration),
         ("expression_statement", Tsx::ExpressionStatement),
-        ("variable_declaration_repeat1", Tsx::VariableDeclarationRepeat1),
+        (
+            "variable_declaration_repeat1",
+            Tsx::VariableDeclarationRepeat1,
+        ),
         ("/", Tsx::SLASH),
         ("if_statement", Tsx::IfStatement),
         ("null", Tsx::Null),
@@ -947,7 +952,10 @@ static KEYS: phf::Map<&'static str, Tsx> = ::phf::Map {
         ("member_expression", Tsx::MemberExpression),
         ("is", Tsx::Is),
         ("for_statement", Tsx::ForStatement),
-        ("augmented_assignment_expression", Tsx::AugmentedAssignmentExpression),
+        (
+            "augmented_assignment_expression",
+            Tsx::AugmentedAssignmentExpression,
+        ),
         ("{|", Tsx::LBRACEPIPE),
         ("+=", Tsx::PLUSEQ),
         ("class_body_repeat1", Tsx::ClassBodyRepeat1),

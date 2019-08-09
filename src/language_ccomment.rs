@@ -19,7 +19,6 @@ pub enum Ccomment {
     TranslationUnitRepeat1 = 14,
     DefineRepeat1 = 15,
     Error = 16,
-    
 }
 
 impl Into<&'static str> for Ccomment {
@@ -42,19 +41,14 @@ impl Into<&'static str> for Ccomment {
             Ccomment::TranslationUnitRepeat1 => "translation_unit_repeat1",
             Ccomment::DefineRepeat1 => "define_repeat1",
             Ccomment::Error => "ERROR",
-            }
+        }
     }
 }
 
 #[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Ccomment> = ::phf::Map {
     key: 3213172566270843353,
-    disps: ::phf::Slice::Static(&[
-        (4, 13),
-        (2, 0),
-        (2, 0),
-        (8, 0),
-    ]),
+    disps: ::phf::Slice::Static(&[(4, 13), (2, 0), (2, 0), (8, 0)]),
     entries: ::phf::Slice::Static(&[
         ("translation_unit_repeat1", Ccomment::TranslationUnitRepeat1),
         ("preproc_line", Ccomment::PreprocLine),
@@ -71,7 +65,10 @@ static KEYS: phf::Map<&'static str, Ccomment> = ::phf::Map {
         ("char_literal", Ccomment::CharLiteral),
         ("ERROR", Ccomment::Error),
         ("char_literal_token1", Ccomment::CharLiteralToken1),
-        ("preproc_continuation_line", Ccomment::PreprocContinuationLine),
+        (
+            "preproc_continuation_line",
+            Ccomment::PreprocContinuationLine,
+        ),
         ("define", Ccomment::Define),
     ]),
 };

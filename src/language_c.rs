@@ -254,7 +254,6 @@ pub enum C {
     FieldIdentifier = 249,
     TypeIdentifier = 250,
     Error = 251,
-    
 }
 
 impl Into<&'static str> for C {
@@ -488,7 +487,9 @@ impl Into<&'static str> for C {
             C::EmptyDeclaration => "_empty_declaration",
             C::TranslationUnitRepeat1 => "translation_unit_repeat1",
             C::PreprocParamsRepeat1 => "preproc_params_repeat1",
-            C::PreprocIfInFieldDeclarationListRepeat1 => "preproc_if_in_field_declaration_list_repeat1",
+            C::PreprocIfInFieldDeclarationListRepeat1 => {
+                "preproc_if_in_field_declaration_list_repeat1"
+            }
             C::PreprocExpressionRepeat1 => "preproc_expression_repeat1",
             C::DeclarationRepeat1 => "declaration_repeat1",
             C::TypeDefinitionRepeat1 => "type_definition_repeat1",
@@ -512,7 +513,7 @@ impl Into<&'static str> for C {
             C::FieldIdentifier => "field_identifier",
             C::TypeIdentifier => "type_identifier",
             C::Error => "ERROR",
-            }
+        }
     }
 }
 
@@ -625,10 +626,16 @@ static KEYS: phf::Map<&'static str, C> = ::phf::Map {
         ("defined", C::Defined),
         ("+", C::PLUS),
         ("initializer_list_repeat1", C::InitializerListRepeat1),
-        ("preproc_parenthesized_expression", C::PreprocParenthesizedExpression),
+        (
+            "preproc_parenthesized_expression",
+            C::PreprocParenthesizedExpression,
+        ),
         ("_type_specifier", C::TypeSpecifier),
         ("enumerator_list_repeat1", C::EnumeratorListRepeat1),
-        ("preproc_if_in_field_declaration_list_repeat1", C::PreprocIfInFieldDeclarationListRepeat1),
+        (
+            "preproc_if_in_field_declaration_list_repeat1",
+            C::PreprocIfInFieldDeclarationListRepeat1,
+        ),
         ("auto", C::Auto),
         ("string_literal_repeat1", C::StringLiteralRepeat1),
         ("#else", C::HASHelse),
@@ -689,7 +696,10 @@ static KEYS: phf::Map<&'static str, C> = ::phf::Map {
         (",", C::COMMA),
         ("if_statement", C::IfStatement),
         ("sized_type_specifier_repeat1", C::SizedTypeSpecifierRepeat1),
-        ("_declaration_specifiers_repeat2", C::DeclarationSpecifiersRepeat2),
+        (
+            "_declaration_specifiers_repeat2",
+            C::DeclarationSpecifiersRepeat2,
+        ),
         ("preproc_function_def", C::PreprocFunctionDef),
         ("escape_sequence", C::EscapeSequence),
         ("#endif", C::HASHendif),
@@ -765,7 +775,10 @@ static KEYS: phf::Map<&'static str, C> = ::phf::Map {
         ("/", C::SLASH),
         ("&&", C::AMPAMP),
         ("?", C::QMARK),
-        ("_declaration_specifiers_repeat1", C::DeclarationSpecifiersRepeat1),
+        (
+            "_declaration_specifiers_repeat1",
+            C::DeclarationSpecifiersRepeat1,
+        ),
         ("else", C::Else),
         ("#elif", C::HASHelif),
         ("type_identifier", C::TypeIdentifier),
@@ -785,7 +798,10 @@ static KEYS: phf::Map<&'static str, C> = ::phf::Map {
         ("const", C::Const),
         ("array_declarator", C::ArrayDeclarator),
         ("case", C::Case),
-        ("abstract_function_declarator", C::AbstractFunctionDeclarator),
+        (
+            "abstract_function_declarator",
+            C::AbstractFunctionDeclarator,
+        ),
         ("return", C::Return),
         ("#include", C::HASHinclude),
         ("-", C::DASH),
@@ -794,14 +810,20 @@ static KEYS: phf::Map<&'static str, C> = ::phf::Map {
         ("preproc_condition", C::PreprocCondition),
         ("function_definition", C::FunctionDefinition),
         ("call_expression", C::CallExpression),
-        ("abstract_parenthesized_declarator", C::AbstractParenthesizedDeclarator),
+        (
+            "abstract_parenthesized_declarator",
+            C::AbstractParenthesizedDeclarator,
+        ),
         ("#ifdef", C::HASHifdef),
         ("<<=", C::LTLTEQ),
         ("...", C::DOTDOTDOT),
         ("struct_specifier", C::StructSpecifier),
         ("subscript_expression", C::SubscriptExpression),
         ("]", C::RBRACK),
-        ("_declaration_specifiers_no_type", C::DeclarationSpecifiersNoType),
+        (
+            "_declaration_specifiers_no_type",
+            C::DeclarationSpecifiersNoType,
+        ),
         ("static", C::Static),
         ("system_lib_string", C::SystemLibString),
         ("null", C::Null),
