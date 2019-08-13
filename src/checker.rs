@@ -106,6 +106,12 @@ impl Checker for JavaCode {
     mk_checker!(Java, is_call, MethodInvocation);
 }
 
+impl Checker for MozjsCode {
+    mk_checker!(Mozjs, is_comment, Comment);
+    mk_checker!(Mozjs, is_string, String, TemplateString);
+    mk_checker!(Mozjs, is_call, CallExpression);
+}
+
 impl Checker for JavascriptCode {
     mk_checker!(Javascript, is_comment, Comment);
     mk_checker!(Javascript, is_string, String, TemplateString);

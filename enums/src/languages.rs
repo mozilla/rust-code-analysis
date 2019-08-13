@@ -6,7 +6,6 @@ use crate::*;
 mk_langs!(
     // 1) Name for enum
     // 2) tree-sitter function to call to get a Language
-    (Javascript, tree_sitter_javascript),
     (Java, tree_sitter_java),
     (Go, tree_sitter_go),
     (Html, tree_sitter_html),
@@ -19,5 +18,7 @@ mk_langs!(
     (Tsx, tree_sitter_tsx),
     (Typescript, tree_sitter_typescript),
     (Ccomment, tree_sitter_ccomment),
-    (Preproc, tree_sitter_preproc)
+    (Preproc, tree_sitter_preproc),
+    (Mozjs, tree_sitter_mozjs),
+    (Javascript, tree_sitter_javascript)
 );

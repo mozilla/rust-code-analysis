@@ -74,6 +74,9 @@ pub use crate::language_html::*;
 mod language_java;
 pub use crate::language_java::*;
 
+mod language_mozjs;
+pub use crate::language_mozjs::*;
+
 mod language_javascript;
 pub use crate::language_javascript::*;
 

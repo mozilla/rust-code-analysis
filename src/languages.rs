@@ -12,12 +12,13 @@ mk_langs!(
     // 3) Parser name
     // 4) tree-sitter function to call to get a Language
     // 5) file extensions
+    (Mozjs, MozjsCode, MozjsParser, tree_sitter_mozjs, [js, jsm]),
     (
         Javascript,
         JavascriptCode,
         JavascriptParser,
         tree_sitter_javascript,
-        [js, jsm]
+        []
     ),
     (Java, JavaCode, JavaParser, tree_sitter_java, [java]),
     (Go, GoCode, GoParser, tree_sitter_go, [go]),
@@ -40,7 +41,7 @@ mk_langs!(
         TypescriptCode,
         TypescriptParser,
         tree_sitter_typescript,
-        [ts]
+        [ts, jsw, jsmw]
     ),
     (
         Ccomment,
