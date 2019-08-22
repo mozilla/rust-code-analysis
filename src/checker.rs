@@ -26,9 +26,9 @@ pub trait Checker {
 }
 
 impl Checker for PreprocCode {
-    mk_checker!(Ccomment, is_comment, Comment);
-    mk_checker!(Ccomment, is_string, StringLiteral, RawStringLiteral);
-    mk_checker!(Ccomment, is_call,);
+    mk_checker!(Preproc, is_comment, Comment);
+    mk_checker!(Preproc, is_string, StringLiteral, RawStringLiteral);
+    mk_checker!(Preproc, is_call,);
 }
 
 impl Checker for CcommentCode {
