@@ -1,11 +1,10 @@
 use serde::ser::{SerializeStruct, Serializer};
 use serde::{Deserialize, Serialize};
-use tree_sitter::Node;
 
-use crate::checker::Checker;
+use super::alterator::Alterator;
 use crate::traits::{Callback, TSParserTrait};
 
-type Span = Option<(usize, usize, usize, usize)>;
+pub type Span = Option<(usize, usize, usize, usize)>;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AstPayload {
@@ -24,10 +23,10 @@ pub struct AstResponse {
 
 #[derive(Debug)]
 pub struct AstNode {
-    r#type: &'static str,
-    value: String,
-    span: Span,
-    children: Vec<AstNode>,
+    pub r#type: &'static str,
+    pub value: String,
+    pub span: Span,
+    pub children: Vec<AstNode>,
 }
 
 impl Serialize for AstNode {
@@ -45,39 +44,13 @@ impl Serialize for AstNode {
 }
 
 impl AstNode {
-    fn new(r#type: &'static str, value: String, span: Span, children: Vec<AstNode>) -> Self {
+    pub fn new(r#type: &'static str, value: String, span: Span, children: Vec<AstNode>) -> Self {
         Self {
             r#type,
             value,
             span,
             children,
         }
-    }
-}
-
-fn get_ast_node<T: Checker>(
-    node: &Node,
-    code: &[u8],
-    children: Vec<AstNode>,
-    span: bool,
-    comment: bool,
-) -> Option<AstNode> {
-    if comment && T::is_comment(node) {
-        None
-    } else {
-        let span = if span {
-            let spos = node.start_position();
-            let epos = node.end_position();
-            Some((spos.row + 1, spos.column + 1, epos.row + 1, epos.column + 1))
-        } else {
-            None
-        };
-        let text = if node.child_count() == 0 {
-            String::from_utf8(code[node.start_byte()..node.end_byte()].to_vec()).unwrap()
-        } else {
-            "".to_string()
-        };
-        Some(AstNode::new(node.kind(), text, span, children))
     }
 }
 
@@ -104,7 +77,7 @@ fn build<T: TSParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstN
         } else {
             loop {
                 let ts_node = node_stack.pop().unwrap();
-                if let Some(node) = get_ast_node::<T::Checker>(
+                if let Some(node) = T::Checker::get_ast_node(
                     &ts_node,
                     code,
                     child_stack.pop().unwrap(),
@@ -146,3 +119,4 @@ impl Callback for AstCallback {
         }
     }
 }
+/* where T::Checker: Alterator*/

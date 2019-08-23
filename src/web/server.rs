@@ -113,7 +113,7 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
     .run()
 }
 
-// curl --header "Content-Type: application/json" --request POST --data '{"id": "1234", "file_name": "prova.cpp", "code": "int x = 1;", "comment": true, "span": true}' http://127.0.0.1:8080/ast
+// curl --header "Content-Type: application/json" --request POST --data '{"id": "1234", "file_name": "prova.cpp", "code": "int x = 1;", "comment": true, "span": true}' http://127.0.0.1:8081/ast
 
 #[cfg(test)]
 mod tests {
@@ -204,6 +204,58 @@ mod tests {
                     }
                 ]
             }
+        });
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_ast_string() {
+        let mut app = test::init_service(
+            App::new().service(web::resource("/ast").route(web::post().to(ast_parser))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/ast")
+            .set_json(&AstPayload {
+                id: "1234".to_string(),
+                file_name: "foo.js".to_string(),
+                code: "var x = \"hello world\";".to_string(),
+                comment: false,
+                span: true,
+            })
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "1234",
+            "root": {"Children": [{"Children": [{"Children": [],
+                                                 "Span": [1, 1, 1, 4],
+                                                 "TextValue": "var",
+                                                 "Type": "var"},
+                                                {"Children": [{"Children": [],
+                                                               "Span": [1, 5, 1, 6],
+                                                               "TextValue": "x",
+                                                               "Type": "identifier"},
+                                                              {"Children": [],
+                                                               "Span": [1, 7, 1, 8],
+                                                               "TextValue": "=",
+                                                               "Type": "="},
+                                                              {"Children": [],
+                                                               "Span": [1, 9, 1, 22],
+                                                               "TextValue": "\"hello world\"",
+                                                               "Type": "string"}],
+                                                 "Span": [1, 5, 1, 22],
+                                                 "TextValue": "",
+                                                 "Type": "variable_declarator"},
+                                                {"Children": [],
+                                                 "Span": [1, 22, 1, 23],
+                                                 "TextValue": ";",
+                                                 "Type": ";"}],
+                                   "Span": [1, 1, 1, 23],
+                                   "TextValue": "",
+                                   "Type": "variable_declaration"}],
+                     "Span": [1, 1, 1, 23],
+                     "TextValue": "",
+                     "Type": "program"}
         });
         assert_eq!(res, expected);
     }

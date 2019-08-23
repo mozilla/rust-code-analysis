@@ -6,6 +6,7 @@ use crate::checker::Checker;
 use crate::languages::*;
 use crate::preproc::PreprocResults;
 use crate::ts_parser::Filter;
+use crate::web::alterator::Alterator;
 
 pub trait TSLanguage {
     fn get_lang() -> LANG;
@@ -14,7 +15,7 @@ pub trait TSLanguage {
 }
 
 pub trait TSParserTrait {
-    type Checker: Checker;
+    type Checker: Alterator + Checker;
 
     fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self;
     fn get_language(&self) -> LANG;

@@ -8,8 +8,9 @@ use crate::checker::*;
 use crate::languages::*;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
+use crate::web::alterator::Alterator;
 
-pub struct TSParser<T: TSLanguage + Checker> {
+pub struct TSParser<T: TSLanguage + Checker + Alterator> {
     code: Vec<u8>,
     tree: Tree,
     phantom: PhantomData<T>,
@@ -60,7 +61,7 @@ fn get_fake_code<T: TSLanguage>(
     }
 }
 
-impl<T: TSLanguage + Checker> TSParserTrait for TSParser<T> {
+impl<T: TSLanguage + Checker + Alterator> TSParserTrait for TSParser<T> {
     type Checker = T;
 
     fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self {
