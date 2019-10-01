@@ -55,5 +55,5 @@ tasks:
         metadata:
           name: rust-code-analysis lint and test
           description: rust-code-analysis lint and test
-          owner: ${user}@users.noreply.github.com
+          owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
