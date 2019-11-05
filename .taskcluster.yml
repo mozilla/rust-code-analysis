@@ -31,8 +31,8 @@ tasks:
       - taskId: {$eval: as_slugid("lint_test_task")}
         created: {$fromNow: ''}
         deadline: {$fromNow: '1 hour'}
-        provisionerId: aws-provisioner-v1
-        workerType: github-worker
+        provisionerId: proj-relman
+        workerType: ci
         payload:
           maxRunTime: 3600
           image: "rust:buster"
