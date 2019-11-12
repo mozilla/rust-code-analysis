@@ -20,7 +20,7 @@ repos:
         name: clippy
         language: system
         files: '\.rs$'
-        entry: cargo clippy --all-targets --all -- -Dwarnings 
+        entry: cargo clippy --all-targets --all --
         pass_filenames: false
 
       - id: test

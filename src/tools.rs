@@ -194,5 +194,4 @@ mod tests {
             assert!(res == expected);
         }
     }
-
 }
