@@ -42,9 +42,13 @@ fn mk_predef(data_name: &str, set_name: &str) {
     let path = Path::new(&env::var("OUT_DIR").unwrap()).join(format!("gen_{}.rs", data_name));
     let mut file = BufWriter::new(fs::File::create(&path).unwrap());
     writeln!(&mut file, "#[allow(clippy::unreadable_literal)]").unwrap();
-    writeln!(&mut file, "static {}: phf::Set<&'static str> =", set_name).unwrap();
-    set.build(&mut file).unwrap();
-    writeln!(&mut file, ";").unwrap();
+    writeln!(
+        &mut file,
+        "static {}: phf::Set<&'static str> =\n{};\n",
+        set_name,
+        set.build()
+    )
+    .unwrap();
 }
 
 fn collect_tree_sitter_dirs(ignore: Vec<String>) -> Vec<String> {

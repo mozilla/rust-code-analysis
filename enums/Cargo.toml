@@ -7,12 +7,12 @@ build = "../build.rs"
 
 [build-dependencies]
 cc = "^1.0"
-phf_codegen = "^0.7"
+phf_codegen = "^0.8"
 
 [dependencies]
-tree-sitter = "^0.3"
+tree-sitter = "^0.5"
 enum-iterator = "^0.3"
 clap = "^2.33"
 askama = "^0.8"
-phf_codegen = "^0.7"
+phf_codegen = "^0.8"
 libc = "^0.2"

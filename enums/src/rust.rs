@@ -38,7 +38,7 @@ pub fn generate_rust(output: &str, file_template: &str) -> std::io::Result<()> {
                 builder.entry(ts_name.as_str(), format!("{}::{}", c_name, name).as_str());
             }
         }
-        builder.build(&mut phf_map).unwrap();
+        writeln!(phf_map, "{}", builder.build()).unwrap();
         let phf_map = String::from_utf8(phf_map.into_inner()).unwrap();
 
         let args = RustTemplate {
