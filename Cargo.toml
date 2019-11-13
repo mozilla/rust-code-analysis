@@ -7,7 +7,7 @@ build = "build.rs"
 
 [build-dependencies]
 cc = "^1.0"
-phf_codegen = "^0.7"
+phf_codegen = "^0.8"
 
 [dependencies]
 actix-http = "^0.2"
