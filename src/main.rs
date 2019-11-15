@@ -25,6 +25,7 @@ struct Config {
     comments: bool,
     find_filter: Vec<String>,
     count_filter: Vec<String>,
+    metrics: bool,
     line_start: Option<usize>,
     line_end: Option<usize>,
     preproc_lock: Option<Arc<Mutex<PreprocResults>>>,
@@ -66,6 +67,11 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
             line_end: cfg.line_end,
         };
         action::<Dump>(&language, source, &path, pr, cfg);
+        Ok(())
+    } else if cfg.metrics {
+        let source = read_file_with_eol(&path)?;
+        let cfg = MetricsCfg { path };
+        action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg);
         Ok(())
     } else if cfg.comments {
         let source = read_file_with_eol(&path)?;
@@ -252,6 +258,12 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("metrics")
+                .help("Compute different metrics")
+                .long("metrics")
+                .short("m"),
+        )
+        .arg(
             Arg::with_name("in_place")
                 .help("Do action in place")
                 .short("i"),
@@ -389,6 +401,7 @@ fn main() {
     } else {
         None
     };
+    let metrics = matches.is_present("metrics");
     let typ = matches.value_of("type").unwrap();
     let preproc_value = matches.value_of("preproc").unwrap();
     let (preproc_lock, preproc) = if !preproc_value.is_empty() {
@@ -440,6 +453,7 @@ fn main() {
         comments,
         find_filter,
         count_filter,
+        metrics,
         line_start,
         line_end,
         preproc_lock: preproc_lock.clone(),

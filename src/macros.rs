@@ -1,13 +1,13 @@
 #[macro_export]
 macro_rules! mk_checker {
-    ( $lang:ident, $name:ident, $( $type:ident ),* ) => {
+    ( $name:ident, $( $type:ident ),* ) => {
         #[inline(always)]
         #[allow(unused_variables)]
         fn $name(node: &Node) -> bool {
             let typ = node.kind_id();
             false
             $(
-                || typ == $lang::$type
+                || typ == <Self as TSLanguage>::BaseLang::$type
             )*
         }
     };
@@ -89,6 +89,8 @@ macro_rules! mk_code {
             pub struct $code { }
 
             impl TSLanguage for $code {
+                type BaseLang = $camel;
+
                 fn get_lang() -> LANG {
                     LANG::$camel
                 }
@@ -115,5 +117,23 @@ macro_rules! mk_langs {
         mk_action!($( ($camel, $parser) ),*);
         mk_extensions!($( ($camel, [ $( $ext ),* ]) ),*);
         mk_code!($( ($camel, $code, $parser, $name) ),*);
+    };
+}
+
+#[macro_export]
+macro_rules! color {
+    ( $stdout: ident, $color: ident) => {
+        $stdout
+            .set_color(ColorSpec::new().set_fg(Some(Color::$color)))
+            .unwrap();
+    };
+    ( $stdout: ident, $color: ident, $intense: ident) => {
+        $stdout
+            .set_color(
+                ColorSpec::new()
+                    .set_fg(Some(Color::$color))
+                    .set_intense($intense),
+            )
+            .unwrap();
     };
 }

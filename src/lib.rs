@@ -13,7 +13,29 @@ extern crate serde_json;
 mod macros;
 pub use crate::macros::*;
 
+pub mod enums;
+pub use crate::enums::*;
+
 pub mod web;
+
+#[macro_use]
+pub mod asttools;
+pub use crate::asttools::*;
+
+pub mod cyclomatic;
+pub use crate::cyclomatic::*;
+
+pub mod sloc;
+pub use crate::sloc::*;
+
+pub mod halstead;
+pub use crate::halstead::*;
+
+pub mod metrics;
+pub use crate::metrics::*;
+
+pub mod getter;
+pub use crate::getter::*;
 
 pub mod find;
 pub use crate::find::*;

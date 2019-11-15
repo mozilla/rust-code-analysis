@@ -2,10 +2,12 @@ use actix_web::{
     dev::Body, guard, http, web, web::Query, App, FromRequest, HttpRequest, HttpResponse,
     HttpServer,
 };
+use bytes::Bytes;
 use std::path::PathBuf;
 
 use super::ast::{AstCallback, AstCfg, AstPayload};
 use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebCommentPayload};
+use super::metrics::{WebMetricsCallback, WebMetricsCfg, WebMetricsInfo, WebMetricsPayload};
 use crate::languages::action;
 use crate::tools::get_language_for_file;
 
@@ -82,6 +84,52 @@ fn comment_removal_plain(code: String, info: Query<WebCommentInfo>) -> HttpRespo
     }
 }
 
+fn metrics_json(item: web::Json<WebMetricsPayload>, _req: HttpRequest) -> HttpResponse {
+    let path = PathBuf::from(&item.file_name);
+    let language = get_language_for_file(&path);
+    let payload = item.into_inner();
+    if let Some(language) = language {
+        let cfg = WebMetricsCfg {
+            id: payload.id,
+            path,
+        };
+        HttpResponse::Ok().json(action::<WebMetricsCallback>(
+            &language,
+            payload.code.into_bytes(),
+            &PathBuf::from(""),
+            None,
+            cfg,
+        ))
+    } else {
+        HttpResponse::NotFound().json(Error {
+            id: payload.id,
+            error: INVALID_LANGUAGE,
+        })
+    }
+}
+
+fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
+    let path = PathBuf::from(&info.file_name);
+    let language = get_language_for_file(&path);
+    if let Some(language) = language {
+        let cfg = WebMetricsCfg {
+            id: "".to_string(),
+            path,
+        };
+        HttpResponse::Ok().json(action::<WebMetricsCallback>(
+            &language,
+            code.to_vec(),
+            &PathBuf::from(""),
+            None,
+            cfg,
+        ))
+    } else {
+        HttpResponse::NotFound()
+            .header(http::header::CONTENT_TYPE, "text/plain")
+            .body(format!("error: {}", INVALID_LANGUAGE))
+    }
+}
+
 fn ping() -> HttpResponse {
     HttpResponse::Ok().body(Body::Empty)
 }
@@ -105,6 +153,18 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
                     .guard(guard::Header("content-type", "text/plain"))
                     .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
                     .route(web::post().to(comment_removal_plain)),
+            )
+            .service(
+                web::resource("/metrics")
+                    .guard(guard::Header("content-type", "application/json"))
+                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                    .route(web::post().to(metrics_json)),
+            )
+            .service(
+                web::resource("/metrics")
+                    .guard(guard::Header("content-type", "application/octet-stream"))
+                    .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                    .route(web::post().to(metrics_plain)),
             )
             .service(web::resource("/ping").route(web::get().to(ping)))
     })
@@ -395,6 +455,113 @@ mod tests {
 
         // No comment in the code so the code is empty
         let expected = Bytes::from_static(b"");
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_metrics_json() {
+        let mut app = test::init_service(
+            App::new().service(web::resource("/metrics").route(web::post().to(metrics_json))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/metrics")
+            .set_json(&WebCommentPayload {
+                id: "1234".to_string(),
+                file_name: "test.py".to_string(),
+                code: "def foo():\n    pass\n".to_string(),
+            })
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "1234",
+            "spaces": {"kind": "unit",
+                       "metrics": {"cyclomatic": 1.0,
+                                   "halstead": {"bugs": 0.000_942_552_557_372_941_4,
+                                                "difficulty": 1.0,
+                                                "effort": 4.754_887_502_163_468,
+                                                "length": 3.0,
+                                                "level": 1.0,
+                                                "operands": 1.0,
+                                                "operators": 2.0,
+                                                "size": 3.0,
+                                                "time": 0.264_160_416_786_859_36,
+                                                "unique_operands": 1.0,
+                                                "unique_operators": 2.0,
+                                                "volume": 4.754_887_502_163_468},
+                                   "loc": {"lloc": 2.0, "sloc": 3.0}},
+                       "name": "test.py",
+                       "spaces": [{"kind": "function",
+                                   "metrics": {"cyclomatic": 1.0,
+                                               "halstead": {"bugs": 0.000_942_552_557_372_941_4,
+                                                            "difficulty": 1.0,
+                                                            "effort": 4.754_887_502_163_468,
+                                                            "length": 3.0,
+                                                            "level": 1.0,
+                                                            "operands": 1.0,
+                                                            "operators": 2.0,
+                                                            "size": 3.0,
+                                                            "time": 0.264_160_416_786_859_36,
+                                                            "unique_operands": 1.0,
+                                                            "unique_operators": 2.0,
+                                                            "volume": 4.754_887_502_163_468},
+                                               "loc": {"lloc": 2.0, "sloc": 2.0}},
+                                   "name": "foo",
+                                   "spaces": []}]}
+        });
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_metrics_plain() {
+        let mut app = test::init_service(
+            App::new().service(web::resource("/metrics").route(web::post().to(metrics_plain))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/metrics?file_name=test.py")
+            .set(ContentType::plaintext())
+            .set_payload("def foo():\n    pass\n")
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "",
+            "spaces": {"kind": "unit",
+                       "metrics": {"cyclomatic": 1.0,
+                                   "halstead": {"bugs": 0.000_942_552_557_372_941_4,
+                                                "difficulty": 1.0,
+                                                "effort": 4.754_887_502_163_468,
+                                                "length": 3.0,
+                                                "level": 1.0,
+                                                "operands": 1.0,
+                                                "operators": 2.0,
+                                                "size": 3.0,
+                                                "time": 0.264_160_416_786_859_36,
+                                                "unique_operands": 1.0,
+                                                "unique_operators": 2.0,
+                                                "volume": 4.754_887_502_163_468},
+                                   "loc": {"lloc": 2.0, "sloc": 3.0}},
+                       "name": "test.py",
+                       "spaces": [{"kind": "function",
+                                   "metrics": {"cyclomatic": 1.0,
+                                               "halstead": {"bugs": 0.000_942_552_557_372_941_4,
+                                                            "difficulty": 1.0,
+                                                            "effort": 4.754_887_502_163_468,
+                                                            "length": 3.0,
+                                                            "level": 1.0,
+                                                            "operands": 1.0,
+                                                            "operators": 2.0,
+                                                            "size": 3.0,
+                                                            "time": 0.264_160_416_786_859_36,
+                                                            "unique_operands": 1.0,
+                                                            "unique_operators": 2.0,
+                                                            "volume": 4.754_887_502_163_468},
+                                               "loc": {"lloc": 2.0, "sloc": 2.0}},
+                                   "name": "foo",
+                                   "spaces": []}]}
+        });
 
         assert_eq!(res, expected);
     }

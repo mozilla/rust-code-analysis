@@ -5,11 +5,6 @@ use tree_sitter::Node;
 use crate::*;
 
 pub trait Checker {
-    // TODO: at some point use a type BaseLang = language to avoid to pass
-    // lang as first arg of mk_checker
-    // right now: error: enum variants on type aliases are experimental
-    // ideally add the type in TSLanguage and then <Self as TSLanguage>::BaseLang
-
     fn is_comment(node: &Node) -> bool;
 
     #[inline(always)]
@@ -19,6 +14,8 @@ pub trait Checker {
 
     fn is_string(node: &Node) -> bool;
     fn is_call(node: &Node) -> bool;
+    fn is_func(node: &Node) -> bool;
+    fn is_func_space(node: &Node) -> bool;
 
     fn is_error(node: &Node) -> bool {
         node.is_error()
@@ -26,15 +23,19 @@ pub trait Checker {
 }
 
 impl Checker for PreprocCode {
-    mk_checker!(Preproc, is_comment, Comment);
-    mk_checker!(Preproc, is_string, StringLiteral, RawStringLiteral);
-    mk_checker!(Preproc, is_call,);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, StringLiteral, RawStringLiteral);
+    mk_checker!(is_call,);
+    mk_checker!(is_func,);
+    mk_checker!(is_func_space,);
 }
 
 impl Checker for CcommentCode {
-    mk_checker!(Ccomment, is_comment, Comment);
-    mk_checker!(Ccomment, is_string, StringLiteral, RawStringLiteral);
-    mk_checker!(Ccomment, is_call,);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, StringLiteral, RawStringLiteral);
+    mk_checker!(is_call,);
+    mk_checker!(is_func,);
+    mk_checker!(is_func_space,);
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -46,9 +47,11 @@ impl Checker for CcommentCode {
 }
 
 impl Checker for CCode {
-    mk_checker!(C, is_comment, Comment);
-    mk_checker!(C, is_string, StringLiteral, ConcatenatedString);
-    mk_checker!(C, is_call, CallExpression);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, StringLiteral, ConcatenatedString);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(is_func, FunctionDefinition);
+    mk_checker!(is_func_space, TranslationUnit);
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -60,15 +63,23 @@ impl Checker for CCode {
 }
 
 impl Checker for CppCode {
-    mk_checker!(Cpp, is_comment, Comment);
+    mk_checker!(is_comment, Comment);
     mk_checker!(
-        Cpp,
         is_string,
         StringLiteral,
         ConcatenatedString,
         RawStringLiteral
     );
-    mk_checker!(Cpp, is_call, CallExpression);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(is_func, FunctionDefinition);
+    mk_checker!(
+        is_func_space,
+        TranslationUnit,
+        FunctionDefinition,
+        StructSpecifier,
+        ClassSpecifier,
+        NamespaceDefinition
+    );
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -80,13 +91,30 @@ impl Checker for CppCode {
 }
 
 impl Checker for CSharpCode {
-    mk_checker!(CSharp, is_comment, Comment);
-    mk_checker!(CSharp, is_string, StringLiteral);
-    mk_checker!(CSharp, is_call,); // TODO not implemented in ts
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, StringLiteral);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(
+        is_func,
+        MethodDeclaration,
+        ConstructorDeclaration,
+        ConversionOperatorDeclaration,
+        DestructorDeclaration,
+        OperatorDeclaration,
+        AccessorDeclaration,
+        LocalFunctionStatement
+    );
+    mk_checker!(
+        is_func_space,
+        CompilationUnit,
+        ClassDeclaration,
+        StructDeclaration,
+        NamespaceDeclaration
+    );
 }
 
 impl Checker for PythonCode {
-    mk_checker!(Python, is_comment, Comment);
+    mk_checker!(is_comment, Comment);
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -96,60 +124,143 @@ impl Checker for PythonCode {
         node.start_position().row <= 1 && RE.is_match(&code[node.start_byte()..node.end_byte()])
     }
 
-    mk_checker!(Python, is_string, String, ConcatenatedString);
-    mk_checker!(Python, is_call, Call);
+    mk_checker!(is_string, String, ConcatenatedString);
+    mk_checker!(is_call, Call);
+    mk_checker!(is_func, FunctionDefinition);
+    mk_checker!(is_func_space, Module, FunctionDefinition, ClassDefinition);
 }
 
 impl Checker for JavaCode {
-    mk_checker!(Java, is_comment, Comment);
-    mk_checker!(Java, is_string, StringLiteral);
-    mk_checker!(Java, is_call, MethodInvocation);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, StringLiteral);
+    mk_checker!(is_call, MethodInvocation);
+    mk_checker!(is_func, MethodDeclaration);
+    mk_checker!(is_func_space, Program, ClassDeclaration);
 }
 
 impl Checker for MozjsCode {
-    mk_checker!(Mozjs, is_comment, Comment);
-    mk_checker!(Mozjs, is_string, String, TemplateString);
-    mk_checker!(Mozjs, is_call, CallExpression);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, String, TemplateString);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(
+        is_func,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration
+    );
+    mk_checker!(
+        is_func_space,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration,
+        Class,
+        ClassDeclaration
+    );
 }
 
 impl Checker for JavascriptCode {
-    mk_checker!(Javascript, is_comment, Comment);
-    mk_checker!(Javascript, is_string, String, TemplateString);
-    mk_checker!(Javascript, is_call, CallExpression);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, String, TemplateString);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(
+        is_func,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration
+    );
+    mk_checker!(
+        is_func_space,
+        Program,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration,
+        Class,
+        ClassDeclaration
+    );
 }
 
 impl Checker for TypescriptCode {
-    mk_checker!(Typescript, is_comment, Comment);
-    mk_checker!(Typescript, is_string, String, TemplateString);
-    mk_checker!(Typescript, is_call, CallExpression);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, String, TemplateString);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(
+        is_func,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration
+    );
+    mk_checker!(
+        is_func_space,
+        Program,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration,
+        Class,
+        ClassDeclaration
+    );
 }
 
 impl Checker for TsxCode {
-    mk_checker!(Tsx, is_comment, Comment);
-    mk_checker!(Tsx, is_string, String, TemplateString);
-    mk_checker!(Tsx, is_call, CallExpression);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, String, TemplateString);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(
+        is_func,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration
+    );
+    mk_checker!(
+        is_func_space,
+        Program,
+        Function,
+        FunctionDeclaration,
+        GeneratorFunction,
+        GeneratorFunctionDeclaration,
+        Class,
+        ClassDeclaration
+    );
 }
 
 impl Checker for GoCode {
-    mk_checker!(Go, is_comment, Comment);
-    mk_checker!(Go, is_string, StringLiteral);
-    mk_checker!(Go, is_call, CallExpression);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, StringLiteral);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(is_func, FunctionDeclaration, MethodDeclaration, FuncLiteral);
+    mk_checker!(
+        is_func_space,
+        SourceFile,
+        FunctionDeclaration,
+        MethodDeclaration,
+        FuncLiteral
+    );
 }
 
 impl Checker for CssCode {
-    mk_checker!(Css, is_comment, Comment);
-    mk_checker!(Css, is_string, StringValue);
-    mk_checker!(Css, is_call, CallExpression);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string, StringValue);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(is_func,);
+    mk_checker!(is_func_space,);
 }
 
 impl Checker for HtmlCode {
-    mk_checker!(Html, is_comment, Comment);
-    mk_checker!(Html, is_string,);
-    mk_checker!(Html, is_call,);
+    mk_checker!(is_comment, Comment);
+    mk_checker!(is_string,);
+    mk_checker!(is_call,);
+    mk_checker!(is_func,);
+    mk_checker!(is_func_space,);
 }
 
 impl Checker for RustCode {
-    mk_checker!(Rust, is_comment, LineComment, BlockComment);
+    mk_checker!(is_comment, LineComment, BlockComment);
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         if let Some(parent) = node.parent() {
@@ -162,6 +273,8 @@ impl Checker for RustCode {
         code.starts_with(b"/// cbindgen:")
     }
 
-    mk_checker!(Rust, is_string, StringLiteral, RawStringLiteral);
-    mk_checker!(Rust, is_call, CallExpression);
+    mk_checker!(is_string, StringLiteral, RawStringLiteral);
+    mk_checker!(is_call, CallExpression);
+    mk_checker!(is_func, FunctionItem);
+    mk_checker!(is_func_space, SourceFile, FunctionItem, ImplItem);
 }

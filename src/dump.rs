@@ -23,9 +23,7 @@ pub fn dump_node(
         &line_start,
         &line_end,
     );
-    stdout
-        .set_color(ColorSpec::new().set_fg(Some(Color::White)))
-        .unwrap();
+    color!(stdout, White);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -55,51 +53,31 @@ fn dump_tree_helper(
     }
 
     if display {
-        stdout
-            .set_color(ColorSpec::new().set_fg(Some(Color::Blue)))
-            .unwrap();
+        color!(stdout, Blue);
         write!(&mut stdout, "{}{}", prefix, pref).unwrap();
 
-        stdout
-            .set_color(
-                ColorSpec::new()
-                    .set_fg(Some(Color::Yellow))
-                    .set_intense(true),
-            )
-            .unwrap();
+        color!(stdout, Yellow, true);
         write!(&mut stdout, "{{{}}} ", node.kind()).unwrap();
 
-        stdout
-            .set_color(ColorSpec::new().set_fg(Some(Color::White)))
-            .unwrap();
+        color!(stdout, White);
         write!(&mut stdout, "from ").unwrap();
 
-        stdout
-            .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
-            .unwrap();
+        color!(stdout, Green);
         let pos = node.start_position();
         write!(&mut stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
 
-        stdout
-            .set_color(ColorSpec::new().set_fg(Some(Color::White)))
-            .unwrap();
+        color!(stdout, White);
         write!(&mut stdout, "to ").unwrap();
 
-        stdout
-            .set_color(ColorSpec::new().set_fg(Some(Color::Green)))
-            .unwrap();
+        color!(stdout, Green);
         let pos = node.end_position();
         write!(&mut stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
 
         if node.start_position().row == node.end_position().row {
-            stdout
-                .set_color(ColorSpec::new().set_fg(Some(Color::White)))
-                .unwrap();
+            color!(stdout, White);
             write!(&mut stdout, ": ").unwrap();
 
-            stdout
-                .set_color(ColorSpec::new().set_fg(Some(Color::Red)).set_intense(true))
-                .unwrap();
+            color!(stdout, Red, true);
             let code = &code[node.start_byte()..node.end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
                 write!(&mut stdout, "{} ", code).unwrap();
