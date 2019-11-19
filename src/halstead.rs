@@ -135,7 +135,7 @@ impl Halstead for PythonCode {
             | Del | Raise | Pass | Break | Continue | If | Elif | Else | Async | For | In
             | While | Try | Except | Finally | With | DASHGT | EQ | Global | Exec | AT | Not
             | And | Or | PLUS | DASH | SLASH | PERCENT | SLASHSLASH | STARSTAR | PIPE | AMP
-            | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ | GT | LTGT | Is | PLUSEQ
+            | CARET | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ | GT | LTGT | Is | PLUSEQ
             | DASHEQ | STAREQ | SLASHEQ | ATEQ | SLASHSLASHEQ | PERCENTEQ | STARSTAREQ | GTGTEQ
             | LTLTEQ | AMPEQ | CARETEQ | PIPEEQ | Yield | LBRACK | LBRACE | Await | Await2
             | Print => {
@@ -157,16 +157,112 @@ impl Halstead for PythonCode {
     }
 }
 
+impl Halstead for MozjsCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+        use Mozjs::*;
+
+        let id = node.kind_id();
+        match id.into() {
+            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
+            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
+            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
+            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
+            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
+            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
+            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
+            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+                *stats.operators.entry(id).or_insert(0) += 1;
+            }
+            Identifier | Identifier2 | String | Number | True | False | Null | Void | This
+            | Super | Undefined | Set | Get | Typeof | Instanceof => {
+                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Halstead for JavascriptCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+        use Javascript::*;
+
+        let id = node.kind_id();
+        match id.into() {
+            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
+            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
+            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
+            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
+            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
+            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
+            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
+            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+                *stats.operators.entry(id).or_insert(0) += 1;
+            }
+            Identifier | Identifier2 | String | Number | True | False | Null | Void | This
+            | Super | Undefined | Set | Get | Typeof | Instanceof => {
+                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Halstead for TypescriptCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+        use Typescript::*;
+
+        let id = node.kind_id();
+        match id.into() {
+            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
+            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
+            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
+            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
+            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
+            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
+            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
+            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+                *stats.operators.entry(id).or_insert(0) += 1;
+            }
+            Identifier | NestedIdentifier | String | Number | True | False | Null | Void | This
+            | Super | Undefined | Set | Get | Typeof | Instanceof => {
+                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Halstead for TsxCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+        use Tsx::*;
+
+        let id = node.kind_id();
+        match id.into() {
+            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
+            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
+            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
+            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
+            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
+            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
+            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
+            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+                *stats.operators.entry(id).or_insert(0) += 1;
+            }
+            Identifier | NestedIdentifier | String | Number | True | False | Null | Void | This
+            | Super | Undefined | Set | Get | Typeof | Instanceof => {
+                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
+            }
+            _ => {}
+        }
+    }
+}
+
 impl Halstead for PreprocCode {}
 impl Halstead for CcommentCode {}
 impl Halstead for CCode {}
 impl Halstead for CppCode {}
 impl Halstead for CSharpCode {}
 impl Halstead for JavaCode {}
-impl Halstead for MozjsCode {}
-impl Halstead for JavascriptCode {}
-impl Halstead for TypescriptCode {}
-impl Halstead for TsxCode {}
 impl Halstead for GoCode {}
 impl Halstead for CssCode {}
 impl Halstead for HtmlCode {}

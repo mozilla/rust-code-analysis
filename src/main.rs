@@ -219,7 +219,7 @@ fn explore(
 fn main() {
     let matches = App::new("code-analysis")
         .version(crate_version!())
-        .author(crate_authors!("\n"))
+        .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
         .about("Analyze source code")
         .arg(
             Arg::with_name("paths")

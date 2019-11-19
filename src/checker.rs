@@ -145,17 +145,18 @@ impl Checker for MozjsCode {
     mk_checker!(
         is_func,
         Function,
-        FunctionDeclaration,
         GeneratorFunction,
+        FunctionDeclaration,
         GeneratorFunctionDeclaration
     );
     mk_checker!(
         is_func_space,
+        Program,
         Function,
-        FunctionDeclaration,
-        GeneratorFunction,
-        GeneratorFunctionDeclaration,
         Class,
+        GeneratorFunction,
+        FunctionDeclaration,
+        GeneratorFunctionDeclaration,
         ClassDeclaration
     );
 }
@@ -167,18 +168,18 @@ impl Checker for JavascriptCode {
     mk_checker!(
         is_func,
         Function,
-        FunctionDeclaration,
         GeneratorFunction,
+        FunctionDeclaration,
         GeneratorFunctionDeclaration
     );
     mk_checker!(
         is_func_space,
         Program,
         Function,
-        FunctionDeclaration,
         GeneratorFunction,
-        GeneratorFunctionDeclaration,
         Class,
+        FunctionDeclaration,
+        GeneratorFunctionDeclaration,
         ClassDeclaration
     );
 }
@@ -190,18 +191,18 @@ impl Checker for TypescriptCode {
     mk_checker!(
         is_func,
         Function,
-        FunctionDeclaration,
         GeneratorFunction,
+        FunctionDeclaration,
         GeneratorFunctionDeclaration
     );
     mk_checker!(
         is_func_space,
         Program,
         Function,
-        FunctionDeclaration,
-        GeneratorFunction,
-        GeneratorFunctionDeclaration,
         Class,
+        GeneratorFunction,
+        FunctionDeclaration,
+        GeneratorFunctionDeclaration,
         ClassDeclaration
     );
 }
@@ -213,18 +214,19 @@ impl Checker for TsxCode {
     mk_checker!(
         is_func,
         Function,
-        FunctionDeclaration,
         GeneratorFunction,
+        FunctionDeclaration,
         GeneratorFunctionDeclaration
     );
     mk_checker!(
         is_func_space,
         Program,
         Function,
+        GeneratorFunction,
+        Class,
         FunctionDeclaration,
         GeneratorFunction,
         GeneratorFunctionDeclaration,
-        Class,
         ClassDeclaration
     );
 }

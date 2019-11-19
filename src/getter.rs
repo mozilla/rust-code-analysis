@@ -4,20 +4,6 @@ use crate::enums::NodeKind;
 use crate::*;
 
 pub trait Getter {
-    fn get_func_name<'a>(_node: &Node, _code: &'a [u8]) -> Option<&'a str> {
-        None
-    }
-
-    fn get_func_space_name<'a>(_node: &Node, _code: &'a [u8]) -> Option<&'a str> {
-        None
-    }
-
-    fn get_kind(_node: &Node) -> NodeKind {
-        NodeKind::Unknown
-    }
-}
-
-impl Getter for PythonCode {
     fn get_func_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
         Self::get_func_space_name(node, code)
     }
@@ -28,10 +14,16 @@ impl Getter for PythonCode {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
-            None
+            Some("<anonymous>")
         }
     }
 
+    fn get_kind(_node: &Node) -> NodeKind {
+        NodeKind::Unknown
+    }
+}
+
+impl Getter for PythonCode {
     fn get_kind(node: &Node) -> NodeKind {
         let typ = node.kind_id();
         match typ.into() {
@@ -43,16 +35,76 @@ impl Getter for PythonCode {
     }
 }
 
+impl Getter for MozjsCode {
+    fn get_kind(node: &Node) -> NodeKind {
+        use Mozjs::*;
+
+        let typ = node.kind_id();
+        match typ.into() {
+            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
+                NodeKind::Function
+            }
+            Class | ClassDeclaration => NodeKind::Class,
+            Program => NodeKind::Unit,
+            _ => NodeKind::Unknown,
+        }
+    }
+}
+
+impl Getter for JavascriptCode {
+    fn get_kind(node: &Node) -> NodeKind {
+        use Javascript::*;
+
+        let typ = node.kind_id();
+        match typ.into() {
+            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
+                NodeKind::Function
+            }
+            Class | ClassDeclaration => NodeKind::Class,
+            Program => NodeKind::Unit,
+            _ => NodeKind::Unknown,
+        }
+    }
+}
+
+impl Getter for TypescriptCode {
+    fn get_kind(node: &Node) -> NodeKind {
+        use Typescript::*;
+
+        let typ = node.kind_id();
+        match typ.into() {
+            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
+                NodeKind::Function
+            }
+            Class | ClassDeclaration => NodeKind::Class,
+            Program => NodeKind::Unit,
+            _ => NodeKind::Unknown,
+        }
+    }
+}
+
+impl Getter for TsxCode {
+    fn get_kind(node: &Node) -> NodeKind {
+        use Tsx::*;
+
+        let typ = node.kind_id();
+        match typ.into() {
+            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
+                NodeKind::Function
+            }
+            Class | ClassDeclaration => NodeKind::Class,
+            Program => NodeKind::Unit,
+            _ => NodeKind::Unknown,
+        }
+    }
+}
+
 impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
 impl Getter for CCode {}
 impl Getter for CppCode {}
 impl Getter for CSharpCode {}
 impl Getter for JavaCode {}
-impl Getter for MozjsCode {}
-impl Getter for JavascriptCode {}
-impl Getter for TypescriptCode {}
-impl Getter for TsxCode {}
 impl Getter for GoCode {}
 impl Getter for CssCode {}
 impl Getter for HtmlCode {}

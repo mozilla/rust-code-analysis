@@ -85,16 +85,72 @@ impl SourceLoc for PythonCode {
     }
 }
 
+impl SourceLoc for MozjsCode {
+    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool) {
+        use Mozjs::*;
+
+        let start = init(node, stats, is_func_space);
+
+        match node.kind_id().into() {
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            _ => {
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
+impl SourceLoc for JavascriptCode {
+    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool) {
+        use Javascript::*;
+
+        let start = init(node, stats, is_func_space);
+
+        match node.kind_id().into() {
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            _ => {
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
+impl SourceLoc for TypescriptCode {
+    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool) {
+        use Typescript::*;
+
+        let start = init(node, stats, is_func_space);
+
+        match node.kind_id().into() {
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            _ => {
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
+impl SourceLoc for TsxCode {
+    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool) {
+        use Tsx::*;
+
+        let start = init(node, stats, is_func_space);
+
+        match node.kind_id().into() {
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            _ => {
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
 impl SourceLoc for PreprocCode {}
 impl SourceLoc for CcommentCode {}
 impl SourceLoc for CCode {}
 impl SourceLoc for CppCode {}
 impl SourceLoc for CSharpCode {}
 impl SourceLoc for JavaCode {}
-impl SourceLoc for MozjsCode {}
-impl SourceLoc for JavascriptCode {}
-impl SourceLoc for TypescriptCode {}
-impl SourceLoc for TsxCode {}
 impl SourceLoc for GoCode {}
 impl SourceLoc for CssCode {}
 impl SourceLoc for HtmlCode {}

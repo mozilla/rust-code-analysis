@@ -65,16 +65,64 @@ impl Cyclomatic for PythonCode {
     }
 }
 
+impl Cyclomatic for MozjsCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Mozjs::*;
+
+        match node.kind_id().into() {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+                stats.cyclomatic += 1.;
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Cyclomatic for JavascriptCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Javascript::*;
+
+        match node.kind_id().into() {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+                stats.cyclomatic += 1.;
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Cyclomatic for TypescriptCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Typescript::*;
+
+        match node.kind_id().into() {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+                stats.cyclomatic += 1.;
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Cyclomatic for TsxCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Tsx::*;
+
+        match node.kind_id().into() {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+                stats.cyclomatic += 1.;
+            }
+            _ => {}
+        }
+    }
+}
+
 impl Cyclomatic for PreprocCode {}
 impl Cyclomatic for CcommentCode {}
 impl Cyclomatic for CCode {}
 impl Cyclomatic for CppCode {}
 impl Cyclomatic for CSharpCode {}
 impl Cyclomatic for JavaCode {}
-impl Cyclomatic for MozjsCode {}
-impl Cyclomatic for JavascriptCode {}
-impl Cyclomatic for TypescriptCode {}
-impl Cyclomatic for TsxCode {}
 impl Cyclomatic for GoCode {}
 impl Cyclomatic for CssCode {}
 impl Cyclomatic for HtmlCode {}

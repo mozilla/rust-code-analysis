@@ -1,4 +1,5 @@
 use std::collections::hash_map::{Entry, HashMap};
+use std::collections::BTreeMap;
 use tree_sitter::Language;
 
 pub fn capitalize(s: &str) -> String {
@@ -119,25 +120,34 @@ pub fn camel_case(name: String) -> String {
 }
 
 pub fn get_token_names(language: &Language, escape: bool) -> Vec<(String, bool, String)> {
-    let mut names = Vec::with_capacity(language.node_kind_count());
+    let count = language.node_kind_count();
+    let mut names = BTreeMap::default();
     let mut name_count = HashMap::new();
-    for i in 0..language.node_kind_count() {
-        let kind = language.node_kind_for_id(i as u16);
-        let name = sanitize_identifier(kind);
-        let ts_name = sanitize_string(kind, escape);
-        let name = camel_case(name);
-        let e = match name_count.entry(name.clone()) {
-            Entry::Occupied(mut e) => {
-                *e.get_mut() += 1;
-                (format!("{}{}", name, e.get()), true, ts_name)
+    for anon in vec![false, true] {
+        for i in 0..count {
+            let anonymous = !language.node_kind_is_named(i as u16);
+            if anonymous != anon {
+                continue;
             }
-            Entry::Vacant(e) => {
-                e.insert(1);
-                (name, false, ts_name)
-            }
-        };
-        names.push(e);
+            let kind = language.node_kind_for_id(i as u16);
+            let name = sanitize_identifier(kind);
+            let ts_name = sanitize_string(kind, escape);
+            let name = camel_case(name);
+            let e = match name_count.entry(name.clone()) {
+                Entry::Occupied(mut e) => {
+                    *e.get_mut() += 1;
+                    (format!("{}{}", name, e.get()), true, ts_name)
+                }
+                Entry::Vacant(e) => {
+                    e.insert(1);
+                    (name, false, ts_name)
+                }
+            };
+            names.insert(i, e);
+        }
     }
+    let mut names: Vec<_> = names.values().map(move |x| x.clone()).collect();
     names.push(("Error".to_string(), false, "ERROR".to_string()));
+
     names
 }
