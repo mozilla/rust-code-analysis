@@ -66,6 +66,7 @@ pub struct FuncSpace<'a> {
     pub spaces: Vec<FuncSpace<'a>>,
     pub metrics: CodeMetrics<'a>,
     pub kind: NodeKind,
+    pub line: usize,
 }
 
 impl<'a> Serialize for FuncSpace<'a> {
@@ -73,8 +74,9 @@ impl<'a> Serialize for FuncSpace<'a> {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("metrics", 4)?;
+        let mut st = serializer.serialize_struct("metrics", 5)?;
         st.serialize_field("name", self.name.map_or("", |name| name))?;
+        st.serialize_field("line", &self.line)?;
         st.serialize_field("metrics", &self.metrics)?;
         st.serialize_field("kind", &format!("{}", self.kind))?;
         st.serialize_field("spaces", &self.spaces)?;
@@ -89,6 +91,7 @@ impl<'a> FuncSpace<'a> {
             spaces: Vec::new(),
             metrics: CodeMetrics::default(),
             kind,
+            line: node.start_position().row + 1,
         }
     }
 
@@ -114,7 +117,10 @@ impl<'a> FuncSpace<'a> {
         write!(&mut stdout, "{}: ", space.kind).unwrap();
 
         color!(stdout, Cyan, true);
-        writeln!(&mut stdout, "{}", space.name.map_or("", |name| name)).unwrap();
+        write!(&mut stdout, "{}", space.name.map_or("", |name| name)).unwrap();
+
+        color!(stdout, Red, true);
+        writeln!(&mut stdout, " (@{})", space.line).unwrap();
 
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_metrics(

@@ -477,6 +477,7 @@ mod tests {
         let expected = json!({
             "id": "1234",
             "spaces": {"kind": "unit",
+                       "line": 1,
                        "metrics": {"cyclomatic": 1.0,
                                    "halstead": {"bugs": 0.000_942_552_557_372_941_4,
                                                 "difficulty": 1.0,
@@ -493,6 +494,7 @@ mod tests {
                                    "loc": {"lloc": 2.0, "sloc": 3.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
+                                   "line": 1,
                                    "metrics": {"cyclomatic": 1.0,
                                                "halstead": {"bugs": 0.000_942_552_557_372_941_4,
                                                             "difficulty": 1.0,
@@ -529,6 +531,7 @@ mod tests {
         let expected = json!({
             "id": "",
             "spaces": {"kind": "unit",
+                       "line": 1,
                        "metrics": {"cyclomatic": 1.0,
                                    "halstead": {"bugs": 0.000_942_552_557_372_941_4,
                                                 "difficulty": 1.0,
@@ -545,6 +548,7 @@ mod tests {
                                    "loc": {"lloc": 2.0, "sloc": 3.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
+                                   "line": 1,
                                    "metrics": {"cyclomatic": 1.0,
                                                "halstead": {"bugs": 0.000_942_552_557_372_941_4,
                                                             "difficulty": 1.0,
