@@ -1,10 +1,10 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
+    rev: v2.4.0
     hooks:
     -   id: check-yaml
 -   repo: https://github.com/marco-c/taskcluster_yml_validator
-    rev: v0.0.2
+    rev: v0.0.3
     hooks:
       - id: taskcluster_yml
 -   repo: local
