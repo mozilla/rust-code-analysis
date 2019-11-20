@@ -145,6 +145,22 @@ impl SourceLoc for TsxCode {
     }
 }
 
+impl SourceLoc for RustCode {
+    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool) {
+        use Rust::*;
+
+        let start = init(node, stats, is_func_space);
+
+        match node.kind_id().into() {
+            LineComment | BlockComment | StringLiteral | RawStringLiteral | ExpressionStatement
+            | Block => {}
+            _ => {
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
 impl SourceLoc for PreprocCode {}
 impl SourceLoc for CcommentCode {}
 impl SourceLoc for CCode {}
@@ -154,4 +170,3 @@ impl SourceLoc for JavaCode {}
 impl SourceLoc for GoCode {}
 impl SourceLoc for CssCode {}
 impl SourceLoc for HtmlCode {}
-impl SourceLoc for RustCode {}

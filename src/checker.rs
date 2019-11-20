@@ -277,6 +277,13 @@ impl Checker for RustCode {
 
     mk_checker!(is_string, StringLiteral, RawStringLiteral);
     mk_checker!(is_call, CallExpression);
-    mk_checker!(is_func, FunctionItem);
-    mk_checker!(is_func_space, SourceFile, FunctionItem, ImplItem);
+    mk_checker!(is_func, FunctionItem, ClosureExpression);
+    mk_checker!(
+        is_func_space,
+        SourceFile,
+        FunctionItem,
+        ImplItem,
+        TraitItem,
+        ClosureExpression
+    );
 }

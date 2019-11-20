@@ -257,6 +257,29 @@ impl Halstead for TsxCode {
     }
 }
 
+impl Halstead for RustCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+        use Rust::*;
+
+        let id = node.kind_id();
+        match id.into() {
+            LPAREN | LBRACE | LBRACK | EQGT | PLUS | STAR | Async | Await | Continue | For | If
+            | Let | Loop | Match | Return | Unsafe | While | BANG | EQ | COMMA | DASHGT | QMARK
+            | LT | GT | AMP | MutableSpecifier | DOTDOT | DOTDOTEQ | DASH | AMPAMP | PIPEPIPE
+            | PIPE | CARET | EQEQ | BANGEQ | LTEQ | GTEQ | LTLT | GTGT | SLASH | PERCENT
+            | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ | AMPEQ | PIPEEQ | CARETEQ
+            | LTLTEQ | GTGTEQ | Move | DOT => {
+                *stats.operators.entry(id).or_insert(0) += 1;
+            }
+            Identifier | StringLiteral | RawStringLiteral | IntegerLiteral | FloatLiteral
+            | BooleanLiteral | Zelf | CharLiteral | UNDERSCORE => {
+                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
+            }
+            _ => {}
+        }
+    }
+}
+
 impl Halstead for PreprocCode {}
 impl Halstead for CcommentCode {}
 impl Halstead for CCode {}
@@ -266,4 +289,3 @@ impl Halstead for JavaCode {}
 impl Halstead for GoCode {}
 impl Halstead for CssCode {}
 impl Halstead for HtmlCode {}
-impl Halstead for RustCode {}

@@ -117,6 +117,19 @@ impl Cyclomatic for TsxCode {
     }
 }
 
+impl Cyclomatic for RustCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Rust::*;
+
+        match node.kind_id().into() {
+            If | For | While | Loop | MatchArm | MatchArm2 | QMARK | AMPAMP | PIPEPIPE => {
+                stats.cyclomatic += 1.;
+            }
+            _ => {}
+        }
+    }
+}
+
 impl Cyclomatic for PreprocCode {}
 impl Cyclomatic for CcommentCode {}
 impl Cyclomatic for CCode {}
@@ -126,4 +139,3 @@ impl Cyclomatic for JavaCode {}
 impl Cyclomatic for GoCode {}
 impl Cyclomatic for CssCode {}
 impl Cyclomatic for HtmlCode {}
-impl Cyclomatic for RustCode {}

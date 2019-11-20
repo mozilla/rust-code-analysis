@@ -57,7 +57,7 @@ fn dump_tree_helper(
         write!(&mut stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Yellow, true);
-        write!(&mut stdout, "{{{}}} ", node.kind()).unwrap();
+        write!(&mut stdout, "{{{}:{}}} ", node.kind(), node.kind_id()).unwrap();
 
         color!(stdout, White);
         write!(&mut stdout, "from ").unwrap();

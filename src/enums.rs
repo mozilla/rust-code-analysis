@@ -6,6 +6,8 @@ pub enum NodeKind {
     Function,
     Class,
     Struct,
+    Trait,
+    Impl,
     Unit,
 }
 
@@ -16,6 +18,8 @@ impl fmt::Display for NodeKind {
             NodeKind::Function => "function",
             NodeKind::Class => "class",
             NodeKind::Struct => "struct",
+            NodeKind::Trait => "trait",
+            NodeKind::Impl => "impl",
             NodeKind::Unit => "unit",
         };
         write!(f, "{}", s)

@@ -99,6 +99,21 @@ impl Getter for TsxCode {
     }
 }
 
+impl Getter for RustCode {
+    fn get_kind(node: &Node) -> NodeKind {
+        use Rust::*;
+
+        let typ = node.kind_id();
+        match typ.into() {
+            FunctionItem | ClosureExpression => NodeKind::Function,
+            TraitItem => NodeKind::Trait,
+            ImplItem => NodeKind::Impl,
+            SourceFile => NodeKind::Unit,
+            _ => NodeKind::Unknown,
+        }
+    }
+}
+
 impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
 impl Getter for CCode {}
@@ -108,4 +123,3 @@ impl Getter for JavaCode {}
 impl Getter for GoCode {}
 impl Getter for CssCode {}
 impl Getter for HtmlCode {}
-impl Getter for RustCode {}
