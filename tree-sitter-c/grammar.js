@@ -437,7 +437,6 @@ module.exports = grammar({
       'CONST',
       'volatile',
       'restrict',
-      'vector',
       '_Atomic'
     ),
 

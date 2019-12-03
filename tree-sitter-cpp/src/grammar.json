@@ -3317,10 +3317,6 @@
             },
             {
               "type": "STRING",
-              "value": "vector"
-            },
-            {
-              "type": "STRING",
               "value": "_Atomic"
             }
           ]
@@ -9019,6 +9015,10 @@
                 "type": "SYMBOL",
                 "name": "compound_statement"
               }
+            },
+            {
+              "type": "SYMBOL",
+              "name": "default_method_clause"
             },
             {
               "type": "SYMBOL",
