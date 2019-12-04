@@ -9,6 +9,7 @@ pub enum NodeKind {
     Trait,
     Impl,
     Unit,
+    Namespace,
 }
 
 impl fmt::Display for NodeKind {
@@ -21,6 +22,7 @@ impl fmt::Display for NodeKind {
             NodeKind::Trait => "trait",
             NodeKind::Impl => "impl",
             NodeKind::Unit => "unit",
+            NodeKind::Namespace => "namespace",
         };
         write!(f, "{}", s)
     }

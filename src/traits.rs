@@ -40,3 +40,7 @@ pub trait Callback {
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
 }
+
+pub trait Search<'a> {
+    fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
+}

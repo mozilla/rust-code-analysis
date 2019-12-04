@@ -71,11 +71,18 @@ impl Checker for CppCode {
         RawStringLiteral
     );
     mk_checker!(is_call, CallExpression);
-    mk_checker!(is_func, FunctionDefinition);
+    mk_checker!(
+        is_func,
+        FunctionDefinition,
+        FunctionDefinition2,
+        FunctionDefinition3
+    );
     mk_checker!(
         is_func_space,
         TranslationUnit,
         FunctionDefinition,
+        FunctionDefinition2,
+        FunctionDefinition3,
         StructSpecifier,
         ClassSpecifier,
         NamespaceDefinition

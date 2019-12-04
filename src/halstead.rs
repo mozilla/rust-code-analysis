@@ -280,10 +280,56 @@ impl Halstead for RustCode {
     }
 }
 
+impl Halstead for CCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+        use C::*;
+
+        let id = node.kind_id();
+
+        match id.into() {
+            DOT | LPAREN | COMMA | STAR | GTGT | COLON | Return | Break | Continue | If | Else
+            | Switch | Case | Default | For | While | Goto | Do | EQ | AMPAMP | PIPEPIPE | PLUS
+            | PLUSPLUS | SLASH | PERCENT | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ
+            | BANGEQ | GTEQ | GT | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ | GTGTEQ
+            | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ | LBRACK | LBRACE | QMARK
+            | TypeSpecifier | Sizeof => {
+                *stats.operators.entry(id).or_insert(0) += 1;
+            }
+            Identifier | TypeIdentifier | FieldIdentifier | PrimitiveType | StringLiteral
+            | NumberLiteral | True | False | Null | DOTDOTDOT => {
+                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Halstead for CppCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+        use Cpp::*;
+
+        let id = node.kind_id();
+
+        match id.into() {
+            DOT | LPAREN | COMMA | STAR | GTGT | COLON | Return | Break | Continue | If | Else
+            | Switch | Case | Default | For | While | Goto | Do | Delete | New | Try | Catch
+            | Throw | EQ | AMPAMP | PIPEPIPE | PLUS | PLUSPLUS | SLASH | PERCENT | PIPE | AMP
+            | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ | GT | PLUSEQ | BANG | STAREQ
+            | SLASHEQ | PERCENTEQ | GTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ | LBRACK
+            | LBRACE | QMARK | COLONCOLON | TypeSpecifier | Sizeof => {
+                *stats.operators.entry(id).or_insert(0) += 1;
+            }
+            Identifier | TypeIdentifier | FieldIdentifier | PrimitiveType | RawStringLiteral
+            | StringLiteral | NumberLiteral | True | False | Null | Nullptr | DOTDOTDOT => {
+                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
+            }
+            _ => {}
+        }
+    }
+}
+
 impl Halstead for PreprocCode {}
 impl Halstead for CcommentCode {}
-impl Halstead for CCode {}
-impl Halstead for CppCode {}
 impl Halstead for CSharpCode {}
 impl Halstead for JavaCode {}
 impl Halstead for GoCode {}

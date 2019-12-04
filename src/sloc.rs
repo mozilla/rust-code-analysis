@@ -161,10 +161,40 @@ impl SourceLoc for RustCode {
     }
 }
 
+impl SourceLoc for CCode {
+    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool) {
+        use C::*;
+
+        let start = init(node, stats, is_func_space);
+
+        match node.kind_id().into() {
+            Comment | StringLiteral | ExpressionStatement | CompoundStatement
+            | LabeledStatement | DeclarationList | FieldDeclarationList => {}
+            _ => {
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
+impl SourceLoc for CppCode {
+    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool) {
+        use Cpp::*;
+
+        let start = init(node, stats, is_func_space);
+
+        match node.kind_id().into() {
+            Comment | RawStringLiteral | StringLiteral | ExpressionStatement
+            | CompoundStatement | LabeledStatement | DeclarationList | FieldDeclarationList => {}
+            _ => {
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
 impl SourceLoc for PreprocCode {}
 impl SourceLoc for CcommentCode {}
-impl SourceLoc for CCode {}
-impl SourceLoc for CppCode {}
 impl SourceLoc for CSharpCode {}
 impl SourceLoc for JavaCode {}
 impl SourceLoc for GoCode {}

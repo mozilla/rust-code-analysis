@@ -124,6 +124,7 @@ impl<T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Halstead + Sour
                 "comment" => T::is_comment,
                 "error" => T::is_error,
                 "string" => T::is_string,
+                "function" => T::is_func,
                 _ => |_: &Node| -> bool { true },
             });
         }

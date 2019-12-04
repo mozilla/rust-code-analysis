@@ -1,6 +1,8 @@
 use tree_sitter::Node;
 
 use crate::enums::NodeKind;
+use crate::traits::Search;
+
 use crate::*;
 
 pub trait Getter {
@@ -114,10 +116,94 @@ impl Getter for RustCode {
     }
 }
 
+impl Getter for CCode {
+    fn get_func_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        Self::get_func_space_name(node, code)
+    }
+
+    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        // we're in a function_definition so need to get the declarator
+        if let Some(declarator) = node.child_by_field_name("declarator") {
+            if let Some(fd) = declarator.first_occurence(|id| C::FunctionDeclarator == id) {
+                if let Some(first) = fd.child(0) {
+                    if first.kind_id() == C::Identifier {
+                        let code = &code[first.start_byte()..first.end_byte()];
+                        return std::str::from_utf8(code).ok();
+                    }
+                }
+            }
+        }
+        Some("<anonymous>")
+    }
+
+    fn get_kind(node: &Node) -> NodeKind {
+        use C::*;
+
+        let typ = node.kind_id();
+        match typ.into() {
+            FunctionDefinition => NodeKind::Function,
+            TranslationUnit => NodeKind::Unit,
+            _ => NodeKind::Unknown,
+        }
+    }
+}
+
+impl Getter for CppCode {
+    fn get_func_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        Self::get_func_space_name(node, code)
+    }
+
+    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        let typ = node.kind_id();
+        match typ.into() {
+            Cpp::FunctionDefinition | Cpp::FunctionDefinition2 | Cpp::FunctionDefinition3 => {
+                // we're in a function_definition so need to get the declarator
+                if let Some(declarator) = node.child_by_field_name("declarator") {
+                    if let Some(fd) = declarator.first_occurence(|id| {
+                        Cpp::FunctionDeclarator == id
+                            || Cpp::FunctionDeclarator2 == id
+                            || Cpp::FunctionDeclarator3 == id
+                    }) {
+                        if let Some(first) = fd.child(0) {
+                            match first.kind_id().into() {
+                                Cpp::ScopedIdentifier | Cpp::Identifier => {
+                                    let code = &code[first.start_byte()..first.end_byte()];
+                                    return std::str::from_utf8(code).ok();
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {
+                if let Some(name) = node.child_by_field_name("name") {
+                    let code = &code[name.start_byte()..name.end_byte()];
+                    return std::str::from_utf8(code).ok();
+                }
+            }
+        }
+
+        Some("<anonymous>")
+    }
+
+    fn get_kind(node: &Node) -> NodeKind {
+        use Cpp::*;
+
+        let typ = node.kind_id();
+        match typ.into() {
+            FunctionDefinition | FunctionDefinition2 | FunctionDefinition3 => NodeKind::Function,
+            StructSpecifier => NodeKind::Struct,
+            ClassSpecifier => NodeKind::Class,
+            NamespaceDefinition => NodeKind::Namespace,
+            TranslationUnit => NodeKind::Unit,
+            _ => NodeKind::Unknown,
+        }
+    }
+}
+
 impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
-impl Getter for CCode {}
-impl Getter for CppCode {}
 impl Getter for CSharpCode {}
 impl Getter for JavaCode {}
 impl Getter for GoCode {}
