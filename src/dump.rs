@@ -32,7 +32,7 @@ fn dump_tree_helper(
     node: &Node,
     prefix: &str,
     last: bool,
-    mut stdout: &mut StandardStreamLock,
+    stdout: &mut StandardStreamLock,
     depth: i32,
     line_start: &Option<usize>,
     line_end: &Option<usize>,
@@ -54,39 +54,39 @@ fn dump_tree_helper(
 
     if display {
         color!(stdout, Blue);
-        write!(&mut stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Yellow, true);
-        write!(&mut stdout, "{{{}:{}}} ", node.kind(), node.kind_id()).unwrap();
+        write!(stdout, "{{{}:{}}} ", node.kind(), node.kind_id()).unwrap();
 
         color!(stdout, White);
-        write!(&mut stdout, "from ").unwrap();
+        write!(stdout, "from ").unwrap();
 
         color!(stdout, Green);
         let pos = node.start_position();
-        write!(&mut stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
+        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
 
         color!(stdout, White);
-        write!(&mut stdout, "to ").unwrap();
+        write!(stdout, "to ").unwrap();
 
         color!(stdout, Green);
         let pos = node.end_position();
-        write!(&mut stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
+        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
 
         if node.start_position().row == node.end_position().row {
             color!(stdout, White);
-            write!(&mut stdout, ": ").unwrap();
+            write!(stdout, ": ").unwrap();
 
             color!(stdout, Red, true);
             let code = &code[node.start_byte()..node.end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
-                write!(&mut stdout, "{} ", code).unwrap();
+                write!(stdout, "{} ", code).unwrap();
             } else {
                 stdout.write_all(code).unwrap();
             }
         }
 
-        writeln!(&mut stdout).unwrap();
+        writeln!(stdout).unwrap();
     }
 
     let count = node.child_count();
@@ -103,7 +103,7 @@ fn dump_tree_helper(
                 &cursor.node(),
                 &prefix,
                 i == 0,
-                &mut stdout,
+                stdout,
                 depth - 1,
                 line_start,
                 line_end,

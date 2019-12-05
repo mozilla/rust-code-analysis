@@ -102,39 +102,29 @@ impl<'a> FuncSpace<'a> {
         color!(stdout, White);
     }
 
-    fn dump_space(
-        space: &FuncSpace,
-        prefix: &str,
-        last: bool,
-        mut stdout: &mut StandardStreamLock,
-    ) {
+    fn dump_space(space: &FuncSpace, prefix: &str, last: bool, stdout: &mut StandardStreamLock) {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(&mut stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Yellow, true);
-        write!(&mut stdout, "{}: ", space.kind).unwrap();
+        write!(stdout, "{}: ", space.kind).unwrap();
 
         color!(stdout, Cyan, true);
-        write!(&mut stdout, "{}", space.name.map_or("", |name| name)).unwrap();
+        write!(stdout, "{}", space.name.map_or("", |name| name)).unwrap();
 
         color!(stdout, Red, true);
-        writeln!(&mut stdout, " (@{})", space.line).unwrap();
+        writeln!(stdout, " (@{})", space.line).unwrap();
 
         let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_metrics(
-            &space.metrics,
-            &prefix,
-            space.spaces.is_empty(),
-            &mut stdout,
-        );
+        Self::dump_metrics(&space.metrics, &prefix, space.spaces.is_empty(), stdout);
 
         if let Some((last, spaces)) = space.spaces.split_last() {
             for space in spaces {
-                Self::dump_space(space, &prefix, false, &mut stdout);
+                Self::dump_space(space, &prefix, false, stdout);
             }
-            Self::dump_space(last, &prefix, true, &mut stdout);
+            Self::dump_space(last, &prefix, true, stdout);
         }
     }
 
@@ -142,53 +132,53 @@ impl<'a> FuncSpace<'a> {
         metrics: &CodeMetrics,
         prefix: &str,
         last: bool,
-        mut stdout: &mut StandardStreamLock,
+        stdout: &mut StandardStreamLock,
     ) {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(&mut stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Yellow, true);
-        writeln!(&mut stdout, "metrics").unwrap();
+        writeln!(stdout, "metrics").unwrap();
 
         let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_cyclomatic(&metrics.cyclomatic, &prefix, false, &mut stdout);
-        Self::dump_halstead(&metrics.halstead, &prefix, false, &mut stdout);
-        Self::dump_sloc(&metrics.sloc, &prefix, true, &mut stdout);
+        Self::dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout);
+        Self::dump_halstead(&metrics.halstead, &prefix, false, stdout);
+        Self::dump_sloc(&metrics.sloc, &prefix, true, stdout);
     }
 
     fn dump_cyclomatic(
         stats: &cyclomatic::Stats,
         prefix: &str,
         last: bool,
-        mut stdout: &mut StandardStreamLock,
+        stdout: &mut StandardStreamLock,
     ) {
         let pref = if last { "`- " } else { "|- " };
 
         color!(stdout, Blue);
-        write!(&mut stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Green, true);
-        write!(&mut stdout, "cyclomatic: ").unwrap();
+        write!(stdout, "cyclomatic: ").unwrap();
 
         color!(stdout, White);
-        writeln!(&mut stdout, "{}", stats.cyclomatic()).unwrap();
+        writeln!(stdout, "{}", stats.cyclomatic()).unwrap();
     }
 
     fn dump_halstead(
         stats: &halstead::Stats,
         prefix: &str,
         last: bool,
-        mut stdout: &mut StandardStreamLock,
+        stdout: &mut StandardStreamLock,
     ) {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(&mut stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Green, true);
-        writeln!(&mut stdout, "halstead").unwrap();
+        writeln!(stdout, "halstead").unwrap();
 
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_value(
@@ -217,42 +207,31 @@ impl<'a> FuncSpace<'a> {
         Self::dump_value("bugs", stats.bugs(), &prefix, true, stdout);
     }
 
-    fn dump_sloc(
-        stats: &sloc::Stats,
-        prefix: &str,
-        last: bool,
-        mut stdout: &mut StandardStreamLock,
-    ) {
+    fn dump_sloc(stats: &sloc::Stats, prefix: &str, last: bool, stdout: &mut StandardStreamLock) {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(&mut stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Green, true);
-        writeln!(&mut stdout, "loc").unwrap();
+        writeln!(stdout, "loc").unwrap();
 
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout);
         Self::dump_value("lloc", stats.lloc(), &prefix, true, stdout);
     }
 
-    fn dump_value(
-        name: &str,
-        val: f64,
-        prefix: &str,
-        last: bool,
-        mut stdout: &mut StandardStreamLock,
-    ) {
+    fn dump_value(name: &str, val: f64, prefix: &str, last: bool, stdout: &mut StandardStreamLock) {
         let pref = if last { "`- " } else { "|- " };
 
         color!(stdout, Blue);
-        write!(&mut stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref).unwrap();
 
         color!(stdout, Magenta, true);
-        write!(&mut stdout, "{}: ", name).unwrap();
+        write!(stdout, "{}: ", name).unwrap();
 
         color!(stdout, White);
-        writeln!(&mut stdout, "{}", val).unwrap();
+        writeln!(stdout, "{}", val).unwrap();
     }
 }
 
