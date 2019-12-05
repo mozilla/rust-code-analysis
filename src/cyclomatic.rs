@@ -33,7 +33,9 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
-    pub fn merge(&mut self, _other: &Stats) {}
+    pub fn merge(&mut self, other: &Stats) {
+        self.cyclomatic += other.cyclomatic;
+    }
 
     pub fn cyclomatic(&self) -> f64 {
         self.cyclomatic
