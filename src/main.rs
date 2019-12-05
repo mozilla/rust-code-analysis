@@ -25,6 +25,7 @@ struct Config {
     comments: bool,
     find_filter: Vec<String>,
     count_filter: Vec<String>,
+    function: bool,
     metrics: bool,
     line_start: Option<usize>,
     line_end: Option<usize>,
@@ -87,6 +88,10 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         } else {
             action::<CommentRm>(&language, source, &cfg.path.clone(), pr, cfg)
         }
+    } else if cfg.function {
+        let source = read_file_with_eol(&path)?;
+        let cfg = FunctionCfg { path: path.clone() };
+        action::<Function>(&language, source, &path, pr, cfg)
     } else if !cfg.find_filter.is_empty() {
         let source = read_file_with_eol(&path)?;
         let cfg = FindCfg {
@@ -248,6 +253,12 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("function")
+                .help("Get functions and their spans")
+                .short("F")
+                .long("function"),
+        )
+        .arg(
             Arg::with_name("count")
                 .help("Count nodes of the given type: comma separated list")
                 .short("C")
@@ -380,6 +391,7 @@ fn main() {
     let paths: Vec<_> = matches.values_of("paths").unwrap().collect();
     let paths: Vec<String> = paths.iter().map(|x| x.to_string()).collect();
     let dump = matches.is_present("dump");
+    let function = matches.is_present("function");
     let in_place = matches.is_present("in_place");
     let comments = matches.is_present("remove_comments");
     let find = matches.value_of("find").unwrap();
@@ -451,6 +463,7 @@ fn main() {
         comments,
         find_filter,
         count_filter,
+        function,
         metrics,
         line_start,
         line_end,

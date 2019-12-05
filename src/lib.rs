@@ -43,6 +43,9 @@ pub use crate::getter::*;
 pub mod find;
 pub use crate::find::*;
 
+pub mod function;
+pub use crate::function::*;
+
 pub mod count;
 pub use crate::count::*;
 

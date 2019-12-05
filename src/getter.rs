@@ -117,10 +117,6 @@ impl Getter for RustCode {
 }
 
 impl Getter for CCode {
-    fn get_func_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        Self::get_func_space_name(node, code)
-    }
-
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
         // we're in a function_definition so need to get the declarator
         if let Some(declarator) = node.child_by_field_name("declarator") {
@@ -133,7 +129,7 @@ impl Getter for CCode {
                 }
             }
         }
-        Some("<anonymous>")
+        None
     }
 
     fn get_kind(node: &Node) -> NodeKind {
@@ -149,10 +145,6 @@ impl Getter for CCode {
 }
 
 impl Getter for CppCode {
-    fn get_func_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        Self::get_func_space_name(node, code)
-    }
-
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
         let typ = node.kind_id();
         match typ.into() {
@@ -166,7 +158,14 @@ impl Getter for CppCode {
                     }) {
                         if let Some(first) = fd.child(0) {
                             match first.kind_id().into() {
-                                Cpp::ScopedIdentifier | Cpp::Identifier => {
+                                Cpp::ScopedIdentifier
+                                | Cpp::Identifier
+                                | Cpp::FieldIdentifier
+                                | Cpp::ScopedFieldIdentifier
+                                | Cpp::DestructorName
+                                | Cpp::OperatorName
+                                | Cpp::TemplateFunction
+                                | Cpp::TemplateMethod => {
                                     let code = &code[first.start_byte()..first.end_byte()];
                                     return std::str::from_utf8(code).ok();
                                 }
@@ -183,8 +182,7 @@ impl Getter for CppCode {
                 }
             }
         }
-
-        Some("<anonymous>")
+        None
     }
 
     fn get_kind(node: &Node) -> NodeKind {

@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 use super::ast::{AstCallback, AstCfg, AstPayload};
 use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebCommentPayload};
+use super::function::{WebFunctionCallback, WebFunctionCfg, WebFunctionInfo, WebFunctionPayload};
 use super::metrics::{WebMetricsCallback, WebMetricsCfg, WebMetricsInfo, WebMetricsPayload};
 use crate::languages::action;
 use crate::tools::get_language_for_file;
@@ -130,6 +131,46 @@ fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
     }
 }
 
+fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -> HttpResponse {
+    let path = PathBuf::from(&item.file_name);
+    let language = get_language_for_file(&path);
+    let payload = item.into_inner();
+    if let Some(language) = language {
+        let cfg = WebFunctionCfg { id: payload.id };
+        HttpResponse::Ok().json(action::<WebFunctionCallback>(
+            &language,
+            payload.code.into_bytes(),
+            &PathBuf::from(""),
+            None,
+            cfg,
+        ))
+    } else {
+        HttpResponse::NotFound().json(Error {
+            id: payload.id,
+            error: INVALID_LANGUAGE,
+        })
+    }
+}
+
+fn function_plain(code: Bytes, info: Query<WebFunctionInfo>) -> HttpResponse {
+    let path = PathBuf::from(&info.file_name);
+    let language = get_language_for_file(&path);
+    if let Some(language) = language {
+        let cfg = WebFunctionCfg { id: "".to_string() };
+        HttpResponse::Ok().json(action::<WebFunctionCallback>(
+            &language,
+            code.to_vec(),
+            &PathBuf::from(""),
+            None,
+            cfg,
+        ))
+    } else {
+        HttpResponse::NotFound()
+            .header(http::header::CONTENT_TYPE, "text/plain")
+            .body(format!("error: {}", INVALID_LANGUAGE))
+    }
+}
+
 fn ping() -> HttpResponse {
     HttpResponse::Ok().body(Body::Empty)
 }
@@ -165,6 +206,18 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
                     .guard(guard::Header("content-type", "application/octet-stream"))
                     .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
                     .route(web::post().to(metrics_plain)),
+            )
+            .service(
+                web::resource("/function")
+                    .guard(guard::Header("content-type", "application/json"))
+                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                    .route(web::post().to(function_json)),
+            )
+            .service(
+                web::resource("/function")
+                    .guard(guard::Header("content-type", "application/octet-stream"))
+                    .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                    .route(web::post().to(function_plain)),
             )
             .service(web::resource("/ping").route(web::get().to(ping)))
     })
@@ -565,6 +618,75 @@ mod tests {
                                                "loc": {"lloc": 2.0, "sloc": 2.0}},
                                    "name": "foo",
                                    "spaces": []}]}
+        });
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_function_json() {
+        let mut app = test::init_service(
+            App::new().service(web::resource("/function").route(web::post().to(function_json))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/function")
+            .set_json(&WebCommentPayload {
+                id: "1234".to_string(),
+                file_name: "test.py".to_string(),
+                code: "def foo():\n    pass\n\ndef bar():\n    pass".to_string(),
+            })
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "1234",
+            "spans": [
+                {
+                    "end_line": 2,
+                    "error": false,
+                    "name": "foo",
+                    "start_line": 1
+                },
+                {
+                    "end_line": 5,
+                    "error": false,
+                    "name": "bar",
+                    "start_line": 4
+                }
+            ]
+        });
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_function_plain() {
+        let mut app = test::init_service(
+            App::new().service(web::resource("/function").route(web::post().to(function_plain))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/function?file_name=test.py")
+            .set(ContentType::plaintext())
+            .set_payload("def foo():\n    pass\n\ndef bar():\n    pass")
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "",
+            "spans": [
+                {
+                    "end_line": 2,
+                    "error": false,
+                    "name": "foo",
+                    "start_line": 1
+                },
+                {
+                    "end_line": 5,
+                    "error": false,
+                    "name": "bar",
+                    "start_line": 4
+                }
+            ]
         });
 
         assert_eq!(res, expected);

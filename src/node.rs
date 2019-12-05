@@ -29,4 +29,28 @@ impl<'a> Search<'a> for Node<'a> {
 
         None
     }
+
+    fn act_on_node(&self, action: &mut dyn FnMut(&Node<'a>)) {
+        let mut cursor = self.walk();
+        let mut stack = Vec::new();
+        let mut children = Vec::new();
+
+        stack.push(*self);
+
+        while let Some(node) = stack.pop() {
+            action(&node);
+            cursor.reset(node);
+            if cursor.goto_first_child() {
+                loop {
+                    children.push(cursor.node());
+                    if !cursor.goto_next_sibling() {
+                        break;
+                    }
+                }
+                for child in children.drain(..).rev() {
+                    stack.push(child);
+                }
+            }
+        }
+    }
 }

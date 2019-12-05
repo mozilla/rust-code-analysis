@@ -20,7 +20,7 @@ fn parse(samples: &[&str], debug: bool, c: bool) {
             let root = parser.get_root();
             if debug || root.has_error() {
                 eprintln!("Sample (C) {}: {}", n, sample);
-                dump_node(&v_sample, &root, -1, None, None);
+                dump_node(&v_sample, &root, -1, None, None).unwrap();
             }
             assert!(!root.has_error());
         } else {
@@ -28,7 +28,7 @@ fn parse(samples: &[&str], debug: bool, c: bool) {
             let root = parser.get_root();
             if debug || root.has_error() {
                 eprintln!("Sample (CPP) {}: {}", n, sample);
-                dump_node(&v_sample, &root, -1, None, None);
+                dump_node(&v_sample, &root, -1, None, None).unwrap();
             }
             assert!(!root.has_error());
         }

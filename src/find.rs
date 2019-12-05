@@ -52,7 +52,7 @@ impl Callback for Find {
             if !good.is_empty() {
                 println!("In file {:?}", cfg.path);
                 for node in good {
-                    dump_node(parser.get_code(), &node, 1, cfg.line_start, cfg.line_end);
+                    dump_node(parser.get_code(), &node, 1, cfg.line_start, cfg.line_end)?;
                 }
                 println!();
             }
