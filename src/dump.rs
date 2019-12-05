@@ -10,10 +10,10 @@ pub fn dump_node(
     depth: i32,
     line_start: Option<usize>,
     line_end: Option<usize>,
-) {
+) -> std::io::Result<()> {
     let stdout = StandardStream::stdout(ColorChoice::Always);
     let mut stdout = stdout.lock();
-    dump_tree_helper(
+    let ret = dump_tree_helper(
         &code,
         &node,
         "",
@@ -23,7 +23,10 @@ pub fn dump_node(
         &line_start,
         &line_end,
     );
+
     color!(stdout, White);
+
+    ret
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -36,9 +39,9 @@ fn dump_tree_helper(
     depth: i32,
     line_start: &Option<usize>,
     line_end: &Option<usize>,
-) {
+) -> std::io::Result<()> {
     if depth == 0 {
-        return;
+        return Ok(());
     }
 
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
@@ -54,39 +57,39 @@ fn dump_tree_helper(
 
     if display {
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Yellow, true);
-        write!(stdout, "{{{}:{}}} ", node.kind(), node.kind_id()).unwrap();
+        write!(stdout, "{{{}:{}}} ", node.kind(), node.kind_id())?;
 
         color!(stdout, White);
-        write!(stdout, "from ").unwrap();
+        write!(stdout, "from ")?;
 
         color!(stdout, Green);
         let pos = node.start_position();
-        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
+        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
         color!(stdout, White);
-        write!(stdout, "to ").unwrap();
+        write!(stdout, "to ")?;
 
         color!(stdout, Green);
         let pos = node.end_position();
-        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1).unwrap();
+        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
         if node.start_position().row == node.end_position().row {
             color!(stdout, White);
-            write!(stdout, ": ").unwrap();
+            write!(stdout, ": ")?;
 
             color!(stdout, Red, true);
             let code = &code[node.start_byte()..node.end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
-                write!(stdout, "{} ", code).unwrap();
+                write!(stdout, "{} ", code)?;
             } else {
                 stdout.write_all(code).unwrap();
             }
         }
 
-        writeln!(stdout).unwrap();
+        writeln!(stdout)?;
     }
 
     let count = node.child_count();
@@ -107,12 +110,14 @@ fn dump_tree_helper(
                 depth - 1,
                 line_start,
                 line_end,
-            );
+            )?;
             if !cursor.goto_next_sibling() {
                 break;
             }
         }
     }
+
+    Ok(())
 }
 
 pub struct DumpCfg {
@@ -123,7 +128,7 @@ pub struct DumpCfg {
 pub struct Dump {}
 
 impl Callback for Dump {
-    type Res = ();
+    type Res = std::io::Result<()>;
     type Cfg = DumpCfg;
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
@@ -133,6 +138,6 @@ impl Callback for Dump {
             -1,
             cfg.line_start,
             cfg.line_end,
-        );
+        )
     }
 }

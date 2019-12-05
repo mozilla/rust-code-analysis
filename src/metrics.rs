@@ -95,37 +95,46 @@ impl<'a> FuncSpace<'a> {
         }
     }
 
-    fn dump_root(&self) {
+    fn dump_root(&self) -> std::io::Result<()> {
         let stdout = StandardStream::stdout(ColorChoice::Always);
         let mut stdout = stdout.lock();
-        Self::dump_space(&self, "", true, &mut stdout);
+        Self::dump_space(&self, "", true, &mut stdout)?;
         color!(stdout, White);
+
+        Ok(())
     }
 
-    fn dump_space(space: &FuncSpace, prefix: &str, last: bool, stdout: &mut StandardStreamLock) {
+    fn dump_space(
+        space: &FuncSpace,
+        prefix: &str,
+        last: bool,
+        stdout: &mut StandardStreamLock,
+    ) -> std::io::Result<()> {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Yellow, true);
-        write!(stdout, "{}: ", space.kind).unwrap();
+        write!(stdout, "{}: ", space.kind)?;
 
         color!(stdout, Cyan, true);
-        write!(stdout, "{}", space.name.map_or("", |name| name)).unwrap();
+        write!(stdout, "{}", space.name.map_or("", |name| name))?;
 
         color!(stdout, Red, true);
-        writeln!(stdout, " (@{})", space.line).unwrap();
+        writeln!(stdout, " (@{})", space.line)?;
 
         let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_metrics(&space.metrics, &prefix, space.spaces.is_empty(), stdout);
+        Self::dump_metrics(&space.metrics, &prefix, space.spaces.is_empty(), stdout)?;
 
         if let Some((last, spaces)) = space.spaces.split_last() {
             for space in spaces {
-                Self::dump_space(space, &prefix, false, stdout);
+                Self::dump_space(space, &prefix, false, stdout)?;
             }
-            Self::dump_space(last, &prefix, true, stdout);
+            Self::dump_space(last, &prefix, true, stdout)?;
         }
+
+        Ok(())
     }
 
     fn dump_metrics(
@@ -133,19 +142,19 @@ impl<'a> FuncSpace<'a> {
         prefix: &str,
         last: bool,
         stdout: &mut StandardStreamLock,
-    ) {
+    ) -> std::io::Result<()> {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Yellow, true);
-        writeln!(stdout, "metrics").unwrap();
+        writeln!(stdout, "metrics")?;
 
         let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout);
-        Self::dump_halstead(&metrics.halstead, &prefix, false, stdout);
-        Self::dump_sloc(&metrics.sloc, &prefix, true, stdout);
+        Self::dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout)?;
+        Self::dump_halstead(&metrics.halstead, &prefix, false, stdout)?;
+        Self::dump_sloc(&metrics.sloc, &prefix, true, stdout)
     }
 
     fn dump_cyclomatic(
@@ -153,17 +162,17 @@ impl<'a> FuncSpace<'a> {
         prefix: &str,
         last: bool,
         stdout: &mut StandardStreamLock,
-    ) {
+    ) -> std::io::Result<()> {
         let pref = if last { "`- " } else { "|- " };
 
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Green, true);
-        write!(stdout, "cyclomatic: ").unwrap();
+        write!(stdout, "cyclomatic: ")?;
 
         color!(stdout, White);
-        writeln!(stdout, "{}", stats.cyclomatic()).unwrap();
+        writeln!(stdout, "{}", stats.cyclomatic())
     }
 
     fn dump_halstead(
@@ -171,14 +180,14 @@ impl<'a> FuncSpace<'a> {
         prefix: &str,
         last: bool,
         stdout: &mut StandardStreamLock,
-    ) {
+    ) -> std::io::Result<()> {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Green, true);
-        writeln!(stdout, "halstead").unwrap();
+        writeln!(stdout, "halstead")?;
 
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_value(
@@ -187,51 +196,62 @@ impl<'a> FuncSpace<'a> {
             &prefix,
             false,
             stdout,
-        );
-        Self::dump_value("operands", stats.operands(), &prefix, false, stdout);
+        )?;
+        Self::dump_value("operands", stats.operands(), &prefix, false, stdout)?;
         Self::dump_value(
             "unique operators",
             stats.u_operators(),
             &prefix,
             false,
             stdout,
-        );
-        Self::dump_value("operators", stats.operators(), &prefix, false, stdout);
-        Self::dump_value("length", stats.length(), &prefix, false, stdout);
-        Self::dump_value("size", stats.size(), &prefix, false, stdout);
-        Self::dump_value("volume", stats.volume(), &prefix, false, stdout);
-        Self::dump_value("difficulty", stats.difficulty(), &prefix, false, stdout);
-        Self::dump_value("level", stats.level(), &prefix, false, stdout);
-        Self::dump_value("effort", stats.effort(), &prefix, false, stdout);
-        Self::dump_value("time", stats.time(), &prefix, false, stdout);
-        Self::dump_value("bugs", stats.bugs(), &prefix, true, stdout);
+        )?;
+        Self::dump_value("operators", stats.operators(), &prefix, false, stdout)?;
+        Self::dump_value("length", stats.length(), &prefix, false, stdout)?;
+        Self::dump_value("size", stats.size(), &prefix, false, stdout)?;
+        Self::dump_value("volume", stats.volume(), &prefix, false, stdout)?;
+        Self::dump_value("difficulty", stats.difficulty(), &prefix, false, stdout)?;
+        Self::dump_value("level", stats.level(), &prefix, false, stdout)?;
+        Self::dump_value("effort", stats.effort(), &prefix, false, stdout)?;
+        Self::dump_value("time", stats.time(), &prefix, false, stdout)?;
+        Self::dump_value("bugs", stats.bugs(), &prefix, true, stdout)
     }
 
-    fn dump_sloc(stats: &sloc::Stats, prefix: &str, last: bool, stdout: &mut StandardStreamLock) {
+    fn dump_sloc(
+        stats: &sloc::Stats,
+        prefix: &str,
+        last: bool,
+        stdout: &mut StandardStreamLock,
+    ) -> std::io::Result<()> {
         let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Green, true);
-        writeln!(stdout, "loc").unwrap();
+        writeln!(stdout, "loc")?;
 
         let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout);
-        Self::dump_value("lloc", stats.lloc(), &prefix, true, stdout);
+        Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
+        Self::dump_value("lloc", stats.lloc(), &prefix, true, stdout)
     }
 
-    fn dump_value(name: &str, val: f64, prefix: &str, last: bool, stdout: &mut StandardStreamLock) {
+    fn dump_value(
+        name: &str,
+        val: f64,
+        prefix: &str,
+        last: bool,
+        stdout: &mut StandardStreamLock,
+    ) -> std::io::Result<()> {
         let pref = if last { "`- " } else { "|- " };
 
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref).unwrap();
+        write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Magenta, true);
-        write!(stdout, "{}: ", name).unwrap();
+        write!(stdout, "{}: ", name)?;
 
         color!(stdout, White);
-        writeln!(stdout, "{}", val).unwrap();
+        writeln!(stdout, "{}", val)
     }
 }
 
@@ -313,12 +333,14 @@ pub struct MetricsCfg {
 pub struct Metrics {}
 
 impl Callback for Metrics {
-    type Res = ();
+    type Res = std::io::Result<()>;
     type Cfg = MetricsCfg;
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {
-            space.dump_root();
+            space.dump_root()
+        } else {
+            Ok(())
         }
     }
 }

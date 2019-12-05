@@ -66,13 +66,11 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
             line_start: cfg.line_start,
             line_end: cfg.line_end,
         };
-        action::<Dump>(&language, source, &path, pr, cfg);
-        Ok(())
+        action::<Dump>(&language, source, &path, pr, cfg)
     } else if cfg.metrics {
         let source = read_file_with_eol(&path)?;
         let cfg = MetricsCfg { path };
-        action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg);
-        Ok(())
+        action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
     } else if cfg.comments {
         let source = read_file_with_eol(&path)?;
         let lang = get_language_for_file(&path);
