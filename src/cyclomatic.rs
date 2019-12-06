@@ -9,11 +9,15 @@ use crate::*;
 #[derive(Debug)]
 pub struct Stats {
     cyclomatic: f64,
+    n: usize,
 }
 
 impl Default for Stats {
     fn default() -> Self {
-        Self { cyclomatic: 1. }
+        Self {
+            cyclomatic: 1.,
+            n: 1,
+        }
     }
 }
 
@@ -22,7 +26,7 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        serializer.serialize_f64(self.cyclomatic)
+        serializer.serialize_f64(self.cyclomatic())
     }
 }
 
@@ -35,10 +39,11 @@ impl fmt::Display for Stats {
 impl Stats {
     pub fn merge(&mut self, other: &Stats) {
         self.cyclomatic += other.cyclomatic;
+        self.n += other.n;
     }
 
     pub fn cyclomatic(&self) -> f64 {
-        self.cyclomatic
+        self.cyclomatic / self.n as f64
     }
 }
 
