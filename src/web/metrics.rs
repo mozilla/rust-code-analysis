@@ -10,6 +10,7 @@ pub struct WebMetricsPayload {
     pub id: String,
     pub file_name: String,
     pub code: String,
+    pub unit: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -21,6 +22,7 @@ pub struct WebMetricsResponse<'a> {
 #[derive(Debug, Deserialize)]
 pub struct WebMetricsInfo {
     pub file_name: String,
+    pub unit: Option<String>,
 }
 
 pub struct WebMetricsCallback {}
@@ -28,6 +30,7 @@ pub struct WebMetricsCallback {}
 pub struct WebMetricsCfg {
     pub id: String,
     pub path: PathBuf,
+    pub unit: bool,
 }
 
 impl Callback for WebMetricsCallback {
@@ -36,6 +39,17 @@ impl Callback for WebMetricsCallback {
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         let spaces = metrics(parser, &cfg.path);
+        let spaces = if cfg.unit {
+            if let Some(mut spaces) = spaces {
+                spaces.spaces.clear();
+                Some(spaces)
+            } else {
+                None
+            }
+        } else {
+            spaces
+        };
+
         serde_json::to_value(WebMetricsResponse { id: cfg.id, spaces }).unwrap()
     }
 }

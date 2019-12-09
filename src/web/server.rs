@@ -93,6 +93,7 @@ fn metrics_json(item: web::Json<WebMetricsPayload>, _req: HttpRequest) -> HttpRe
         let cfg = WebMetricsCfg {
             id: payload.id,
             path,
+            unit: payload.unit,
         };
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -116,6 +117,10 @@ fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
         let cfg = WebMetricsCfg {
             id: "".to_string(),
             path,
+            unit: info
+                .unit
+                .as_ref()
+                .map_or(false, |s| s == "1" || s == "true"),
         };
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -519,10 +524,11 @@ mod tests {
         );
         let req = test::TestRequest::post()
             .uri("/metrics")
-            .set_json(&WebCommentPayload {
+            .set_json(&WebMetricsPayload {
                 id: "1234".to_string(),
                 file_name: "test.py".to_string(),
                 code: "def foo():\n    pass\n".to_string(),
+                unit: false,
             })
             .to_request();
 
@@ -564,6 +570,47 @@ mod tests {
                                                "loc": {"lloc": 2.0, "sloc": 2.0}},
                                    "name": "foo",
                                    "spaces": []}]}
+        });
+
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_web_metrics_json_unit() {
+        let mut app = test::init_service(
+            App::new().service(web::resource("/metrics").route(web::post().to(metrics_json))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/metrics")
+            .set_json(&WebMetricsPayload {
+                id: "1234".to_string(),
+                file_name: "test.py".to_string(),
+                code: "def foo():\n    pass\n".to_string(),
+                unit: true,
+            })
+            .to_request();
+
+        let res: Value = test::read_response_json(&mut app, req);
+        let expected = json!({
+            "id": "1234",
+            "spaces": {"kind": "unit",
+                       "line": 1,
+                       "metrics": {"cyclomatic": 1.0,
+                                   "halstead": {"bugs": 0.000_942_552_557_372_941_4,
+                                                "difficulty": 1.0,
+                                                "effort": 4.754_887_502_163_468,
+                                                "length": 3.0,
+                                                "level": 1.0,
+                                                "operands": 1.0,
+                                                "operators": 2.0,
+                                                "size": 3.0,
+                                                "time": 0.264_160_416_786_859_36,
+                                                "unique_operands": 1.0,
+                                                "unique_operators": 2.0,
+                                                "volume": 4.754_887_502_163_468},
+                                   "loc": {"lloc": 2.0, "sloc": 3.0}},
+                       "name": "test.py",
+                       "spaces": []}
         });
 
         assert_eq!(res, expected);
