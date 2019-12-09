@@ -154,7 +154,8 @@ impl Checker for MozjsCode {
         Function,
         GeneratorFunction,
         FunctionDeclaration,
-        GeneratorFunctionDeclaration
+        GeneratorFunctionDeclaration,
+        MethodDefinition
     );
     mk_checker!(
         is_func_space,
@@ -163,6 +164,7 @@ impl Checker for MozjsCode {
         Class,
         GeneratorFunction,
         FunctionDeclaration,
+        MethodDefinition,
         GeneratorFunctionDeclaration,
         ClassDeclaration
     );
@@ -177,7 +179,8 @@ impl Checker for JavascriptCode {
         Function,
         GeneratorFunction,
         FunctionDeclaration,
-        GeneratorFunctionDeclaration
+        GeneratorFunctionDeclaration,
+        MethodDefinition
     );
     mk_checker!(
         is_func_space,
@@ -186,6 +189,7 @@ impl Checker for JavascriptCode {
         GeneratorFunction,
         Class,
         FunctionDeclaration,
+        MethodDefinition,
         GeneratorFunctionDeclaration,
         ClassDeclaration
     );
@@ -200,7 +204,8 @@ impl Checker for TypescriptCode {
         Function,
         GeneratorFunction,
         FunctionDeclaration,
-        GeneratorFunctionDeclaration
+        GeneratorFunctionDeclaration,
+        MethodDefinition
     );
     mk_checker!(
         is_func_space,
@@ -209,6 +214,7 @@ impl Checker for TypescriptCode {
         Class,
         GeneratorFunction,
         FunctionDeclaration,
+        MethodDefinition,
         GeneratorFunctionDeclaration,
         ClassDeclaration
     );
@@ -223,7 +229,8 @@ impl Checker for TsxCode {
         Function,
         GeneratorFunction,
         FunctionDeclaration,
-        GeneratorFunctionDeclaration
+        GeneratorFunctionDeclaration,
+        MethodDefinition
     );
     mk_checker!(
         is_func_space,
@@ -232,6 +239,7 @@ impl Checker for TsxCode {
         GeneratorFunction,
         Class,
         FunctionDeclaration,
+        MethodDefinition,
         GeneratorFunction,
         GeneratorFunctionDeclaration,
         ClassDeclaration

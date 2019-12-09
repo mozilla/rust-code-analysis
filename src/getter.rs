@@ -43,12 +43,42 @@ impl Getter for MozjsCode {
 
         let typ = node.kind_id();
         match typ.into() {
-            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
-                NodeKind::Function
-            }
+            Function
+            | MethodDefinition
+            | GeneratorFunction
+            | FunctionDeclaration
+            | GeneratorFunctionDeclaration => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
+        }
+    }
+
+    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        if let Some(name) = node.child_by_field_name("name") {
+            let code = &code[name.start_byte()..name.end_byte()];
+            std::str::from_utf8(code).ok()
+        } else {
+            // We can be in a pair: foo: function() {}
+            // Or in a variable declaration: var aFun = function() {}
+            if let Some(parent) = node.parent() {
+                match parent.kind_id().into() {
+                    Mozjs::Pair => {
+                        if let Some(name) = parent.child_by_field_name("key") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    Mozjs::VariableDeclarator => {
+                        if let Some(name) = parent.child_by_field_name("name") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Some("<anonymous>")
         }
     }
 }
@@ -59,12 +89,42 @@ impl Getter for JavascriptCode {
 
         let typ = node.kind_id();
         match typ.into() {
-            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
-                NodeKind::Function
-            }
+            Function
+            | MethodDefinition
+            | GeneratorFunction
+            | FunctionDeclaration
+            | GeneratorFunctionDeclaration => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
+        }
+    }
+
+    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        if let Some(name) = node.child_by_field_name("name") {
+            let code = &code[name.start_byte()..name.end_byte()];
+            std::str::from_utf8(code).ok()
+        } else {
+            // We can be in a pair: foo: function() {}
+            // Or in a variable declaration: var aFun = function() {}
+            if let Some(parent) = node.parent() {
+                match parent.kind_id().into() {
+                    Mozjs::Pair => {
+                        if let Some(name) = parent.child_by_field_name("key") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    Mozjs::VariableDeclarator => {
+                        if let Some(name) = parent.child_by_field_name("name") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Some("<anonymous>")
         }
     }
 }
@@ -75,12 +135,42 @@ impl Getter for TypescriptCode {
 
         let typ = node.kind_id();
         match typ.into() {
-            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
-                NodeKind::Function
-            }
+            Function
+            | MethodDefinition
+            | GeneratorFunction
+            | FunctionDeclaration
+            | GeneratorFunctionDeclaration => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
+        }
+    }
+
+    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        if let Some(name) = node.child_by_field_name("name") {
+            let code = &code[name.start_byte()..name.end_byte()];
+            std::str::from_utf8(code).ok()
+        } else {
+            // We can be in a pair: foo: function() {}
+            // Or in a variable declaration: var aFun = function() {}
+            if let Some(parent) = node.parent() {
+                match parent.kind_id().into() {
+                    Mozjs::Pair => {
+                        if let Some(name) = parent.child_by_field_name("key") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    Mozjs::VariableDeclarator => {
+                        if let Some(name) = parent.child_by_field_name("name") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Some("<anonymous>")
         }
     }
 }
@@ -91,12 +181,42 @@ impl Getter for TsxCode {
 
         let typ = node.kind_id();
         match typ.into() {
-            Function | GeneratorFunction | FunctionDeclaration | GeneratorFunctionDeclaration => {
-                NodeKind::Function
-            }
+            Function
+            | MethodDefinition
+            | GeneratorFunction
+            | FunctionDeclaration
+            | GeneratorFunctionDeclaration => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
+        }
+    }
+
+    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        if let Some(name) = node.child_by_field_name("name") {
+            let code = &code[name.start_byte()..name.end_byte()];
+            std::str::from_utf8(code).ok()
+        } else {
+            // We can be in a pair: foo: function() {}
+            // Or in a variable declaration: var aFun = function() {}
+            if let Some(parent) = node.parent() {
+                match parent.kind_id().into() {
+                    Mozjs::Pair => {
+                        if let Some(name) = parent.child_by_field_name("key") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    Mozjs::VariableDeclarator => {
+                        if let Some(name) = parent.child_by_field_name("name") {
+                            let code = &code[name.start_byte()..name.end_byte()];
+                            return std::str::from_utf8(code).ok();
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            Some("<anonymous>")
         }
     }
 }
