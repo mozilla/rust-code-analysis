@@ -1374,7 +1374,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "actix-http 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "actix-rt 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
