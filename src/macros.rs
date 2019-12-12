@@ -83,6 +83,22 @@ macro_rules! mk_extensions {
 }
 
 #[macro_export]
+macro_rules! mk_emacs_mode {
+    ( $( ($camel:ident, [ $( $emacs_mode:expr ),* ]) ),* ) => {
+        pub fn get_from_emacs_mode(mode: &str) -> Option<LANG>{
+            match mode {
+                $(
+                    $(
+                        $emacs_mode => Some(LANG::$camel),
+                    )*
+                )*
+                _ => None,
+            }
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! mk_code {
     ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident) ),* ) => {
         $(
@@ -110,12 +126,13 @@ macro_rules! mk_code {
 
 #[macro_export]
 macro_rules! mk_langs {
-    ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ]) ),* ) => {
+    ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
         mk_extern!($( $name ),*);
         mk_enum!($( $camel ),*);
         mk_get_language!($( ($camel, $name) ),*);
         mk_action!($( ($camel, $parser) ),*);
         mk_extensions!($( ($camel, [ $( $ext ),* ]) ),*);
+        mk_emacs_mode!($( ($camel, [ $( $emacs_mode ),* ]) ),*);
         mk_code!($( ($camel, $code, $parser, $name) ),*);
     };
 }

@@ -63,6 +63,7 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
     let pr = cfg.preproc;
     if cfg.dump {
         let source = read_file_with_eol(&path)?;
+        let language = guess_language(&source).unwrap_or(language);
         let cfg = DumpCfg {
             line_start: cfg.line_start,
             line_end: cfg.line_end,
@@ -70,10 +71,12 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         action::<Dump>(&language, source, &path, pr, cfg)
     } else if cfg.metrics {
         let source = read_file_with_eol(&path)?;
+        let language = guess_language(&source).unwrap_or(language);
         let cfg = MetricsCfg { path };
         action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
     } else if cfg.comments {
         let source = read_file_with_eol(&path)?;
+        let language = guess_language(&source).unwrap_or(language);
         let lang = get_language_for_file(&path);
         let cfg = CommentRmCfg {
             in_place: cfg.in_place,
@@ -90,10 +93,12 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         }
     } else if cfg.function {
         let source = read_file_with_eol(&path)?;
+        let language = guess_language(&source).unwrap_or(language);
         let cfg = FunctionCfg { path: path.clone() };
         action::<Function>(&language, source, &path, pr, cfg)
     } else if !cfg.find_filter.is_empty() {
         let source = read_file_with_eol(&path)?;
+        let language = guess_language(&source).unwrap_or(language);
         let cfg = FindCfg {
             path: Some(path.clone()),
             filters: cfg.find_filter,
@@ -103,6 +108,7 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         action::<Find>(&language, source, &path, pr, cfg)
     } else if cfg.count_lock.is_some() {
         let source = read_file_with_eol(&path)?;
+        let language = guess_language(&source).unwrap_or(language);
         let cfg = CountCfg {
             path: Some(path.clone()),
             filters: cfg.count_filter,

@@ -1,4 +1,5 @@
 use crate::languages::*;
+use regex::bytes::Regex;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read, Write};
@@ -61,6 +62,53 @@ pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
         None
     }
 }
+
+pub fn get_language_with_mode(lang: &[u8]) -> Option<LANG> {
+    if let Some(lang) = std::str::from_utf8(lang)
+        .ok()
+        .map(|l| l.to_lowercase())
+        .as_ref()
+    {
+        get_from_emacs_mode(lang)
+    } else {
+        None
+    }
+}
+
+pub fn guess_language(buf: &[u8]) -> Option<LANG> {
+    // we just try to use the emacs info (if there)
+    lazy_static! {
+        // comment containing coding info are useful
+        static ref RE1_EMACS: Regex = Regex::new(r"(?i)-\*-.*[^-\w]mode\s*:\s*([^:;\s]+)").unwrap();
+        static ref RE2_EMACS: Regex = Regex::new(r"-\*-\s*([^:;\s]+)\s*-\*-").unwrap();
+        static ref RE1_VIM: Regex = Regex::new(r"(?i)vim\s*:.*[^\w]ft\s*=\s*([^:\s]+)").unwrap();
+    }
+
+    for (i, line) in buf.splitn(5, |c| *c == b'\n').enumerate() {
+        if let Some(cap) = RE1_EMACS.captures_iter(line).next() {
+            return get_language_with_mode(&cap[1]);
+        } else if let Some(cap) = RE2_EMACS.captures_iter(line).next() {
+            return get_language_with_mode(&cap[1]);
+        } else if let Some(cap) = RE1_VIM.captures_iter(line).next() {
+            return get_language_with_mode(&cap[1]);
+        }
+        if i == 3 {
+            break;
+        }
+    }
+
+    for (i, line) in buf.rsplitn(5, |c| *c == b'\n').enumerate() {
+        if let Some(cap) = RE1_VIM.captures_iter(line).next() {
+            return get_language_with_mode(&cap[1]);
+        }
+        if i == 3 {
+            break;
+        }
+    }
+
+    None
+}
+
 pub fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
     // Copied from Cargo sources: https://github.com/rust-lang/cargo/blob/master/src/cargo/util/paths.rs#L65
     let mut components = path.as_ref().components().peekable();
@@ -193,5 +241,26 @@ mod tests {
             let res = read_file_with_eol(&tmp_path).unwrap();
             assert!(res == expected);
         }
+    }
+
+    #[test]
+    fn test_guess_language() {
+        let buf = b"// -*- foo: bar; mode: c++; hello: world\n";
+        assert_eq!(guess_language(buf), Some(LANG::Cpp));
+
+        let buf = b"// -*- c++ -*-\n";
+        assert_eq!(guess_language(buf), Some(LANG::Cpp));
+
+        let buf = b"// -*- foo: bar; bar-mode: c++; hello: world\n";
+        assert_eq!(guess_language(buf), None);
+
+        let buf = b"/* hello world */\n";
+        assert_eq!(guess_language(buf), None);
+
+        let buf = b"\n\n\n\n\n\n\n\n\n// vim: set ts=4 ft=c++\n\n\n";
+        assert_eq!(guess_language(buf), Some(LANG::Cpp));
+
+        let buf = b"\n\n\n\n\n\n\n\n\n\n\n\n";
+        assert_eq!(guess_language(buf), None);
     }
 }
