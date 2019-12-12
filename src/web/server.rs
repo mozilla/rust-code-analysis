@@ -76,20 +76,20 @@ fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -
     }
 }
 
-fn comment_removal_plain(code: String, info: Query<WebCommentInfo>) -> HttpResponse {
+fn comment_removal_plain(code: Bytes, info: Query<WebCommentInfo>) -> HttpResponse {
     let language = get_language_for_file(&PathBuf::from(&info.file_name));
     if let Some(language) = language {
-        let buf = code.into_bytes();
+        let buf = code.to_vec();
         let language = guess_language(&buf).unwrap_or(language);
         let cfg = WebCommentCfg { id: "".to_string() };
         let res = action::<WebCommentCallback>(&language, buf, &PathBuf::from(""), None, cfg);
         if let Some(res_code) = res.code {
             HttpResponse::Ok()
-                .header(http::header::CONTENT_TYPE, "text/plain")
+                .header(http::header::CONTENT_TYPE, "application/octet-stream")
                 .body(res_code)
         } else {
             HttpResponse::NoContent()
-                .header(http::header::CONTENT_TYPE, "text/plain")
+                .header(http::header::CONTENT_TYPE, "application/octet-stream")
                 .body(Body::Empty)
         }
     } else {
@@ -218,7 +218,7 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
             )
             .service(
                 web::resource("/comment")
-                    .guard(guard::Header("content-type", "text/plain"))
+                    .guard(guard::Header("content-type", "application/octet-stream"))
                     .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
                     .route(web::post().to(comment_removal_plain)),
             )
