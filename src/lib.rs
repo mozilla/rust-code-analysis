@@ -81,9 +81,6 @@ pub use crate::dump::*;
 mod language_ccomment;
 pub use crate::language_ccomment::*;
 
-mod language_c;
-pub use crate::language_c::*;
-
 mod language_cpp;
 pub use crate::language_cpp::*;
 

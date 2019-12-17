@@ -137,19 +137,6 @@ impl Cyclomatic for RustCode {
     }
 }
 
-impl Cyclomatic for CCode {
-    fn compute(node: &Node, stats: &mut Stats) {
-        use C::*;
-
-        match node.kind_id().into() {
-            If | For | While | Case | ConditionalExpression | AMPAMP | PIPEPIPE => {
-                stats.cyclomatic += 1.;
-            }
-            _ => {}
-        }
-    }
-}
-
 impl Cyclomatic for CppCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Cpp::*;

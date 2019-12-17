@@ -139,7 +139,6 @@ fn main() {
     }
     let ignore = vec![
         "tree-sitter-typescript".to_string(),
-        "tree-sitter-c".to_string(),
         "tree-sitter-cpp".to_string(),
     ];
     let dirs = collect_tree_sitter_dirs(ignore);

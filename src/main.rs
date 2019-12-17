@@ -83,7 +83,7 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
             path,
         };
         if let Some(lang) = lang {
-            if lang == LANG::C || lang == LANG::Cpp {
+            if lang == LANG::Cpp {
                 action::<CommentRm>(&LANG::Ccomment, source, &cfg.path.clone(), pr, cfg)
             } else {
                 action::<CommentRm>(&language, source, &cfg.path.clone(), pr, cfg)
@@ -117,7 +117,7 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         action::<Count>(&language, source, &path, pr, cfg)
     } else if cfg.preproc_lock.is_some() {
         if let Some(lang) = get_language_for_file(&path) {
-            if lang == LANG::C || lang == LANG::Cpp {
+            if lang == LANG::Cpp {
                 let source = read_file_with_eol(&path)?;
                 preprocess(
                     &PreprocParser::new(source, &path, None),

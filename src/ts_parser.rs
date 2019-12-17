@@ -56,7 +56,7 @@ fn get_fake_code<T: TSLanguage>(
 ) -> Option<Vec<u8>> {
     if let Some(pr) = pr {
         match T::get_lang() {
-            LANG::C | LANG::Cpp => {
+            LANG::Cpp => {
                 let macros = get_macros(path, &pr.files);
                 c_macro::replace(code, &macros)
             }

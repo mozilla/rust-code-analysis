@@ -55,26 +55,6 @@ impl Alterator for PreprocCode {}
 
 impl Alterator for CcommentCode {}
 
-impl Alterator for CCode {
-    fn alterate(node: &Node, code: &[u8], span: bool, mut children: Vec<AstNode>) -> AstNode {
-        match C::from(node.kind_id()) {
-            C::StringLiteral | C::CharLiteral => {
-                let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
-            }
-            C::PreprocDef | C::PreprocFunctionDef | C::PreprocCall => {
-                if let Some(last) = children.last() {
-                    if last.r#type == "\n" {
-                        children.pop();
-                    }
-                }
-                Self::get_default(node, code, span, children)
-            }
-            _ => Self::get_default(node, code, span, children),
-        }
-    }
-}
-
 impl Alterator for CppCode {
     fn alterate(node: &Node, code: &[u8], span: bool, mut children: Vec<AstNode>) -> AstNode {
         match Cpp::from(node.kind_id()) {

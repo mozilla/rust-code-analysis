@@ -236,34 +236,6 @@ impl Getter for RustCode {
     }
 }
 
-impl Getter for CCode {
-    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        // we're in a function_definition so need to get the declarator
-        if let Some(declarator) = node.child_by_field_name("declarator") {
-            if let Some(fd) = declarator.first_occurence(|id| C::FunctionDeclarator == id) {
-                if let Some(first) = fd.child(0) {
-                    if first.kind_id() == C::Identifier {
-                        let code = &code[first.start_byte()..first.end_byte()];
-                        return std::str::from_utf8(code).ok();
-                    }
-                }
-            }
-        }
-        None
-    }
-
-    fn get_kind(node: &Node) -> NodeKind {
-        use C::*;
-
-        let typ = node.kind_id();
-        match typ.into() {
-            FunctionDefinition => NodeKind::Function,
-            TranslationUnit => NodeKind::Unit,
-            _ => NodeKind::Unknown,
-        }
-    }
-}
-
 impl Getter for CppCode {
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
         let typ = node.kind_id();

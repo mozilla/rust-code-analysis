@@ -46,7 +46,6 @@ mk_langs!(
         [html],
         ["html"]
     ),
-    (C, CCode, CParser, tree_sitter_c, [c, h, hh, inc], ["c"]),
     (
         CSharp,
         CSharpCode,
@@ -62,8 +61,8 @@ mk_langs!(
         CppCode,
         CppParser,
         tree_sitter_cpp,
-        [cpp, cxx, cc, hxx, hpp],
-        ["c++"]
+        [cpp, cxx, cc, hxx, hpp, c, h, hh, inc],
+        ["c++", "c"]
     ),
     (
         Python,

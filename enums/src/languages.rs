@@ -9,7 +9,6 @@ mk_langs!(
     (Java, tree_sitter_java),
     (Go, tree_sitter_go),
     (Html, tree_sitter_html),
-    (C, tree_sitter_c),
     (CSharp, tree_sitter_c_sharp),
     (Rust, tree_sitter_rust),
     (Css, tree_sitter_css),

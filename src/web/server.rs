@@ -56,7 +56,7 @@ fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -
         let cfg = WebCommentCfg { id: payload.id };
         let buf = payload.code.into_bytes();
         let language = guess_language(&buf).unwrap_or(language);
-        let language = if language == LANG::C || language == LANG::Cpp {
+        let language = if language == LANG::Cpp {
             LANG::Ccomment
         } else {
             language

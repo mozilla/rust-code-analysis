@@ -46,22 +46,6 @@ impl Checker for CcommentCode {
     }
 }
 
-impl Checker for CCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, StringLiteral, ConcatenatedString);
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(is_func, FunctionDefinition);
-    mk_checker!(is_func_space, TranslationUnit);
-
-    fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        lazy_static! {
-            static ref AC: AhoCorasick = AhoCorasick::new(vec![b"<div rustbindgen"]);
-        }
-        let code = &code[node.start_byte()..node.end_byte()];
-        AC.is_match(code)
-    }
-}
-
 impl Checker for CppCode {
     mk_checker!(is_comment, Comment);
     mk_checker!(
