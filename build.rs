@@ -137,7 +137,11 @@ fn main() {
         mk_predef("c_macros", "PREDEFINED_MACROS");
         mk_predef("c_specials", "SPECIALS");
     }
-    let ignore = vec!["tree-sitter-typescript".to_string()];
+    let ignore = vec![
+        "tree-sitter-typescript".to_string(),
+        "tree-sitter-c".to_string(),
+        "tree-sitter-cpp".to_string(),
+    ];
     let dirs = collect_tree_sitter_dirs(ignore);
     for dir in dirs {
         let language = &dir[TREE_SITTER.len()..];
