@@ -135,7 +135,7 @@ dependencies = [
  "enum-iterator 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.65 (registry+https://github.com/rust-lang/crates.io-index)",
  "phf_codegen 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "tree-sitter 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tree-sitter 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -401,7 +401,7 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc 1.0.47 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -510,7 +510,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum textwrap 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
 "checksum thread_local 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "c6b53e329000edc2b34dbe8545fd20e55a333362d0a321909685a19bd28c3f1b"
 "checksum toml 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)" = "758664fc71a3a69038656bee8b6be6477d2a6c315a6b81f7081f591bffa4111f"
-"checksum tree-sitter 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "33621b32db4c40f23ed5c75b1a42d0083c70d1f7d2e0f2f97441074195708b23"
+"checksum tree-sitter 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5e1283f1a3d6027409c69021230dd21607d7234c4eb39d614f0c7858ee7da061"
 "checksum unicode-width 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "7007dbd421b92cc6e28410fe7362e2e0a2503394908f417b68ec8d1c364c4e20"
 "checksum unicode-xid 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "fc72304796d0818e357ead4e000d19c9c174ab23dc11093ac919054d20a6a7fc"
 "checksum unicode-xid 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"

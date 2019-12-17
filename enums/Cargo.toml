@@ -10,7 +10,7 @@ cc = "^1.0"
 phf_codegen = "^0.8"
 
 [dependencies]
-tree-sitter = "^0.5"
+tree-sitter = "^0.6"
 enum-iterator = "^0.3"
 clap = "^2.33"
 askama = "^0.8"
