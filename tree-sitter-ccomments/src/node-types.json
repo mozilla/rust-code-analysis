@@ -10,7 +10,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "preproc_continuation_line",
@@ -64,6 +64,10 @@
     }
   },
   {
+    "type": "comment",
+    "named": true
+  },
+  {
     "type": "nothing",
     "named": true
   },
@@ -73,10 +77,6 @@
   },
   {
     "type": "preproc_line",
-    "named": true
-  },
-  {
-    "type": "comment",
     "named": true
   }
 ]

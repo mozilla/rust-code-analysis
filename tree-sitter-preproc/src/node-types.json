@@ -10,7 +10,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "identifier",
@@ -205,8 +205,8 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
-      "required": false,
+      "multiple": false,
+      "required": true,
       "types": [
         {
           "type": "identifier",
@@ -229,7 +229,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "preproc_continuation_line",
@@ -308,7 +308,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "identifier",
@@ -326,20 +326,8 @@
     }
   },
   {
-    "type": "identifier",
-    "named": true
-  },
-  {
-    "type": "nothing",
-    "named": true
-  },
-  {
-    "type": "preproc_continuation_line",
-    "named": true
-  },
-  {
-    "type": "preproc_line",
-    "named": true
+    "type": "\n",
+    "named": false
   },
   {
     "type": "<",
@@ -350,19 +338,31 @@
     "named": false
   },
   {
-    "type": "path",
+    "type": "comment",
     "named": true
   },
   {
-    "type": "\n",
-    "named": false
+    "type": "identifier",
+    "named": true
   },
   {
     "type": "integer_literal",
     "named": true
   },
   {
-    "type": "comment",
+    "type": "nothing",
+    "named": true
+  },
+  {
+    "type": "path",
+    "named": true
+  },
+  {
+    "type": "preproc_continuation_line",
+    "named": true
+  },
+  {
+    "type": "preproc_line",
     "named": true
   }
 ]
