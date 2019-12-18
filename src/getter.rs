@@ -47,7 +47,8 @@ impl Getter for MozjsCode {
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
-            | GeneratorFunctionDeclaration => NodeKind::Function,
+            | GeneratorFunctionDeclaration
+            | ArrowFunction => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
@@ -93,7 +94,8 @@ impl Getter for JavascriptCode {
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
-            | GeneratorFunctionDeclaration => NodeKind::Function,
+            | GeneratorFunctionDeclaration
+            | ArrowFunction => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
@@ -139,7 +141,8 @@ impl Getter for TypescriptCode {
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
-            | GeneratorFunctionDeclaration => NodeKind::Function,
+            | GeneratorFunctionDeclaration
+            | ArrowFunction => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
@@ -185,7 +188,8 @@ impl Getter for TsxCode {
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
-            | GeneratorFunctionDeclaration => NodeKind::Function,
+            | GeneratorFunctionDeclaration
+            | ArrowFunction => NodeKind::Function,
             Class | ClassDeclaration => NodeKind::Class,
             Program => NodeKind::Unit,
             _ => NodeKind::Unknown,
