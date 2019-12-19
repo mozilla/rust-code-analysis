@@ -57,3 +57,70 @@ tasks:
           description: rust-code-analysis lint and test
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+        then:
+          taskId: {$eval: as_slugid("build_release")}
+          dependencies:
+            - {$eval: as_slugid("lint_test_task")}
+          created: {$fromNow: ''}
+          deadline: {$fromNow: '2 hour'}
+          provisionerId: proj-relman
+          workerType: ci
+          payload:
+            maxRunTime: 3600
+            image: "rust:buster"
+            env:
+              PROJECT_NAME: rust-code-analysis
+            command:
+              - "/bin/bash"
+              - "-cx"
+              - "git clone --recursive --quiet ${repository} &&
+                 cd rust-code-analysis &&
+                 git -c advice.detachedHead=false checkout ${head_rev} &&
+                 cargo build --release &&
+                 cd target/release &&
+                 tar -zvcf /build.tar.gz rust-code-analysis"
+            artifacts:
+              public/rust-code-analysis-linux-x86_64.tar.gz:
+                expires: {$fromNow: '2 weeks'}
+                path: /build.tar.gz
+                type: file
+          metadata:
+            name: rust-code-analysis release build
+            description: rust-code-analysis release build
+            owner: cdenizet@mozilla.com
+            source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+        then:
+          $let:
+            version: {$eval: 'head_branch[10:]'}
+          in:
+            taskId: {$eval: as_slugid("deploy_release")}
+            dependencies:
+              - {$eval: as_slugid("build_release")}
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '2 hour'}
+            provisionerId: proj-relman
+            workerType: ci
+            scopes:
+              - secrets:get:project/relman/rust-code-analysis/deploy
+            payload:
+              features:
+                taskclusterProxy: true
+              maxRunTime: 3600
+              image: "mozilla/taskboot:0.2.0"
+              env:
+                TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
+              command:
+                - taskboot
+                - github-release
+                - mozilla/rust-code-analysis
+                - "${version}"
+                - "--asset=rust-code-analysis-linux-x86_64.tar.gz:public/rust-code-analysis-linux-x86_64.tar.gz"
+            metadata:
+              name: "rust-code-analysis release publication ${version}"
+              description: rust-code-analysis release publication on Github
+              owner: cdenizet@mozilla.com
+              source: ${repository}/raw/${head_rev}/.taskcluster.yml
