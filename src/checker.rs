@@ -16,6 +16,7 @@ pub trait Checker {
     fn is_call(node: &Node) -> bool;
     fn is_func(node: &Node) -> bool;
     fn is_func_space(node: &Node) -> bool;
+    fn is_non_arg(node: &Node) -> bool;
 
     fn is_error(node: &Node) -> bool {
         node.is_error()
@@ -28,6 +29,7 @@ impl Checker for PreprocCode {
     mk_checker!(is_call,);
     mk_checker!(is_func,);
     mk_checker!(is_func_space,);
+    mk_checker!(is_non_arg,);
 }
 
 impl Checker for CcommentCode {
@@ -36,6 +38,7 @@ impl Checker for CcommentCode {
     mk_checker!(is_call,);
     mk_checker!(is_func,);
     mk_checker!(is_func_space,);
+    mk_checker!(is_non_arg,);
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -79,6 +82,7 @@ impl Checker for CppCode {
         let code = &code[node.start_byte()..node.end_byte()];
         AC.is_match(code)
     }
+    mk_checker!(is_non_arg, LPAREN, LPAREN2, COMMA, RPAREN);
 }
 
 impl Checker for CSharpCode {
@@ -102,6 +106,7 @@ impl Checker for CSharpCode {
         StructDeclaration,
         NamespaceDeclaration
     );
+    mk_checker!(is_non_arg,);
 }
 
 impl Checker for PythonCode {
@@ -119,6 +124,7 @@ impl Checker for PythonCode {
     mk_checker!(is_call, Call);
     mk_checker!(is_func, FunctionDefinition);
     mk_checker!(is_func_space, Module, FunctionDefinition, ClassDefinition);
+    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
 impl Checker for JavaCode {
@@ -127,6 +133,7 @@ impl Checker for JavaCode {
     mk_checker!(is_call, MethodInvocation);
     mk_checker!(is_func, MethodDeclaration);
     mk_checker!(is_func_space, Program, ClassDeclaration);
+    mk_checker!(is_non_arg,);
 }
 
 impl Checker for MozjsCode {
@@ -154,6 +161,7 @@ impl Checker for MozjsCode {
         ClassDeclaration,
         ArrowFunction
     );
+    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
 impl Checker for JavascriptCode {
@@ -181,6 +189,7 @@ impl Checker for JavascriptCode {
         ClassDeclaration,
         ArrowFunction
     );
+    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
 impl Checker for TypescriptCode {
@@ -208,6 +217,7 @@ impl Checker for TypescriptCode {
         ClassDeclaration,
         ArrowFunction
     );
+    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
 impl Checker for TsxCode {
@@ -236,6 +246,7 @@ impl Checker for TsxCode {
         ClassDeclaration,
         ArrowFunction
     );
+    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
 impl Checker for GoCode {
@@ -250,6 +261,7 @@ impl Checker for GoCode {
         MethodDeclaration,
         FuncLiteral
     );
+    mk_checker!(is_non_arg,);
 }
 
 impl Checker for CssCode {
@@ -258,6 +270,7 @@ impl Checker for CssCode {
     mk_checker!(is_call, CallExpression);
     mk_checker!(is_func,);
     mk_checker!(is_func_space,);
+    mk_checker!(is_non_arg,);
 }
 
 impl Checker for HtmlCode {
@@ -266,6 +279,7 @@ impl Checker for HtmlCode {
     mk_checker!(is_call,);
     mk_checker!(is_func,);
     mk_checker!(is_func_space,);
+    mk_checker!(is_non_arg,);
 }
 
 impl Checker for RustCode {
@@ -293,4 +307,5 @@ impl Checker for RustCode {
         TraitItem,
         ClosureExpression
     );
+    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN, AttributeItem);
 }

@@ -34,6 +34,9 @@ pub use crate::sloc::*;
 pub mod halstead;
 pub use crate::halstead::*;
 
+pub mod fn_args;
+pub use crate::fn_args::*;
+
 pub mod metrics;
 pub use crate::metrics::*;
 

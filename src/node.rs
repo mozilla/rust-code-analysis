@@ -63,4 +63,11 @@ impl<'a> Search<'a> for Node<'a> {
         }
         None
     }
+
+    fn act_on_child(&self, action: &mut dyn FnMut(&Node<'a>)) {
+        let mut cursor = self.walk();
+        for child in self.children(&mut cursor) {
+            action(&child);
+        }
+    }
 }

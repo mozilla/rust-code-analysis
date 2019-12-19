@@ -4,6 +4,7 @@ use tree_sitter::{Language, Node};
 
 use crate::checker::Checker;
 use crate::cyclomatic::Cyclomatic;
+use crate::fn_args::NArgs;
 use crate::getter::Getter;
 use crate::halstead::Halstead;
 use crate::languages::*;
@@ -26,6 +27,7 @@ pub trait TSParserTrait {
     type Cyclomatic: Cyclomatic;
     type Halstead: Halstead;
     type SourceLoc: SourceLoc;
+    type NArgs: NArgs;
 
     fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self;
     fn get_language(&self) -> LANG;
@@ -45,4 +47,5 @@ pub trait Search<'a> {
     fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
     fn act_on_node(&self, pred: &mut dyn FnMut(&Node<'a>));
     fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
+    fn act_on_child(&self, action: &mut dyn FnMut(&Node<'a>));
 }

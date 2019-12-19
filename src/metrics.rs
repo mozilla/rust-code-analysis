@@ -9,6 +9,7 @@ use tree_sitter::Node;
 use crate::checker::Checker;
 use crate::cyclomatic::{self, Cyclomatic};
 use crate::enums::NodeKind;
+use crate::fn_args::{self, NArgs};
 use crate::getter::Getter;
 use crate::halstead::{self, Halstead};
 use crate::sloc::{self, SourceLoc};
@@ -19,6 +20,7 @@ pub struct CodeMetrics<'a> {
     pub cyclomatic: cyclomatic::Stats,
     pub halstead: halstead::Stats<'a>,
     pub sloc: sloc::Stats,
+    pub nargs: fn_args::Stats,
 }
 
 impl<'a> Serialize for CodeMetrics<'a> {
@@ -30,6 +32,7 @@ impl<'a> Serialize for CodeMetrics<'a> {
         st.serialize_field("cyclomatic", &self.cyclomatic)?;
         st.serialize_field("halstead", &self.halstead)?;
         st.serialize_field("loc", &self.sloc)?;
+        st.serialize_field("nargs", &self.nargs)?;
         st.end()
     }
 }
@@ -40,6 +43,7 @@ impl<'a> Default for CodeMetrics<'a> {
             cyclomatic: cyclomatic::Stats::default(),
             halstead: halstead::Stats::default(),
             sloc: sloc::Stats::default(),
+            nargs: fn_args::Stats::default(),
         }
     }
 }
@@ -48,7 +52,8 @@ impl<'a> fmt::Display for CodeMetrics<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "{}", self.cyclomatic)?;
         writeln!(f, "{}", self.halstead)?;
-        write!(f, "{}", self.sloc)
+        write!(f, "{}", self.sloc)?;
+        write!(f, "{}", self.nargs)
     }
 }
 
@@ -57,6 +62,7 @@ impl<'a> CodeMetrics<'a> {
         self.cyclomatic.merge(&other.cyclomatic);
         self.halstead.merge(&other.halstead);
         self.sloc.merge(&other.sloc);
+        self.nargs.merge(&other.nargs);
     }
 }
 
@@ -153,6 +159,7 @@ impl<'a> FuncSpace<'a> {
 
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout)?;
+        Self::dump_nargs(&metrics.nargs, &prefix, false, stdout)?;
         Self::dump_halstead(&metrics.halstead, &prefix, false, stdout)?;
         Self::dump_sloc(&metrics.sloc, &prefix, true, stdout)
     }
@@ -235,6 +242,24 @@ impl<'a> FuncSpace<'a> {
         Self::dump_value("lloc", stats.lloc(), &prefix, true, stdout)
     }
 
+    fn dump_nargs(
+        stats: &fn_args::Stats,
+        prefix: &str,
+        last: bool,
+        stdout: &mut StandardStreamLock,
+    ) -> std::io::Result<()> {
+        let pref = if last { "`- " } else { "|- " };
+
+        color!(stdout, Blue);
+        write!(stdout, "{}{}", prefix, pref)?;
+
+        color!(stdout, Green, true);
+        write!(stdout, "n_args: ")?;
+
+        color!(stdout, White);
+        writeln!(stdout, "{}", stats.n_args())
+    }
+
     fn dump_value(
         name: &str,
         val: f64,
@@ -302,6 +327,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
             T::Halstead::compute(&node, code, &mut last.metrics.halstead);
             T::SourceLoc::compute(&node, code, &mut last.metrics.sloc, func_space);
+            T::NArgs::compute(&node, &mut last.metrics.nargs);
         }
 
         cursor.reset(node);
