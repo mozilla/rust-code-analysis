@@ -11,7 +11,7 @@ use crate::*;
 #[derive(Default, Debug)]
 pub struct Stats<'a> {
     pub operators: FxHashMap<u16, u64>,
-    pub operands: FxHashMap<&'a str, u64>,
+    pub operands: FxHashMap<&'a [u8], u64>,
 }
 
 impl Serialize for Stats<'_> {
@@ -120,9 +120,9 @@ where
     fn compute<'a>(_node: &Node<'a>, _code: &'a [u8], _stats: &mut Stats<'a>) {}
 }
 
-fn get_id<'a>(node: &Node<'a>, code: &'a [u8]) -> &'a str {
-    let code = &code[node.start_byte()..node.end_byte()];
-    std::str::from_utf8(code).unwrap()
+#[inline(always)]
+fn get_id<'a>(node: &Node<'a>, code: &'a [u8]) -> &'a [u8] {
+    &code[node.start_byte()..node.end_byte()]
 }
 
 impl Halstead for PythonCode {
