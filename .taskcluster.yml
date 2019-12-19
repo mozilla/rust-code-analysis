@@ -80,7 +80,7 @@ tasks:
                  git -c advice.detachedHead=false checkout ${head_rev} &&
                  cargo build --release &&
                  cd target/release &&
-                 tar -zvcf /build.tar.gz rust-code-analysis"
+                 tar -zvcf /build.tar.gz --transform 's,^,rust-code-analysis-linux-x86_64/,' rust-code-analysis"
             artifacts:
               public/rust-code-analysis-linux-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
