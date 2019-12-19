@@ -49,9 +49,9 @@ fn dump_span(
     stdout: &mut StandardStreamLock,
     last: bool,
 ) -> std::io::Result<()> {
-    if !span.error {
+    /*if !span.error {
         return Ok(());
-    }
+    }*/
 
     let pref = if last { "   `- " } else { "   |- " };
 
