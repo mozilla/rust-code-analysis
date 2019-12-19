@@ -5,6 +5,90 @@ module.exports = grammar(CPP, {
 
   rules: {
 
+    _top_level_item: ($, original) => choice(
+      $.alone_macro,
+      $.alone_macro_call,
+      alias($.operator_cast_definition, $.function_definition),
+      alias($.operator_cast_declaration, $._declaration),
+      original,
+    ),
+
+    operator_name: $ => token(seq(
+      'operator',
+      /\s*/,
+      choice(
+        '+', '-', '*', '/', '%',
+        '^', '&', '|', '~',
+        '!', '=', '<', '>',
+        '+=', '-=', '*=', '/=', '%=', '^=', '&=', '|=',
+        '<<', '>>', '>>=', '<<=',
+        '==', '!=', '<=', '>=',
+        '&&', '||',
+        '++', '--',
+        ',',
+        '->*',
+        '->',
+        '()', '[]',
+        'new', 'delete',
+        'new[]', 'delete[]',
+      )
+    )),
+    
+    _field_declaration_list_item: ($, original) => choice(
+      original,
+      alias($.operator_cast_definition, $.function_definition),
+      alias($.operator_cast_declaration, $.declaration),
+      $.alone_macro,
+      $.alone_macro_call,
+    ),
+
+    operator_cast: $ => prec(1, seq(
+      optional(seq(
+        field('namespace', optional(choice(
+          $._namespace_identifier,
+          $.template_type,
+          $.scoped_namespace_identifier
+        ))),
+        '::',
+      )),
+      'operator',
+      $._declaration_specifiers,
+      field('declarator', $._abstract_declarator),
+    )),
+
+    operator_cast_definition: $ => seq(
+      repeat(choice(
+        $.storage_class_specifier,
+        $.type_qualifier,
+        $.attribute_specifier
+      )),
+      prec(1, seq(
+        optional(choice($.virtual_function_specifier, $.explicit_function_specifier)),
+        field('declarator', $.operator_cast),
+      )),
+      choice(
+        field('body', $.compound_statement),
+        $.default_method_clause,
+        $.delete_method_clause
+      )
+    ),
+
+    operator_cast_declaration: $ => seq(
+      optional(choice($.virtual_function_specifier, $.explicit_function_specifier)),
+      field('declarator', $.operator_cast),
+      optional(seq('=', field('default_value', $._expression))),
+      ';'
+    ),
+
+    alone_macro: $ => /[_A-Z][_A-Z0-9]+\s*\n/,
+    alone_macro_call: $ => seq(
+      /[_A-Z][_A-Z0-9]+/,
+      '(',
+      optional(seq(/[_A-Z][_A-Z0-9]+/, repeat(seq(',', /[_A-Z][_A-Z0-9]+/)))),
+      ')',
+      '\n',
+    ),
+
     class_specifier: $ => prec.right(seq(
       'class',
       optional($.macro_annotation),

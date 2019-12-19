@@ -390,6 +390,46 @@
     ]
   },
   {
+    "type": "_declaration",
+    "named": true,
+    "fields": {
+      "declarator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "operator_cast",
+            "named": true
+          }
+        ]
+      },
+      "default_value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "_expression",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "explicit_function_specifier",
+          "named": true
+        },
+        {
+          "type": "virtual_function_specifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "abstract_array_declarator",
     "named": true,
     "fields": {
@@ -563,6 +603,11 @@
         ]
       }
     }
+  },
+  {
+    "type": "alone_macro_call",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "argument_list",
@@ -1262,6 +1307,10 @@
       "required": false,
       "types": [
         {
+          "type": "_declaration",
+          "named": true
+        },
+        {
           "type": "_statement",
           "named": true
         },
@@ -1271,6 +1320,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -1453,6 +1510,20 @@
           {
             "type": "init_declarator",
             "named": true
+          },
+          {
+            "type": "operator_cast",
+            "named": true
+          }
+        ]
+      },
+      "default_value": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "_expression",
+            "named": true
           }
         ]
       },
@@ -1521,6 +1592,10 @@
       "required": false,
       "types": [
         {
+          "type": "_declaration",
+          "named": true
+        },
+        {
           "type": "_statement",
           "named": true
         },
@@ -1530,6 +1605,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -1902,6 +1985,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -2291,6 +2382,10 @@
           },
           {
             "type": "function_declarator",
+            "named": true
+          },
+          {
+            "type": "operator_cast",
             "named": true
           }
         ]
@@ -2729,6 +2824,68 @@
       "types": [
         {
           "type": "_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "operator_cast",
+    "named": true,
+    "fields": {
+      "declarator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "_abstract_declarator",
+            "named": true
+          }
+        ]
+      },
+      "namespace": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "namespace_identifier",
+            "named": true
+          },
+          {
+            "type": "scoped_namespace_identifier",
+            "named": true
+          },
+          {
+            "type": "template_type",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "_type_specifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "storage_class_specifier",
+          "named": true
+        },
+        {
+          "type": "type_qualifier",
           "named": true
         }
       ]
@@ -3180,6 +3337,10 @@
       "required": false,
       "types": [
         {
+          "type": "_declaration",
+          "named": true
+        },
+        {
           "type": "_statement",
           "named": true
         },
@@ -3193,6 +3354,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -3275,6 +3444,10 @@
       "required": false,
       "types": [
         {
+          "type": "_declaration",
+          "named": true
+        },
+        {
           "type": "_statement",
           "named": true
         },
@@ -3288,6 +3461,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -3459,6 +3640,10 @@
       "required": false,
       "types": [
         {
+          "type": "_declaration",
+          "named": true
+        },
+        {
           "type": "_statement",
           "named": true
         },
@@ -3472,6 +3657,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -3579,6 +3772,10 @@
       "required": false,
       "types": [
         {
+          "type": "_declaration",
+          "named": true
+        },
+        {
           "type": "_statement",
           "named": true
         },
@@ -3592,6 +3789,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -4484,6 +4689,10 @@
       "required": false,
       "types": [
         {
+          "type": "_declaration",
+          "named": true
+        },
+        {
           "type": "_statement",
           "named": true
         },
@@ -4493,6 +4702,14 @@
         },
         {
           "type": "alias_declaration",
+          "named": true
+        },
+        {
+          "type": "alone_macro",
+          "named": true
+        },
+        {
+          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -5438,6 +5655,10 @@
     "named": false
   },
   {
+    "type": "alone_macro",
+    "named": true
+  },
+  {
     "type": "auto",
     "named": true
   },
@@ -5580,6 +5801,10 @@
   {
     "type": "number_literal",
     "named": true
+  },
+  {
+    "type": "operator",
+    "named": false
   },
   {
     "type": "operator_name",

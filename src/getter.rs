@@ -245,6 +245,10 @@ impl Getter for CppCode {
         let typ = node.kind_id();
         match typ.into() {
             Cpp::FunctionDefinition | Cpp::FunctionDefinition2 | Cpp::FunctionDefinition3 => {
+                if let Some(op_cast) = node.first_child(|id| Cpp::OperatorCast == id) {
+                    let code = &code[op_cast.start_byte()..op_cast.end_byte()];
+                    return std::str::from_utf8(code).ok();
+                }
                 // we're in a function_definition so need to get the declarator
                 if let Some(declarator) = node.child_by_field_name("declarator") {
                     if let Some(fd) = declarator.first_occurence(|id| {

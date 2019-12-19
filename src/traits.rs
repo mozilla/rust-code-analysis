@@ -44,4 +44,5 @@ pub trait Callback {
 pub trait Search<'a> {
     fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
     fn act_on_node(&self, pred: &mut dyn FnMut(&Node<'a>));
+    fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
 }

@@ -53,4 +53,14 @@ impl<'a> Search<'a> for Node<'a> {
             }
         }
     }
+
+    fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
+        let mut cursor = self.walk();
+        for child in self.children(&mut cursor) {
+            if pred(child.kind_id()) {
+                return Some(child);
+            }
+        }
+        None
+    }
 }
