@@ -219,7 +219,7 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
             .service(
                 web::resource("/comment")
                     .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                    .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
                     .route(web::post().to(comment_removal_plain)),
             )
             .service(
@@ -231,7 +231,7 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
             .service(
                 web::resource("/metrics")
                     .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                    .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
                     .route(web::post().to(metrics_plain)),
             )
             .service(
@@ -243,7 +243,7 @@ pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
             .service(
                 web::resource("/function")
                     .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(String::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                    .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
                     .route(web::post().to(function_plain)),
             )
             .service(web::resource("/ping").route(web::get().to(ping)))
