@@ -13,7 +13,7 @@ pub struct WebCommentPayload {
 #[derive(Debug, Serialize)]
 pub struct WebCommentResponse {
     pub id: String,
-    pub code: Option<String>,
+    pub code: Option<Vec<u8>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -32,11 +32,9 @@ impl Callback for WebCommentCallback {
     type Cfg = WebCommentCfg;
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
-        let code = if let Some(code) = rm_comments(parser) {
-            Some(String::from_utf8(code).unwrap())
-        } else {
-            None
-        };
-        WebCommentResponse { id: cfg.id, code }
+        WebCommentResponse {
+            id: cfg.id,
+            code: rm_comments(parser),
+        }
     }
 }
