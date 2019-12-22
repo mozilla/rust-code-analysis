@@ -539,6 +539,31 @@ mod tests {
         assert_eq!(res, expected);
     }
 
+    // Inspired from https://hg.mozilla.org/mozilla-central/file/9b2a99adc05e53cd4010de512f50118594756650/extensions/java/xpcom/tests/testparams/TestParams.java#l64.
+    #[test]
+    fn test_web_comment_plain_bad_chars() {
+        let bad_bytes = &[142, 137, 138, 136, 140, 141, 10];
+        let input_vec = ["/*char*/s: ".as_bytes(), bad_bytes].concat();
+        let output_vec = ["s: ".as_bytes(), bad_bytes].concat();
+
+        let mut app = test::init_service(
+            App::new()
+                .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
+        );
+        let req = test::TestRequest::post()
+            .uri("/comment?file_name=foo.java")
+            .set(ContentType::plaintext())
+            .set_payload(input_vec)
+            .to_request();
+
+        let resp = test::call_service(&mut app, req);
+        assert_eq!(resp.status(), StatusCode::OK);
+
+        let res = test::read_body(resp);
+
+        assert_eq!(res, output_vec);
+    }
+
     #[test]
     fn test_web_metrics_json() {
         let mut app = test::init_service(
