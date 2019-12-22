@@ -418,7 +418,7 @@ mod tests {
         let res: Value = test::read_response_json(&mut app, req);
         let expected = json!({
             "id": "1234",
-            "code": "int x = 1; ",
+            "code": b"int x = 1; ",
         });
 
         assert_eq!(res, expected);
