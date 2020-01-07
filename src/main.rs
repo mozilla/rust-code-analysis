@@ -306,7 +306,7 @@ fn main() {
                 .help("Number of jobs")
                 .short("j")
                 .value_name("NUMBER")
-                .default_value("1")
+                .default_value("")
                 .takes_value(true),
         )
         .arg(
