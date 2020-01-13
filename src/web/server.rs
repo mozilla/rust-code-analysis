@@ -1,3 +1,4 @@
+use actix_rt::Runtime;
 use actix_web::{
     dev::Body, guard, http, web, web::Query, App, FromRequest, HttpRequest, HttpResponse,
     HttpServer,
@@ -202,55 +203,61 @@ fn ping() -> HttpResponse {
     HttpResponse::Ok().body(Body::Empty)
 }
 
-pub fn run(host: &str, port: u32, n_threads: usize) -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .service(
-                web::resource("/ast")
-                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
-                    .route(web::post().to(ast_parser)),
-            )
-            .service(
-                web::resource("/comment")
-                    .guard(guard::Header("content-type", "application/json"))
-                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
-                    .route(web::post().to(comment_removal_json)),
-            )
-            .service(
-                web::resource("/comment")
-                    .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
-                    .route(web::post().to(comment_removal_plain)),
-            )
-            .service(
-                web::resource("/metrics")
-                    .guard(guard::Header("content-type", "application/json"))
-                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
-                    .route(web::post().to(metrics_json)),
-            )
-            .service(
-                web::resource("/metrics")
-                    .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
-                    .route(web::post().to(metrics_plain)),
-            )
-            .service(
-                web::resource("/function")
-                    .guard(guard::Header("content-type", "application/json"))
-                    .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
-                    .route(web::post().to(function_json)),
-            )
-            .service(
-                web::resource("/function")
-                    .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
-                    .route(web::post().to(function_plain)),
-            )
-            .service(web::resource("/ping").route(web::get().to(ping)))
+pub fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
+    let _ = actix_rt::System::new("server");
+    let mut rt = Runtime::new()?;
+
+    rt.block_on(async move {
+        HttpServer::new(|| {
+            App::new()
+                .service(
+                    web::resource("/ast")
+                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .route(web::post().to(ast_parser)),
+                )
+                .service(
+                    web::resource("/comment")
+                        .guard(guard::Header("content-type", "application/json"))
+                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .route(web::post().to(comment_removal_json)),
+                )
+                .service(
+                    web::resource("/comment")
+                        .guard(guard::Header("content-type", "application/octet-stream"))
+                        .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                        .route(web::post().to(comment_removal_plain)),
+                )
+                .service(
+                    web::resource("/metrics")
+                        .guard(guard::Header("content-type", "application/json"))
+                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .route(web::post().to(metrics_json)),
+                )
+                .service(
+                    web::resource("/metrics")
+                        .guard(guard::Header("content-type", "application/octet-stream"))
+                        .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                        .route(web::post().to(metrics_plain)),
+                )
+                .service(
+                    web::resource("/function")
+                        .guard(guard::Header("content-type", "application/json"))
+                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .route(web::post().to(function_json)),
+                )
+                .service(
+                    web::resource("/function")
+                        .guard(guard::Header("content-type", "application/octet-stream"))
+                        .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                        .route(web::post().to(function_plain)),
+                )
+                .service(web::resource("/ping").route(web::get().to(ping)))
+        })
+        .workers(n_threads)
+        .bind((host.as_str(), port))?
+        .run()
+        .await
     })
-    .workers(n_threads)
-    .bind(format!("{}:{}", host, port))?
-    .run()
 }
 
 // curl --header "Content-Type: application/json" --request POST --data '{"id": "1234", "file_name": "prova.cpp", "code": "int x = 1;", "comment": true, "span": true}' http://127.0.0.1:8081/ast
@@ -263,22 +270,24 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn test_web_ping() {
+    #[actix_rt::test]
+    async fn test_web_ping() {
         let mut app = test::init_service(
             App::new().service(web::resource("/ping").route(web::get().to(ping))),
-        );
+        )
+        .await;
         let req = test::TestRequest::with_uri("/ping").to_request();
-        let resp = test::call_service(&mut app, req);
+        let resp = test::call_service(&mut app, req).await;
 
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    #[test]
-    fn test_web_ast() {
+    #[actix_rt::test]
+    async fn test_web_ast() {
         let mut app = test::init_service(
             App::new().service(web::resource("/ast").route(web::post().to(ast_parser))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/ast")
             .set_json(&AstPayload {
@@ -290,7 +299,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
             "root": {
@@ -348,11 +357,12 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_ast_string() {
+    #[actix_rt::test]
+    async fn test_web_ast_string() {
         let mut app = test::init_service(
             App::new().service(web::resource("/ast").route(web::post().to(ast_parser))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/ast")
             .set_json(&AstPayload {
@@ -364,7 +374,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
             "root": {"Children": [{"Children": [{"Children": [],
@@ -400,12 +410,13 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_comment_json() {
+    #[actix_rt::test]
+    async fn test_web_comment_json() {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/comment")
             .set_json(&WebCommentPayload {
@@ -415,7 +426,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
             "code": b"int x = 1; ",
@@ -424,12 +435,13 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_comment_json_invalid() {
+    #[actix_rt::test]
+    async fn test_web_comment_json_invalid() {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/comment")
             .set_json(&WebCommentPayload {
@@ -439,7 +451,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
             "error": INVALID_LANGUAGE,
@@ -448,12 +460,13 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_comment_json_no_comment() {
+    #[actix_rt::test]
+    async fn test_web_comment_json_no_comment() {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/comment")
             .set_json(&WebCommentPayload {
@@ -463,7 +476,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
 
         // No comment in the code so the code is null
         let expected = json!({
@@ -474,64 +487,67 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_comment_plain() {
+    #[actix_rt::test]
+    async fn test_web_comment_plain() {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.c")
             .set(ContentType::plaintext())
             .set_payload("int x = 1; // hello")
             .to_request();
 
-        let resp = test::call_service(&mut app, req);
+        let resp = test::call_service(&mut app, req).await;
         assert_eq!(resp.status(), StatusCode::OK);
 
-        let res = test::read_body(resp);
+        let res = test::read_body(resp).await;
         let expected = Bytes::from_static(b"int x = 1; ");
 
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_comment_plain_invalid() {
+    #[actix_rt::test]
+    async fn test_web_comment_plain_invalid() {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.unexisting_extension")
             .set(ContentType::plaintext())
             .set_payload("int x = 1; // hello")
             .to_request();
 
-        let resp = test::call_service(&mut app, req);
+        let resp = test::call_service(&mut app, req).await;
         assert_eq!(resp.status(), StatusCode::NOT_FOUND);
 
-        let res = test::read_body(resp);
-        let expected = Bytes::from(format!("error: {}", INVALID_LANGUAGE).as_bytes());
+        let res = test::read_body(resp).await;
+        let expected = Bytes::from(format!("error: {}", INVALID_LANGUAGE));
 
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_comment_plain_no_comment() {
+    #[actix_rt::test]
+    async fn test_web_comment_plain_no_comment() {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.c")
             .set(ContentType::plaintext())
             .set_payload("int x = 1;")
             .to_request();
 
-        let resp = test::call_service(&mut app, req);
+        let resp = test::call_service(&mut app, req).await;
         assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
-        let res = test::read_body(resp);
+        let res = test::read_body(resp).await;
 
         // No comment in the code so the code is empty
         let expected = Bytes::from_static(b"");
@@ -540,8 +556,8 @@ mod tests {
     }
 
     // Inspired from https://hg.mozilla.org/mozilla-central/file/9b2a99adc05e53cd4010de512f50118594756650/extensions/java/xpcom/tests/testparams/TestParams.java#l64.
-    #[test]
-    fn test_web_comment_plain_bad_chars() {
+    #[actix_rt::test]
+    async fn test_web_comment_plain_bad_chars() {
         let bad_bytes = &[142, 137, 138, 136, 140, 141, 10];
         let input_vec = ["/*char*/s: ".as_bytes(), bad_bytes].concat();
         let output_vec = ["s: ".as_bytes(), bad_bytes].concat();
@@ -549,26 +565,28 @@ mod tests {
         let mut app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.java")
             .set(ContentType::plaintext())
             .set_payload(input_vec)
             .to_request();
 
-        let resp = test::call_service(&mut app, req);
+        let resp = test::call_service(&mut app, req).await;
         assert_eq!(resp.status(), StatusCode::OK);
 
-        let res = test::read_body(resp);
+        let res = test::read_body(resp).await;
 
         assert_eq!(res, output_vec);
     }
 
-    #[test]
-    fn test_web_metrics_json() {
+    #[actix_rt::test]
+    async fn test_web_metrics_json() {
         let mut app = test::init_service(
             App::new().service(web::resource("/metrics").route(web::post().to(metrics_json))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/metrics")
             .set_json(&WebMetricsPayload {
@@ -579,7 +597,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
             "spaces": {"kind": "unit",
@@ -628,11 +646,12 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_metrics_json_unit() {
+    #[actix_rt::test]
+    async fn test_web_metrics_json_unit() {
         let mut app = test::init_service(
             App::new().service(web::resource("/metrics").route(web::post().to(metrics_json))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/metrics")
             .set_json(&WebMetricsPayload {
@@ -643,7 +662,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
             "spaces": {"kind": "unit",
@@ -672,18 +691,19 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_metrics_plain() {
+    #[actix_rt::test]
+    async fn test_web_metrics_plain() {
         let mut app = test::init_service(
             App::new().service(web::resource("/metrics").route(web::post().to(metrics_plain))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/metrics?file_name=test.py")
             .set(ContentType::plaintext())
             .set_payload("def foo():\n    pass\n")
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "",
             "spaces": {"kind": "unit",
@@ -732,11 +752,12 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_function_json() {
+    #[actix_rt::test]
+    async fn test_web_function_json() {
         let mut app = test::init_service(
             App::new().service(web::resource("/function").route(web::post().to(function_json))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/function")
             .set_json(&WebCommentPayload {
@@ -746,7 +767,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
             "spans": [
@@ -768,18 +789,19 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-    #[test]
-    fn test_web_function_plain() {
+    #[actix_rt::test]
+    async fn test_web_function_plain() {
         let mut app = test::init_service(
             App::new().service(web::resource("/function").route(web::post().to(function_plain))),
-        );
+        )
+        .await;
         let req = test::TestRequest::post()
             .uri("/function?file_name=test.py")
             .set(ContentType::plaintext())
             .set_payload("def foo():\n    pass\n\ndef bar():\n    pass")
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req);
+        let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "",
             "spans": [

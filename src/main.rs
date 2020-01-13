@@ -382,13 +382,13 @@ fn main() {
     let serve = matches.is_present("serve");
     if serve {
         let host = matches.value_of("host").unwrap();
-        let port = if let Ok(port) = matches.value_of("port").unwrap().parse::<u32>() {
+        let port = if let Ok(port) = matches.value_of("port").unwrap().parse::<u16>() {
             port
         } else {
             eprintln!("Invalid port number");
             return;
         };
-        if let Err(e) = server::run(&host, port, num_jobs) {
+        if let Err(e) = server::run(host.to_string(), port, num_jobs) {
             eprintln!("Cannot run the server at {}:{}: {}", host, port, e);
         }
         return;
