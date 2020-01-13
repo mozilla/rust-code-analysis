@@ -19,7 +19,7 @@ repos:
         language: system
         files: '\.rs$'
         exclude: '.*/templates/.*\.rs$'
-        entry: rustup run stable rustfmt
+        entry: rustup run stable rustfmt --edition 2018
 
       - id: clippy
         name: clippy
