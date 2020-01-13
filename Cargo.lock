@@ -631,7 +631,7 @@ dependencies = [
 
 [[package]]
 name = "fixedbitset"
-version = "0.1.9"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -1046,11 +1046,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ordermap"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
 name = "parking_lot"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1086,11 +1081,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "petgraph"
-version = "0.4.13"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "fixedbitset 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "ordermap 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fixedbitset 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "indexmap 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1396,7 +1391,7 @@ dependencies = [
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-format 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "petgraph 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "petgraph 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "phf 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "phf_codegen 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2018,7 +2013,7 @@ dependencies = [
 "checksum enum-iterator-derive 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "eb3f06af72cbd86aa47dc2efeac193199e1ad3d2c4b4c8ee39175a6d643eb5e6"
 "checksum failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "f8273f13c977665c5db7eb2b99ae520952fe5ac831ae4cd09d80c4c7042b5ed9"
 "checksum failure_derive 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "0bc225b78e0391e4b8683440bf2e63c2deeeb2ce5189eab46e2b68c6d3725d08"
-"checksum fixedbitset 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)" = "86d4de0081402f5e88cdac65c8dcdcc73118c1a7a465e2a05f0da05843a8ea33"
+"checksum fixedbitset 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 "checksum flate2 1.0.13 (registry+https://github.com/rust-lang/crates.io-index)" = "6bd6d6f4752952feb71363cffc9ebac9411b75b87c6ab6058c40c8900cf43c0f"
 "checksum fnv 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "2fad85553e09a6f881f739c29f0b00b0f01357c743266d478b68951ce23285f3"
 "checksum foreign-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f6f339eb8adc052cd2ca78910fda869aefa38d22d5cb648e6485e4d3fc06f3b1"
@@ -2069,12 +2064,11 @@ dependencies = [
 "checksum num_cpus 1.11.1 (registry+https://github.com/rust-lang/crates.io-index)" = "76dac5ed2a876980778b8b85f75a71b6cbf0db0b1232ee12f826bccb00d09d72"
 "checksum openssl 0.10.26 (registry+https://github.com/rust-lang/crates.io-index)" = "3a3cc5799d98e1088141b8e01ff760112bbd9f19d850c124500566ca6901a585"
 "checksum openssl-sys 0.9.53 (registry+https://github.com/rust-lang/crates.io-index)" = "465d16ae7fc0e313318f7de5cecf57b2fbe7511fd213978b457e1c96ff46736f"
-"checksum ordermap 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)" = "a86ed3f5f244b372d6b1a00b72ef7f8876d0bc6a78a4c9985c53614041512063"
 "checksum parking_lot 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f842b1982eb6c2fe34036a4fbfb06dd185a3f5c8edfaacdf7d1ea10b07de6252"
 "checksum parking_lot_core 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "b876b1b9e7ac6e1a74a6da34d25c42e17e8862aa409cbbbdcfc8d86c6f3bc62b"
 "checksum percent-encoding 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "31010dd2e1ac33d5b46a5b413495239882813e0369f8ed8a5e266f173602f831"
 "checksum percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
-"checksum petgraph 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)" = "9c3659d1ee90221741f65dd128d9998311b0e40c5d3c23a62445938214abce4f"
+"checksum petgraph 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "29c127eea4a29ec6c85d153c59dc1213f33ec74cead30fe4730aecc88cc1fd92"
 "checksum phf 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3dfb61232e34fcb633f43d12c58f83c1df82962dcdfa565a4e866ffc17dafe12"
 "checksum phf_codegen 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "cbffee61585b0411840d3ece935cce9cb6321f01c45477d30066498cd5e1a815"
 "checksum phf_generator 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "17367f0cc86f2d25802b2c26ee58a7b23faeccf78a396094c13dced0d0182526"
