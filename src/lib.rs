@@ -28,6 +28,9 @@ pub use crate::asttools::*;
 pub mod cyclomatic;
 pub use crate::cyclomatic::*;
 
+pub mod exit;
+pub use crate::exit::*;
+
 pub mod sloc;
 pub use crate::sloc::*;
 

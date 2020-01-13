@@ -6,6 +6,7 @@ use tree_sitter::{Node, Parser, Tree};
 use crate::c_macro;
 use crate::checker::*;
 use crate::cyclomatic::Cyclomatic;
+use crate::exit::Exit;
 use crate::fn_args::NArgs;
 use crate::getter::Getter;
 use crate::halstead::Halstead;
@@ -16,7 +17,7 @@ use crate::traits::*;
 use crate::web::alterator::Alterator;
 
 pub struct TSParser<
-    T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Halstead + SourceLoc,
+    T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Exit + Halstead + NArgs + SourceLoc,
 > {
     code: Vec<u8>,
     tree: Tree,
@@ -68,8 +69,17 @@ fn get_fake_code<T: TSLanguage>(
     }
 }
 
-impl<T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Halstead + SourceLoc + NArgs>
-    TSParserTrait for TSParser<T>
+impl<
+        T: TSLanguage
+            + Checker
+            + Getter
+            + Alterator
+            + Cyclomatic
+            + Exit
+            + Halstead
+            + SourceLoc
+            + NArgs,
+    > TSParserTrait for TSParser<T>
 {
     type Checker = T;
     type Getter = T;
@@ -77,6 +87,7 @@ impl<T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Halstead + Sour
     type Halstead = T;
     type SourceLoc = T;
     type NArgs = T;
+    type Exit = T;
 
     fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self {
         let mut parser = Parser::new();

@@ -4,6 +4,7 @@ use tree_sitter::{Language, Node};
 
 use crate::checker::Checker;
 use crate::cyclomatic::Cyclomatic;
+use crate::exit::Exit;
 use crate::fn_args::NArgs;
 use crate::getter::Getter;
 use crate::halstead::Halstead;
@@ -28,6 +29,7 @@ pub trait TSParserTrait {
     type Halstead: Halstead;
     type SourceLoc: SourceLoc;
     type NArgs: NArgs;
+    type Exit: Exit;
 
     fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self;
     fn get_language(&self) -> LANG;
