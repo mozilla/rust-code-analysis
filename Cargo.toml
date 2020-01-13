@@ -12,7 +12,7 @@ phf_codegen = "^0.8"
 [dependencies]
 actix-web = {version = "^1.0", features = ["ssl"]}
 aho-corasick = "^0.7"
-bytes = "^0.4"
+bytes = "^0.5"
 clap = "^2.33"
 enum-iterator = "^0.5"
 fxhash = "0.2"
