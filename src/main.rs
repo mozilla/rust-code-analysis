@@ -235,6 +235,7 @@ fn main() {
                 .help("Sets the input files to analyze")
                 .short("p")
                 .long("paths")
+                .default_value(".")
                 .multiple(true)
                 .takes_value(true),
         )
