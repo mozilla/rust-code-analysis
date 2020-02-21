@@ -27,6 +27,7 @@ struct Config {
     count_filter: Vec<String>,
     function: bool,
     metrics: bool,
+    output: String,
     line_start: Option<usize>,
     line_end: Option<usize>,
     preproc_lock: Option<Arc<Mutex<PreprocResults>>>,
@@ -72,7 +73,14 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
     } else if cfg.metrics {
         let source = read_file_with_eol(&path)?;
         let language = guess_language(&source).unwrap_or(language);
-        let cfg = MetricsCfg { path };
+        let cfg = MetricsCfg {
+            path,
+            output_path: if cfg.output.is_empty() {
+                None
+            } else {
+                Some(PathBuf::from(cfg.output))
+            },
+        };
         action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
     } else if cfg.comments {
         let source = read_file_with_eol(&path)?;
@@ -320,7 +328,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("output")
-                .help("Output file")
+                .help("Output file/directory")
                 .short("o")
                 .long("output")
                 .default_value("")
@@ -439,7 +447,12 @@ fn main() {
         (None, None)
     };
 
-    let output = matches.value_of("output").unwrap();
+    let output = matches.value_of("output").unwrap().to_string();
+    let output_is_dir = PathBuf::from(output.clone()).is_dir();
+    if metrics && !output.is_empty() && !output_is_dir {
+        eprintln!("Error: The output parameter must be a directory");
+        process::exit(1);
+    }
     let language = if preproc_lock.is_some() {
         Some(LANG::Preproc)
     } else if typ.is_empty() {
@@ -472,6 +485,7 @@ fn main() {
         count_filter,
         function,
         metrics,
+        output: output.clone(),
         line_start,
         line_end,
         preproc_lock: preproc_lock.clone(),
