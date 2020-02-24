@@ -170,7 +170,7 @@ impl Halstead for MozjsCode {
             | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
                 *stats.operators.entry(id).or_insert(0) += 1;
             }
             Identifier | Identifier2 | String | Number | True | False | Null | Void | This
@@ -195,7 +195,7 @@ impl Halstead for JavascriptCode {
             | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
                 *stats.operators.entry(id).or_insert(0) += 1;
             }
             Identifier | Identifier2 | String | Number | True | False | Null | Void | This
@@ -220,7 +220,7 @@ impl Halstead for TypescriptCode {
             | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
                 *stats.operators.entry(id).or_insert(0) += 1;
             }
             Identifier | NestedIdentifier | String | Number | True | False | Null | Void | This
@@ -245,7 +245,7 @@ impl Halstead for TsxCode {
             | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | New | Let | Var | Const => {
+            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
                 *stats.operators.entry(id).or_insert(0) += 1;
             }
             Identifier | NestedIdentifier | String | Number | True | False | Null | Void | This
