@@ -11,7 +11,7 @@ phf_codegen = "^0.8"
 
 [dependencies]
 tree-sitter = "^0.6"
-enum-iterator = "^0.3"
+enum-iterator = "^0.6"
 clap = "^2.33"
 askama = "^0.8"
 phf_codegen = "^0.8"
