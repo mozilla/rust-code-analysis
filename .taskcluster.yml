@@ -49,7 +49,7 @@ tasks:
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
                pip3 install --quiet pre-commit &&
-               pre-commit run -a &&
+               pre-commit run -a --show-diff-on-failure &&
                rustup default nightly &&
                cargo test"
         metadata:
