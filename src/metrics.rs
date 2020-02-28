@@ -1,3 +1,4 @@
+use regex::Regex;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
@@ -14,6 +15,7 @@ use crate::fn_args::{self, NArgs};
 use crate::getter::Getter;
 use crate::halstead::{self, Halstead};
 use crate::sloc::{self, SourceLoc};
+use crate::tools::write_file;
 use crate::traits::*;
 
 #[derive(Debug)]
@@ -306,6 +308,26 @@ impl<'a> FuncSpace<'a> {
         color!(stdout, White);
         writeln!(stdout, "{}", val)
     }
+
+    fn dump_json(&self, path: &PathBuf, output_path: &PathBuf) -> std::io::Result<()> {
+        let json_data = serde_json::to_string_pretty(&self).unwrap();
+
+        let mut file = path.as_path().file_name().unwrap().to_os_string();
+        file.push(".json");
+
+        let mut json_path = output_path.clone();
+        json_path.push(file.clone());
+
+        if json_path.as_path().exists() {
+            let mut new_filename = path.to_str().unwrap().to_string();
+            let re = Regex::new(r"[\\:/]").unwrap();
+            new_filename = re.replace_all(&mut new_filename, "_").to_string();
+            new_filename.push_str(".json");
+            json_path.pop();
+            json_path.push(new_filename);
+        }
+        write_file(&json_path, json_data.as_bytes())
+    }
 }
 
 fn finalize<'a>(space_stack: &mut Vec<FuncSpace<'a>>, diff_level: usize) {
@@ -383,6 +405,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
 
 pub struct MetricsCfg {
     pub path: PathBuf,
+    pub output_path: Option<PathBuf>,
 }
 
 pub struct Metrics {}
@@ -393,7 +416,11 @@ impl Callback for Metrics {
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {
-            space.dump_root()
+            if let Some(output_path) = cfg.output_path {
+                space.dump_json(&cfg.path, &output_path)
+            } else {
+                space.dump_root()
+            }
         } else {
             Ok(())
         }
