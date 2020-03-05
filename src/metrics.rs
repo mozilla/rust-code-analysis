@@ -102,13 +102,23 @@ impl<'a> Serialize for FuncSpace<'a> {
 
 impl<'a> FuncSpace<'a> {
     fn new<T: Getter>(node: &Node<'a>, code: &'a [u8], kind: NodeKind) -> Self {
+        let (start_position, end_position) = match kind {
+            NodeKind::Unit => {
+                if node.child_count() == 0 {
+                    (0, 0)
+                } else {
+                    (node.start_position().row + 1, node.end_position().row)
+                }
+            }
+            _ => (node.start_position().row + 1, node.end_position().row + 1),
+        };
         Self {
             name: T::get_func_space_name(&node, code),
             spaces: Vec::new(),
             metrics: CodeMetrics::default(),
             kind,
-            start_line: node.start_position().row + 1,
-            end_line: node.end_position().row + 1,
+            start_line: start_position,
+            end_line: end_position,
         }
     }
 
@@ -251,7 +261,8 @@ impl<'a> FuncSpace<'a> {
 
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
-        Self::dump_value("lloc", stats.lloc(), &prefix, true, stdout)
+        Self::dump_value("lloc", stats.lloc(), &prefix, false, stdout)?;
+        Self::dump_value("cloc", stats.cloc(), &prefix, true, stdout)
     }
 
     fn dump_nargs(
@@ -359,14 +370,13 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
             last_level = level;
         }
 
+        let kind = T::Getter::get_kind(&node);
+
         let func_space = T::Checker::is_func(&node) || T::Checker::is_func_space(&node);
+        let unit = kind == NodeKind::Unit;
 
         let new_level = if func_space {
-            space_stack.push(FuncSpace::new::<T::Getter>(
-                &node,
-                code,
-                T::Getter::get_kind(&node),
-            ));
+            space_stack.push(FuncSpace::new::<T::Getter>(&node, code, kind));
             last_level = level + 1;
             last_level
         } else {
@@ -376,7 +386,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
         if let Some(last) = space_stack.last_mut() {
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
             T::Halstead::compute(&node, code, &mut last.metrics.halstead);
-            T::SourceLoc::compute(&node, code, &mut last.metrics.sloc, func_space);
+            T::SourceLoc::compute(&node, code, &mut last.metrics.sloc, func_space, unit);
             T::NArgs::compute(&node, &mut last.metrics.nargs);
             T::Exit::compute(&node, &mut last.metrics.nexits);
         }
