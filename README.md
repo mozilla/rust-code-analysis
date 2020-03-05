@@ -16,3 +16,21 @@ It supports several languages:
 * Python
 * Rust
 * Typescript
+
+
+Short example of the API:
+```
+fn parse(samples: &[&str]) {
+    let path = PathBuf::from("foo.c");
+    for (n, sample) in samples.iter().enumerate() {
+        let v_sample = sample.as_bytes().to_vec();
+        let parser = CppParser::new(v_sample.clone(), &path, None);
+        let root = parser.get_root();
+        if root.has_error() {
+            eprintln!("Sample (CPP) {}: {}", n, sample);
+            dump_node(&v_sample, &root, -1, None, None).unwrap();
+        }
+        assert!(!root.has_error());
+    }
+}
+```
