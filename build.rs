@@ -128,8 +128,12 @@ fn build_cpp(files: Vec<String>, language: &str) {
 fn build_dir(dir: &str, language: &str) {
     eprintln!("Build language {}", language);
     let (c, cpp) = collect_src_files(&dir);
-    build_c(c, &language);
-    build_cpp(cpp, &language);
+    if !c.is_empty() {
+        build_c(c, &language);
+    }
+    if !cpp.is_empty() {
+        build_cpp(cpp, &language);
+    }
 }
 
 fn main() {
