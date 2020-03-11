@@ -126,7 +126,15 @@ fn build_cpp(files: Vec<String>, language: &str) {
 }
 
 fn build_dir(dir: &str, language: &str) {
-    eprintln!("Build language {}", language);
+    println!("Build language {}", language);
+    if PathBuf::from(dir).read_dir().unwrap().next().is_none() {
+        eprintln!(
+            "The directory {} is empty, did you use 'git clone --recursive'?",
+            dir
+        );
+        eprintln!("You can fix in using 'git submodule init && git submodule update --recursive'.");
+        std::process::exit(1);
+    }
     let (c, cpp) = collect_src_files(&dir);
     if !c.is_empty() {
         build_c(c, &language);
