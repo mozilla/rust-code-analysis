@@ -16,3 +16,18 @@ It supports several languages:
 * Python
 * Rust
 * Typescript
+
+## How to build it
+
+```console
+# Fetch the tree-sitter dependencies
+git submodule init
+git submodule update --recursive
+
+# Now build with cargo
+cargo build
+
+# It should be available through cargo now
+cargo run -- -h
+cargo run -- --serve --port 8000
+```
