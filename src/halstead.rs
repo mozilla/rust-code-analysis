@@ -19,13 +19,15 @@ impl Serialize for Stats<'_> {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("halstead", 12)?;
-        st.serialize_field("unique_operands", &self.u_operands())?;
-        st.serialize_field("operands", &self.operands())?;
-        st.serialize_field("unique_operators", &self.u_operators())?;
-        st.serialize_field("operators", &self.operators())?;
+        let mut st = serializer.serialize_struct("halstead", 14)?;
+        st.serialize_field("n1", &self.u_operators())?;
+        st.serialize_field("N1", &self.operators())?;
+        st.serialize_field("n2", &self.u_operands())?;
+        st.serialize_field("N2", &self.operands())?;
         st.serialize_field("length", &self.length())?;
-        st.serialize_field("size", &self.size())?;
+        st.serialize_field("estimated_program_length", &self.estimated_program_length())?;
+        st.serialize_field("purity_ratio", &self.purity_ratio())?;
+        st.serialize_field("vocabulary", &self.vocabulary())?;
         st.serialize_field("volume", &self.volume())?;
         st.serialize_field("difficulty", &self.difficulty())?;
         st.serialize_field("level", &self.level())?;
@@ -38,7 +40,37 @@ impl Serialize for Stats<'_> {
 
 impl<'a> fmt::Display for Stats<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "unique operands: {}, operands: {}, unique operators: {}, operators: {}, length: {}, size: {}, volume: {}, difficulty: {}, level: {}, effort: {}, time: {}, bugs: {}", self.u_operands(), self.operands(), self.u_operators(), self.operators(), self.length(), self.size(), self.volume(), self.difficulty(), self.level(), self.effort(), self.time(), self.bugs())
+        write!(
+            f,
+            "n1: {}, \
+             N1: {}, \
+             n2: {}, \
+             N2: {}, \
+             length: {}, \
+             estimated program length: {}, \
+             purity ratio: {}, \
+             size: {}, \
+             volume: {}, \
+             difficulty: {}, \
+             level: {}, \
+             effort: {}, \
+             time: {}, \
+             bugs: {}",
+            self.u_operators(),
+            self.operators(),
+            self.u_operands(),
+            self.operands(),
+            self.length(),
+            self.estimated_program_length(),
+            self.purity_ratio(),
+            self.vocabulary(),
+            self.volume(),
+            self.difficulty(),
+            self.level(),
+            self.effort(),
+            self.time(),
+            self.bugs(),
+        )
     }
 }
 
@@ -78,13 +110,24 @@ impl<'a> Stats<'a> {
     }
 
     #[inline(always)]
-    pub fn size(&self) -> f64 {
+    pub fn estimated_program_length(&self) -> f64 {
+        self.u_operators() * self.u_operators().log2()
+            + self.u_operands() * self.u_operands().log2()
+    }
+
+    #[inline(always)]
+    pub fn purity_ratio(&self) -> f64 {
+        self.estimated_program_length() / self.length()
+    }
+
+    #[inline(always)]
+    pub fn vocabulary(&self) -> f64 {
         self.u_operands() + self.u_operators()
     }
 
     #[inline(always)]
     pub fn volume(&self) -> f64 {
-        self.length() * self.size().log2()
+        self.length() * self.vocabulary().log2()
     }
 
     #[inline(always)]
@@ -268,7 +311,7 @@ impl Halstead for RustCode {
             | LT | GT | AMP | MutableSpecifier | DOTDOT | DOTDOTEQ | DASH | AMPAMP | PIPEPIPE
             | PIPE | CARET | EQEQ | BANGEQ | LTEQ | GTEQ | LTLT | GTGT | SLASH | PERCENT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ | AMPEQ | PIPEEQ | CARETEQ
-            | LTLTEQ | GTGTEQ | Move | DOT => {
+            | LTLTEQ | GTGTEQ | Move | DOT | PrimitiveType => {
                 *stats.operators.entry(id).or_insert(0) += 1;
             }
             Identifier | StringLiteral | RawStringLiteral | IntegerLiteral | FloatLiteral
@@ -287,16 +330,17 @@ impl Halstead for CppCode {
         let id = node.kind_id();
 
         match id.into() {
-            DOT | LPAREN | COMMA | STAR | GTGT | COLON | Return | Break | Continue | If | Else
-            | Switch | Case | Default | For | While | Goto | Do | Delete | New | Try | Catch
-            | Throw | EQ | AMPAMP | PIPEPIPE | PLUS | PLUSPLUS | SLASH | PERCENT | PIPE | AMP
-            | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ | GT | PLUSEQ | BANG | STAREQ
-            | SLASHEQ | PERCENTEQ | GTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ | LBRACK
-            | LBRACE | QMARK | COLONCOLON | TypeSpecifier | Sizeof => {
+            DOT | LPAREN | LPAREN2 | COMMA | STAR | GTGT | COLON | SEMI | Return | Break
+            | Continue | If | Else | Switch | Case | Default | For | While | Goto | Do | Delete
+            | New | Try | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | PLUS | PLUSPLUS
+            | SLASH | PERCENT | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
+            | GT | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ | GTGTEQ | LTLTEQ | AMPEQ
+            | CARET | CARETEQ | PIPEEQ | LBRACK | LBRACE | QMARK | COLONCOLON | PrimitiveType
+            | TypeSpecifier | Sizeof => {
                 *stats.operators.entry(id).or_insert(0) += 1;
             }
-            Identifier | TypeIdentifier | FieldIdentifier | PrimitiveType | RawStringLiteral
-            | StringLiteral | NumberLiteral | True | False | Null | Nullptr | DOTDOTDOT => {
+            Identifier | TypeIdentifier | FieldIdentifier | RawStringLiteral | StringLiteral
+            | NumberLiteral | True | False | Null | Nullptr | DOTDOTDOT => {
                 *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
             }
             _ => {}
