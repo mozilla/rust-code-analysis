@@ -602,7 +602,7 @@ mod tests {
             "id": "1234",
             "spaces": {"kind": "unit",
                        "start_line": 1,
-                       "end_line": 3,
+                       "end_line": 2,
                        "metrics": {"cyclomatic": 1.0,
                                    "nargs": 0.,
                                    "nexits": 0.,
@@ -618,7 +618,7 @@ mod tests {
                                                 "unique_operands": 1.0,
                                                 "unique_operators": 2.0,
                                                 "volume": 4.754_887_502_163_468},
-                                   "loc": {"lloc": 2.0, "sloc": 3.0}},
+                                   "loc": {"cloc": 0.0, "lloc": 2.0, "sloc": 2.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
                                    "start_line": 1,
@@ -638,7 +638,7 @@ mod tests {
                                                             "unique_operands": 1.0,
                                                             "unique_operators": 2.0,
                                                             "volume": 4.754_887_502_163_468},
-                                               "loc": {"lloc": 2.0, "sloc": 2.0}},
+                                               "loc": {"cloc": 0.0, "lloc": 2.0, "sloc": 2.0}},
                                    "name": "foo",
                                    "spaces": []}]}
         });
@@ -667,7 +667,7 @@ mod tests {
             "id": "1234",
             "spaces": {"kind": "unit",
                        "start_line": 1,
-                       "end_line": 3,
+                       "end_line": 2,
                        "metrics": {"cyclomatic": 1.0,
                                    "nargs": 0.,
                                    "nexits": 0.,
@@ -683,7 +683,7 @@ mod tests {
                                                 "unique_operands": 1.0,
                                                 "unique_operators": 2.0,
                                                 "volume": 4.754_887_502_163_468},
-                                   "loc": {"lloc": 2.0, "sloc": 3.0}},
+                                   "loc": {"cloc": 0.0, "lloc": 2.0, "sloc": 2.0}},
                        "name": "test.py",
                        "spaces": []}
         });
@@ -708,7 +708,7 @@ mod tests {
             "id": "",
             "spaces": {"kind": "unit",
                        "start_line": 1,
-                       "end_line": 3,
+                       "end_line": 2,
                        "metrics": {"cyclomatic": 1.0,
                                    "nargs": 0.,
                                    "nexits": 0.,
@@ -724,7 +724,7 @@ mod tests {
                                                 "unique_operands": 1.0,
                                                 "unique_operators": 2.0,
                                                 "volume": 4.754_887_502_163_468},
-                                   "loc": {"lloc": 2.0, "sloc": 3.0}},
+                                   "loc": {"cloc": 0.0, "lloc": 2.0, "sloc": 2.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
                                    "start_line": 1,
@@ -744,7 +744,7 @@ mod tests {
                                                             "unique_operands": 1.0,
                                                             "unique_operators": 2.0,
                                                             "volume": 4.754_887_502_163_468},
-                                               "loc": {"lloc": 2.0, "sloc": 2.0}},
+                                               "loc": {"cloc": 0.0, "lloc": 2.0, "sloc": 2.0}},
                                    "name": "foo",
                                    "spaces": []}]}
         });
