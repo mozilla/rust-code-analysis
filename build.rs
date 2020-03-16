@@ -127,7 +127,13 @@ fn build_cpp(files: Vec<String>, language: &str) {
 
 fn build_dir(dir: &str, language: &str) {
     println!("Build language {}", language);
-    if PathBuf::from(dir).read_dir().unwrap().next().is_none() {
+    if PathBuf::from(get_cwd())
+        .join(dir)
+        .read_dir()
+        .unwrap()
+        .next()
+        .is_none()
+    {
         eprintln!(
             "The directory {} is empty, did you use 'git clone --recursive'?",
             dir
