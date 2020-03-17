@@ -31,8 +31,8 @@ pub use crate::cyclomatic::*;
 pub mod exit;
 pub use crate::exit::*;
 
-pub mod sloc;
-pub use crate::sloc::*;
+pub mod loc;
+pub use crate::loc::*;
 
 pub mod halstead;
 pub use crate::halstead::*;

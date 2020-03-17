@@ -14,7 +14,7 @@ use crate::exit::{self, Exit};
 use crate::fn_args::{self, NArgs};
 use crate::getter::Getter;
 use crate::halstead::{self, Halstead};
-use crate::sloc::{self, SourceLoc};
+use crate::loc::{self, Loc};
 use crate::tools::write_file;
 use crate::traits::*;
 
@@ -22,7 +22,7 @@ use crate::traits::*;
 pub struct CodeMetrics<'a> {
     pub cyclomatic: cyclomatic::Stats,
     pub halstead: halstead::Stats<'a>,
-    pub sloc: sloc::Stats,
+    pub loc: loc::Stats,
     pub nargs: fn_args::Stats,
     pub nexits: exit::Stats,
 }
@@ -35,7 +35,7 @@ impl<'a> Serialize for CodeMetrics<'a> {
         let mut st = serializer.serialize_struct("metrics", 3)?;
         st.serialize_field("cyclomatic", &self.cyclomatic)?;
         st.serialize_field("halstead", &self.halstead)?;
-        st.serialize_field("loc", &self.sloc)?;
+        st.serialize_field("loc", &self.loc)?;
         st.serialize_field("nargs", &self.nargs)?;
         st.serialize_field("nexits", &self.nexits)?;
         st.end()
@@ -47,7 +47,7 @@ impl<'a> Default for CodeMetrics<'a> {
         Self {
             cyclomatic: cyclomatic::Stats::default(),
             halstead: halstead::Stats::default(),
-            sloc: sloc::Stats::default(),
+            loc: loc::Stats::default(),
             nargs: fn_args::Stats::default(),
             nexits: exit::Stats::default(),
         }
@@ -58,7 +58,7 @@ impl<'a> fmt::Display for CodeMetrics<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "{}", self.cyclomatic)?;
         writeln!(f, "{}", self.halstead)?;
-        writeln!(f, "{}", self.sloc)?;
+        writeln!(f, "{}", self.loc)?;
         writeln!(f, "{}", self.nargs)?;
         write!(f, "{}", self.nexits)
     }
@@ -68,7 +68,7 @@ impl<'a> CodeMetrics<'a> {
     pub fn merge(&mut self, other: &CodeMetrics<'a>) {
         self.cyclomatic.merge(&other.cyclomatic);
         self.halstead.merge(&other.halstead);
-        self.sloc.merge(&other.sloc);
+        self.loc.merge(&other.loc);
         self.nargs.merge(&other.nargs);
         self.nexits.merge(&other.nexits);
     }
@@ -183,7 +183,7 @@ impl<'a> FuncSpace<'a> {
         Self::dump_nargs(&metrics.nargs, &prefix, false, stdout)?;
         Self::dump_nexits(&metrics.nexits, &prefix, false, stdout)?;
         Self::dump_halstead(&metrics.halstead, &prefix, false, stdout)?;
-        Self::dump_sloc(&metrics.sloc, &prefix, true, stdout)
+        Self::dump_loc(&metrics.loc, &prefix, true, stdout)
     }
 
     fn dump_cyclomatic(
@@ -245,8 +245,8 @@ impl<'a> FuncSpace<'a> {
         Self::dump_value("bugs", stats.bugs(), &prefix, true, stdout)
     }
 
-    fn dump_sloc(
-        stats: &sloc::Stats,
+    fn dump_loc(
+        stats: &loc::Stats,
         prefix: &str,
         last: bool,
         stdout: &mut StandardStreamLock,
@@ -386,7 +386,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
         if let Some(last) = space_stack.last_mut() {
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
             T::Halstead::compute(&node, code, &mut last.metrics.halstead);
-            T::SourceLoc::compute(&node, code, &mut last.metrics.sloc, func_space, unit);
+            T::Loc::compute(&node, code, &mut last.metrics.loc, func_space, unit);
             T::NArgs::compute(&node, &mut last.metrics.nargs);
             T::Exit::compute(&node, &mut last.metrics.nexits);
         }
