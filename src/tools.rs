@@ -63,19 +63,19 @@ pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
     }
 }
 
-pub fn get_language_with_mode(lang: &[u8]) -> Option<LANG> {
+pub fn get_language_with_mode(lang: &[u8]) -> (Option<LANG>, String) {
     if let Some(lang) = std::str::from_utf8(lang)
         .ok()
         .map(|l| l.to_lowercase())
         .as_ref()
     {
-        get_from_emacs_mode(lang)
+        (get_from_emacs_mode(lang), lang.to_string())
     } else {
-        None
+        (None, "".to_string())
     }
 }
 
-pub fn guess_language(buf: &[u8]) -> Option<LANG> {
+pub fn guess_language(buf: &[u8]) -> (Option<LANG>, String) {
     // we just try to use the emacs info (if there)
     lazy_static! {
         // comment containing coding info are useful
@@ -106,7 +106,7 @@ pub fn guess_language(buf: &[u8]) -> Option<LANG> {
         }
     }
 
-    None
+    (None, "".to_string())
 }
 
 pub fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
@@ -246,21 +246,24 @@ mod tests {
     #[test]
     fn test_guess_language() {
         let buf = b"// -*- foo: bar; mode: c++; hello: world\n";
-        assert_eq!(guess_language(buf), Some(LANG::Cpp));
+        assert_eq!(guess_language(buf), (Some(LANG::Cpp), "c++".to_string()));
 
         let buf = b"// -*- c++ -*-\n";
-        assert_eq!(guess_language(buf), Some(LANG::Cpp));
+        assert_eq!(guess_language(buf), (Some(LANG::Cpp), "c++".to_string()));
 
         let buf = b"// -*- foo: bar; bar-mode: c++; hello: world\n";
-        assert_eq!(guess_language(buf), None);
+        assert_eq!(guess_language(buf), (None, "".to_string()));
 
         let buf = b"/* hello world */\n";
-        assert_eq!(guess_language(buf), None);
+        assert_eq!(guess_language(buf), (None, "".to_string()));
 
         let buf = b"\n\n\n\n\n\n\n\n\n// vim: set ts=4 ft=c++\n\n\n";
-        assert_eq!(guess_language(buf), Some(LANG::Cpp));
+        assert_eq!(guess_language(buf), (Some(LANG::Cpp), "c++".to_string()));
 
         let buf = b"\n\n\n\n\n\n\n\n\n\n\n\n";
-        assert_eq!(guess_language(buf), None);
+        assert_eq!(guess_language(buf), (None, "".to_string()));
+
+        let buf = b"// -*- foo: bar; mode: Objective-C++; hello: world\n";
+        assert_eq!(guess_language(buf), (None, "objective-c++".to_string()));
     }
 }

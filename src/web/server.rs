@@ -32,7 +32,7 @@ fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
             span: payload.span,
         };
         let buf = payload.code.into_bytes();
-        let language = guess_language(&buf).unwrap_or(language);
+        let language = guess_language(&buf).0.unwrap_or(language);
 
         // TODO: the 4th arg should be preproc data
         HttpResponse::Ok().json(action::<AstCallback>(
@@ -56,7 +56,7 @@ fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -
     if let Some(language) = language {
         let cfg = WebCommentCfg { id: payload.id };
         let buf = payload.code.into_bytes();
-        let language = guess_language(&buf).unwrap_or(language);
+        let language = guess_language(&buf).0.unwrap_or(language);
         let language = if language == LANG::Cpp {
             LANG::Ccomment
         } else {
@@ -81,7 +81,7 @@ fn comment_removal_plain(code: Bytes, info: Query<WebCommentInfo>) -> HttpRespon
     let language = get_language_for_file(&PathBuf::from(&info.file_name));
     if let Some(language) = language {
         let buf = code.to_vec();
-        let language = guess_language(&buf).unwrap_or(language);
+        let language = guess_language(&buf).0.unwrap_or(language);
         let cfg = WebCommentCfg { id: "".to_string() };
         let res = action::<WebCommentCallback>(&language, buf, &PathBuf::from(""), None, cfg);
         if let Some(res_code) = res.code {
@@ -105,13 +105,15 @@ fn metrics_json(item: web::Json<WebMetricsPayload>, _req: HttpRequest) -> HttpRe
     let language = get_language_for_file(&path);
     let payload = item.into_inner();
     if let Some(language) = language {
+        let buf = payload.code.into_bytes();
+        let (guessed_language, guessed_name) = guess_language(&buf);
+        let language = guessed_language.unwrap_or(language);
         let cfg = WebMetricsCfg {
             id: payload.id,
             path,
             unit: payload.unit,
+            guessed_language: guessed_name,
         };
-        let buf = payload.code.into_bytes();
-        let language = guess_language(&buf).unwrap_or(language);
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
             buf,
@@ -132,7 +134,8 @@ fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
     let language = get_language_for_file(&path);
     if let Some(language) = language {
         let buf = code.to_vec();
-        let language = guess_language(&buf).unwrap_or(language);
+        let (guessed_language, guessed_name) = guess_language(&buf);
+        let language = guessed_language.unwrap_or(language);
         let cfg = WebMetricsCfg {
             id: "".to_string(),
             path,
@@ -140,6 +143,7 @@ fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
                 .unit
                 .as_ref()
                 .map_or(false, |s| s == "1" || s == "true"),
+            guessed_language: guessed_name,
         };
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -162,7 +166,7 @@ fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -> Http
     if let Some(language) = language {
         let cfg = WebFunctionCfg { id: payload.id };
         let buf = payload.code.into_bytes();
-        let language = guess_language(&buf).unwrap_or(language);
+        let language = guess_language(&buf).0.unwrap_or(language);
         HttpResponse::Ok().json(action::<WebFunctionCallback>(
             &language,
             buf,
@@ -183,7 +187,7 @@ fn function_plain(code: Bytes, info: Query<WebFunctionInfo>) -> HttpResponse {
     let language = get_language_for_file(&path);
     if let Some(language) = language {
         let buf = code.to_vec();
-        let language = guess_language(&buf).unwrap_or(language);
+        let language = guess_language(&buf).0.unwrap_or(language);
         let cfg = WebFunctionCfg { id: "".to_string() };
         HttpResponse::Ok().json(action::<WebFunctionCallback>(
             &language,
@@ -266,6 +270,7 @@ pub fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
 mod tests {
     use actix_web::{http::header::ContentType, http::StatusCode, test};
     use bytes::Bytes;
+    use pretty_assertions::assert_eq;
     use serde_json::value::Value;
 
     use super::*;
@@ -592,7 +597,7 @@ mod tests {
             .set_json(&WebMetricsPayload {
                 id: "1234".to_string(),
                 file_name: "test.py".to_string(),
-                code: "def foo():\n    pass\n".to_string(),
+                code: "# -*- Mode: Objective-C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-\ndef foo():\n    pass\n".to_string(),
                 unit: false,
             })
             .to_request();
@@ -600,9 +605,10 @@ mod tests {
         let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
+            "guessed_language": "objective-c++",
             "spaces": {"kind": "unit",
                        "start_line": 1,
-                       "end_line": 2,
+                       "end_line": 3,
                        "metrics": {"cyclomatic": 1.0,
                                    "nargs": 0.,
                                    "nexits": 0.,
@@ -618,11 +624,11 @@ mod tests {
                                                 "unique_operands": 1.0,
                                                 "unique_operators": 2.0,
                                                 "volume": 4.754_887_502_163_468},
-                                   "loc": {"cloc": 0.0, "lloc": 2.0, "sloc": 2.0}},
+                                   "loc": {"cloc": 0.0, "lloc": 3.0, "sloc": 3.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
-                                   "start_line": 1,
-                                   "end_line": 2,
+                                   "start_line": 2,
+                                   "end_line": 3,
                                    "metrics": {"cyclomatic": 1.0,
                                                "nargs": 0.,
                                                "nexits": 0.,
@@ -665,6 +671,7 @@ mod tests {
         let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
+            "guessed_language": "",
             "spaces": {"kind": "unit",
                        "start_line": 1,
                        "end_line": 2,
@@ -706,6 +713,7 @@ mod tests {
         let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "",
+            "guessed_language": "",
             "spaces": {"kind": "unit",
                        "start_line": 1,
                        "end_line": 2,
