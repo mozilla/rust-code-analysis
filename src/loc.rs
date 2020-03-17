@@ -54,7 +54,7 @@ impl Stats {
         let sloc = if self.unit {
             self.end - self.start
         } else {
-            ((self.end - self.start) + 1)
+            (self.end - self.start) + 1
         };
         sloc as f64
     }
