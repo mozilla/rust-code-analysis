@@ -624,7 +624,7 @@ mod tests {
                                                 "unique_operands": 1.0,
                                                 "unique_operators": 2.0,
                                                 "volume": 4.754_887_502_163_468},
-                                   "loc": {"cloc": 0.0, "lloc": 3.0, "sloc": 3.0}},
+                                   "loc": {"cloc": 1.0, "lloc": 2.0, "sloc": 3.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
                                    "start_line": 2,

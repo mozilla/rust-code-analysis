@@ -105,7 +105,7 @@ impl SourceLoc for PythonCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | DQUOTE2 | ExpressionStatement | Block => {}
+            Comment | String | DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
             _ => {
                 stats.lines.insert(start);
             }
@@ -120,7 +120,7 @@ impl SourceLoc for MozjsCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             _ => {
                 stats.lines.insert(start);
             }
@@ -135,7 +135,7 @@ impl SourceLoc for JavascriptCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             _ => {
                 stats.lines.insert(start);
             }
@@ -150,7 +150,7 @@ impl SourceLoc for TypescriptCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             _ => {
                 stats.lines.insert(start);
             }
@@ -165,7 +165,7 @@ impl SourceLoc for TsxCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock => {}
+            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             _ => {
                 stats.lines.insert(start);
             }
