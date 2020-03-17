@@ -1,6 +1,6 @@
 [package]
 name = "rust-code-analysis"
-version = "0.0.8"
+version = "0.0.9"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2018"
 build = "build.rs"
