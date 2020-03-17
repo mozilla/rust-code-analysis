@@ -11,13 +11,13 @@ use crate::fn_args::NArgs;
 use crate::getter::Getter;
 use crate::halstead::Halstead;
 use crate::languages::*;
+use crate::loc::Loc;
 use crate::preproc::{get_macros, PreprocResults};
-use crate::sloc::SourceLoc;
 use crate::traits::*;
 use crate::web::alterator::Alterator;
 
 pub struct TSParser<
-    T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Exit + Halstead + NArgs + SourceLoc,
+    T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Exit + Halstead + NArgs + Loc,
 > {
     code: Vec<u8>,
     tree: Tree,
@@ -69,23 +69,14 @@ fn get_fake_code<T: TSLanguage>(
     }
 }
 
-impl<
-        T: TSLanguage
-            + Checker
-            + Getter
-            + Alterator
-            + Cyclomatic
-            + Exit
-            + Halstead
-            + SourceLoc
-            + NArgs,
-    > TSParserTrait for TSParser<T>
+impl<T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Exit + Halstead + Loc + NArgs>
+    TSParserTrait for TSParser<T>
 {
     type Checker = T;
     type Getter = T;
     type Cyclomatic = T;
     type Halstead = T;
-    type SourceLoc = T;
+    type Loc = T;
     type NArgs = T;
     type Exit = T;
 

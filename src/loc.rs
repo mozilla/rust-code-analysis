@@ -54,7 +54,7 @@ impl Stats {
         let sloc = if self.unit {
             self.end - self.start
         } else {
-            ((self.end - self.start) + 1)
+            (self.end - self.start) + 1
         };
         sloc as f64
     }
@@ -70,7 +70,7 @@ impl Stats {
     }
 }
 
-pub trait SourceLoc
+pub trait Loc
 where
     Self: Checker,
 {
@@ -98,7 +98,7 @@ fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> u
     start
 }
 
-impl SourceLoc for PythonCode {
+impl Loc for PythonCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Python::*;
 
@@ -113,7 +113,7 @@ impl SourceLoc for PythonCode {
     }
 }
 
-impl SourceLoc for MozjsCode {
+impl Loc for MozjsCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Mozjs::*;
 
@@ -128,7 +128,7 @@ impl SourceLoc for MozjsCode {
     }
 }
 
-impl SourceLoc for JavascriptCode {
+impl Loc for JavascriptCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Javascript::*;
 
@@ -143,7 +143,7 @@ impl SourceLoc for JavascriptCode {
     }
 }
 
-impl SourceLoc for TypescriptCode {
+impl Loc for TypescriptCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Typescript::*;
 
@@ -158,7 +158,7 @@ impl SourceLoc for TypescriptCode {
     }
 }
 
-impl SourceLoc for TsxCode {
+impl Loc for TsxCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Tsx::*;
 
@@ -173,7 +173,7 @@ impl SourceLoc for TsxCode {
     }
 }
 
-impl SourceLoc for RustCode {
+impl Loc for RustCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Rust::*;
 
@@ -189,7 +189,7 @@ impl SourceLoc for RustCode {
     }
 }
 
-impl SourceLoc for CppCode {
+impl Loc for CppCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Cpp::*;
 
@@ -206,10 +206,10 @@ impl SourceLoc for CppCode {
     }
 }
 
-impl SourceLoc for PreprocCode {}
-impl SourceLoc for CcommentCode {}
-impl SourceLoc for CSharpCode {}
-impl SourceLoc for JavaCode {}
-impl SourceLoc for GoCode {}
-impl SourceLoc for CssCode {}
-impl SourceLoc for HtmlCode {}
+impl Loc for PreprocCode {}
+impl Loc for CcommentCode {}
+impl Loc for CSharpCode {}
+impl Loc for JavaCode {}
+impl Loc for GoCode {}
+impl Loc for CssCode {}
+impl Loc for HtmlCode {}
