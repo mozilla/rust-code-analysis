@@ -16,7 +16,7 @@ pub struct WebMetricsPayload {
 #[derive(Debug, Serialize)]
 pub struct WebMetricsResponse<'a> {
     pub id: String,
-    pub guessed_language: String,
+    pub language: String,
     pub spaces: Option<FuncSpace<'a>>,
 }
 
@@ -32,7 +32,7 @@ pub struct WebMetricsCfg {
     pub id: String,
     pub path: PathBuf,
     pub unit: bool,
-    pub guessed_language: String,
+    pub language: String,
 }
 
 impl Callback for WebMetricsCallback {
@@ -54,7 +54,7 @@ impl Callback for WebMetricsCallback {
 
         serde_json::to_value(WebMetricsResponse {
             id: cfg.id,
-            guessed_language: cfg.guessed_language,
+            language: cfg.language,
             spaces,
         })
         .unwrap()

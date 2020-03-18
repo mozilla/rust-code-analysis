@@ -60,9 +60,6 @@ pub mod c_macro;
 pub mod preproc;
 pub use crate::preproc::*;
 
-mod language;
-pub use crate::language::*;
-
 mod languages;
 pub use crate::languages::*;
 
