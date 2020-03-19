@@ -1,9 +1,11 @@
 use actix_rt::Runtime;
 use actix_web::{
-    dev::Body, guard, http, web, web::Query, App, FromRequest, HttpRequest, HttpResponse,
-    HttpServer,
+    dev::Body,
+    guard, http,
+    web::{self, BytesMut, Query},
+    App, FromRequest, HttpRequest, HttpResponse, HttpServer,
 };
-use bytes::Bytes;
+use futures::StreamExt;
 use std::path::PathBuf;
 
 use super::ast::{AstCallback, AstCfg, AstPayload};
@@ -22,7 +24,16 @@ struct Error {
     error: &'static str,
 }
 
-fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
+async fn get_code(mut body: web::Payload) -> Result<Vec<u8>, actix_web::Error> {
+    let mut code = BytesMut::new();
+    while let Some(item) = body.next().await {
+        code.extend_from_slice(&item?);
+    }
+
+    Ok(code.to_vec())
+}
+
+fn ast_parser(item: web::Json<AstPayload>) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
@@ -50,7 +61,7 @@ fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
     }
 }
 
-fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> HttpResponse {
+fn comment_removal_json(item: web::Json<WebCommentPayload>) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
@@ -77,30 +88,33 @@ fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -
     }
 }
 
-fn comment_removal_plain(code: Bytes, info: Query<WebCommentInfo>) -> HttpResponse {
+async fn comment_removal_plain(
+    body: web::Payload,
+    info: Query<WebCommentInfo>,
+) -> Result<HttpResponse, actix_web::Error> {
+    let buf = get_code(body).await?;
     let path = PathBuf::from(&info.file_name);
-    let buf = code.to_vec();
     let (language, _) = guess_language(&buf, &path);
     if let Some(language) = language {
         let cfg = WebCommentCfg { id: "".to_string() };
         let res = action::<WebCommentCallback>(&language, buf, &PathBuf::from(""), None, cfg);
         if let Some(res_code) = res.code {
-            HttpResponse::Ok()
+            Ok(HttpResponse::Ok()
                 .header(http::header::CONTENT_TYPE, "application/octet-stream")
-                .body(res_code)
+                .body(res_code))
         } else {
-            HttpResponse::NoContent()
+            Ok(HttpResponse::NoContent()
                 .header(http::header::CONTENT_TYPE, "application/octet-stream")
-                .body(Body::Empty)
+                .body(Body::Empty))
         }
     } else {
-        HttpResponse::NotFound()
+        Ok(HttpResponse::NotFound()
             .header(http::header::CONTENT_TYPE, "text/plain")
-            .body(format!("error: {}", INVALID_LANGUAGE))
+            .body(format!("error: {}", INVALID_LANGUAGE)))
     }
 }
 
-fn metrics_json(item: web::Json<WebMetricsPayload>, _req: HttpRequest) -> HttpResponse {
+fn metrics_json(item: web::Json<WebMetricsPayload>) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
@@ -127,9 +141,12 @@ fn metrics_json(item: web::Json<WebMetricsPayload>, _req: HttpRequest) -> HttpRe
     }
 }
 
-fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
+async fn metrics_plain(
+    body: web::Payload,
+    info: Query<WebMetricsInfo>,
+) -> Result<HttpResponse, actix_web::Error> {
+    let buf = get_code(body).await?;
     let path = PathBuf::from(&info.file_name);
-    let buf = code.to_vec();
     let (language, name) = guess_language(&buf, &path);
     if let Some(language) = language {
         let cfg = WebMetricsCfg {
@@ -141,17 +158,17 @@ fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
                 .map_or(false, |s| s == "1" || s == "true"),
             language: name,
         };
-        HttpResponse::Ok().json(action::<WebMetricsCallback>(
+        Ok(HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
             buf,
             &PathBuf::from(""),
             None,
             cfg,
-        ))
+        )))
     } else {
-        HttpResponse::NotFound()
+        Ok(HttpResponse::NotFound()
             .header(http::header::CONTENT_TYPE, "text/plain")
-            .body(format!("error: {}", INVALID_LANGUAGE))
+            .body(format!("error: {}", INVALID_LANGUAGE)))
     }
 }
 
@@ -177,23 +194,26 @@ fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -> Http
     }
 }
 
-fn function_plain(code: Bytes, info: Query<WebFunctionInfo>) -> HttpResponse {
+async fn function_plain(
+    body: web::Payload,
+    info: Query<WebFunctionInfo>,
+) -> Result<HttpResponse, actix_web::Error> {
+    let buf = get_code(body).await?;
     let path = PathBuf::from(&info.file_name);
-    let buf = code.to_vec();
     let (language, _) = guess_language(&buf, &path);
     if let Some(language) = language {
         let cfg = WebFunctionCfg { id: "".to_string() };
-        HttpResponse::Ok().json(action::<WebFunctionCallback>(
+        Ok(HttpResponse::Ok().json(action::<WebFunctionCallback>(
             &language,
             buf,
             &PathBuf::from(""),
             None,
             cfg,
-        ))
+        )))
     } else {
-        HttpResponse::NotFound()
+        Ok(HttpResponse::NotFound()
             .header(http::header::CONTENT_TYPE, "text/plain")
-            .body(format!("error: {}", INVALID_LANGUAGE))
+            .body(format!("error: {}", INVALID_LANGUAGE)))
     }
 }
 
@@ -204,49 +224,59 @@ fn ping() -> HttpResponse {
 pub fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
     let _ = actix_rt::System::new("server");
     let mut rt = Runtime::new()?;
+    let max_size = 1024 * 1024 * 4;
 
     rt.block_on(async move {
-        HttpServer::new(|| {
+        HttpServer::new(move || {
             App::new()
                 .service(
                     web::resource("/ast")
-                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .guard(guard::Header("content-type", "application/json"))
+                        .app_data(web::Json::<AstPayload>::configure(|cfg| {
+                            cfg.limit(max_size)
+                        }))
                         .route(web::post().to(ast_parser)),
                 )
                 .service(
                     web::resource("/comment")
                         .guard(guard::Header("content-type", "application/json"))
-                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .app_data(web::Json::<WebCommentPayload>::configure(|cfg| {
+                            cfg.limit(max_size)
+                        }))
                         .route(web::post().to(comment_removal_json)),
                 )
                 .service(
                     web::resource("/comment")
                         .guard(guard::Header("content-type", "application/octet-stream"))
-                        .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                        .data(web::PayloadConfig::default().limit(max_size))
                         .route(web::post().to(comment_removal_plain)),
                 )
                 .service(
                     web::resource("/metrics")
                         .guard(guard::Header("content-type", "application/json"))
-                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .app_data(web::Json::<WebMetricsPayload>::configure(|cfg| {
+                            cfg.limit(max_size)
+                        }))
                         .route(web::post().to(metrics_json)),
                 )
                 .service(
                     web::resource("/metrics")
                         .guard(guard::Header("content-type", "application/octet-stream"))
-                        .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                        .data(web::PayloadConfig::default().limit(max_size))
                         .route(web::post().to(metrics_plain)),
                 )
                 .service(
                     web::resource("/function")
                         .guard(guard::Header("content-type", "application/json"))
-                        .data(web::JsonConfig::default().limit(std::u32::MAX as usize))
+                        .app_data(web::Json::<WebFunctionPayload>::configure(|cfg| {
+                            cfg.limit(max_size)
+                        }))
                         .route(web::post().to(function_json)),
                 )
                 .service(
                     web::resource("/function")
                         .guard(guard::Header("content-type", "application/octet-stream"))
-                        .data(Bytes::configure(|cfg| cfg.limit(std::u32::MAX as usize)))
+                        .data(web::PayloadConfig::default().limit(max_size))
                         .route(web::post().to(function_plain)),
                 )
                 .service(web::resource("/ping").route(web::get().to(ping)))
