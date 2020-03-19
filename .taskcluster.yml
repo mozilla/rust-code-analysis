@@ -58,11 +58,30 @@ tasks:
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
+      - taskId: {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: win2012r2
+        payload:
+          maxRunTime: 3600
+          command:
+            - git clone --recursive --quiet ${repository}
+            - cd rust-code-analysis
+            - git -c advice.detachedHead=false checkout ${head_rev}
+            - cargo test
+        metadata:
+          name: rust-code-analysis windows test
+          description: rust-code-analysis windows test
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
       - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
         then:
           taskId: {$eval: as_slugid("build_release")}
           dependencies:
             - {$eval: as_slugid("lint_test_task")}
+            - {$eval: as_slugid("windows_test_task")}
           created: {$fromNow: ''}
           deadline: {$fromNow: '2 hour'}
           provisionerId: proj-relman
