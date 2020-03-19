@@ -84,7 +84,7 @@ mk_langs!(
         CppCode,
         CppParser,
         tree_sitter_cpp,
-        [cpp, cxx, cc, hxx, hpp, c, h, hh, inc, mm],
+        [cpp, cxx, cc, hxx, hpp, c, h, hh, inc, mm, m],
         ["c++", "c", "objc", "objc++", "objective-c++", "objective-c"]
     ),
     (
