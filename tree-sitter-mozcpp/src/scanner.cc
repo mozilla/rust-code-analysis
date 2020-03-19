@@ -1,1 +1,1 @@
-../../tree-sitter-cpp/src/scanner.cc
+#include "../../tree-sitter-cpp/src/scanner.cc"

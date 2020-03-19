@@ -105,7 +105,7 @@ fn build_c(files: Vec<String>, language: &str) {
             .opt_level(get_opt_level())
             .debug(get_debug())
             .warnings(false)
-            .flag("-std=c99");
+            .flag_if_supported("-std=c99");
     }
     build.compile(&format!("tree-sitter-{}-c", language));
 }
