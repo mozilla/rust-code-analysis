@@ -219,24 +219,22 @@ impl<'a> FuncSpace<'a> {
         writeln!(stdout, "halstead")?;
 
         let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_value(
-            "unique operands",
-            stats.u_operands(),
-            &prefix,
-            false,
-            stdout,
-        )?;
-        Self::dump_value("operands", stats.operands(), &prefix, false, stdout)?;
-        Self::dump_value(
-            "unique operators",
-            stats.u_operators(),
-            &prefix,
-            false,
-            stdout,
-        )?;
-        Self::dump_value("operators", stats.operators(), &prefix, false, stdout)?;
+
+        Self::dump_value("n1", stats.u_operators(), &prefix, false, stdout)?;
+        Self::dump_value("N1", stats.operators(), &prefix, false, stdout)?;
+        Self::dump_value("n2", stats.u_operands(), &prefix, false, stdout)?;
+        Self::dump_value("N2", stats.operands(), &prefix, false, stdout)?;
+
         Self::dump_value("length", stats.length(), &prefix, false, stdout)?;
-        Self::dump_value("size", stats.size(), &prefix, false, stdout)?;
+        Self::dump_value(
+            "estimated program length",
+            stats.estimated_program_length(),
+            &prefix,
+            false,
+            stdout,
+        )?;
+        Self::dump_value("purity ratio", stats.purity_ratio(), &prefix, false, stdout)?;
+        Self::dump_value("vocabulary", stats.vocabulary(), &prefix, false, stdout)?;
         Self::dump_value("volume", stats.volume(), &prefix, false, stdout)?;
         Self::dump_value("difficulty", stats.difficulty(), &prefix, false, stdout)?;
         Self::dump_value("level", stats.level(), &prefix, false, stdout)?;
