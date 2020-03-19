@@ -58,11 +58,40 @@ tasks:
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
+      - taskId: {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: win2012r2
+        payload:
+          maxRunTime: 3600
+          command:
+            - set VS_PATH=%programfiles(x86)%\Microsoft Visual Studio 14.0\VC
+            - set RUSTUP_INIT_PATH=%CD%\rustup-init
+            - set PATH=%RUSTUP_INIT_PATH%;%USERPROFILE%\.cargo\bin;%PATH%
+            - call "%VS_PATH%\vcvarsall.bat" x86_amd64
+            - rustup-init -yv --default-toolchain stable ^
+                              --default-host x86_64-pc-windows-msvc
+            - git clone --recursive --quiet ${repository}
+            - cd rust-code-analysis
+            - git -c advice.detachedHead=false checkout ${head_rev}
+            - cargo test --verbose --all-features
+          mounts:
+            - content:
+                url: https://win.rustup.rs/
+              file: rustup-init\rustup-init.exe
+        metadata:
+          name: rust-code-analysis windows test
+          description: rust-code-analysis windows test
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
       - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
         then:
           taskId: {$eval: as_slugid("build_release")}
           dependencies:
             - {$eval: as_slugid("lint_test_task")}
+            - {$eval: as_slugid("windows_test_task")}
           created: {$fromNow: ''}
           deadline: {$fromNow: '2 hour'}
           provisionerId: proj-relman
