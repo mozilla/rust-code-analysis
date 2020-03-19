@@ -36,7 +36,7 @@ struct Config {
 }
 
 struct JobItem {
-    language: LANG,
+    language: Option<LANG>,
     path: PathBuf,
     cfg: Config,
 }
@@ -60,19 +60,24 @@ fn mk_globset(elems: clap::Values) -> GlobSet {
     }
 }
 
-fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()> {
+fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::Result<()> {
+    let source = read_file_with_eol(&path)?;
+    let language = if let Some(language) = language {
+        language
+    } else if let Some(language) = guess_language(&source, &path).0 {
+        language
+    } else {
+        return Ok(());
+    };
+
     let pr = cfg.preproc;
     if cfg.dump {
-        let source = read_file_with_eol(&path)?;
-        let language = guess_language(&source).0.unwrap_or(language);
         let cfg = DumpCfg {
             line_start: cfg.line_start,
             line_end: cfg.line_end,
         };
         action::<Dump>(&language, source, &path, pr, cfg)
     } else if cfg.metrics {
-        let source = read_file_with_eol(&path)?;
-        let language = guess_language(&source).0.unwrap_or(language);
         let cfg = MetricsCfg {
             path,
             output_path: if cfg.output.is_empty() {
@@ -83,30 +88,19 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         };
         action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
     } else if cfg.comments {
-        let source = read_file_with_eol(&path)?;
-        let language = guess_language(&source).0.unwrap_or(language);
-        let lang = get_language_for_file(&path);
         let cfg = CommentRmCfg {
             in_place: cfg.in_place,
             path,
         };
-        if let Some(lang) = lang {
-            if lang == LANG::Cpp {
-                action::<CommentRm>(&LANG::Ccomment, source, &cfg.path.clone(), pr, cfg)
-            } else {
-                action::<CommentRm>(&language, source, &cfg.path.clone(), pr, cfg)
-            }
+        if language == LANG::Cpp {
+            action::<CommentRm>(&LANG::Ccomment, source, &cfg.path.clone(), pr, cfg)
         } else {
             action::<CommentRm>(&language, source, &cfg.path.clone(), pr, cfg)
         }
     } else if cfg.function {
-        let source = read_file_with_eol(&path)?;
-        let language = guess_language(&source).0.unwrap_or(language);
         let cfg = FunctionCfg { path: path.clone() };
         action::<Function>(&language, source, &path, pr, cfg)
     } else if !cfg.find_filter.is_empty() {
-        let source = read_file_with_eol(&path)?;
-        let language = guess_language(&source).0.unwrap_or(language);
         let cfg = FindCfg {
             path: Some(path.clone()),
             filters: cfg.find_filter,
@@ -115,8 +109,6 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         };
         action::<Find>(&language, source, &path, pr, cfg)
     } else if cfg.count_lock.is_some() {
-        let source = read_file_with_eol(&path)?;
-        let language = guess_language(&source).0.unwrap_or(language);
         let cfg = CountCfg {
             path: Some(path.clone()),
             filters: cfg.count_filter,
@@ -124,15 +116,13 @@ fn act_on_file(language: LANG, path: PathBuf, cfg: Config) -> std::io::Result<()
         };
         action::<Count>(&language, source, &path, pr, cfg)
     } else if cfg.preproc_lock.is_some() {
-        if let Some(lang) = get_language_for_file(&path) {
-            if lang == LANG::Cpp {
-                let source = read_file_with_eol(&path)?;
-                preprocess(
-                    &PreprocParser::new(source, &path, None),
-                    &path,
-                    cfg.preproc_lock.unwrap().clone(),
-                );
-            }
+        if language == LANG::Cpp {
+            let source = read_file_with_eol(&path)?;
+            preprocess(
+                &PreprocParser::new(source, &path, None),
+                &path,
+                cfg.preproc_lock.unwrap().clone(),
+            );
         }
         Ok(())
     } else {
@@ -154,21 +144,13 @@ fn consumer(receiver: JobReceiver) {
 }
 
 fn send_file(path: PathBuf, cfg: &Config, language: &Option<LANG>, sender: &JobSender) {
-    let language = if language.is_none() {
-        get_language_for_file(&path)
-    } else {
-        language.clone()
-    };
-
-    if let Some(language) = language {
-        sender
-            .send(Some(JobItem {
-                language,
-                path,
-                cfg: cfg.clone(),
-            }))
-            .unwrap();
-    }
+    sender
+        .send(Some(JobItem {
+            language: language.clone(),
+            path,
+            cfg: cfg.clone(),
+        }))
+        .unwrap();
 }
 
 fn is_hidden(entry: &DirEntry) -> bool {

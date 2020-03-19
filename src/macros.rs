@@ -25,7 +25,7 @@ macro_rules! mk_extern {
 #[macro_export]
 macro_rules! mk_enum {
     ( $( $camel:ident ),* ) => {
-        #[derive(Clone, Debug, IntoEnumIterator, PartialEq)]
+        #[derive(Clone, Copy, Debug, IntoEnumIterator, PartialEq)]
         pub enum LANG {
             $(
                 $camel,
@@ -35,13 +35,24 @@ macro_rules! mk_enum {
 }
 
 #[macro_export]
-macro_rules! mk_get_language {
-    ( $( ($camel:ident, $name:ident) ),* ) => {
-        pub fn get_language(lang: &LANG) -> Language {
-            unsafe {
-                match lang {
+macro_rules! mk_impl_lang {
+    ( $( ($camel:ident, $name:ident, $display: expr) ),* ) => {
+        impl LANG {
+
+            pub fn get_language(&self) -> Language {
+                unsafe {
+                    match self {
+                        $(
+                            LANG::$camel => $name(),
+                        )*
+                    }
+                }
+            }
+
+            pub fn get_name(&self) -> &'static str {
+                match self {
                     $(
-                        LANG::$camel => $name(),
+                        LANG::$camel => $display,
                     )*
                 }
             }
@@ -126,10 +137,10 @@ macro_rules! mk_code {
 
 #[macro_export]
 macro_rules! mk_langs {
-    ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
+    ( $( ($camel:ident, $display: expr, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
         mk_extern!($( $name ),*);
         mk_enum!($( $camel ),*);
-        mk_get_language!($( ($camel, $name) ),*);
+        mk_impl_lang!($( ($camel, $name, $display) ),*);
         mk_action!($( ($camel, $parser) ),*);
         mk_extensions!($( ($camel, [ $( $ext ),* ]) ),*);
         mk_emacs_mode!($( ($camel, [ $( $emacs_mode ),* ]) ),*);

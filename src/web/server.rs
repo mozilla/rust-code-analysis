@@ -11,7 +11,7 @@ use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebComme
 use super::function::{WebFunctionCallback, WebFunctionCfg, WebFunctionInfo, WebFunctionPayload};
 use super::metrics::{WebMetricsCallback, WebMetricsCfg, WebMetricsInfo, WebMetricsPayload};
 use crate::languages::action;
-use crate::tools::{get_language_for_file, guess_language};
+use crate::tools::guess_language;
 use crate::LANG;
 
 const INVALID_LANGUAGE: &str = "The file extension doesn't correspond to a valid language";
@@ -23,16 +23,16 @@ struct Error {
 }
 
 fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
-    let language = get_language_for_file(&PathBuf::from(&item.file_name));
+    let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
+    let buf = payload.code.into_bytes();
+    let (language, _) = guess_language(&buf, &path);
     if let Some(language) = language {
         let cfg = AstCfg {
             id: payload.id,
             comment: payload.comment,
             span: payload.span,
         };
-        let buf = payload.code.into_bytes();
-        let language = guess_language(&buf).0.unwrap_or(language);
 
         // TODO: the 4th arg should be preproc data
         HttpResponse::Ok().json(action::<AstCallback>(
@@ -51,12 +51,12 @@ fn ast_parser(item: web::Json<AstPayload>, _req: HttpRequest) -> HttpResponse {
 }
 
 fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -> HttpResponse {
-    let language = get_language_for_file(&PathBuf::from(&item.file_name));
+    let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
+    let buf = payload.code.into_bytes();
+    let (language, _) = guess_language(&buf, &path);
     if let Some(language) = language {
         let cfg = WebCommentCfg { id: payload.id };
-        let buf = payload.code.into_bytes();
-        let language = guess_language(&buf).0.unwrap_or(language);
         let language = if language == LANG::Cpp {
             LANG::Ccomment
         } else {
@@ -78,10 +78,10 @@ fn comment_removal_json(item: web::Json<WebCommentPayload>, _req: HttpRequest) -
 }
 
 fn comment_removal_plain(code: Bytes, info: Query<WebCommentInfo>) -> HttpResponse {
-    let language = get_language_for_file(&PathBuf::from(&info.file_name));
+    let path = PathBuf::from(&info.file_name);
+    let buf = code.to_vec();
+    let (language, _) = guess_language(&buf, &path);
     if let Some(language) = language {
-        let buf = code.to_vec();
-        let language = guess_language(&buf).0.unwrap_or(language);
         let cfg = WebCommentCfg { id: "".to_string() };
         let res = action::<WebCommentCallback>(&language, buf, &PathBuf::from(""), None, cfg);
         if let Some(res_code) = res.code {
@@ -102,17 +102,15 @@ fn comment_removal_plain(code: Bytes, info: Query<WebCommentInfo>) -> HttpRespon
 
 fn metrics_json(item: web::Json<WebMetricsPayload>, _req: HttpRequest) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
-    let language = get_language_for_file(&path);
     let payload = item.into_inner();
+    let buf = payload.code.into_bytes();
+    let (language, name) = guess_language(&buf, &path);
     if let Some(language) = language {
-        let buf = payload.code.into_bytes();
-        let (guessed_language, guessed_name) = guess_language(&buf);
-        let language = guessed_language.unwrap_or(language);
         let cfg = WebMetricsCfg {
             id: payload.id,
             path,
             unit: payload.unit,
-            guessed_language: guessed_name,
+            language: name,
         };
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -131,11 +129,9 @@ fn metrics_json(item: web::Json<WebMetricsPayload>, _req: HttpRequest) -> HttpRe
 
 fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
     let path = PathBuf::from(&info.file_name);
-    let language = get_language_for_file(&path);
+    let buf = code.to_vec();
+    let (language, name) = guess_language(&buf, &path);
     if let Some(language) = language {
-        let buf = code.to_vec();
-        let (guessed_language, guessed_name) = guess_language(&buf);
-        let language = guessed_language.unwrap_or(language);
         let cfg = WebMetricsCfg {
             id: "".to_string(),
             path,
@@ -143,7 +139,7 @@ fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
                 .unit
                 .as_ref()
                 .map_or(false, |s| s == "1" || s == "true"),
-            guessed_language: guessed_name,
+            language: name,
         };
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -161,12 +157,11 @@ fn metrics_plain(code: Bytes, info: Query<WebMetricsInfo>) -> HttpResponse {
 
 fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
-    let language = get_language_for_file(&path);
     let payload = item.into_inner();
+    let buf = payload.code.into_bytes();
+    let (language, _) = guess_language(&buf, &path);
     if let Some(language) = language {
         let cfg = WebFunctionCfg { id: payload.id };
-        let buf = payload.code.into_bytes();
-        let language = guess_language(&buf).0.unwrap_or(language);
         HttpResponse::Ok().json(action::<WebFunctionCallback>(
             &language,
             buf,
@@ -184,10 +179,9 @@ fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -> Http
 
 fn function_plain(code: Bytes, info: Query<WebFunctionInfo>) -> HttpResponse {
     let path = PathBuf::from(&info.file_name);
-    let language = get_language_for_file(&path);
+    let buf = code.to_vec();
+    let (language, _) = guess_language(&buf, &path);
     if let Some(language) = language {
-        let buf = code.to_vec();
-        let language = guess_language(&buf).0.unwrap_or(language);
         let cfg = WebFunctionCfg { id: "".to_string() };
         HttpResponse::Ok().json(action::<WebFunctionCallback>(
             &language,
@@ -605,7 +599,7 @@ mod tests {
         let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
-            "guessed_language": "objective-c++",
+            "language": "python",
             "spaces": {"kind": "unit",
                        "start_line": 1,
                        "end_line": 3,
@@ -671,7 +665,7 @@ mod tests {
         let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "1234",
-            "guessed_language": "",
+            "language": "python",
             "spaces": {"kind": "unit",
                        "start_line": 1,
                        "end_line": 2,
@@ -713,7 +707,7 @@ mod tests {
         let res: Value = test::read_response_json(&mut app, req).await;
         let expected = json!({
             "id": "",
-            "guessed_language": "",
+            "language": "python",
             "spaces": {"kind": "unit",
                        "start_line": 1,
                        "end_line": 2,

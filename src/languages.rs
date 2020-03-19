@@ -8,21 +8,24 @@ use crate::*;
 
 mk_langs!(
     // 1) Name for enum
-    // 2) Empty struct name to implement
-    // 3) Parser name
-    // 4) tree-sitter function to call to get a Language
-    // 5) file extensions
-    // 6) emacs modes
+    // 2) Display name
+    // 3) Empty struct name to implement
+    // 4) Parser name
+    // 5) tree-sitter function to call to get a Language
+    // 6) file extensions
+    // 7) emacs modes
     (
         Mozjs,
+        "javascript",
         MozjsCode,
         MozjsParser,
         tree_sitter_mozjs,
         [js, jsm],
-        ["js"]
+        ["js", "js2"]
     ),
     (
         Javascript,
+        "javascript",
         JavascriptCode,
         JavascriptParser,
         tree_sitter_javascript,
@@ -31,15 +34,17 @@ mk_langs!(
     ),
     (
         Java,
+        "java",
         JavaCode,
         JavaParser,
         tree_sitter_java,
         [java],
         ["java"]
     ),
-    (Go, GoCode, GoParser, tree_sitter_go, [go], ["go"]),
+    (Go, "go", GoCode, GoParser, tree_sitter_go, [go], ["go"]),
     (
         Html,
+        "html",
         HtmlCode,
         HtmlParser,
         tree_sitter_html,
@@ -48,33 +53,61 @@ mk_langs!(
     ),
     (
         CSharp,
+        "c#",
         CSharpCode,
         CSharpParser,
         tree_sitter_c_sharp,
         [cs],
         ["csharp", "c#"]
     ),
-    (Rust, RustCode, RustParser, tree_sitter_rust, [rs], ["rust"]),
-    (Css, CssCode, CssParser, tree_sitter_css, [css], ["css"]),
+    (
+        Rust,
+        "rust",
+        RustCode,
+        RustParser,
+        tree_sitter_rust,
+        [rs],
+        ["rust"]
+    ),
+    (
+        Css,
+        "css",
+        CssCode,
+        CssParser,
+        tree_sitter_css,
+        [css],
+        ["css"]
+    ),
     (
         Cpp,
+        "c/c++",
         CppCode,
         CppParser,
         tree_sitter_cpp,
-        [cpp, cxx, cc, hxx, hpp, c, h, hh, inc],
-        ["c++", "c"]
+        [cpp, cxx, cc, hxx, hpp, c, h, hh, inc, mm, m],
+        ["c++", "c", "objc", "objc++", "objective-c++", "objective-c"]
     ),
     (
         Python,
+        "python",
         PythonCode,
         PythonParser,
         tree_sitter_python,
         [py],
         ["python"]
     ),
-    (Tsx, TsxCode, TsxParser, tree_sitter_tsx, [tsx], []),
+    (
+        Tsx,
+        "typescript",
+        TsxCode,
+        TsxParser,
+        tree_sitter_tsx,
+        [tsx],
+        []
+    ),
     (
         Typescript,
+        "typescript",
         TypescriptCode,
         TypescriptParser,
         tree_sitter_typescript,
@@ -83,6 +116,7 @@ mk_langs!(
     ),
     (
         Ccomment,
+        "ccomment",
         CcommentCode,
         CcommentParser,
         tree_sitter_ccomment,
@@ -91,6 +125,7 @@ mk_langs!(
     ),
     (
         Preproc,
+        "preproc",
         PreprocCode,
         PreprocParser,
         tree_sitter_preproc,
@@ -98,3 +133,19 @@ mk_langs!(
         []
     )
 );
+
+pub(crate) mod fake {
+    pub fn get_true(ext: &str, mode: &str) -> Option<String> {
+        if ext == "m"
+            || ext == "mm"
+            || mode == "objc"
+            || mode == "objc++"
+            || mode == "objective-c++"
+            || mode == "objective-c"
+        {
+            Some("obj-c/c++".to_string())
+        } else {
+            None
+        }
+    }
+}

@@ -1,3 +1,4 @@
+use crate::languages::fake;
 use crate::languages::*;
 use regex::bytes::Regex;
 use std::collections::HashMap;
@@ -63,19 +64,14 @@ pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
     }
 }
 
-pub fn get_language_with_mode(lang: &[u8]) -> (Option<LANG>, String) {
-    if let Some(lang) = std::str::from_utf8(lang)
+fn mode_to_str(mode: &[u8]) -> Option<String> {
+    std::str::from_utf8(mode)
         .ok()
-        .map(|l| l.to_lowercase())
-        .as_ref()
-    {
-        (get_from_emacs_mode(lang), lang.to_string())
-    } else {
-        (None, "".to_string())
-    }
+        .map(|m| m.to_lowercase())
+        .map(|m| m.to_string())
 }
 
-pub fn guess_language(buf: &[u8]) -> (Option<LANG>, String) {
+fn get_emacs_mode<'a>(buf: &'a [u8]) -> Option<String> {
     // we just try to use the emacs info (if there)
     lazy_static! {
         // comment containing coding info are useful
@@ -86,11 +82,11 @@ pub fn guess_language(buf: &[u8]) -> (Option<LANG>, String) {
 
     for (i, line) in buf.splitn(5, |c| *c == b'\n').enumerate() {
         if let Some(cap) = RE1_EMACS.captures_iter(line).next() {
-            return get_language_with_mode(&cap[1]);
+            return mode_to_str(&cap[1]);
         } else if let Some(cap) = RE2_EMACS.captures_iter(line).next() {
-            return get_language_with_mode(&cap[1]);
+            return mode_to_str(&cap[1]);
         } else if let Some(cap) = RE1_VIM.captures_iter(line).next() {
-            return get_language_with_mode(&cap[1]);
+            return mode_to_str(&cap[1]);
         }
         if i == 3 {
             break;
@@ -99,14 +95,55 @@ pub fn guess_language(buf: &[u8]) -> (Option<LANG>, String) {
 
     for (i, line) in buf.rsplitn(5, |c| *c == b'\n').enumerate() {
         if let Some(cap) = RE1_VIM.captures_iter(line).next() {
-            return get_language_with_mode(&cap[1]);
+            return mode_to_str(&cap[1]);
         }
         if i == 3 {
             break;
         }
     }
 
-    (None, "".to_string())
+    None
+}
+
+pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, String) {
+    let ext = path
+        .as_ref()
+        .extension()
+        .map(|e| e.to_str().unwrap())
+        .map(|e| e.to_lowercase())
+        .unwrap_or("".to_string());
+    let from_ext = get_from_ext(&ext);
+
+    let mode = get_emacs_mode(buf).unwrap_or("".to_string());
+    let from_mode = get_from_emacs_mode(&mode);
+
+    if let Some(lang_ext) = from_ext {
+        if let Some(lang_mode) = from_mode {
+            if lang_ext == lang_mode {
+                (
+                    Some(lang_mode),
+                    fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name().to_string()),
+                )
+            } else {
+                // we should probably rely on extension here
+                (Some(lang_ext), lang_ext.get_name().to_string())
+            }
+        } else {
+            (
+                Some(lang_ext),
+                fake::get_true(&ext, &mode).unwrap_or_else(|| lang_ext.get_name().to_string()),
+            )
+        }
+    } else {
+        if let Some(lang_mode) = from_mode {
+            (
+                Some(lang_mode),
+                fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name().to_string()),
+            )
+        } else {
+            (None, fake::get_true(&ext, &mode).unwrap_or("".to_string()))
+        }
+    }
 }
 
 pub fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
@@ -218,6 +255,8 @@ pub fn guess_file(
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]
@@ -246,24 +285,42 @@ mod tests {
     #[test]
     fn test_guess_language() {
         let buf = b"// -*- foo: bar; mode: c++; hello: world\n";
-        assert_eq!(guess_language(buf), (Some(LANG::Cpp), "c++".to_string()));
+        assert_eq!(
+            guess_language(buf, "foo.cpp"),
+            (Some(LANG::Cpp), "c/c++".to_string())
+        );
 
         let buf = b"// -*- c++ -*-\n";
-        assert_eq!(guess_language(buf), (Some(LANG::Cpp), "c++".to_string()));
+        assert_eq!(
+            guess_language(buf, "foo.cpp"),
+            (Some(LANG::Cpp), "c/c++".to_string())
+        );
 
         let buf = b"// -*- foo: bar; bar-mode: c++; hello: world\n";
-        assert_eq!(guess_language(buf), (None, "".to_string()));
+        assert_eq!(
+            guess_language(buf, "foo.py"),
+            (Some(LANG::Python), "python".to_string())
+        );
 
         let buf = b"/* hello world */\n";
-        assert_eq!(guess_language(buf), (None, "".to_string()));
+        assert_eq!(
+            guess_language(buf, "foo.cpp"),
+            (Some(LANG::Cpp), "c/c++".to_string())
+        );
 
         let buf = b"\n\n\n\n\n\n\n\n\n// vim: set ts=4 ft=c++\n\n\n";
-        assert_eq!(guess_language(buf), (Some(LANG::Cpp), "c++".to_string()));
+        assert_eq!(
+            guess_language(buf, "foo.c"),
+            (Some(LANG::Cpp), "c/c++".to_string())
+        );
 
         let buf = b"\n\n\n\n\n\n\n\n\n\n\n\n";
-        assert_eq!(guess_language(buf), (None, "".to_string()));
+        assert_eq!(guess_language(buf, "foo.txt"), (None, "".to_string()));
 
         let buf = b"// -*- foo: bar; mode: Objective-C++; hello: world\n";
-        assert_eq!(guess_language(buf), (None, "objective-c++".to_string()));
+        assert_eq!(
+            guess_language(buf, "foo.mm"),
+            (Some(LANG::Cpp), "obj-c/c++".to_string())
+        );
     }
 }
