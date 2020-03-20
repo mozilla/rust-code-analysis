@@ -24,10 +24,10 @@ pub struct TSParser<
     phantom: PhantomData<T>,
 }
 
-type FilterFn = fn(&Node) -> bool;
+type FilterFn = dyn Fn(&Node) -> bool;
 
 pub struct Filter {
-    filters: Vec<FilterFn>,
+    filters: Vec<Box<FilterFn>>,
 }
 
 impl Filter {
@@ -69,8 +69,18 @@ fn get_fake_code<T: TSLanguage>(
     }
 }
 
-impl<T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Exit + Halstead + Loc + NArgs>
-    TSParserTrait for TSParser<T>
+impl<
+        T: 'static
+            + TSLanguage
+            + Checker
+            + Getter
+            + Alterator
+            + Cyclomatic
+            + Exit
+            + Halstead
+            + Loc
+            + NArgs,
+    > TSParserTrait for TSParser<T>
 {
     type Checker = T;
     type Getter = T;
@@ -120,20 +130,24 @@ impl<T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Exit + Halstead
     }
 
     fn get_filters(&self, filters: &[String]) -> Filter {
-        let mut res = Vec::new();
+        let mut res: Vec<Box<FilterFn>> = Vec::new();
         for f in filters.iter() {
             let f = f.as_str();
-            res.push(match f {
-                "call" => T::is_call,
-                "comment" => T::is_comment,
-                "error" => T::is_error,
-                "string" => T::is_string,
-                "function" => T::is_func,
-                _ => |_: &Node| -> bool { true },
-            });
+            match f {
+                "call" => res.push(Box::new(T::is_call)),
+                "comment" => res.push(Box::new(T::is_comment)),
+                "error" => res.push(Box::new(T::is_error)),
+                "string" => res.push(Box::new(T::is_string)),
+                "function" => res.push(Box::new(T::is_func)),
+                _ => {
+                    if let Ok(n) = f.parse::<u16>() {
+                        res.push(Box::new(move |node: &Node| -> bool { node.kind_id() == n }));
+                    }
+                }
+            }
         }
         if res.is_empty() {
-            res.push(|_: &Node| -> bool { true })
+            res.push(Box::new(|_: &Node| -> bool { true }))
         }
 
         Filter { filters: res }
