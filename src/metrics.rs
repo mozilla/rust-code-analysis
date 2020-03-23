@@ -15,6 +15,7 @@ use crate::fn_args::{self, NArgs};
 use crate::getter::Getter;
 use crate::halstead::{self, Halstead};
 use crate::loc::{self, Loc};
+use crate::mi::{self, Mi};
 use crate::tools::write_file;
 use crate::traits::*;
 
@@ -23,6 +24,7 @@ pub struct CodeMetrics<'a> {
     pub cyclomatic: cyclomatic::Stats,
     pub halstead: halstead::Stats<'a>,
     pub loc: loc::Stats,
+    pub mi: mi::Stats,
     pub nargs: fn_args::Stats,
     pub nexits: exit::Stats,
 }
@@ -36,6 +38,7 @@ impl<'a> Serialize for CodeMetrics<'a> {
         st.serialize_field("cyclomatic", &self.cyclomatic)?;
         st.serialize_field("halstead", &self.halstead)?;
         st.serialize_field("loc", &self.loc)?;
+        st.serialize_field("mi", &self.mi)?;
         st.serialize_field("nargs", &self.nargs)?;
         st.serialize_field("nexits", &self.nexits)?;
         st.end()
@@ -48,6 +51,7 @@ impl<'a> Default for CodeMetrics<'a> {
             cyclomatic: cyclomatic::Stats::default(),
             halstead: halstead::Stats::default(),
             loc: loc::Stats::default(),
+            mi: mi::Stats::default(),
             nargs: fn_args::Stats::default(),
             nexits: exit::Stats::default(),
         }
@@ -59,6 +63,7 @@ impl<'a> fmt::Display for CodeMetrics<'a> {
         writeln!(f, "{}", self.cyclomatic)?;
         writeln!(f, "{}", self.halstead)?;
         writeln!(f, "{}", self.loc)?;
+        writeln!(f, "{}", self.mi)?;
         writeln!(f, "{}", self.nargs)?;
         write!(f, "{}", self.nexits)
     }
@@ -69,6 +74,7 @@ impl<'a> CodeMetrics<'a> {
         self.cyclomatic.merge(&other.cyclomatic);
         self.halstead.merge(&other.halstead);
         self.loc.merge(&other.loc);
+        self.mi.merge(&other.mi);
         self.nargs.merge(&other.nargs);
         self.nexits.merge(&other.nexits);
     }
@@ -183,7 +189,8 @@ impl<'a> FuncSpace<'a> {
         Self::dump_nargs(&metrics.nargs, &prefix, false, stdout)?;
         Self::dump_nexits(&metrics.nexits, &prefix, false, stdout)?;
         Self::dump_halstead(&metrics.halstead, &prefix, false, stdout)?;
-        Self::dump_loc(&metrics.loc, &prefix, true, stdout)
+        Self::dump_loc(&metrics.loc, &prefix, false, stdout)?;
+        Self::dump_mi(&metrics.mi, &prefix, true, stdout)
     }
 
     fn dump_cyclomatic(
@@ -261,6 +268,32 @@ impl<'a> FuncSpace<'a> {
         Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
         Self::dump_value("lloc", stats.lloc(), &prefix, false, stdout)?;
         Self::dump_value("cloc", stats.cloc(), &prefix, true, stdout)
+    }
+
+    fn dump_mi(
+        stats: &mi::Stats,
+        prefix: &str,
+        last: bool,
+        stdout: &mut StandardStreamLock,
+    ) -> std::io::Result<()> {
+        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
+
+        color!(stdout, Blue);
+        write!(stdout, "{}{}", prefix, pref)?;
+
+        color!(stdout, Green, true);
+        writeln!(stdout, "mi")?;
+
+        let prefix = format!("{}{}", prefix, pref_child);
+        Self::dump_value("mi_original", stats.mi_original(), &prefix, false, stdout)?;
+        Self::dump_value("mi_sei", stats.mi_sei(), &prefix, false, stdout)?;
+        Self::dump_value(
+            "mi_visual_studio",
+            stats.mi_visual_studio(),
+            &prefix,
+            true,
+            stdout,
+        )
     }
 
     fn dump_nargs(
@@ -385,6 +418,13 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
             T::Halstead::compute(&node, code, &mut last.metrics.halstead);
             T::Loc::compute(&node, code, &mut last.metrics.loc, func_space, unit);
+            T::Mi::compute(
+                &node,
+                &last.metrics.loc,
+                &last.metrics.cyclomatic,
+                &last.metrics.halstead,
+                &mut last.metrics.mi,
+            );
             T::NArgs::compute(&node, &mut last.metrics.nargs);
             T::Exit::compute(&node, &mut last.metrics.nexits);
         }
