@@ -13,6 +13,7 @@ pub struct Stats {
     end: usize,
     unit: bool,
     lines: FxHashSet<usize>,
+    comment_lines: FxHashSet<usize>,
 }
 
 impl Serialize for Stats {
@@ -45,6 +46,10 @@ impl Stats {
         for l in other.lines.iter() {
             self.lines.insert(*l);
         }
+
+        for c in other.comment_lines.iter() {
+            self.comment_lines.insert(*c);
+        }
     }
 
     #[inline(always)]
@@ -66,7 +71,9 @@ impl Stats {
 
     #[inline(always)]
     pub fn cloc(&self) -> f64 {
-        self.sloc() - self.lloc()
+        // Comments are counted regardless of their placement
+        // https://en.wikipedia.org/wiki/Source_lines_of_code
+        self.comment_lines.len() as f64
     }
 }
 
@@ -105,7 +112,10 @@ impl Loc for PythonCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
+            String | DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
+            Comment => {
+                stats.comment_lines.insert(start);
+            }
             _ => {
                 stats.lines.insert(start);
             }
@@ -120,7 +130,10 @@ impl Loc for MozjsCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            Comment => {
+                stats.comment_lines.insert(start);
+            }
             _ => {
                 stats.lines.insert(start);
             }
@@ -135,7 +148,10 @@ impl Loc for JavascriptCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            Comment => {
+                stats.comment_lines.insert(start);
+            }
             _ => {
                 stats.lines.insert(start);
             }
@@ -150,7 +166,10 @@ impl Loc for TypescriptCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            Comment => {
+                stats.comment_lines.insert(start);
+            }
             _ => {
                 stats.lines.insert(start);
             }
@@ -165,7 +184,10 @@ impl Loc for TsxCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            Comment => {
+                stats.comment_lines.insert(start);
+            }
             _ => {
                 stats.lines.insert(start);
             }
@@ -180,8 +202,10 @@ impl Loc for RustCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            LineComment | BlockComment | StringLiteral | RawStringLiteral | ExpressionStatement
-            | Block | SourceFile => {}
+            StringLiteral | RawStringLiteral | ExpressionStatement | Block | SourceFile => {}
+            LineComment | BlockComment => {
+                stats.comment_lines.insert(start);
+            }
             _ => {
                 stats.lines.insert(start);
             }
@@ -196,9 +220,11 @@ impl Loc for CppCode {
         let start = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Comment | RawStringLiteral | StringLiteral | ExpressionStatement
-            | CompoundStatement | LabeledStatement | DeclarationList | FieldDeclarationList
-            | TranslationUnit => {}
+            RawStringLiteral | StringLiteral | ExpressionStatement | CompoundStatement
+            | LabeledStatement | DeclarationList | FieldDeclarationList | TranslationUnit => {}
+            Comment => {
+                stats.comment_lines.insert(start);
+            }
             _ => {
                 stats.lines.insert(start);
             }
