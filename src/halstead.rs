@@ -332,11 +332,11 @@ impl Halstead for CppCode {
         match id.into() {
             DOT | LPAREN | LPAREN2 | COMMA | STAR | GTGT | COLON | SEMI | Return | Break
             | Continue | If | Else | Switch | Case | Default | For | While | Goto | Do | Delete
-            | New | Try | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | PLUS | PLUSPLUS
-            | SLASH | PERCENT | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
-            | GT | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ | GTGTEQ | LTLTEQ | AMPEQ
-            | CARET | CARETEQ | PIPEEQ | LBRACK | LBRACE | QMARK | COLONCOLON | PrimitiveType
-            | TypeSpecifier | Sizeof => {
+            | New | Try | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | DASHDASH | DASHGT
+            | PLUS | PLUSPLUS | SLASH | PERCENT | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ
+            | BANGEQ | GTEQ | GT | GT2 | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ | GTGTEQ
+            | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ | LBRACK | LBRACE | QMARK | COLONCOLON
+            | PrimitiveType | TypeSpecifier | Sizeof => {
                 *stats.operators.entry(id).or_insert(0) += 1;
             }
             Identifier | TypeIdentifier | FieldIdentifier | RawStringLiteral | StringLiteral
