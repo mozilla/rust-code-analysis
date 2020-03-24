@@ -116,13 +116,14 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
         };
         action::<Count>(&language, source, &path, pr, cfg)
     } else if cfg.preproc_lock.is_some() {
-        if language == LANG::Cpp {
-            let source = read_file_with_eol(&path)?;
-            preprocess(
-                &PreprocParser::new(source, &path, None),
-                &path,
-                cfg.preproc_lock.unwrap().clone(),
-            );
+        if let Some(language) = guess_language(&source, &path).0 {
+            if language == LANG::Cpp {
+                preprocess(
+                    &PreprocParser::new(source, &path, None),
+                    &path,
+                    cfg.preproc_lock.unwrap().clone(),
+                );
+            }
         }
         Ok(())
     } else {
