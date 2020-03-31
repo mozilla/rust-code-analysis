@@ -40,6 +40,9 @@ pub use crate::mi::*;
 pub mod halstead;
 pub use crate::halstead::*;
 
+pub mod nom;
+pub use crate::nom::*;
+
 pub mod fn_args;
 pub use crate::fn_args::*;
 
