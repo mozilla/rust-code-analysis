@@ -621,7 +621,7 @@ mod tests {
             .set_json(&WebMetricsPayload {
                 id: "1234".to_string(),
                 file_name: "test.py".to_string(),
-                code: "# -*- Mode: Objective-C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-\ndef foo():\n    pass\n".to_string(),
+                code: "# -*- Mode: Objective-C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-\n\ndef foo():\n    pass\n".to_string(),
                 unit: false,
             })
             .to_request();
@@ -632,7 +632,7 @@ mod tests {
             "language": "python",
             "spaces": {"kind": "unit",
                        "start_line": 1,
-                       "end_line": 3,
+                       "end_line": 4,
                        "metrics": {"cyclomatic": 1.0,
                                    "nargs": 0.,
                                    "nexits": 0.,
@@ -650,11 +650,11 @@ mod tests {
                                                 "n2": 1.0,
                                                 "n1": 2.0,
                                                 "volume": 4.754_887_502_163_468},
-                                   "loc": {"cloc": 1.0, "lloc": 2.0, "sloc": 3.0}},
+                                   "loc": {"cloc": 1.0, "lloc": 2.0, "sloc": 4.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
-                                   "start_line": 2,
-                                   "end_line": 3,
+                                   "start_line": 3,
+                                   "end_line": 4,
                                    "metrics": {"cyclomatic": 1.0,
                                                "nargs": 0.,
                                                "nexits": 0.,
