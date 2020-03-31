@@ -25,6 +25,7 @@ control flow of a program.
 - SLOC: it counts the number of lines in a source file.
 - LLOC: it counts the number of logical lines (instructions) contained in a source file.
 - HALSTEAD: it is a suite that provides a series of information, such as the effort required to maintain the analyzed code, the size in bits to store the program, the difficulty to understand the code, an estimate of the number of bugs present in the codebase, and an estimate of the time needed to implement the software.
+- MI: it is a suite that allows to evaluate the maintainability of a software.
 - NEXITS: it counts the number of possible exit points from a method/function.
 - NARGS: it counts the number of arguments of a function/method.
 
