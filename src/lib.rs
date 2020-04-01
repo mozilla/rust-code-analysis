@@ -34,6 +34,9 @@ pub use crate::exit::*;
 pub mod loc;
 pub use crate::loc::*;
 
+pub mod mi;
+pub use crate::mi::*;
+
 pub mod halstead;
 pub use crate::halstead::*;
 

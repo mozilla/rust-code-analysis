@@ -10,6 +10,7 @@ use crate::getter::Getter;
 use crate::halstead::Halstead;
 use crate::languages::*;
 use crate::loc::Loc;
+use crate::mi::Mi;
 use crate::preproc::PreprocResults;
 use crate::ts_parser::Filter;
 use crate::web::alterator::Alterator;
@@ -28,6 +29,7 @@ pub trait TSParserTrait {
     type Cyclomatic: Cyclomatic;
     type Halstead: Halstead;
     type Loc: Loc;
+    type Mi: Mi;
     type NArgs: NArgs;
     type Exit: Exit;
 
