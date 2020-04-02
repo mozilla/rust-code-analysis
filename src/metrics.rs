@@ -351,8 +351,17 @@ impl<'a> FuncSpace<'a> {
         writeln!(stdout, "{}", val)
     }
 
-    fn dump_json(&self, path: &PathBuf, output_path: &PathBuf) -> std::io::Result<()> {
-        let json_data = serde_json::to_string_pretty(&self).unwrap();
+    fn dump_json(
+        &self,
+        path: &PathBuf,
+        output_path: &PathBuf,
+        pretty: bool,
+    ) -> std::io::Result<()> {
+        let json_data = if pretty {
+            serde_json::to_string_pretty(&self).unwrap()
+        } else {
+            serde_json::to_string(&self).unwrap()
+        };
 
         let mut file = path.as_path().file_name().unwrap().to_os_string();
         file.push(".json");
@@ -453,6 +462,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
 
 pub struct MetricsCfg {
     pub path: PathBuf,
+    pub pretty: bool,
     pub output_path: Option<PathBuf>,
 }
 
@@ -465,7 +475,7 @@ impl Callback for Metrics {
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {
             if let Some(output_path) = cfg.output_path {
-                space.dump_json(&cfg.path, &output_path)
+                space.dump_json(&cfg.path, &output_path, cfg.pretty)
             } else {
                 space.dump_root()
             }
