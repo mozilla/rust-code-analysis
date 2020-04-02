@@ -622,39 +622,11 @@
           "named": true
         },
         {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "char_literal",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
           "type": "initializer_list",
           "named": true
         },
         {
-          "type": "number_literal",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
           "type": "preproc_defined",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
           "named": true
         }
       ]
@@ -824,35 +796,7 @@
             "named": true
           },
           {
-            "type": "binary_expression",
-            "named": true
-          },
-          {
-            "type": "call_expression",
-            "named": true
-          },
-          {
-            "type": "char_literal",
-            "named": true
-          },
-          {
-            "type": "identifier",
-            "named": true
-          },
-          {
-            "type": "number_literal",
-            "named": true
-          },
-          {
-            "type": "parenthesized_expression",
-            "named": true
-          },
-          {
             "type": "preproc_defined",
-            "named": true
-          },
-          {
-            "type": "unary_expression",
             "named": true
           }
         ]
@@ -944,35 +888,7 @@
             "named": true
           },
           {
-            "type": "binary_expression",
-            "named": true
-          },
-          {
-            "type": "call_expression",
-            "named": true
-          },
-          {
-            "type": "char_literal",
-            "named": true
-          },
-          {
-            "type": "identifier",
-            "named": true
-          },
-          {
-            "type": "number_literal",
-            "named": true
-          },
-          {
-            "type": "parenthesized_expression",
-            "named": true
-          },
-          {
             "type": "preproc_defined",
-            "named": true
-          },
-          {
-            "type": "unary_expression",
             "named": true
           }
         ]
@@ -1019,10 +935,6 @@
         "types": [
           {
             "type": "_expression",
-            "named": true
-          },
-          {
-            "type": "identifier",
             "named": true
           },
           {
@@ -1406,6 +1318,10 @@
           "named": true
         },
         {
+          "type": "raw_string_literal",
+          "named": true
+        },
+        {
           "type": "string_literal",
           "named": true
         }
@@ -1504,10 +1420,6 @@
             "named": true
           },
           {
-            "type": "function_declarator",
-            "named": true
-          },
-          {
             "type": "init_declarator",
             "named": true
           },
@@ -1529,7 +1441,7 @@
       },
       "type": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "_type_specifier",
@@ -1566,6 +1478,10 @@
         },
         {
           "type": "explicit_function_specifier",
+          "named": true
+        },
+        {
+          "type": "ms_declspec_modifier",
           "named": true
         },
         {
@@ -1957,6 +1873,10 @@
           "named": true
         },
         {
+          "type": "ms_declspec_modifier",
+          "named": true
+        },
+        {
           "type": "storage_class_specifier",
           "named": true
         },
@@ -1985,14 +1905,6 @@
         },
         {
           "type": "alias_declaration",
-          "named": true
-        },
-        {
-          "type": "alone_macro",
-          "named": true
-        },
-        {
-          "type": "alone_macro_call",
           "named": true
         },
         {
@@ -2199,6 +2111,10 @@
           "named": true
         },
         {
+          "type": "ms_declspec_modifier",
+          "named": true
+        },
+        {
           "type": "storage_class_specifier",
           "named": true
         },
@@ -2276,15 +2192,23 @@
       "required": true,
       "types": [
         {
-          "type": "class_specifier",
-          "named": true
-        },
-        {
           "type": "declaration",
           "named": true
         },
         {
           "type": "function_definition",
+          "named": true
+        },
+        {
+          "type": "scoped_type_identifier",
+          "named": true
+        },
+        {
+          "type": "template_type",
+          "named": true
+        },
+        {
+          "type": "type_identifier",
           "named": true
         }
       ]
@@ -2381,10 +2305,6 @@
             "named": true
           },
           {
-            "type": "function_declarator",
-            "named": true
-          },
-          {
             "type": "operator_cast",
             "named": true
           }
@@ -2392,7 +2312,7 @@
       },
       "type": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "_type_specifier",
@@ -2427,6 +2347,14 @@
         },
         {
           "type": "field_initializer_list",
+          "named": true
+        },
+        {
+          "type": "ms_call_modifier",
+          "named": true
+        },
+        {
+          "type": "ms_declspec_modifier",
           "named": true
         },
         {
@@ -2713,6 +2641,73 @@
     "fields": {}
   },
   {
+    "type": "ms_based_modifier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "argument_list",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ms_call_modifier",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "ms_declspec_modifier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ms_pointer_modifier",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "ms_restrict_modifier",
+          "named": true
+        },
+        {
+          "type": "ms_signed_ptr_modifier",
+          "named": true
+        },
+        {
+          "type": "ms_unaligned_ptr_modifier",
+          "named": true
+        },
+        {
+          "type": "ms_unsigned_ptr_modifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ms_unaligned_ptr_modifier",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "namespace_definition",
     "named": true,
     "fields": {
@@ -2881,6 +2876,10 @@
           "named": true
         },
         {
+          "type": "ms_declspec_modifier",
+          "named": true
+        },
+        {
           "type": "storage_class_specifier",
           "named": true
         },
@@ -2932,6 +2931,10 @@
       "types": [
         {
           "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "ms_declspec_modifier",
           "named": true
         },
         {
@@ -3010,6 +3013,10 @@
         },
         {
           "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "ms_declspec_modifier",
           "named": true
         },
         {
@@ -3106,39 +3113,11 @@
           "named": true
         },
         {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "call_expression",
-          "named": true
-        },
-        {
-          "type": "char_literal",
-          "named": true
-        },
-        {
           "type": "comma_expression",
           "named": true
         },
         {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "number_literal",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
           "type": "preproc_defined",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
           "named": true
         }
       ]
@@ -3171,6 +3150,14 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "ms_based_modifier",
+          "named": true
+        },
+        {
+          "type": "ms_pointer_modifier",
+          "named": true
+        },
         {
           "type": "type_qualifier",
           "named": true
@@ -4152,10 +4139,6 @@
           {
             "type": "_expression",
             "named": true
-          },
-          {
-            "type": "identifier",
-            "named": true
           }
         ]
       }
@@ -4372,10 +4355,6 @@
           "named": true
         },
         {
-          "type": "parameter_pack_expansion",
-          "named": true
-        },
-        {
           "type": "type_descriptor",
           "named": true
         }
@@ -4488,6 +4467,10 @@
           "named": true
         },
         {
+          "type": "ms_declspec_modifier",
+          "named": true
+        },
+        {
           "type": "storage_class_specifier",
           "named": true
         },
@@ -4554,6 +4537,10 @@
         },
         {
           "type": "type_parameter_declaration",
+          "named": true
+        },
+        {
+          "type": "variadic_parameter_declaration",
           "named": true
         },
         {
@@ -4906,35 +4893,7 @@
             "named": true
           },
           {
-            "type": "binary_expression",
-            "named": true
-          },
-          {
-            "type": "call_expression",
-            "named": true
-          },
-          {
-            "type": "char_literal",
-            "named": true
-          },
-          {
-            "type": "identifier",
-            "named": true
-          },
-          {
-            "type": "number_literal",
-            "named": true
-          },
-          {
-            "type": "parenthesized_expression",
-            "named": true
-          },
-          {
             "type": "preproc_defined",
-            "named": true
-          },
-          {
-            "type": "unary_expression",
             "named": true
           }
         ]
@@ -5005,6 +4964,10 @@
           "named": true
         },
         {
+          "type": "ms_declspec_modifier",
+          "named": true
+        },
+        {
           "type": "virtual_specifier",
           "named": true
         }
@@ -5066,7 +5029,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "identifier",
@@ -5110,6 +5073,10 @@
       "types": [
         {
           "type": "attribute_specifier",
+          "named": true
+        },
+        {
+          "type": "ms_declspec_modifier",
           "named": true
         },
         {
@@ -5188,6 +5155,38 @@
   },
   {
     "type": "\"",
+    "named": false
+  },
+  {
+    "type": "#define",
+    "named": false
+  },
+  {
+    "type": "#elif",
+    "named": false
+  },
+  {
+    "type": "#else",
+    "named": false
+  },
+  {
+    "type": "#endif",
+    "named": false
+  },
+  {
+    "type": "#if",
+    "named": false
+  },
+  {
+    "type": "#ifdef",
+    "named": false
+  },
+  {
+    "type": "#ifndef",
+    "named": false
+  },
+  {
+    "type": "#include",
     "named": false
   },
   {
@@ -5655,6 +5654,46 @@
     "named": false
   },
   {
+    "type": "__based",
+    "named": false
+  },
+  {
+    "type": "__cdecl",
+    "named": false
+  },
+  {
+    "type": "__clrcall",
+    "named": false
+  },
+  {
+    "type": "__declspec",
+    "named": false
+  },
+  {
+    "type": "__fastcall",
+    "named": false
+  },
+  {
+    "type": "__stdcall",
+    "named": false
+  },
+  {
+    "type": "__thiscall",
+    "named": false
+  },
+  {
+    "type": "__unaligned",
+    "named": false
+  },
+  {
+    "type": "__vectorcall",
+    "named": false
+  },
+  {
+    "type": "_unaligned",
+    "named": false
+  },
+  {
     "type": "alone_macro",
     "named": true
   },
@@ -5771,6 +5810,18 @@
     "named": false
   },
   {
+    "type": "ms_restrict_modifier",
+    "named": true
+  },
+  {
+    "type": "ms_signed_ptr_modifier",
+    "named": true
+  },
+  {
+    "type": "ms_unsigned_ptr_modifier",
+    "named": true
+  },
+  {
     "type": "mutable",
     "named": false
   },
@@ -5837,6 +5888,10 @@
   {
     "type": "public",
     "named": false
+  },
+  {
+    "type": "raw_string_literal",
+    "named": true
   },
   {
     "type": "register",
