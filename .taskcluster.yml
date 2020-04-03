@@ -41,7 +41,6 @@ tasks:
             - "-cx"
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup toolchain install stable &&
-               rustup default stable &&
                rustup component add clippy &&
                rustup component add rustfmt &&
                git clone --recursive --quiet ${repository} &&
