@@ -58,6 +58,39 @@ tasks:
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
+      - taskId: {$eval: as_slugid("grcov_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          env:
+            CODECOV_TOKEN: 4df01912-087e-489a-be28-25aa911cb9d2
+            CARGO_INCREMENTAL: 0
+            RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "apt-get -qq update &&
+               apt-get -qq install -y zip &&
+               rustup toolchain install nightly &&
+               rustup default nightly &&
+               curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-linux-x86_64.tar.bz2 | tar jxf - &&
+               git clone --recursive --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               cargo test &&
+               zip -0 ccov.zip `find . -name 'rust_code_analysis*.gc*' -print` &&
+               ../grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
+               bash <(curl -s https://codecov.io/bash) -f lcov.info"
+        metadata:
+          name: rust-code-analysis grcov test
+          description: rust-code-analysis grcov test
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
       - taskId: {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
         deadline: {$fromNow: '1 hour'}
