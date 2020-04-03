@@ -41,7 +41,6 @@ tasks:
             - "-cx"
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup toolchain install stable &&
-               rustup toolchain install nightly &&
                rustup default stable &&
                rustup component add clippy &&
                rustup component add rustfmt &&
@@ -50,7 +49,6 @@ tasks:
                git -c advice.detachedHead=false checkout ${head_rev} &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
-               rustup default nightly &&
                cargo test"
         metadata:
           name: rust-code-analysis lint and test
