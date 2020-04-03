@@ -28,6 +28,7 @@ struct Config {
     function: bool,
     metrics: bool,
     output: String,
+    pretty: bool,
     line_start: Option<usize>,
     line_end: Option<usize>,
     preproc_lock: Option<Arc<Mutex<PreprocResults>>>,
@@ -80,6 +81,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
     } else if cfg.metrics {
         let cfg = MetricsCfg {
             path,
+            pretty: cfg.pretty,
             output_path: if cfg.output.is_empty() {
                 None
             } else {
@@ -310,6 +312,11 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("pretty")
+                .help("Dump a pretty json file")
+                .long("pr"),
+        )
+        .arg(
             Arg::with_name("output")
                 .help("Output file/directory")
                 .short("o")
@@ -430,6 +437,7 @@ fn main() {
         (None, None)
     };
 
+    let pretty = matches.is_present("pretty");
     let output = matches.value_of("output").unwrap().to_string();
     let output_is_dir = PathBuf::from(output.clone()).is_dir();
     if metrics && !output.is_empty() && !output_is_dir {
@@ -468,6 +476,7 @@ fn main() {
         count_filter,
         function,
         metrics,
+        pretty,
         output: output.clone(),
         line_start,
         line_end,
