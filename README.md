@@ -1,6 +1,7 @@
 # rust-code-analysis
 
 [![Task Status](https://community-tc.services.mozilla.com/api/github/v1/repository/mozilla/rust-code-analysis/master/badge.svg)](https://community-tc.services.mozilla.com/api/github/v1/repository/mozilla/rust-code-analysis/master/latest)
+[![codecov](https://codecov.io/gh/mozilla/rust-code-analysis/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/rust-code-analysis)
 
 This project is a Rust crate (library) to analyse source code. This software is based on [Tree Sitter](https://github.com/tree-sitter/tree-sitter).
 
