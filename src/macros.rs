@@ -161,3 +161,17 @@ macro_rules! color {
         )?;
     };
 }
+
+#[macro_export]
+macro_rules! check_metrics {
+    ($source: expr, $file: expr, $parser: ident, $metric: ident,
+     [ $( ( $func: ident, $true_value: expr $(,$type: ty)? )$(,)* )* ]) => {
+        {
+            let path = PathBuf::from($file);
+            let parser = $parser::new($source.to_string().into_bytes(), &path, None);
+            let func_space = metrics(&parser, &path).unwrap();
+
+            $( assert_eq!(func_space.metrics.$metric.$func() $(as $type)?, $true_value); )*
+        }
+    };
+}

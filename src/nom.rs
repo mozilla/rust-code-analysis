@@ -202,54 +202,61 @@ mod tests {
 
     #[test]
     fn test_nom_python() {
-        let sample =
-            String::from("def a():\n    pass\n\ndef b():\n    pass\n\ndef c():\n    pass\n");
-        let path = PathBuf::from("foo.py");
-        let b_sample = sample.as_bytes().to_vec();
-        let parser = PythonParser::new(b_sample.clone(), &path, None);
-        let func_space = metrics(&parser, &path).unwrap();
-
-        assert_eq!(func_space.metrics.nom.functions() as usize, 3);
-        assert_eq!(func_space.metrics.nom.closures() as usize, 0);
-        assert_eq!(func_space.metrics.nom.total() as usize, 3);
+        check_metrics!(
+            "def a():\n    pass\n\ndef b():\n    pass\n\ndef c():\n    pass\n",
+            "foo.py",
+            PythonParser,
+            nom,
+            [
+                (functions, 3, usize),
+                (closures, 0, usize),
+                (total, 3, usize)
+            ]
+        );
     }
 
     #[test]
     fn test_nom_rust() {
-        let sample = String::from("mod A { fn foo() {}}\n mod B { fn foo() {}}\n");
-        let path = PathBuf::from("foo.rs");
-        let b_sample = sample.as_bytes().to_vec();
-        let parser = RustParser::new(b_sample.clone(), &path, None);
-        let func_space = metrics(&parser, &path).unwrap();
-
-        assert_eq!(func_space.metrics.nom.functions() as usize, 2);
-        assert_eq!(func_space.metrics.nom.closures() as usize, 0);
-        assert_eq!(func_space.metrics.nom.total() as usize, 2);
+        check_metrics!(
+            "mod A { fn foo() {}}\n mod B { fn foo() {}}\n",
+            "foo.rs",
+            RustParser,
+            nom,
+            [
+                (functions, 2, usize),
+                (closures, 0, usize),
+                (total, 2, usize)
+            ]
+        );
     }
 
     #[test]
     fn test_nom_cpp() {
-        let sample = String::from("struct A {\n  void foo(int) {}\n  void foo(double) {}\n};\n");
-        let path = PathBuf::from("foo.cpp");
-        let b_sample = sample.as_bytes().to_vec();
-        let parser = CppParser::new(b_sample.clone(), &path, None);
-        let func_space = metrics(&parser, &path).unwrap();
-
-        assert_eq!(func_space.metrics.nom.functions() as usize, 2);
-        assert_eq!(func_space.metrics.nom.closures() as usize, 0);
-        assert_eq!(func_space.metrics.nom.total() as usize, 2);
+        check_metrics!(
+            "struct A {\n  void foo(int) {}\n  void foo(double) {}\n};\n",
+            "foo.cpp",
+            CppParser,
+            nom,
+            [
+                (functions, 2, usize),
+                (closures, 0, usize),
+                (total, 2, usize)
+            ]
+        );
     }
 
     #[test]
     fn test_nom_c() {
-        let sample = String::from("int foo();\n\nint foo() {\n  return 0;\n}\n");
-        let path = PathBuf::from("foo.c");
-        let b_sample = sample.as_bytes().to_vec();
-        let parser = CppParser::new(b_sample.clone(), &path, None);
-        let func_space = metrics(&parser, &path).unwrap();
-
-        assert_eq!(func_space.metrics.nom.functions() as usize, 1);
-        assert_eq!(func_space.metrics.nom.closures() as usize, 0);
-        assert_eq!(func_space.metrics.nom.total() as usize, 1);
+        check_metrics!(
+            "int foo();\n\nint foo() {\n  return 0;\n}\n",
+            "foo.c",
+            CppParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
     }
 }
