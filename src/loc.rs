@@ -235,3 +235,48 @@ impl Loc for JavaCode {}
 impl Loc for GoCode {}
 impl Loc for CssCode {}
 impl Loc for HtmlCode {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_cloc_python() {
+        // FIXME Add block comments
+        check_metrics!(
+            "# Line Comment\na = 42 # Line Comment\n",
+            "foo.py",
+            PythonParser,
+            loc,
+            [(cloc, 2, usize)]
+        );
+    }
+
+    #[test]
+    fn test_cloc_rust() {
+        check_metrics!(
+            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ let a = 42; // Line Comment\n",
+            "foo.rs",
+            RustParser,
+            loc,
+            [
+                (cloc, 5, usize),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_cloc_c() {
+        check_metrics!(
+            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ int a = 42; // Line Comment\n",
+            "foo.c",
+            CppParser,
+            loc,
+            [
+                (cloc, 5, usize),
+            ]
+        );
+    }
+}
