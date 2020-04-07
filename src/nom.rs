@@ -78,7 +78,7 @@ impl Nom for PythonCode {
             FunctionDefinition => {
                 stats.functions += 1;
             }
-            Lambda | Lambda2 | Lambda3 => {
+            Lambda => {
                 stats.closures += 1;
             }
             _ => {}
@@ -203,14 +203,17 @@ mod tests {
     #[test]
     fn test_nom_python() {
         check_metrics!(
-            "def a():\n    pass\n\ndef b():\n    pass\n\ndef c():\n    pass\n",
+            "def a():\n    pass\n\n
+             def b():\n    pass\n\n
+             def c():\n    pass\n\n
+             x = lambda a : a + 42\n",
             "foo.py",
             PythonParser,
             nom,
             [
                 (functions, 3, usize),
-                (closures, 0, usize),
-                (total, 3, usize)
+                (closures, 1, usize),
+                (total, 4, usize)
             ]
         );
     }
@@ -218,14 +221,15 @@ mod tests {
     #[test]
     fn test_nom_rust() {
         check_metrics!(
-            "mod A { fn foo() {}}\n mod B { fn foo() {}}\n",
+            "mod A { fn foo() {}}\n mod B { fn foo() {}}\n
+             let closure = |i: i32| -> i32 { i + 42 };\n",
             "foo.rs",
             RustParser,
             nom,
             [
                 (functions, 2, usize),
-                (closures, 0, usize),
-                (total, 2, usize)
+                (closures, 1, usize),
+                (total, 3, usize)
             ]
         );
     }
@@ -233,14 +237,15 @@ mod tests {
     #[test]
     fn test_nom_cpp() {
         check_metrics!(
-            "struct A {\n  void foo(int) {}\n  void foo(double) {}\n};\n",
+            "struct A {\n  void foo(int) {}\n  void foo(double) {}\n};\n
+             int b = [](int x) -> int { return x + 42; };\n",
             "foo.cpp",
             CppParser,
             nom,
             [
                 (functions, 2, usize),
-                (closures, 0, usize),
-                (total, 2, usize)
+                (closures, 1, usize),
+                (total, 3, usize)
             ]
         );
     }
