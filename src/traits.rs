@@ -11,6 +11,7 @@ use crate::halstead::Halstead;
 use crate::languages::*;
 use crate::loc::Loc;
 use crate::mi::Mi;
+use crate::nom::Nom;
 use crate::preproc::PreprocResults;
 use crate::ts_parser::Filter;
 use crate::web::alterator::Alterator;
@@ -29,6 +30,7 @@ pub trait TSParserTrait {
     type Cyclomatic: Cyclomatic;
     type Halstead: Halstead;
     type Loc: Loc;
+    type Nom: Nom;
     type Mi: Mi;
     type NArgs: NArgs;
     type Exit: Exit;

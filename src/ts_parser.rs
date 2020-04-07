@@ -13,12 +13,23 @@ use crate::halstead::Halstead;
 use crate::languages::*;
 use crate::loc::Loc;
 use crate::mi::Mi;
+use crate::nom::Nom;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 use crate::web::alterator::Alterator;
 
 pub struct TSParser<
-    T: TSLanguage + Checker + Getter + Alterator + Cyclomatic + Exit + Halstead + NArgs + Loc + Mi,
+    T: TSLanguage
+        + Checker
+        + Getter
+        + Alterator
+        + Cyclomatic
+        + Exit
+        + Halstead
+        + NArgs
+        + Loc
+        + Nom
+        + Mi,
 > {
     code: Vec<u8>,
     tree: Tree,
@@ -80,6 +91,7 @@ impl<
             + Exit
             + Halstead
             + Loc
+            + Nom
             + Mi
             + NArgs,
     > TSParserTrait for TSParser<T>
@@ -89,6 +101,7 @@ impl<
     type Cyclomatic = T;
     type Halstead = T;
     type Loc = T;
+    type Nom = T;
     type Mi = T;
     type NArgs = T;
     type Exit = T;
