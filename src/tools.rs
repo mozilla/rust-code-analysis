@@ -1,6 +1,7 @@
 use crate::languages::fake;
 use crate::languages::*;
 use regex::bytes::Regex;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read, Write};
@@ -65,13 +66,10 @@ pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
 }
 
 fn mode_to_str(mode: &[u8]) -> Option<String> {
-    std::str::from_utf8(mode)
-        .ok()
-        .map(|m| m.to_lowercase())
-        .map(|m| m.to_string())
+    std::str::from_utf8(mode).ok().map(|m| m.to_lowercase())
 }
 
-fn get_emacs_mode<'a>(buf: &'a [u8]) -> Option<String> {
+fn get_emacs_mode(buf: &[u8]) -> Option<String> {
     // we just try to use the emacs info (if there)
     lazy_static! {
         // comment containing coding info are useful
@@ -111,10 +109,11 @@ pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, Str
         .extension()
         .map(|e| e.to_str().unwrap())
         .map(|e| e.to_lowercase())
-        .unwrap_or("".to_string());
+        .unwrap_or_else(|| "".to_string());
     let from_ext = get_from_ext(&ext);
 
-    let mode = get_emacs_mode(buf).unwrap_or("".to_string());
+    let mode = get_emacs_mode(buf).unwrap_or_else(|| "".to_string());
+
     let from_mode = get_from_emacs_mode(&mode);
 
     if let Some(lang_ext) = from_ext {
@@ -134,15 +133,16 @@ pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, Str
                 fake::get_true(&ext, &mode).unwrap_or_else(|| lang_ext.get_name().to_string()),
             )
         }
+    } else if let Some(lang_mode) = from_mode {
+        (
+            Some(lang_mode),
+            fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name().to_string()),
+        )
     } else {
-        if let Some(lang_mode) = from_mode {
-            (
-                Some(lang_mode),
-                fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name().to_string()),
-            )
-        } else {
-            (None, fake::get_true(&ext, &mode).unwrap_or("".to_string()))
-        }
+        (
+            None,
+            fake::get_true(&ext, &mode).unwrap_or_else(|| "".to_string()),
+        )
     }
 }
 
@@ -236,12 +236,16 @@ pub fn guess_file(
                 continue;
             }
             if let Some(dist) = get_paths_dist(current_path, &p) {
-                if dist < dist_min {
-                    dist_min = dist;
-                    path_min.clear();
-                    path_min.push(p);
-                } else if dist == dist_min {
-                    path_min.push(p)
+                match dist.cmp(&dist_min) {
+                    Ordering::Less => {
+                        dist_min = dist;
+                        path_min.clear();
+                        path_min.push(p);
+                    }
+                    Ordering::Equal => {
+                        path_min.push(p);
+                    }
+                    Ordering::Greater => {}
                 }
             }
         }

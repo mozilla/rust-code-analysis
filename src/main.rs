@@ -145,10 +145,10 @@ fn consumer(receiver: JobReceiver) {
     }
 }
 
-fn send_file(path: PathBuf, cfg: &Arc<Config>, language: &Option<LANG>, sender: &JobSender) {
+fn send_file(path: PathBuf, cfg: &Arc<Config>, language: Option<LANG>, sender: &JobSender) {
     sender
         .send(Some(JobItem {
-            language: language.clone(),
+            language,
             path,
             cfg: Arc::clone(cfg),
         }))
@@ -203,14 +203,14 @@ fn explore(
                         };
                     }
 
-                    send_file(path, &cfg, &language, &sender);
+                    send_file(path, &cfg, language, &sender);
                 }
             }
         } else if (include.is_empty() || include.is_match(&path))
             && (exclude.is_empty() || !exclude.is_match(&path))
             && path.is_file()
         {
-            send_file(path, &cfg, &language, &sender);
+            send_file(path, &cfg, language, &sender);
         }
     }
 
@@ -393,7 +393,7 @@ fn main() {
     }
 
     let paths: Vec<_> = matches.values_of("paths").unwrap().collect();
-    let paths: Vec<String> = paths.iter().map(|x| x.to_string()).collect();
+    let paths: Vec<String> = paths.iter().map(|x| (*x).to_string()).collect();
     let dump = matches.is_present("dump");
     let function = matches.is_present("function");
     let in_place = matches.is_present("in_place");
@@ -488,7 +488,6 @@ fn main() {
 
     let producer = {
         let sender = sender.clone();
-        let cfg = cfg.clone();
         let include = mk_globset(matches.values_of("include").unwrap());
         let exclude = mk_globset(matches.values_of("exclude").unwrap());
 
@@ -543,7 +542,7 @@ fn main() {
             println!("{}", data);
         } else {
             let output = PathBuf::from(output);
-            write_file(&output, data.to_string().as_bytes()).unwrap();
+            write_file(&output, data.as_bytes()).unwrap();
         }
     }
 }

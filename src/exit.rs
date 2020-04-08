@@ -51,85 +51,58 @@ where
 
 impl Exit for PythonCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        match node.kind_id().into() {
-            Python::ReturnStatement => {
-                stats.exit += 1;
-            }
-            _ => {}
+        if let Python::ReturnStatement = node.kind_id().into() {
+            stats.exit += 1;
         }
     }
 }
 
 impl Exit for MozjsCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        match node.kind_id().into() {
-            Mozjs::ReturnStatement => {
-                stats.exit += 1;
-            }
-            _ => {}
+        if let Mozjs::ReturnStatement = node.kind_id().into() {
+            stats.exit += 1;
         }
     }
 }
 
 impl Exit for JavascriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        match node.kind_id().into() {
-            Javascript::ReturnStatement => {
-                stats.exit += 1;
-            }
-            _ => {}
+        if let Javascript::ReturnStatement = node.kind_id().into() {
+            stats.exit += 1;
         }
     }
 }
 
 impl Exit for TypescriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        match node.kind_id().into() {
-            Typescript::ReturnStatement => {
-                stats.exit += 1;
-            }
-            _ => {}
+        if let Typescript::ReturnStatement = node.kind_id().into() {
+            stats.exit += 1;
         }
     }
 }
 
 impl Exit for TsxCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        match node.kind_id().into() {
-            Tsx::ReturnStatement => {
-                stats.exit += 1;
-            }
-            _ => {}
+        if let Tsx::ReturnStatement = node.kind_id().into() {
+            stats.exit += 1;
         }
     }
 }
 
 impl Exit for RustCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        use Rust::*;
-
-        match node.kind_id().into() {
-            ReturnExpression => {
-                stats.exit += 1;
-            }
-            _ => {
-                if Self::is_func(node) {
-                    if let Some(_) = node.child_by_field_name("return_type") {
-                        stats.exit += 1;
-                    }
-                }
-            }
+        if let Rust::ReturnExpression = node.kind_id().into() {
+            stats.exit += 1;
+        } else if Self::is_func(node) && node.child_by_field_name("return_type").is_some() {
+            stats.exit += 1;
         }
     }
 }
 
 impl Exit for CppCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        match node.kind_id().into() {
-            Cpp::ReturnStatement => {
-                stats.exit += 1;
-            }
-            _ => {}
+        if let Cpp::ReturnStatement = node.kind_id().into() {
+            stats.exit += 1;
         }
     }
 }

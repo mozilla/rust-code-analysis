@@ -587,9 +587,9 @@ mod tests {
     // Inspired from https://hg.mozilla.org/mozilla-central/file/9b2a99adc05e53cd4010de512f50118594756650/extensions/java/xpcom/tests/testparams/TestParams.java#l64.
     #[actix_rt::test]
     async fn test_web_comment_plain_bad_chars() {
-        let bad_bytes = &[142, 137, 138, 136, 140, 141, 10];
-        let input_vec = ["/*char*/s: ".as_bytes(), bad_bytes].concat();
-        let output_vec = ["s: ".as_bytes(), bad_bytes].concat();
+        let bad_bytes: &[u8] = &[142, 137, 138, 136, 140, 141, 10];
+        let input_vec = [b"/*char*/s: ", bad_bytes].concat();
+        let output_vec = [b"s: ", bad_bytes].concat();
 
         let mut app = test::init_service(
             App::new()

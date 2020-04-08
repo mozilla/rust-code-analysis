@@ -28,7 +28,7 @@ impl PreprocFile {
     pub fn new_macros(macros: &[&str]) -> Self {
         let mut pf = Self::default();
         for m in macros {
-            pf.macros.insert(m.to_string());
+            pf.macros.insert((*m).to_string());
         }
         pf
     }
