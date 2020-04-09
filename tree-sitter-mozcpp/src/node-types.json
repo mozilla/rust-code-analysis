@@ -1924,6 +1924,10 @@
           "named": true
         },
         {
+          "type": "macro_statement",
+          "named": true
+        },
+        {
           "type": "preproc_call",
           "named": true
         },
@@ -2637,6 +2641,11 @@
   },
   {
     "type": "macro_annotation",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "macro_statement",
     "named": true,
     "fields": {}
   },
@@ -3372,6 +3381,10 @@
           "named": true
         },
         {
+          "type": "macro_statement",
+          "named": true
+        },
+        {
           "type": "namespace_definition",
           "named": true
         },
@@ -3476,6 +3489,10 @@
         },
         {
           "type": "linkage_specification",
+          "named": true
+        },
+        {
+          "type": "macro_statement",
           "named": true
         },
         {
@@ -3675,6 +3692,10 @@
           "named": true
         },
         {
+          "type": "macro_statement",
+          "named": true
+        },
+        {
           "type": "namespace_definition",
           "named": true
         },
@@ -3804,6 +3825,10 @@
         },
         {
           "type": "linkage_specification",
+          "named": true
+        },
+        {
+          "type": "macro_statement",
           "named": true
         },
         {
@@ -5375,6 +5400,10 @@
   },
   {
     "type": "MOZ_COLD",
+    "named": false
+  },
+  {
+    "type": "MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER",
     "named": false
   },
   {

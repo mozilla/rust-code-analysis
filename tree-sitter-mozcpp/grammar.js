@@ -11,6 +11,11 @@ module.exports = grammar(CPP, {
       original,
     ),
 
+    _field_declaration_list_item: ($, original) => choice(
+      original,
+      $.macro_statement,
+    ),
+
     operator_name: $ => token(seq(
       'operator',
       /\s*/,
@@ -77,6 +82,10 @@ module.exports = grammar(CPP, {
     storage_class_specifier: ($, original) => choice(
       original,
       $.macro_annotation,
+    ),
+
+    macro_statement: $ => choice(
+      'MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER'
     ),
     
     macro_annotation: $ => choice(
