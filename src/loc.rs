@@ -256,6 +256,39 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_blank_python() {
+        check_metrics!(
+            "\na = 42\n\n",
+            "foo.py",
+            PythonParser,
+            loc,
+            [(blank, 1, usize)]
+        );
+    }
+
+    #[test]
+    fn test_blank_rust() {
+        check_metrics!(
+            "\nlet a = 42;\n\n",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(blank, 1, usize)]
+        );
+    }
+
+    #[test]
+    fn test_blank_c() {
+        check_metrics!(
+            "\nint a = 42;\n\n",
+            "foo.c",
+            CppParser,
+            loc,
+            [(blank, 1, usize)]
+        );
+    }
+
+    #[test]
     fn test_cloc_python() {
         check_metrics!(
             "\"\"\"Block comment\nBlock comment\n\"\"\"\n
