@@ -108,9 +108,15 @@ impl Loc for PythonCode {
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            String | DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
+            DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
+            }
+            String => {
+                let parent = node.parent().unwrap();
+                if let ExpressionStatement = parent.kind_id().into() {
+                    stats.comment_lines += (end - start) + 1;
+                }
             }
             _ => {
                 stats.lines.insert(start);
@@ -244,13 +250,13 @@ mod tests {
 
     #[test]
     fn test_cloc_python() {
-        // FIXME Add block comments
         check_metrics!(
-            "# Line Comment\na = 42 # Line Comment\n",
+            "\"\"\"Block comment\nBlock comment\n\"\"\"\n
+            # Line Comment\na = 42 # Line Comment\n",
             "foo.py",
             PythonParser,
             loc,
-            [(cloc, 2, usize)]
+            [(cloc, 5, usize)]
         );
     }
 
