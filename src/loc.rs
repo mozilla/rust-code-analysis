@@ -13,7 +13,7 @@ pub struct Stats {
     end: usize,
     unit: bool,
     lines: FxHashSet<usize>,
-    comment_lines: FxHashSet<usize>,
+    comment_lines: usize,
 }
 
 impl Serialize for Stats {
@@ -46,10 +46,7 @@ impl Stats {
         for l in other.lines.iter() {
             self.lines.insert(*l);
         }
-
-        for c in other.comment_lines.iter() {
-            self.comment_lines.insert(*c);
-        }
+        self.comment_lines += other.comment_lines;
     }
 
     #[inline(always)]
@@ -73,7 +70,7 @@ impl Stats {
     pub fn cloc(&self) -> f64 {
         // Comments are counted regardless of their placement
         // https://en.wikipedia.org/wiki/Source_lines_of_code
-        self.comment_lines.len() as f64
+        self.comment_lines as f64
     }
 }
 
@@ -92,29 +89,34 @@ where
 }
 
 #[inline(always)]
-fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> usize {
+fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (usize, usize) {
     let start = node.start_position().row;
+    let end = node.end_position().row;
 
     if is_func_space {
-        let end = node.end_position().row;
-
         stats.start = start;
         stats.end = end;
         stats.unit = is_unit;
     }
-    start
+    (start, end)
 }
 
 impl Loc for PythonCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Python::*;
 
-        let start = init(node, stats, is_func_space, is_unit);
+        let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            String | DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
+            DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
             Comment => {
-                stats.comment_lines.insert(start);
+                stats.comment_lines += (end - start) + 1;
+            }
+            String => {
+                let parent = node.parent().unwrap();
+                if let ExpressionStatement = parent.kind_id().into() {
+                    stats.comment_lines += (end - start) + 1;
+                }
             }
             _ => {
                 stats.lines.insert(start);
@@ -127,12 +129,12 @@ impl Loc for MozjsCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Mozjs::*;
 
-        let start = init(node, stats, is_func_space, is_unit);
+        let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
             String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             Comment => {
-                stats.comment_lines.insert(start);
+                stats.comment_lines += (end - start) + 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -145,12 +147,12 @@ impl Loc for JavascriptCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Javascript::*;
 
-        let start = init(node, stats, is_func_space, is_unit);
+        let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
             String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             Comment => {
-                stats.comment_lines.insert(start);
+                stats.comment_lines += (end - start) + 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -163,12 +165,12 @@ impl Loc for TypescriptCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Typescript::*;
 
-        let start = init(node, stats, is_func_space, is_unit);
+        let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
             String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             Comment => {
-                stats.comment_lines.insert(start);
+                stats.comment_lines += (end - start) + 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -181,12 +183,12 @@ impl Loc for TsxCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Tsx::*;
 
-        let start = init(node, stats, is_func_space, is_unit);
+        let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
             String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
             Comment => {
-                stats.comment_lines.insert(start);
+                stats.comment_lines += (end - start) + 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -199,12 +201,12 @@ impl Loc for RustCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Rust::*;
 
-        let start = init(node, stats, is_func_space, is_unit);
+        let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
             StringLiteral | RawStringLiteral | ExpressionStatement | Block | SourceFile => {}
             LineComment | BlockComment => {
-                stats.comment_lines.insert(start);
+                stats.comment_lines += (end - start) + 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -217,13 +219,13 @@ impl Loc for CppCode {
     fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Cpp::*;
 
-        let start = init(node, stats, is_func_space, is_unit);
+        let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
             RawStringLiteral | StringLiteral | ExpressionStatement | CompoundStatement
             | LabeledStatement | DeclarationList | FieldDeclarationList | TranslationUnit => {}
             Comment => {
-                stats.comment_lines.insert(start);
+                stats.comment_lines += (end - start) + 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -239,3 +241,48 @@ impl Loc for JavaCode {}
 impl Loc for GoCode {}
 impl Loc for CssCode {}
 impl Loc for HtmlCode {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_cloc_python() {
+        check_metrics!(
+            "\"\"\"Block comment\nBlock comment\n\"\"\"\n
+            # Line Comment\na = 42 # Line Comment\n",
+            "foo.py",
+            PythonParser,
+            loc,
+            [(cloc, 5, usize)]
+        );
+    }
+
+    #[test]
+    fn test_cloc_rust() {
+        check_metrics!(
+            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ let a = 42; // Line Comment\n",
+            "foo.rs",
+            RustParser,
+            loc,
+            [
+                (cloc, 5, usize),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_cloc_c() {
+        check_metrics!(
+            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ int a = 42; // Line Comment\n",
+            "foo.c",
+            CppParser,
+            loc,
+            [
+                (cloc, 5, usize),
+            ]
+        );
+    }
+}
