@@ -114,6 +114,7 @@ macro_rules! mk_code {
     ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident) ),* ) => {
         $(
             pub struct $code { }
+            impl CodeMetricsT for $code { }
 
             impl TSLanguage for $code {
                 type BaseLang = $camel;

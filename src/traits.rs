@@ -16,6 +16,8 @@ use crate::preproc::PreprocResults;
 use crate::ts_parser::Filter;
 use crate::web::alterator::Alterator;
 
+pub trait CodeMetricsT: Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi {}
+
 pub trait TSLanguage {
     type BaseLang;
 

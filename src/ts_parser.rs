@@ -5,32 +5,13 @@ use tree_sitter::{Node, Parser, Tree};
 
 use crate::c_macro;
 use crate::checker::*;
-use crate::cyclomatic::Cyclomatic;
-use crate::exit::Exit;
-use crate::fn_args::NArgs;
 use crate::getter::Getter;
-use crate::halstead::Halstead;
 use crate::languages::*;
-use crate::loc::Loc;
-use crate::mi::Mi;
-use crate::nom::Nom;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 use crate::web::alterator::Alterator;
 
-pub struct TSParser<
-    T: TSLanguage
-        + Checker
-        + Getter
-        + Alterator
-        + Cyclomatic
-        + Exit
-        + Halstead
-        + NArgs
-        + Loc
-        + Nom
-        + Mi,
-> {
+pub struct TSParser<T: TSLanguage + Checker + Getter + Alterator + CodeMetricsT> {
     code: Vec<u8>,
     tree: Tree,
     phantom: PhantomData<T>,
@@ -81,20 +62,8 @@ fn get_fake_code<T: TSLanguage>(
     }
 }
 
-impl<
-        T: 'static
-            + TSLanguage
-            + Checker
-            + Getter
-            + Alterator
-            + Cyclomatic
-            + Exit
-            + Halstead
-            + Loc
-            + Nom
-            + Mi
-            + NArgs,
-    > TSParserTrait for TSParser<T>
+impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> TSParserTrait
+    for TSParser<T>
 {
     type Checker = T;
     type Getter = T;
