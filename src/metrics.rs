@@ -274,7 +274,8 @@ impl<'a> FuncSpace<'a> {
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
         Self::dump_value("lloc", stats.lloc(), &prefix, false, stdout)?;
-        Self::dump_value("cloc", stats.cloc(), &prefix, true, stdout)
+        Self::dump_value("cloc", stats.cloc(), &prefix, false, stdout)?;
+        Self::dump_value("blank", stats.blank(), &prefix, true, stdout)
     }
 
     fn dump_nom(

@@ -21,10 +21,11 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("loc", 3)?;
+        let mut st = serializer.serialize_struct("loc", 4)?;
         st.serialize_field("sloc", &self.sloc())?;
         st.serialize_field("lloc", &self.lloc())?;
         st.serialize_field("cloc", &self.cloc())?;
+        st.serialize_field("blank", &self.blank())?;
         st.end()
     }
 }
@@ -33,10 +34,11 @@ impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "sloc: {}, lloc: {}, cloc: {}",
+            "sloc: {}, lloc: {}, cloc: {}, blank: {}",
             self.sloc(),
             self.lloc(),
-            self.cloc()
+            self.cloc(),
+            self.blank(),
         )
     }
 }
@@ -71,6 +73,11 @@ impl Stats {
         // Comments are counted regardless of their placement
         // https://en.wikipedia.org/wiki/Source_lines_of_code
         self.comment_lines as f64
+    }
+
+    #[inline(always)]
+    pub fn blank(&self) -> f64 {
+        self.sloc() - self.lloc() - self.cloc()
     }
 }
 
@@ -247,6 +254,39 @@ mod tests {
     use std::path::PathBuf;
 
     use super::*;
+
+    #[test]
+    fn test_blank_python() {
+        check_metrics!(
+            "\na = 42\n\n",
+            "foo.py",
+            PythonParser,
+            loc,
+            [(blank, 1, usize)]
+        );
+    }
+
+    #[test]
+    fn test_blank_rust() {
+        check_metrics!(
+            "\nlet a = 42;\n\n",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(blank, 1, usize)]
+        );
+    }
+
+    #[test]
+    fn test_blank_c() {
+        check_metrics!(
+            "\nint a = 42;\n\n",
+            "foo.c",
+            CppParser,
+            loc,
+            [(blank, 1, usize)]
+        );
+    }
 
     #[test]
     fn test_cloc_python() {
