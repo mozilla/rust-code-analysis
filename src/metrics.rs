@@ -382,7 +382,8 @@ impl<'a> FuncSpace<'a> {
     fn dump_json(
         &self,
         path: &PathBuf,
-        output_path: &PathBuf,
+        output_path: &Option<PathBuf>,
+        json: bool,
         pretty: bool,
     ) -> std::io::Result<()> {
         let json_data = if pretty {
@@ -391,21 +392,32 @@ impl<'a> FuncSpace<'a> {
             serde_json::to_string(&self).unwrap()
         };
 
-        let mut file = path.as_path().file_name().unwrap().to_os_string();
-        file.push(".json");
+        if json && output_path.is_none() {
+            let stdout = StandardStream::stdout(ColorChoice::Always);
+            let mut stdout = stdout.lock();
+            color!(stdout, White);
+            write!(stdout, "{}", json_data)?;
 
-        let mut json_path = output_path.clone();
-        json_path.push(file.clone());
+            Ok(())
+        } else {
+            let output_path = output_path.as_ref().unwrap();
 
-        if json_path.as_path().exists() {
-            let mut new_filename = path.to_str().unwrap().to_string();
-            let re = Regex::new(r"[\\:/]").unwrap();
-            new_filename = re.replace_all(&mut new_filename, "_").to_string();
-            new_filename.push_str(".json");
-            json_path.pop();
-            json_path.push(new_filename);
+            let mut file = path.as_path().file_name().unwrap().to_os_string();
+            file.push(".json");
+
+            let mut json_path = output_path.clone();
+            json_path.push(file.clone());
+
+            if json_path.as_path().exists() {
+                let mut new_filename = path.to_str().unwrap().to_string();
+                let re = Regex::new(r"[\\:/]").unwrap();
+                new_filename = re.replace_all(&mut new_filename, "_").to_string();
+                new_filename.push_str(".json");
+                json_path.pop();
+                json_path.push(new_filename);
+            }
+            write_file(&json_path, json_data.as_bytes())
         }
-        write_file(&json_path, json_data.as_bytes())
     }
 }
 
@@ -491,6 +503,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
 
 pub struct MetricsCfg {
     pub path: PathBuf,
+    pub json: bool,
     pub pretty: bool,
     pub output_path: Option<PathBuf>,
 }
@@ -503,8 +516,8 @@ impl Callback for Metrics {
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {
-            if let Some(output_path) = cfg.output_path {
-                space.dump_json(&cfg.path, &output_path, cfg.pretty)
+            if cfg.json {
+                space.dump_json(&cfg.path, &cfg.output_path, cfg.json, cfg.pretty)
             } else {
                 space.dump_root()
             }

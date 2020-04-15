@@ -27,6 +27,7 @@ struct Config {
     count_filter: Vec<String>,
     function: bool,
     metrics: bool,
+    json: bool,
     output: String,
     pretty: bool,
     line_start: Option<usize>,
@@ -81,6 +82,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
     } else if cfg.metrics {
         let cfg = MetricsCfg {
             path,
+            json: cfg.json,
             pretty: cfg.pretty,
             output_path: if cfg.output.is_empty() {
                 None
@@ -312,6 +314,11 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("json")
+                .help("Output metrics as json files")
+                .long("json"),
+        )
+        .arg(
             Arg::with_name("pretty")
                 .help("Dump a pretty json file")
                 .long("pr"),
@@ -437,6 +444,7 @@ fn main() {
         (None, None)
     };
 
+    let json = matches.is_present("json");
     let pretty = matches.is_present("pretty");
     let output = matches.value_of("output").unwrap().to_string();
     let output_is_dir = PathBuf::from(output.clone()).is_dir();
@@ -476,6 +484,7 @@ fn main() {
         count_filter,
         function,
         metrics,
+        json,
         pretty,
         output: output.clone(),
         line_start,
