@@ -273,6 +273,7 @@ impl<'a> FuncSpace<'a> {
 
         let prefix = format!("{}{}", prefix, pref_child);
         Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
+        Self::dump_value("ploc", stats.ploc(), &prefix, false, stdout)?;
         Self::dump_value("lloc", stats.lloc(), &prefix, false, stdout)?;
         Self::dump_value("cloc", stats.cloc(), &prefix, false, stdout)?;
         Self::dump_value("blank", stats.blank(), &prefix, true, stdout)
@@ -454,7 +455,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
         if let Some(last) = space_stack.last_mut() {
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
             T::Halstead::compute(&node, code, &mut last.metrics.halstead);
-            T::Loc::compute(&node, code, &mut last.metrics.loc, func_space, unit);
+            T::Loc::compute(&node, &mut last.metrics.loc, func_space, unit);
             T::Nom::compute(&node, &mut last.metrics.nom);
             T::Mi::compute(
                 &node,

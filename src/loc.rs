@@ -13,6 +13,7 @@ pub struct Stats {
     end: usize,
     unit: bool,
     lines: FxHashSet<usize>,
+    logical_lines: usize,
     comment_lines: usize,
 }
 
@@ -21,8 +22,9 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("loc", 4)?;
+        let mut st = serializer.serialize_struct("loc", 5)?;
         st.serialize_field("sloc", &self.sloc())?;
+        st.serialize_field("ploc", &self.ploc())?;
         st.serialize_field("lloc", &self.lloc())?;
         st.serialize_field("cloc", &self.cloc())?;
         st.serialize_field("blank", &self.blank())?;
@@ -34,8 +36,9 @@ impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "sloc: {}, lloc: {}, cloc: {}, blank: {}",
+            "sloc: {}, ploc: {}, lloc: {}, cloc: {}, blank: {}",
             self.sloc(),
+            self.ploc(),
             self.lloc(),
             self.cloc(),
             self.blank(),
@@ -45,14 +48,21 @@ impl fmt::Display for Stats {
 
 impl Stats {
     pub fn merge(&mut self, other: &Stats) {
+        // Merge ploc lines
         for l in other.lines.iter() {
             self.lines.insert(*l);
         }
+
+        // Merge lloc lines
+        self.logical_lines += other.logical_lines;
+
+        // Merge cloc lines
         self.comment_lines += other.comment_lines;
     }
 
     #[inline(always)]
     pub fn sloc(&self) -> f64 {
+        // This metric counts the number of lines of a file
         // The if construct is needed to count the line that represents
         // the signature of a function in a function space
         let sloc = if self.unit {
@@ -64,8 +74,17 @@ impl Stats {
     }
 
     #[inline(always)]
-    pub fn lloc(&self) -> f64 {
+    pub fn ploc(&self) -> f64 {
+        // This metric counts the number of instruction lines present in the code
+        // https://en.wikipedia.org/wiki/Source_lines_of_code
         self.lines.len() as f64
+    }
+
+    #[inline(always)]
+    pub fn lloc(&self) -> f64 {
+        // This metric counts the number of statements present in the code
+        // https://en.wikipedia.org/wiki/Source_lines_of_code
+        self.logical_lines as f64
     }
 
     #[inline(always)]
@@ -77,7 +96,8 @@ impl Stats {
 
     #[inline(always)]
     pub fn blank(&self) -> f64 {
-        self.sloc() - self.lloc() - self.cloc()
+        // This metric counts the number of blank lines present in the code
+        self.sloc() - self.ploc() - self.cloc()
     }
 }
 
@@ -85,14 +105,7 @@ pub trait Loc
 where
     Self: Checker,
 {
-    fn compute(
-        _node: &Node,
-        _code: &[u8],
-        _stats: &mut Stats,
-        _is_func_space: bool,
-        _is_unit: bool,
-    ) {
-    }
+    fn compute(_node: &Node, _stats: &mut Stats, _is_func_space: bool, _is_unit: bool) {}
 }
 
 #[inline(always)]
@@ -109,13 +122,13 @@ fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (
 }
 
 impl Loc for PythonCode {
-    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Python::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            DQUOTE | DQUOTE2 | ExpressionStatement | Block | Module => {}
+            DQUOTE | DQUOTE2 | Block | Module => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
             }
@@ -125,6 +138,30 @@ impl Loc for PythonCode {
                     stats.comment_lines += (end - start) + 1;
                 }
             }
+            Statement
+            | SimpleStatements
+            | ImportStatement
+            | FutureImportStatement
+            | ImportFromStatement
+            | PrintStatement
+            | AssertStatement
+            | ReturnStatement
+            | DeleteStatement
+            | RaiseStatement
+            | PassStatement
+            | BreakStatement
+            | ContinueStatement
+            | IfStatement
+            | ForStatement
+            | WhileStatement
+            | TryStatement
+            | WithStatement
+            | GlobalStatement
+            | NonlocalStatement
+            | ExecStatement
+            | ExpressionStatement => {
+                stats.logical_lines += 1;
+            }
             _ => {
                 stats.lines.insert(start);
             }
@@ -133,15 +170,22 @@ impl Loc for PythonCode {
 }
 
 impl Loc for MozjsCode {
-    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Mozjs::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
+            }
+            ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
+            | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
+            | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
+            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
+            | StatementIdentifier => {
+                stats.logical_lines += 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -151,15 +195,22 @@ impl Loc for MozjsCode {
 }
 
 impl Loc for JavascriptCode {
-    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Javascript::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
+            }
+            ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
+            | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
+            | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
+            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
+            | StatementIdentifier => {
+                stats.logical_lines += 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -169,15 +220,22 @@ impl Loc for JavascriptCode {
 }
 
 impl Loc for TypescriptCode {
-    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Typescript::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
+            }
+            ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
+            | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
+            | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
+            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
+            | StatementIdentifier => {
+                stats.logical_lines += 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -187,15 +245,22 @@ impl Loc for TypescriptCode {
 }
 
 impl Loc for TsxCode {
-    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Tsx::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            String | DQUOTE | ExpressionStatement | StatementBlock | Program => {}
+            String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
+            }
+            ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
+            | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
+            | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
+            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
+            | StatementIdentifier => {
+                stats.logical_lines += 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -205,15 +270,42 @@ impl Loc for TsxCode {
 }
 
 impl Loc for RustCode {
-    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Rust::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            StringLiteral | RawStringLiteral | ExpressionStatement | Block | SourceFile => {}
+            StringLiteral | RawStringLiteral | Block | SourceFile => {}
             LineComment | BlockComment => {
                 stats.comment_lines += (end - start) + 1;
+            }
+            Statement
+            | EmptyStatement
+            | ExpressionStatement
+            | LetDeclaration
+            | AssignmentExpression
+            | CompoundAssignmentExpr
+            | ReturnExpression
+            | CallExpression
+            | ArrayExpression
+            | ParenthesizedExpression
+            | TupleExpression
+            | UnitExpression
+            | IfExpression
+            | IfLetExpression
+            | WhileExpression
+            | WhileLetExpression
+            | LoopExpression
+            | ForExpression
+            | ClosureExpression
+            | BreakExpression
+            | ContinueExpression
+            | IndexExpression
+            | AwaitExpression
+            | FieldExpression
+            | MacroInvocation => {
+                stats.logical_lines += 1;
             }
             _ => {
                 stats.lines.insert(start);
@@ -223,17 +315,24 @@ impl Loc for RustCode {
 }
 
 impl Loc for CppCode {
-    fn compute(node: &Node, _code: &[u8], stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Cpp::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            RawStringLiteral | StringLiteral | ExpressionStatement | CompoundStatement
-            | LabeledStatement | DeclarationList | FieldDeclarationList | TranslationUnit => {}
+            RawStringLiteral | StringLiteral | DeclarationList | FieldDeclarationList
+            | TranslationUnit => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
             }
+            WhileStatement | SwitchStatement | CaseStatement | IfStatement | ForStatement
+            | ReturnStatement | BreakStatement | ContinueStatement | GotoStatement
+            | ThrowStatement | TryStatement | ExpressionStatement | LabeledStatement
+            | StatementIdentifier => {
+                stats.logical_lines += 1;
+            }
+
             _ => {
                 stats.lines.insert(start);
             }
@@ -307,9 +406,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [
-                (cloc, 5, usize),
-            ]
+            [(cloc, 5, usize)]
         );
     }
 
@@ -320,9 +417,61 @@ mod tests {
             "foo.c",
             CppParser,
             loc,
-            [
-                (cloc, 5, usize),
-            ]
+            [(cloc, 5, usize)]
+        );
+    }
+
+    #[test]
+    fn test_lloc_python() {
+        check_metrics!(
+            "for x in range(0,42):\n
+                if x % 2 == 0:\n
+                    print(x)\n",
+            "foo.py",
+            PythonParser,
+            loc,
+            [(lloc, 3, usize)]
+        );
+    }
+
+    #[test]
+    fn test_lloc_rust() {
+        check_metrics!(
+            "for x in 0..42 {\n
+                if x % 2 == 0 {\n
+                    println!(\"{}\", x);\n
+                }\n
+             }\n",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(lloc, 3, usize)]
+        );
+
+        // STAT returns three because there is an empty Rust statement
+        check_metrics!(
+            "let a = 42;\n
+             if true {\n
+                42\n
+             } else {\n
+                43\n
+             };\n",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(lloc, 3, usize)]
+        );
+    }
+
+    #[test]
+    fn test_lloc_c() {
+        check_metrics!(
+            "for (;;)\n
+                break;\n",
+            "foo.c",
+            CppParser,
+            loc,
+            [(lloc, 2, usize)]
         );
     }
 }
