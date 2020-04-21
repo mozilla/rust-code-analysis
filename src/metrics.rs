@@ -396,12 +396,12 @@ impl<'a> FuncSpace<'a> {
         file.push(".json");
 
         let mut json_path = output_path.clone();
-        json_path.push(file.clone());
+        json_path.push(file);
 
         if json_path.as_path().exists() {
             let mut new_filename = path.to_str().unwrap().to_string();
             let re = Regex::new(r"[\\:/]").unwrap();
-            new_filename = re.replace_all(&mut new_filename, "_").to_string();
+            new_filename = re.replace_all(&new_filename, "_").to_string();
             new_filename.push_str(".json");
             json_path.pop();
             json_path.push(new_filename);
