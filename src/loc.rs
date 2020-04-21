@@ -97,7 +97,11 @@ impl Stats {
     #[inline(always)]
     pub fn blank(&self) -> f64 {
         // This metric counts the number of blank lines present in the code
-        self.sloc() - self.ploc() - self.cloc()
+        // The if construct is needed because sometimes lloc and cloc
+        // coincide on the same lines, in that case lloc + cloc could be greater
+        // than the number of lines of a file.
+        let blank = self.sloc() - self.ploc() - self.cloc();
+        blank.max(0.0)
     }
 }
 
@@ -374,6 +378,14 @@ mod tests {
             loc,
             [(blank, 1, usize)]
         );
+
+        check_metrics!(
+            "fn func() { /* comment */ }\n",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(blank, 0, usize)]
+        );
     }
 
     #[test]
@@ -448,7 +460,7 @@ mod tests {
             [(lloc, 3, usize)]
         );
 
-        // STAT returns three because there is an empty Rust statement
+        // LLOC returns three because there is an empty Rust statement
         check_metrics!(
             "let a = 42;\n
              if true {\n
