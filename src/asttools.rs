@@ -15,6 +15,7 @@ pub fn get_parent<'a>(node: &'a Node<'a>, level: usize) -> Option<Node<'a>> {
     Some(node)
 }
 
+#[macro_export]
 macro_rules! has_ancestors {
     ($node:expr, $( $typs:pat )|*, $( $typ:pat ),+) => {{
         let mut res = false;

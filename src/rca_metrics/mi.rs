@@ -3,9 +3,9 @@ use serde::Serialize;
 use std::fmt;
 use tree_sitter::Node;
 
-use crate::cyclomatic;
-use crate::halstead;
-use crate::loc;
+use super::cyclomatic;
+use super::halstead;
+use super::loc;
 
 use crate::checker::Checker;
 
