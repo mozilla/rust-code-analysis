@@ -17,8 +17,7 @@ use walkdir::{DirEntry, WalkDir};
 use rust_code_analysis::web::server;
 use rust_code_analysis::*;
 
-// TODO: we could probably avoid to have to clone the Config...
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Config {
     dump: bool,
     in_place: bool,
@@ -39,7 +38,7 @@ struct Config {
 struct JobItem {
     language: Option<LANG>,
     path: PathBuf,
-    cfg: Config,
+    cfg: Arc<Config>,
 }
 
 type JobReceiver = Receiver<Option<JobItem>>;
@@ -61,7 +60,7 @@ fn mk_globset(elems: clap::Values) -> GlobSet {
     }
 }
 
-fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::Result<()> {
+fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     let source = read_file_with_eol(&path)?;
     let language = if let Some(language) = language {
         language
@@ -71,7 +70,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
         return Ok(());
     };
 
-    let pr = cfg.preproc;
+    let pr = cfg.preproc.clone();
     if cfg.dump {
         let cfg = DumpCfg {
             line_start: cfg.line_start,
@@ -85,7 +84,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
             output_path: if cfg.output.is_empty() {
                 None
             } else {
-                Some(PathBuf::from(cfg.output))
+                Some(PathBuf::from(cfg.output.clone()))
             },
         };
         action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
@@ -105,7 +104,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
     } else if !cfg.find_filter.is_empty() {
         let cfg = FindCfg {
             path: Some(path.clone()),
-            filters: cfg.find_filter,
+            filters: cfg.find_filter.clone(),
             line_start: cfg.line_start,
             line_end: cfg.line_end,
         };
@@ -113,8 +112,8 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
     } else if cfg.count_lock.is_some() {
         let cfg = CountCfg {
             path: Some(path.clone()),
-            filters: cfg.count_filter,
-            stats: cfg.count_lock.unwrap().clone(),
+            filters: cfg.count_filter.clone(),
+            stats: cfg.count_lock.as_ref().unwrap().clone(),
         };
         action::<Count>(&language, source, &path, pr, cfg)
     } else if cfg.preproc_lock.is_some() {
@@ -123,7 +122,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: Config) -> std::io::R
                 preprocess(
                     &PreprocParser::new(source, &path, None),
                     &path,
-                    cfg.preproc_lock.unwrap().clone(),
+                    cfg.preproc_lock.as_ref().unwrap().clone(),
                 );
             }
         }
@@ -140,18 +139,18 @@ fn consumer(receiver: JobReceiver) {
         }
         let job = job.unwrap();
         let path = job.path.clone();
-        if let Err(err) = act_on_file(job.language, job.path, job.cfg) {
+        if let Err(err) = act_on_file(job.language, job.path, &job.cfg) {
             eprintln!("{:?} for file {:?}", err, path);
         }
     }
 }
 
-fn send_file(path: PathBuf, cfg: &Config, language: &Option<LANG>, sender: &JobSender) {
+fn send_file(path: PathBuf, cfg: &Arc<Config>, language: &Option<LANG>, sender: &JobSender) {
     sender
         .send(Some(JobItem {
             language: language.clone(),
             path,
-            cfg: cfg.clone(),
+            cfg: Arc::clone(cfg),
         }))
         .unwrap();
 }
@@ -166,7 +165,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
 
 fn explore(
     mut paths: Vec<String>,
-    cfg: &Config,
+    cfg: &Arc<Config>,
     include: GlobSet,
     exclude: GlobSet,
     language: Option<LANG>,
@@ -468,7 +467,7 @@ fn main() {
         None
     };
 
-    let cfg = Config {
+    let cfg = Arc::new(Config {
         dump,
         in_place,
         comments,
@@ -483,12 +482,13 @@ fn main() {
         preproc_lock: preproc_lock.clone(),
         preproc,
         count_lock: count_lock.clone(),
-    };
+    });
 
     let (sender, receiver) = unbounded();
 
     let producer = {
-        let sender: JobSender = sender.clone();
+        let sender = sender.clone();
+        let cfg = cfg.clone();
         let include = mk_globset(matches.values_of("include").unwrap());
         let exclude = mk_globset(matches.values_of("exclude").unwrap());
 
