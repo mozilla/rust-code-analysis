@@ -1,0 +1,9 @@
+[package]
+name = "enums-cli"
+version = "0.0.1"
+authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
+edition = "2018"
+
+[dependencies]
+clap = "^2.33"
+enums = { path = ".." }
