@@ -19,7 +19,9 @@ pub use crate::enums::*;
 pub mod node;
 pub use crate::node::*;
 
-pub mod rca_metrics;
+mod rca_metrics;
+pub(crate) use rca_metrics::*;
+
 pub mod web;
 
 #[macro_use]
