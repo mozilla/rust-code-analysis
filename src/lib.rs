@@ -19,32 +19,14 @@ pub use crate::enums::*;
 pub mod node;
 pub use crate::node::*;
 
+mod rca_metrics;
+pub(crate) use rca_metrics::*;
+
 pub mod web;
 
 #[macro_use]
 pub mod asttools;
 pub use crate::asttools::*;
-
-pub mod cyclomatic;
-pub use crate::cyclomatic::*;
-
-pub mod exit;
-pub use crate::exit::*;
-
-pub mod loc;
-pub use crate::loc::*;
-
-pub mod mi;
-pub use crate::mi::*;
-
-pub mod halstead;
-pub use crate::halstead::*;
-
-pub mod nom;
-pub use crate::nom::*;
-
-pub mod fn_args;
-pub use crate::fn_args::*;
 
 pub mod metrics;
 pub use crate::metrics::*;
