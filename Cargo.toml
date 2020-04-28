@@ -33,6 +33,7 @@ pretty_assertions = "^0.6"
 
 [workspace]
 members = ["rust-code-analysis-cli"]
+exclude = ["enums"]
 
 [profile.release]
 opt-level = 3

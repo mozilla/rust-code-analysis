@@ -129,7 +129,7 @@ pub fn get_token_names(language: &Language, escape: bool) -> Vec<(String, bool, 
             if anonymous != anon {
                 continue;
             }
-            let kind = language.node_kind_for_id(i as u16);
+            let kind = language.node_kind_for_id(i as u16).unwrap();
             let name = sanitize_identifier(kind);
             let ts_name = sanitize_string(kind, escape);
             let name = camel_case(name);
