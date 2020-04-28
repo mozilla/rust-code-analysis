@@ -1,5 +1,5 @@
-use crate::languages::fake;
-use crate::languages::*;
+use crate::langs::fake;
+use crate::langs::*;
 use regex::bytes::Regex;
 use std::cmp::Ordering;
 use std::collections::HashMap;

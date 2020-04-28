@@ -1,6 +1,6 @@
 use tree_sitter::Node;
 
-use crate::metrics::SpaceKind;
+use crate::spaces::SpaceKind;
 use crate::traits::Search;
 
 use crate::*;

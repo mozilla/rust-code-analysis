@@ -16,11 +16,11 @@ pub use crate::macros::*;
 pub mod node;
 pub use crate::node::*;
 
-mod rca_metrics;
-pub(crate) use rca_metrics::*;
+mod metrics;
+pub(crate) use metrics::*;
 
-mod rca_languages;
-pub(crate) use rca_languages::*;
+mod languages;
+pub(crate) use languages::*;
 
 pub mod web;
 
@@ -28,8 +28,8 @@ pub mod web;
 pub mod asttools;
 pub use crate::asttools::*;
 
-pub mod metrics;
-pub use crate::metrics::*;
+pub mod spaces;
+pub use crate::spaces::*;
 
 pub mod getter;
 pub use crate::getter::*;
@@ -48,8 +48,8 @@ pub mod c_macro;
 pub mod preproc;
 pub use crate::preproc::*;
 
-mod languages;
-pub use crate::languages::*;
+mod langs;
+pub use crate::langs::*;
 
 mod tools;
 pub use crate::tools::*;

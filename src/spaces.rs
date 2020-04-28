@@ -517,17 +517,17 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
     })
 }
 
-pub struct MetricsCfg {
+pub struct SpacesCfg {
     pub path: PathBuf,
     pub pretty: bool,
     pub output_path: Option<PathBuf>,
 }
 
-pub struct Metrics {}
+pub struct Spaces {}
 
-impl Callback for Metrics {
+impl Callback for Spaces {
     type Res = std::io::Result<()>;
-    type Cfg = MetricsCfg;
+    type Cfg = SpacesCfg;
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {

@@ -78,7 +78,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
         };
         action::<Dump>(&language, source, &path, pr, cfg)
     } else if cfg.metrics {
-        let cfg = MetricsCfg {
+        let cfg = SpacesCfg {
             path,
             pretty: cfg.pretty,
             output_path: if cfg.output.is_empty() {
@@ -87,7 +87,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
                 Some(PathBuf::from(cfg.output.clone()))
             },
         };
-        action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
+        action::<Spaces>(&language, source, &cfg.path.clone(), pr, cfg)
     } else if cfg.comments {
         let cfg = CommentRmCfg {
             in_place: cfg.in_place,

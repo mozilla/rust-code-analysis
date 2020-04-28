@@ -12,7 +12,7 @@ use super::ast::{AstCallback, AstCfg, AstPayload};
 use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebCommentPayload};
 use super::function::{WebFunctionCallback, WebFunctionCfg, WebFunctionInfo, WebFunctionPayload};
 use super::metrics::{WebMetricsCallback, WebMetricsCfg, WebMetricsInfo, WebMetricsPayload};
-use crate::languages::action;
+use crate::langs::action;
 use crate::tools::guess_language;
 use crate::LANG;
 

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
 use std::path::PathBuf;
 
-use crate::metrics::{metrics, FuncSpace};
+use crate::spaces::{metrics, FuncSpace};
 use crate::traits::{Callback, TSParserTrait};
 
 #[derive(Debug, Deserialize, Serialize)]
