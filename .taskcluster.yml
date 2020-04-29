@@ -123,7 +123,7 @@ tasks:
 
       - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
         then:
-          taskId: {$eval: as_slugid("build_release")}
+          taskId: {$eval: as_slugid("build_linux_release")}
           dependencies:
             - {$eval: as_slugid("lint_test_task")}
             - {$eval: as_slugid("windows_test_task")}
@@ -134,25 +134,101 @@ tasks:
           payload:
             maxRunTime: 3600
             image: "rust:buster"
-            env:
-              PROJECT_NAME: rust-code-analysis
             command:
               - "/bin/bash"
               - "-cx"
               - "git clone --recursive --quiet ${repository} &&
                  cd rust-code-analysis &&
                  git -c advice.detachedHead=false checkout ${head_rev} &&
-                 cargo build --release &&
+                 cargo build --all --release &&
                  cd target/release &&
-                 tar -zvcf /build.tar.gz --transform 's,^,rust-code-analysis-linux-x86_64/,' rust-code-analysis"
+                 strip rust-code-analysis-cli &&
+                 tar -zvcf /build.tar.gz \
+                     --transform 's,^,rust-code-analysis-linux-x86_64/,' \
+                     rust-code-analysis-cli"
             artifacts:
               public/rust-code-analysis-linux-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
                 path: /build.tar.gz
                 type: file
           metadata:
-            name: rust-code-analysis release build
-            description: rust-code-analysis release build
+            name: rust-code-analysis linux release build
+            description: rust-code-analysis linux release build
+            owner: cdenizet@mozilla.com
+            source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+        then:
+          taskId: {$eval: as_slugid("build_windows_release")}
+          dependencies:
+            - {$eval: as_slugid("lint_test_task")}
+            - {$eval: as_slugid("windows_test_task")}
+          created: {$fromNow: ''}
+          deadline: {$fromNow: '2 hour'}
+          provisionerId: proj-relman
+          workerType: win2012r2
+          payload:
+            maxRunTime: 3600
+            command:
+              - set VSWHERE=%programfiles(x86)%\Microsoft Visual Studio\Installer
+              - set VS_BINS=VC\Tools\MSVC\*\bin\Hostx64\x64
+              - set RUSTUP_INIT_PATH=%CD%\rustup-init
+              - set CARGO_PATH=%USERPROFILE%\.cargo\bin
+              - set PATH=%RUSTUP_INIT_PATH%;%CARGO_PATH%;%VSWHERE%;%PATH%
+              - set VSWHERE_CMD=vswhere -latest -products * -find %VS_BINS%
+              - FOR /F "tokens=*" %%o IN ('%VSWHERE_CMD%') do (SET LIB_PATH=%%o)
+              - set PATH=%LIB_PATH%;%PATH%
+              - rustup-init -yv --default-toolchain stable ^
+                                --default-host x86_64-pc-windows-msvc
+              - git clone --recursive --quiet ${repository}
+              - cd rust-code-analysis
+              - git -c advice.detachedHead=false checkout ${head_rev}
+              - cargo build --all --release
+            mounts:
+              - content:
+                  url: https://win.rustup.rs/
+                file: rustup-init\rustup-init.exe
+            artifacts:
+              - name: public/rust-code-analysis-cli.exe
+                expires: {$fromNow: '2 weeks'}
+                path: rust-code-analysis\target\release\rust-code-analysis-cli.exe
+                type: file
+          metadata:
+            name: rust-code-analysis windows release build
+            description: rust-code-analysis windows release build
+            owner: cdenizet@mozilla.com
+            source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+        then:
+          taskId: {$eval: as_slugid("strip_windows_binary")}
+          dependencies:
+              - {$eval: as_slugid("build_windows_release")}
+          created: {$fromNow: ''}
+          deadline: {$fromNow: '2 hour'}
+          provisionerId: proj-relman
+          workerType: ci
+          payload:
+            maxRunTime: 3600
+            image: "mozilla/taskboot:0.2.5"
+            env:
+              WINDOWS_BIN: rust-code-analysis-cli.exe
+            command:
+                - "/bin/sh"
+                - "-cx"
+                - "taskboot retrieve-artifact --output-path=. \
+                            --artifacts=$WINDOWS_BIN:public/$WINDOWS_BIN &&
+                   apk add --no-cache zip &&
+                   strip $WINDOWS_BIN &&
+                   zip -9 rust-code-analysis-windows-x86_64.zip $WINDOWS_BIN"
+            artifacts:
+              public/rust-code-analysis-windows-x86_64.zip:
+                expires: {$fromNow: '2 weeks'}
+                path: /rust-code-analysis-windows-x86_64.zip
+                type: file
+          metadata:
+            name: strip rust-code-analysis windows binary
+            description: strip rust-code-analysis windows binary
             owner: cdenizet@mozilla.com
             source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
@@ -163,7 +239,8 @@ tasks:
           in:
             taskId: {$eval: as_slugid("deploy_release")}
             dependencies:
-              - {$eval: as_slugid("build_release")}
+              - {$eval: as_slugid("build_linux_release")}
+              - {$eval: as_slugid("strip_windows_binary")}
             created: {$fromNow: ''}
             deadline: {$fromNow: '2 hour'}
             provisionerId: proj-relman
@@ -174,15 +251,18 @@ tasks:
               features:
                 taskclusterProxy: true
               maxRunTime: 3600
-              image: "mozilla/taskboot:0.2.0"
+              image: "mozilla/taskboot:0.2.5"
               env:
+                LINUX_ARTIFACT: rust-code-analysis-linux-x86_64.tar.gz
+                WINDOWS_ARTIFACT: rust-code-analysis-windows-x86_64.zip
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
                 - taskboot
                 - github-release
                 - mozilla/rust-code-analysis
                 - "${version}"
-                - "--asset=rust-code-analysis-linux-x86_64.tar.gz:public/rust-code-analysis-linux-x86_64.tar.gz"
+                - "--asset=$LINUX_ARTIFACT:public/$LINUX_ARTIFACT"
+                - "--asset=$WINDOWS_ARTIFACT:public/$WINDOWS_ARTIFACT"
             metadata:
               name: "rust-code-analysis release publication ${version}"
               description: rust-code-analysis release publication on Github
