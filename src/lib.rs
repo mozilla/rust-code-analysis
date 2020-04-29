@@ -1,6 +1,5 @@
 #![recursion_limit = "128"]
 #![allow(clippy::implicit_hasher)]
-//#![warn(unused_extern_crates)]
 
 #[macro_use]
 extern crate lazy_static;
@@ -21,6 +20,9 @@ pub(crate) use metrics::*;
 
 mod languages;
 pub(crate) use languages::*;
+
+mod output;
+pub use output::*;
 
 pub mod web;
 
@@ -65,6 +67,3 @@ pub use crate::checker::*;
 
 mod comment_rm;
 pub use crate::comment_rm::*;
-
-mod dump;
-pub use crate::dump::*;
