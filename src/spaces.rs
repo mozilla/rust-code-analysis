@@ -9,7 +9,6 @@ use tree_sitter::Node;
 
 use crate::checker::Checker;
 use crate::cyclomatic::{self, Cyclomatic};
-use crate::enums::NodeKind;
 use crate::exit::{self, Exit};
 use crate::fn_args::{self, NArgs};
 use crate::getter::Getter;
@@ -19,6 +18,34 @@ use crate::mi::{self, Mi};
 use crate::nom::{self, Nom};
 use crate::tools::write_file;
 use crate::traits::*;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum SpaceKind {
+    Unknown,
+    Function,
+    Class,
+    Struct,
+    Trait,
+    Impl,
+    Unit,
+    Namespace,
+}
+
+impl fmt::Display for SpaceKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self {
+            SpaceKind::Unknown => "unknown",
+            SpaceKind::Function => "function",
+            SpaceKind::Class => "class",
+            SpaceKind::Struct => "struct",
+            SpaceKind::Trait => "trait",
+            SpaceKind::Impl => "impl",
+            SpaceKind::Unit => "unit",
+            SpaceKind::Namespace => "namespace",
+        };
+        write!(f, "{}", s)
+    }
+}
 
 #[derive(Debug)]
 pub struct CodeMetrics<'a> {
@@ -91,7 +118,7 @@ pub struct FuncSpace<'a> {
     pub name: Option<&'a str>,
     pub spaces: Vec<FuncSpace<'a>>,
     pub metrics: CodeMetrics<'a>,
-    pub kind: NodeKind,
+    pub kind: SpaceKind,
     pub start_line: usize,
     pub end_line: usize,
 }
@@ -113,9 +140,9 @@ impl<'a> Serialize for FuncSpace<'a> {
 }
 
 impl<'a> FuncSpace<'a> {
-    fn new<T: Getter>(node: &Node<'a>, code: &'a [u8], kind: NodeKind) -> Self {
+    fn new<T: Getter>(node: &Node<'a>, code: &'a [u8], kind: SpaceKind) -> Self {
         let (start_position, end_position) = match kind {
-            NodeKind::Unit => {
+            SpaceKind::Unit => {
                 if node.child_count() == 0 {
                     (0, 0)
                 } else {
@@ -439,10 +466,10 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
             last_level = level;
         }
 
-        let kind = T::Getter::get_kind(&node);
+        let kind = T::Getter::get_space_kind(&node);
 
         let func_space = T::Checker::is_func(&node) || T::Checker::is_func_space(&node);
-        let unit = kind == NodeKind::Unit;
+        let unit = kind == SpaceKind::Unit;
 
         let new_level = if func_space {
             space_stack.push(FuncSpace::new::<T::Getter>(&node, code, kind));

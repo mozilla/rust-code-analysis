@@ -5,8 +5,8 @@ use std::collections::{hash_map, HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use crate::languages::*;
-use crate::rca_languages::language_preproc::*;
+use crate::langs::*;
+use crate::languages::language_preproc::*;
 use crate::tools::*;
 use crate::traits::*;
 

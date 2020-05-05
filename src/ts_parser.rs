@@ -6,7 +6,7 @@ use tree_sitter::{Node, Parser, Tree};
 use crate::c_macro;
 use crate::checker::*;
 use crate::getter::Getter;
-use crate::languages::*;
+use crate::langs::*;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 use crate::web::alterator::Alterator;

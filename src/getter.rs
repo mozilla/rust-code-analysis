@@ -1,6 +1,6 @@
 use tree_sitter::Node;
 
-use crate::enums::NodeKind;
+use crate::spaces::SpaceKind;
 use crate::traits::Search;
 
 use crate::*;
@@ -20,25 +20,25 @@ pub trait Getter {
         }
     }
 
-    fn get_kind(_node: &Node) -> NodeKind {
-        NodeKind::Unknown
+    fn get_space_kind(_node: &Node) -> SpaceKind {
+        SpaceKind::Unknown
     }
 }
 
 impl Getter for PythonCode {
-    fn get_kind(node: &Node) -> NodeKind {
+    fn get_space_kind(node: &Node) -> SpaceKind {
         let typ = node.kind_id();
         match typ.into() {
-            Python::FunctionDefinition => NodeKind::Function,
-            Python::ClassDefinition => NodeKind::Class,
-            Python::Module => NodeKind::Unit,
-            _ => NodeKind::Unknown,
+            Python::FunctionDefinition => SpaceKind::Function,
+            Python::ClassDefinition => SpaceKind::Class,
+            Python::Module => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
         }
     }
 }
 
 impl Getter for MozjsCode {
-    fn get_kind(node: &Node) -> NodeKind {
+    fn get_space_kind(node: &Node) -> SpaceKind {
         use Mozjs::*;
 
         let typ = node.kind_id();
@@ -48,10 +48,10 @@ impl Getter for MozjsCode {
             | GeneratorFunction
             | FunctionDeclaration
             | GeneratorFunctionDeclaration
-            | ArrowFunction => NodeKind::Function,
-            Class | ClassDeclaration => NodeKind::Class,
-            Program => NodeKind::Unit,
-            _ => NodeKind::Unknown,
+            | ArrowFunction => SpaceKind::Function,
+            Class | ClassDeclaration => SpaceKind::Class,
+            Program => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
         }
     }
 
@@ -85,7 +85,7 @@ impl Getter for MozjsCode {
 }
 
 impl Getter for JavascriptCode {
-    fn get_kind(node: &Node) -> NodeKind {
+    fn get_space_kind(node: &Node) -> SpaceKind {
         use Javascript::*;
 
         let typ = node.kind_id();
@@ -95,10 +95,10 @@ impl Getter for JavascriptCode {
             | GeneratorFunction
             | FunctionDeclaration
             | GeneratorFunctionDeclaration
-            | ArrowFunction => NodeKind::Function,
-            Class | ClassDeclaration => NodeKind::Class,
-            Program => NodeKind::Unit,
-            _ => NodeKind::Unknown,
+            | ArrowFunction => SpaceKind::Function,
+            Class | ClassDeclaration => SpaceKind::Class,
+            Program => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
         }
     }
 
@@ -132,7 +132,7 @@ impl Getter for JavascriptCode {
 }
 
 impl Getter for TypescriptCode {
-    fn get_kind(node: &Node) -> NodeKind {
+    fn get_space_kind(node: &Node) -> SpaceKind {
         use Typescript::*;
 
         let typ = node.kind_id();
@@ -142,10 +142,10 @@ impl Getter for TypescriptCode {
             | GeneratorFunction
             | FunctionDeclaration
             | GeneratorFunctionDeclaration
-            | ArrowFunction => NodeKind::Function,
-            Class | ClassDeclaration => NodeKind::Class,
-            Program => NodeKind::Unit,
-            _ => NodeKind::Unknown,
+            | ArrowFunction => SpaceKind::Function,
+            Class | ClassDeclaration => SpaceKind::Class,
+            Program => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
         }
     }
 
@@ -179,7 +179,7 @@ impl Getter for TypescriptCode {
 }
 
 impl Getter for TsxCode {
-    fn get_kind(node: &Node) -> NodeKind {
+    fn get_space_kind(node: &Node) -> SpaceKind {
         use Tsx::*;
 
         let typ = node.kind_id();
@@ -189,10 +189,10 @@ impl Getter for TsxCode {
             | GeneratorFunction
             | FunctionDeclaration
             | GeneratorFunctionDeclaration
-            | ArrowFunction => NodeKind::Function,
-            Class | ClassDeclaration => NodeKind::Class,
-            Program => NodeKind::Unit,
-            _ => NodeKind::Unknown,
+            | ArrowFunction => SpaceKind::Function,
+            Class | ClassDeclaration => SpaceKind::Class,
+            Program => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
         }
     }
 
@@ -226,16 +226,16 @@ impl Getter for TsxCode {
 }
 
 impl Getter for RustCode {
-    fn get_kind(node: &Node) -> NodeKind {
+    fn get_space_kind(node: &Node) -> SpaceKind {
         use Rust::*;
 
         let typ = node.kind_id();
         match typ.into() {
-            FunctionItem | ClosureExpression => NodeKind::Function,
-            TraitItem => NodeKind::Trait,
-            ImplItem => NodeKind::Impl,
-            SourceFile => NodeKind::Unit,
-            _ => NodeKind::Unknown,
+            FunctionItem | ClosureExpression => SpaceKind::Function,
+            TraitItem => SpaceKind::Trait,
+            ImplItem => SpaceKind::Impl,
+            SourceFile => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
         }
     }
 }
@@ -285,17 +285,17 @@ impl Getter for CppCode {
         None
     }
 
-    fn get_kind(node: &Node) -> NodeKind {
+    fn get_space_kind(node: &Node) -> SpaceKind {
         use Cpp::*;
 
         let typ = node.kind_id();
         match typ.into() {
-            FunctionDefinition | FunctionDefinition2 | FunctionDefinition3 => NodeKind::Function,
-            StructSpecifier => NodeKind::Struct,
-            ClassSpecifier => NodeKind::Class,
-            NamespaceDefinition => NodeKind::Namespace,
-            TranslationUnit => NodeKind::Unit,
-            _ => NodeKind::Unknown,
+            FunctionDefinition | FunctionDefinition2 | FunctionDefinition3 => SpaceKind::Function,
+            StructSpecifier => SpaceKind::Struct,
+            ClassSpecifier => SpaceKind::Class,
+            NamespaceDefinition => SpaceKind::Namespace,
+            TranslationUnit => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
         }
     }
 }

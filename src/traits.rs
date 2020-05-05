@@ -8,7 +8,7 @@ use crate::exit::Exit;
 use crate::fn_args::NArgs;
 use crate::getter::Getter;
 use crate::halstead::Halstead;
-use crate::languages::*;
+use crate::langs::*;
 use crate::loc::Loc;
 use crate::mi::Mi;
 use crate::nom::Nom;
