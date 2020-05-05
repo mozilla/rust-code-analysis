@@ -97,10 +97,14 @@ tasks:
         payload:
           maxRunTime: 3600
           command:
-            - set VS_PATH=%programfiles(x86)%\Microsoft Visual Studio 14.0\VC
+            - set VSWHERE=%programfiles(x86)%\Microsoft Visual Studio\Installer
+            - set VS_BINS=VC\Tools\MSVC\*\bin\Hostx64\x64
             - set RUSTUP_INIT_PATH=%CD%\rustup-init
-            - set PATH=%RUSTUP_INIT_PATH%;%USERPROFILE%\.cargo\bin;%PATH%
-            - call "%VS_PATH%\vcvarsall.bat" x86_amd64
+            - set CARGO_PATH=%USERPROFILE%\.cargo\bin
+            - set PATH=%RUSTUP_INIT_PATH%;%CARGO_PATH%;%VSWHERE%;%PATH%
+            - set VSWHERE_CMD=vswhere -latest -products * -find %VS_BINS%
+            - FOR /F "tokens=*" %%o IN ('%VSWHERE_CMD%') do (SET LIB_PATH=%%o)
+            - set PATH=%LIB_PATH%;%PATH%
             - rustup-init -yv --default-toolchain stable ^
                               --default-host x86_64-pc-windows-msvc
             - git clone --recursive --quiet ${repository}
