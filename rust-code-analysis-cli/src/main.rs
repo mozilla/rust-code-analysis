@@ -9,7 +9,9 @@ use crossbeam::channel::{Receiver, Sender};
 use crossbeam::crossbeam_channel::unbounded;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use std::collections::{hash_map, HashMap};
+use std::fmt;
 use std::path::PathBuf;
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::{process, thread};
 use walkdir::{DirEntry, WalkDir};
@@ -26,6 +28,7 @@ struct Config {
     count_filter: Vec<String>,
     function: bool,
     metrics: bool,
+    output_format: Option<Format>,
     output: String,
     pretty: bool,
     line_start: Option<usize>,
@@ -80,6 +83,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
     } else if cfg.metrics {
         let cfg = MetricsCfg {
             path,
+            output_format: cfg.output_format.clone(),
             pretty: cfg.pretty,
             output_path: if cfg.output.is_empty() {
                 None
@@ -217,6 +221,17 @@ fn explore(
     all_files
 }
 
+fn parse_or_exit<T>(s: &str) -> T
+where
+    T: FromStr,
+    T::Err: fmt::Display,
+{
+    T::from_str(s).unwrap_or_else(|e| {
+        eprintln!("Error:\n{}", e);
+        process::exit(1);
+    })
+}
+
 fn main() {
     let matches = App::new("code-analysis")
         .version(crate_version!())
@@ -303,11 +318,19 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("type")
+            Arg::with_name("language_type")
                 .help("Language type")
-                .short("t")
-                .long("type")
+                .short("l")
+                .long("language-type")
                 .default_value("")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("output_format")
+                .help("Output metrics as different formats")
+                .short("O")
+                .long("--output-format")
+                .possible_values(Format::all())
                 .takes_value(true),
         )
         .arg(
@@ -416,7 +439,7 @@ fn main() {
         None
     };
     let metrics = matches.is_present("metrics");
-    let typ = matches.value_of("type").unwrap();
+    let typ = matches.value_of("language_type").unwrap();
     let preproc_value = matches.value_of("preproc").unwrap();
     let (preproc_lock, preproc) = if !preproc_value.is_empty() {
         let path = PathBuf::from(preproc_value);
@@ -436,6 +459,9 @@ fn main() {
         (None, None)
     };
 
+    let output_format = matches
+        .value_of("output_format")
+        .map(parse_or_exit::<Format>);
     let pretty = matches.is_present("pretty");
     let output = matches.value_of("output").unwrap().to_string();
     let output_is_dir = PathBuf::from(output.clone()).is_dir();
@@ -475,6 +501,7 @@ fn main() {
         count_filter,
         function,
         metrics,
+        output_format,
         pretty,
         output: output.clone(),
         line_start,
