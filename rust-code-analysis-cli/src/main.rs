@@ -329,7 +329,7 @@ fn main() {
             Arg::with_name("output_format")
                 .help("Output metrics as different formats")
                 .short("O")
-                .long("--output-format")
+                .long("output-format")
                 .possible_values(Format::all())
                 .takes_value(true),
         )
