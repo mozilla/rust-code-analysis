@@ -5,8 +5,11 @@
 extern crate lazy_static;
 #[macro_use]
 extern crate serde;
+extern crate serde_cbor;
 #[cfg_attr(test, macro_use)]
 extern crate serde_json;
+extern crate serde_yaml;
+extern crate toml;
 
 #[macro_use]
 mod macros;

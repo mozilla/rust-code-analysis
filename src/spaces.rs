@@ -1,10 +1,6 @@
-use regex::Regex;
-use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
-use std::io::Write;
 use std::path::PathBuf;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
 use tree_sitter::Node;
 
 use crate::checker::Checker;
@@ -16,10 +12,13 @@ use crate::halstead::{self, Halstead};
 use crate::loc::{self, Loc};
 use crate::mi::{self, Mi};
 use crate::nom::{self, Nom};
-use crate::tools::write_file;
+
+use crate::dump_formats::*;
+use crate::dump_metrics::*;
 use crate::traits::*;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum SpaceKind {
     Unknown,
     Function,
@@ -47,32 +46,15 @@ impl fmt::Display for SpaceKind {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct CodeMetrics<'a> {
+    pub nargs: fn_args::Stats,
+    pub nexits: exit::Stats,
     pub cyclomatic: cyclomatic::Stats,
     pub halstead: halstead::Stats<'a>,
     pub loc: loc::Stats,
     pub nom: nom::Stats,
     pub mi: mi::Stats,
-    pub nargs: fn_args::Stats,
-    pub nexits: exit::Stats,
-}
-
-impl<'a> Serialize for CodeMetrics<'a> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("metrics", 3)?;
-        st.serialize_field("cyclomatic", &self.cyclomatic)?;
-        st.serialize_field("halstead", &self.halstead)?;
-        st.serialize_field("loc", &self.loc)?;
-        st.serialize_field("nom", &self.nom)?;
-        st.serialize_field("mi", &self.mi)?;
-        st.serialize_field("nargs", &self.nargs)?;
-        st.serialize_field("nexits", &self.nexits)?;
-        st.end()
-    }
 }
 
 impl<'a> Default for CodeMetrics<'a> {
@@ -91,13 +73,13 @@ impl<'a> Default for CodeMetrics<'a> {
 
 impl<'a> fmt::Display for CodeMetrics<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "{}", self.nargs)?;
+        writeln!(f, "{}", self.nexits)?;
         writeln!(f, "{}", self.cyclomatic)?;
         writeln!(f, "{}", self.halstead)?;
         writeln!(f, "{}", self.loc)?;
         writeln!(f, "{}", self.nom)?;
-        writeln!(f, "{}", self.mi)?;
-        writeln!(f, "{}", self.nargs)?;
-        write!(f, "{}", self.nexits)
+        write!(f, "{}", self.mi)
     }
 }
 
@@ -113,30 +95,14 @@ impl<'a> CodeMetrics<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct FuncSpace<'a> {
     pub name: Option<&'a str>,
-    pub spaces: Vec<FuncSpace<'a>>,
-    pub metrics: CodeMetrics<'a>,
-    pub kind: SpaceKind,
     pub start_line: usize,
     pub end_line: usize,
-}
-
-impl<'a> Serialize for FuncSpace<'a> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("metrics", 5)?;
-        st.serialize_field("name", self.name.map_or("", |name| name))?;
-        st.serialize_field("start_line", &self.start_line)?;
-        st.serialize_field("end_line", &self.end_line)?;
-        st.serialize_field("metrics", &self.metrics)?;
-        st.serialize_field("kind", &format!("{}", self.kind))?;
-        st.serialize_field("spaces", &self.spaces)?;
-        st.end()
-    }
+    pub kind: SpaceKind,
+    pub spaces: Vec<FuncSpace<'a>>,
+    pub metrics: CodeMetrics<'a>,
 }
 
 impl<'a> FuncSpace<'a> {
@@ -159,281 +125,6 @@ impl<'a> FuncSpace<'a> {
             start_line: start_position,
             end_line: end_position,
         }
-    }
-
-    fn dump_root(&self) -> std::io::Result<()> {
-        let stdout = StandardStream::stdout(ColorChoice::Always);
-        let mut stdout = stdout.lock();
-        Self::dump_space(&self, "", true, &mut stdout)?;
-        color!(stdout, White);
-
-        Ok(())
-    }
-
-    fn dump_space(
-        space: &FuncSpace,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Yellow, true);
-        write!(stdout, "{}: ", space.kind)?;
-
-        color!(stdout, Cyan, true);
-        write!(stdout, "{}", space.name.map_or("", |name| name))?;
-
-        color!(stdout, Red, true);
-        writeln!(stdout, " (@{})", space.start_line)?;
-
-        let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_metrics(&space.metrics, &prefix, space.spaces.is_empty(), stdout)?;
-
-        if let Some((last, spaces)) = space.spaces.split_last() {
-            for space in spaces {
-                Self::dump_space(space, &prefix, false, stdout)?;
-            }
-            Self::dump_space(last, &prefix, true, stdout)?;
-        }
-
-        Ok(())
-    }
-
-    fn dump_metrics(
-        metrics: &CodeMetrics,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Yellow, true);
-        writeln!(stdout, "metrics")?;
-
-        let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout)?;
-        Self::dump_nargs(&metrics.nargs, &prefix, false, stdout)?;
-        Self::dump_nexits(&metrics.nexits, &prefix, false, stdout)?;
-        Self::dump_halstead(&metrics.halstead, &prefix, false, stdout)?;
-        Self::dump_loc(&metrics.loc, &prefix, false, stdout)?;
-        Self::dump_nom(&metrics.nom, &prefix, false, stdout)?;
-        Self::dump_mi(&metrics.mi, &prefix, true, stdout)
-    }
-
-    fn dump_cyclomatic(
-        stats: &cyclomatic::Stats,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let pref = if last { "`- " } else { "|- " };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        write!(stdout, "cyclomatic: ")?;
-
-        color!(stdout, White);
-        writeln!(stdout, "{}", stats.cyclomatic())
-    }
-
-    fn dump_halstead(
-        stats: &halstead::Stats,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        writeln!(stdout, "halstead")?;
-
-        let prefix = format!("{}{}", prefix, pref_child);
-
-        Self::dump_value("n1", stats.u_operators(), &prefix, false, stdout)?;
-        Self::dump_value("N1", stats.operators(), &prefix, false, stdout)?;
-        Self::dump_value("n2", stats.u_operands(), &prefix, false, stdout)?;
-        Self::dump_value("N2", stats.operands(), &prefix, false, stdout)?;
-
-        Self::dump_value("length", stats.length(), &prefix, false, stdout)?;
-        Self::dump_value(
-            "estimated program length",
-            stats.estimated_program_length(),
-            &prefix,
-            false,
-            stdout,
-        )?;
-        Self::dump_value("purity ratio", stats.purity_ratio(), &prefix, false, stdout)?;
-        Self::dump_value("vocabulary", stats.vocabulary(), &prefix, false, stdout)?;
-        Self::dump_value("volume", stats.volume(), &prefix, false, stdout)?;
-        Self::dump_value("difficulty", stats.difficulty(), &prefix, false, stdout)?;
-        Self::dump_value("level", stats.level(), &prefix, false, stdout)?;
-        Self::dump_value("effort", stats.effort(), &prefix, false, stdout)?;
-        Self::dump_value("time", stats.time(), &prefix, false, stdout)?;
-        Self::dump_value("bugs", stats.bugs(), &prefix, true, stdout)
-    }
-
-    fn dump_loc(
-        stats: &loc::Stats,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        writeln!(stdout, "loc")?;
-
-        let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
-        Self::dump_value("ploc", stats.ploc(), &prefix, false, stdout)?;
-        Self::dump_value("lloc", stats.lloc(), &prefix, false, stdout)?;
-        Self::dump_value("cloc", stats.cloc(), &prefix, false, stdout)?;
-        Self::dump_value("blank", stats.blank(), &prefix, true, stdout)
-    }
-
-    fn dump_nom(
-        stats: &nom::Stats,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        writeln!(stdout, "nom")?;
-
-        let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_value("functions", stats.functions(), &prefix, false, stdout)?;
-        Self::dump_value("closures", stats.closures(), &prefix, false, stdout)?;
-        Self::dump_value("total", stats.total(), &prefix, true, stdout)
-    }
-
-    fn dump_mi(
-        stats: &mi::Stats,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        writeln!(stdout, "mi")?;
-
-        let prefix = format!("{}{}", prefix, pref_child);
-        Self::dump_value("mi_original", stats.mi_original(), &prefix, false, stdout)?;
-        Self::dump_value("mi_sei", stats.mi_sei(), &prefix, false, stdout)?;
-        Self::dump_value(
-            "mi_visual_studio",
-            stats.mi_visual_studio(),
-            &prefix,
-            true,
-            stdout,
-        )
-    }
-
-    fn dump_nargs(
-        stats: &fn_args::Stats,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let pref = if last { "`- " } else { "|- " };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        write!(stdout, "n_args: ")?;
-
-        color!(stdout, White);
-        writeln!(stdout, "{}", stats.n_args())
-    }
-
-    fn dump_nexits(
-        stats: &exit::Stats,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let pref = if last { "`- " } else { "|- " };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        write!(stdout, "n_exits: ")?;
-
-        color!(stdout, White);
-        writeln!(stdout, "{}", stats.exit())
-    }
-
-    fn dump_value(
-        name: &str,
-        val: f64,
-        prefix: &str,
-        last: bool,
-        stdout: &mut StandardStreamLock,
-    ) -> std::io::Result<()> {
-        let pref = if last { "`- " } else { "|- " };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Magenta, true);
-        write!(stdout, "{}: ", name)?;
-
-        color!(stdout, White);
-        writeln!(stdout, "{}", val)
-    }
-
-    fn dump_json(
-        &self,
-        path: &PathBuf,
-        output_path: &PathBuf,
-        pretty: bool,
-    ) -> std::io::Result<()> {
-        let json_data = if pretty {
-            serde_json::to_string_pretty(&self).unwrap()
-        } else {
-            serde_json::to_string(&self).unwrap()
-        };
-
-        let mut file = path.as_path().file_name().unwrap().to_os_string();
-        file.push(".json");
-
-        let mut json_path = output_path.clone();
-        json_path.push(file);
-
-        if json_path.as_path().exists() {
-            let mut new_filename = path.to_str().unwrap().to_string();
-            let re = Regex::new(r"[\\:/]").unwrap();
-            new_filename = re.replace_all(&new_filename, "_").to_string();
-            new_filename.push_str(".json");
-            json_path.pop();
-            json_path.push(new_filename);
-        }
-        write_file(&json_path, json_data.as_bytes())
     }
 }
 
@@ -519,6 +210,7 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
 
 pub struct MetricsCfg {
     pub path: PathBuf,
+    pub output_format: Option<Format>,
     pub pretty: bool,
     pub output_path: Option<PathBuf>,
 }
@@ -531,10 +223,16 @@ impl Callback for Metrics {
 
     fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {
-            if let Some(output_path) = cfg.output_path {
-                space.dump_json(&cfg.path, &output_path, cfg.pretty)
+            if let Some(output_format) = cfg.output_format {
+                dump_formats(
+                    &space,
+                    &cfg.path,
+                    &cfg.output_path,
+                    output_format,
+                    cfg.pretty,
+                )
             } else {
-                space.dump_root()
+                dump_root(&space)
             }
         } else {
             Ok(())
