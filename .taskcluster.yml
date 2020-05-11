@@ -220,11 +220,11 @@ tasks:
                             --artifacts=$WINDOWS_BIN:public/$WINDOWS_BIN &&
                    apk add --no-cache zip &&
                    strip $WINDOWS_BIN &&
-                   zip -9 rust-code-analysis-windows-x86_64.zip $WINDOWS_BIN"
+                   zip -9 rust-code-analysis-win-x86_64.zip $WINDOWS_BIN"
             artifacts:
-              public/rust-code-analysis-windows-x86_64.zip:
+              public/rust-code-analysis-win-x86_64.zip:
                 expires: {$fromNow: '2 weeks'}
-                path: /rust-code-analysis-windows-x86_64.zip
+                path: /rust-code-analysis-win-x86_64.zip
                 type: file
           metadata:
             name: strip rust-code-analysis windows binary
@@ -237,7 +237,7 @@ tasks:
           $let:
             version: {$eval: 'head_branch[10:]'}
             linux_artifact: rust-code-analysis-linux-x86_64.tar.gz
-            windows_artifact: rust-code-analysis-windows-x86_64.zip
+            windows_artifact: rust-code-analysis-win-x86_64.zip
           in:
             taskId: {$eval: as_slugid("deploy_release")}
             dependencies:
