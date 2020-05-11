@@ -220,7 +220,7 @@ tasks:
                             --artifacts=$WINDOWS_BIN:public/$WINDOWS_BIN &&
                    apk add --no-cache zip &&
                    strip $WINDOWS_BIN &&
-                   zip -9 rust-code-analysis-win-x86_64.zip $WINDOWS_BIN"
+                   zip -9 /rust-code-analysis-win-x86_64.zip $WINDOWS_BIN"
             artifacts:
               public/rust-code-analysis-win-x86_64.zip:
                 expires: {$fromNow: '2 weeks'}
