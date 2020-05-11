@@ -236,6 +236,8 @@ tasks:
         then:
           $let:
             version: {$eval: 'head_branch[10:]'}
+            linux_artifact: rust-code-analysis-linux-x86_64.tar.gz
+            windows_artifact: rust-code-analysis-windows-x86_64.zip
           in:
             taskId: {$eval: as_slugid("deploy_release")}
             dependencies:
@@ -253,16 +255,14 @@ tasks:
               maxRunTime: 3600
               image: "mozilla/taskboot:0.2.5"
               env:
-                LINUX_ARTIFACT: rust-code-analysis-linux-x86_64.tar.gz
-                WINDOWS_ARTIFACT: rust-code-analysis-windows-x86_64.zip
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
                 - taskboot
                 - github-release
                 - mozilla/rust-code-analysis
                 - "${version}"
-                - "--asset=$LINUX_ARTIFACT:public/$LINUX_ARTIFACT"
-                - "--asset=$WINDOWS_ARTIFACT:public/$WINDOWS_ARTIFACT"
+                - "--asset=${linux_artifact}:public/${linux_artifact}"
+                - "--asset=${windows_artifact}:public/${windows_artifact}"
             metadata:
               name: "rust-code-analysis release publication ${version}"
               description: rust-code-analysis release publication on Github
