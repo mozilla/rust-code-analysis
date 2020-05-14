@@ -1,0 +1,20 @@
+[book]
+title = "Rust-Code-Analysis Documentation"
+description = "This book documents rust-code-analysis"
+authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
+language = "en"
+
+[output.html]
+mathjax-support = true
+
+[output.html.playpen]
+line-numbers = true
+
+[output.html.search]
+limit-results = 25
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 2
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
