@@ -261,8 +261,8 @@ tasks:
                 - github-release
                 - mozilla/rust-code-analysis
                 - "${version}"
-                - "--asset=${linux_artifact}:public/${linux_artifact}"
-                - "--asset=${windows_artifact}:public/${windows_artifact}"
+                - "--asset ${linux_artifact}:public/${linux_artifact} \
+                           ${windows_artifact}:public/${windows_artifact}"
             metadata:
               name: "rust-code-analysis release publication ${version}"
               description: rust-code-analysis release publication on Github
