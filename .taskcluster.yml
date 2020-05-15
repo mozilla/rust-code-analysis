@@ -257,12 +257,9 @@ tasks:
               env:
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
-                - taskboot
-                - github-release
-                - mozilla/rust-code-analysis
-                - "${version}"
-                - "--asset ${linux_artifact}:public/${linux_artifact} \
-                           ${windows_artifact}:public/${windows_artifact}"
+                - "/bin/sh"
+                - "-cx"
+                - "taskboot github-release mozilla/rust-code-analysis ${version} --asset ${linux_artifact}:public/${linux_artifact} ${windows_artifact}:public/${windows_artifact}"
             metadata:
               name: "rust-code-analysis release publication ${version}"
               description: rust-code-analysis release publication on Github
