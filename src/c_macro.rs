@@ -14,11 +14,14 @@ fn is_identifier_starter(c: u8) -> bool {
 }
 
 #[inline(always)]
-fn is_macro(mac: &str, macros: &HashSet<String>) -> bool {
+fn is_macro<S: ::std::hash::BuildHasher>(mac: &str, macros: &HashSet<String, S>) -> bool {
     macros.contains(mac) || PREDEFINED_MACROS.contains(mac)
 }
 
-pub fn replace(code: &[u8], macros: &HashSet<String>) -> Option<Vec<u8>> {
+pub fn replace<S: ::std::hash::BuildHasher>(
+    code: &[u8],
+    macros: &HashSet<String, S>,
+) -> Option<Vec<u8>> {
     let mut new_code = Vec::with_capacity(code.len());
     let mut code_start = 0;
     let mut k_start = 0;

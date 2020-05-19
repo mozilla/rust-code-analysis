@@ -34,7 +34,10 @@ impl PreprocFile {
     }
 }
 
-pub fn get_macros(file: &PathBuf, files: &HashMap<PathBuf, PreprocFile>) -> HashSet<String> {
+pub fn get_macros<S: ::std::hash::BuildHasher>(
+    file: &PathBuf,
+    files: &HashMap<PathBuf, PreprocFile, S>,
+) -> HashSet<String> {
     let mut macros = HashSet::new();
     if let Some(pf) = files.get(file) {
         for m in pf.macros.iter() {
@@ -51,9 +54,9 @@ pub fn get_macros(file: &PathBuf, files: &HashMap<PathBuf, PreprocFile>) -> Hash
     macros
 }
 
-pub fn fix_includes(
-    files: &mut HashMap<PathBuf, PreprocFile>,
-    all_files: &HashMap<String, Vec<PathBuf>>,
+pub fn fix_includes<S: ::std::hash::BuildHasher>(
+    files: &mut HashMap<PathBuf, PreprocFile, S>,
+    all_files: &HashMap<String, Vec<PathBuf>, S>,
 ) {
     let mut nodes: HashMap<PathBuf, NodeIndex> = HashMap::new();
     // Since we'll remove strong connected components we need to have a stable graph

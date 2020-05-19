@@ -1,5 +1,3 @@
-#![allow(clippy::implicit_hasher)]
-
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
