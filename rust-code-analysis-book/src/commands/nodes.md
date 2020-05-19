@@ -20,6 +20,8 @@ The `-f` option instead searches all nodes of a certain type.
 In the case above, we are looking for all the erroneous nodes present in the
 code.
 
+## Count Errors
+
 It is also possible to count the number of nodes of a certain type using the
 `--count` option:
 
