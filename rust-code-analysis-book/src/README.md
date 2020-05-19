@@ -50,7 +50,7 @@ Below you can find the list of programming languages parsed by
 - **NEXITS**: it counts the number of possible exit points from a method/function.
 - **NARGS**: it counts the number of arguments of a function/method.
 
-The metrics above are **NOT** implemented for C#, CSS, Go, HTML, and Java
+The metrics above are still **NOT** implemented for C#, CSS, Go, HTML, and Java
 languages.
 
 ## Supported platforms
