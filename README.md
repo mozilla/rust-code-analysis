@@ -2,6 +2,9 @@
 
 [![Task Status](https://community-tc.services.mozilla.com/api/github/v1/repository/mozilla/rust-code-analysis/master/badge.svg)](https://community-tc.services.mozilla.com/api/github/v1/repository/mozilla/rust-code-analysis/master/latest)
 [![codecov](https://codecov.io/gh/mozilla/rust-code-analysis/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/rust-code-analysis)
+<a href="https://chat.mozilla.org/#/room/#rust-code-analysis:mozilla.org" target="_blank">
+   <img src="https://img.shields.io/badge/chat%20on%20[m]-%23rca%3Amozilla.org-blue">
+</a>
 
 **rust-code-analysis** is a Rust library to analyze the source code of many different programming languages. It is based on a parser generator tool and an incremental parsing library called [Tree Sitter](https://github.com/tree-sitter/tree-sitter).
 
