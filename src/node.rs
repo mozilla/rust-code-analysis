@@ -1,22 +1,40 @@
+use tree_sitter::Node as OtherNode;
+
 use crate::traits::Search;
-use tree_sitter::Node;
+
+#[derive(Clone, Copy)]
+pub struct Node<'a>(OtherNode<'a>);
+
+impl<'a> Node<'a> {
+    pub fn has_error(&self) -> bool {
+        self.0.has_error()
+    }
+
+    pub(crate) fn new(node: OtherNode<'a>) -> Self {
+        Node(node)
+    }
+
+    pub(crate) fn object(&self) -> OtherNode<'a> {
+        self.0
+    }
+}
 
 impl<'a> Search<'a> for Node<'a> {
     fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
-        let mut cursor = self.walk();
+        let mut cursor = self.0.walk();
         let mut stack = Vec::new();
         let mut children = Vec::new();
 
         stack.push(*self);
 
         while let Some(node) = stack.pop() {
-            if pred(node.kind_id()) {
+            if pred(node.0.kind_id()) {
                 return Some(node);
             }
-            cursor.reset(node);
+            cursor.reset(node.0);
             if cursor.goto_first_child() {
                 loop {
-                    children.push(cursor.node());
+                    children.push(Node::new(cursor.node()));
                     if !cursor.goto_next_sibling() {
                         break;
                     }
@@ -31,7 +49,7 @@ impl<'a> Search<'a> for Node<'a> {
     }
 
     fn act_on_node(&self, action: &mut dyn FnMut(&Node<'a>)) {
-        let mut cursor = self.walk();
+        let mut cursor = self.0.walk();
         let mut stack = Vec::new();
         let mut children = Vec::new();
 
@@ -39,10 +57,10 @@ impl<'a> Search<'a> for Node<'a> {
 
         while let Some(node) = stack.pop() {
             action(&node);
-            cursor.reset(node);
+            cursor.reset(node.0);
             if cursor.goto_first_child() {
                 loop {
-                    children.push(cursor.node());
+                    children.push(Node::new(cursor.node()));
                     if !cursor.goto_next_sibling() {
                         break;
                     }
@@ -55,19 +73,19 @@ impl<'a> Search<'a> for Node<'a> {
     }
 
     fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
-        let mut cursor = self.walk();
-        for child in self.children(&mut cursor) {
+        let mut cursor = self.0.walk();
+        for child in self.0.children(&mut cursor) {
             if pred(child.kind_id()) {
-                return Some(child);
+                return Some(Node::new(child));
             }
         }
         None
     }
 
     fn act_on_child(&self, action: &mut dyn FnMut(&Node<'a>)) {
-        let mut cursor = self.walk();
-        for child in self.children(&mut cursor) {
-            action(&child);
+        let mut cursor = self.0.walk();
+        for child in self.0.children(&mut cursor) {
+            action(&Node::new(child));
         }
     }
 }
