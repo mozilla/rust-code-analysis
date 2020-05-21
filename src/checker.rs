@@ -1,6 +1,5 @@
 use aho_corasick::AhoCorasick;
 use regex::bytes::Regex;
-use tree_sitter::Node;
 
 use crate::*;
 
@@ -19,7 +18,7 @@ pub trait Checker {
     fn is_non_arg(node: &Node) -> bool;
 
     fn is_error(node: &Node) -> bool {
-        node.is_error()
+        node.object().is_error()
     }
 }
 
@@ -44,7 +43,7 @@ impl Checker for CcommentCode {
         lazy_static! {
             static ref AC: AhoCorasick = AhoCorasick::new(vec![b"<div rustbindgen"]);
         }
-        let code = &code[node.start_byte()..node.end_byte()];
+        let code = &code[node.object().start_byte()..node.object().end_byte()];
         AC.is_match(code)
     }
 }
@@ -79,7 +78,7 @@ impl Checker for CppCode {
         lazy_static! {
             static ref AC: AhoCorasick = AhoCorasick::new(vec![b"<div rustbindgen"]);
         }
-        let code = &code[node.start_byte()..node.end_byte()];
+        let code = &code[node.object().start_byte()..node.object().end_byte()];
         AC.is_match(code)
     }
     mk_checker!(is_non_arg, LPAREN, LPAREN2, COMMA, RPAREN);
@@ -117,7 +116,8 @@ impl Checker for PythonCode {
             // comment containing coding info are useful
             static ref RE: Regex = Regex::new(r"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)").unwrap();
         }
-        node.start_position().row <= 1 && RE.is_match(&code[node.start_byte()..node.end_byte()])
+        node.object().start_position().row <= 1
+            && RE.is_match(&code[node.object().start_byte()..node.object().end_byte()])
     }
 
     mk_checker!(is_string, String, ConcatenatedString);
@@ -286,13 +286,13 @@ impl Checker for RustCode {
     mk_checker!(is_comment, LineComment, BlockComment);
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        if let Some(parent) = node.parent() {
+        if let Some(parent) = node.object().parent() {
             if parent.kind_id() == Rust::TokenTree {
                 // A comment could be a macro token
                 return true;
             }
         }
-        let code = &code[node.start_byte()..node.end_byte()];
+        let code = &code[node.object().start_byte()..node.object().end_byte()];
         code.starts_with(b"/// cbindgen:")
     }
 

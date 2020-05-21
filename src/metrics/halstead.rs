@@ -2,7 +2,6 @@ use fxhash::FxHashMap;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
-use tree_sitter::Node;
 
 use crate::checker::Checker;
 use crate::getter::Getter;
@@ -190,13 +189,13 @@ pub enum HalsteadType {
 
 #[inline(always)]
 fn get_id<'a>(node: &Node<'a>, code: &'a [u8]) -> &'a [u8] {
-    &code[node.start_byte()..node.end_byte()]
+    &code[node.object().start_byte()..node.object().end_byte()]
 }
 
 #[inline(always)]
 fn compute_halstead<'a, T: Getter>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
     match T::get_op_type(&node) {
-        HalsteadType::Operator => *stats.operators.entry(node.kind_id()).or_insert(0) += 1,
+        HalsteadType::Operator => *stats.operators.entry(node.object().kind_id()).or_insert(0) += 1,
         HalsteadType::Operand => *stats.operands.entry(get_id(node, code)).or_insert(0) += 1,
         _ => {}
     }

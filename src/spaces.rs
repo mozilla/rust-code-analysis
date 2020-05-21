@@ -1,9 +1,10 @@
 use serde::Serialize;
 use std::fmt;
 use std::path::PathBuf;
-use tree_sitter::Node;
 
 use crate::checker::Checker;
+use crate::node::Node;
+
 use crate::cyclomatic::{self, Cyclomatic};
 use crate::exit::{self, Exit};
 use crate::fn_args::{self, NArgs};
@@ -136,13 +137,19 @@ impl<'a> FuncSpace<'a> {
     fn new<T: Getter>(node: &Node<'a>, code: &'a [u8], kind: SpaceKind) -> Self {
         let (start_position, end_position) = match kind {
             SpaceKind::Unit => {
-                if node.child_count() == 0 {
+                if node.object().child_count() == 0 {
                     (0, 0)
                 } else {
-                    (node.start_position().row + 1, node.end_position().row)
+                    (
+                        node.object().start_position().row + 1,
+                        node.object().end_position().row,
+                    )
                 }
             }
-            _ => (node.start_position().row + 1, node.end_position().row + 1),
+            _ => (
+                node.object().start_position().row + 1,
+                node.object().end_position().row + 1,
+            ),
         };
         Self {
             name: T::get_func_space_name(&node, code),
@@ -193,7 +200,7 @@ fn finalize<'a>(space_stack: &mut Vec<FuncSpace<'a>>, diff_level: usize) {
 pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace<'a>> {
     let code = parser.get_code();
     let node = parser.get_root();
-    let mut cursor = node.walk();
+    let mut cursor = node.object().walk();
     let mut stack = Vec::new();
     let mut children = Vec::new();
     let mut space_stack: Vec<FuncSpace> = Vec::new();
@@ -236,10 +243,10 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<F
             T::Exit::compute(&node, &mut last.metrics.nexits);
         }
 
-        cursor.reset(node);
+        cursor.reset(node.object());
         if cursor.goto_first_child() {
             loop {
-                children.push((cursor.node(), new_level));
+                children.push((Node::new(cursor.node()), new_level));
                 if !cursor.goto_next_sibling() {
                     break;
                 }
