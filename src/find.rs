@@ -5,7 +5,7 @@ use crate::dump::*;
 use crate::traits::*;
 
 /// Finds the types of nodes specified in the input slice.
-pub fn find<'a, T: TSParserTrait>(parser: &'a T, filters: &[String]) -> Option<Vec<Node<'a>>> {
+pub fn find<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> Option<Vec<Node<'a>>> {
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
     let mut cursor = node.walk();
@@ -62,7 +62,7 @@ impl Callback for Find {
     type Res = std::io::Result<()>;
     type Cfg = FindCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(good) = find(parser, &cfg.filters) {
             if !good.is_empty() {
                 println!("In file {}", cfg.path.to_str().unwrap());

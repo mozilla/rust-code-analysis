@@ -13,8 +13,8 @@ use crate::langs::*;
 use crate::loc::Loc;
 use crate::mi::Mi;
 use crate::nom::Nom;
+use crate::parser::Filter;
 use crate::preproc::PreprocResults;
-use crate::ts_parser::Filter;
 
 /// A trait for callback functions.
 ///
@@ -27,7 +27,7 @@ pub trait Callback {
     type Cfg;
 
     /// Calls a function inside the library and returns its value
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
 }
 
 #[doc(hidden)]
@@ -43,7 +43,7 @@ pub trait TSLanguage {
 }
 
 #[doc(hidden)]
-pub trait TSParserTrait {
+pub trait ParserTrait {
     type Checker: Alterator + Checker;
     type Getter: Getter;
     type Cyclomatic: Cyclomatic;

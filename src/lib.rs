@@ -105,8 +105,8 @@ pub use crate::tools::*;
 mod traits;
 pub use crate::traits::*;
 
-mod ts_parser;
-pub(crate) use crate::ts_parser::*;
+mod parser;
+pub use crate::parser::*;
 
 mod comment_rm;
 pub use crate::comment_rm::*;

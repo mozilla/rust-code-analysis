@@ -77,7 +77,7 @@ impl AstNode {
     }
 }
 
-fn build<T: TSParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNode> {
+fn build<T: ParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNode> {
     let code = parser.get_code();
     let root = parser.get_root();
     let mut cursor = root.walk();
@@ -142,7 +142,7 @@ impl Callback for AstCallback {
     type Res = AstResponse;
     type Cfg = AstCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         AstResponse {
             id: cfg.id,
             root: build(parser, cfg.span, cfg.comment),

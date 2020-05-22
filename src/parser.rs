@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tree_sitter::{Node, Parser, Tree};
+use tree_sitter::{Node, Parser as TSParser, Tree};
 
 use crate::alterator::Alterator;
 use crate::c_macro;
@@ -11,7 +11,7 @@ use crate::langs::*;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
-pub struct TSParser<T: TSLanguage + Checker + Getter + Alterator + CodeMetricsT> {
+pub struct Parser<T: TSLanguage + Checker + Getter + Alterator + CodeMetricsT> {
     code: Vec<u8>,
     tree: Tree,
     phantom: PhantomData<T>,
@@ -62,8 +62,8 @@ fn get_fake_code<T: TSLanguage>(
     }
 }
 
-impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> TSParserTrait
-    for TSParser<T>
+impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> ParserTrait
+    for Parser<T>
 {
     type Checker = T;
     type Getter = T;
@@ -76,7 +76,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> TSPa
     type Exit = T;
 
     fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self {
-        let mut parser = Parser::new();
+        let mut parser = TSParser::new();
         parser.set_language(T::get_language()).unwrap();
         let fake_code = get_fake_code::<T>(&code, path, pr);
         /*let tree = if let Some(fake) = fake_code {
