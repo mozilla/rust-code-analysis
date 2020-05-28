@@ -1,8 +1,5 @@
 use tree_sitter::Node;
 
-use crate::checker::Checker;
-use crate::web::ast::{AstNode, Span};
-
 use crate::*;
 
 pub trait Alterator

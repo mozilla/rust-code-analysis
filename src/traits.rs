@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tree_sitter::{Language, Node};
 
+use crate::alterator::Alterator;
 use crate::checker::Checker;
 use crate::cyclomatic::Cyclomatic;
 use crate::exit::Exit;
@@ -14,7 +15,6 @@ use crate::mi::Mi;
 use crate::nom::Nom;
 use crate::preproc::PreprocResults;
 use crate::ts_parser::Filter;
-use crate::web::alterator::Alterator;
 
 pub trait CodeMetricsT: Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi {}
 

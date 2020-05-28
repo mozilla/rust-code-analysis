@@ -2,8 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
 use std::path::PathBuf;
 
-use crate::spaces::{metrics, FuncSpace};
-use crate::traits::{Callback, TSParserTrait};
+use rust_code_analysis::{metrics, Callback, FuncSpace, TSParserTrait};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WebMetricsPayload {
