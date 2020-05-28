@@ -49,7 +49,7 @@ tasks:
                git -c advice.detachedHead=false checkout ${head_rev} &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
-               cargo test"
+               cargo test --all --verbose --all-features"
         metadata:
           name: rust-code-analysis lint and test
           description: rust-code-analysis lint and test
@@ -80,7 +80,7 @@ tasks:
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
-               cargo test &&
+               cargo test --all --verbose --all-features &&
                zip -0 ccov.zip `find . -name 'rust_code_analysis*.gc*' -print` &&
                ../grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
                bash <(curl -s https://codecov.io/bash) -f lcov.info"
@@ -111,7 +111,7 @@ tasks:
             - git clone --recursive --quiet ${repository}
             - cd rust-code-analysis
             - git -c advice.detachedHead=false checkout ${head_rev}
-            - cargo test --verbose --all-features
+            - cargo test --all --verbose --all-features
           mounts:
             - content:
                 url: https://win.rustup.rs/
