@@ -67,7 +67,8 @@ tasks:
           env:
             CODECOV_TOKEN: 4df01912-087e-489a-be28-25aa911cb9d2
             CARGO_INCREMENTAL: 0
-            RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests
+            RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort
+            RUSTDOCFLAGS: -Cpanic=abort
           command:
             - "/bin/bash"
             - "-cx"
