@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
 
-use crate::function::{function, FunctionSpan};
-use crate::traits::{Callback, TSParserTrait};
+use rust_code_analysis::{function, Callback, FunctionSpan, TSParserTrait};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WebFunctionPayload {

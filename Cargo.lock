@@ -1463,13 +1463,9 @@ dependencies = [
 name = "rust-code-analysis"
 version = "0.0.16"
 dependencies = [
- "actix-rt",
- "actix-web",
  "aho-corasick",
- "bytes",
  "cc",
  "enum-iterator",
- "futures",
  "fxhash",
  "json",
  "lazy_static",
@@ -1493,11 +1489,17 @@ dependencies = [
 name = "rust-code-analysis-cli"
 version = "0.0.1"
 dependencies = [
+ "actix-rt",
+ "actix-web",
+ "bytes",
  "clap",
  "crossbeam",
+ "futures",
  "globset",
  "num_cpus",
+ "pretty_assertions",
  "rust-code-analysis",
+ "serde",
  "serde_json",
  "walkdir",
 ]

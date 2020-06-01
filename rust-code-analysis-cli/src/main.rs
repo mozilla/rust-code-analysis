@@ -2,7 +2,12 @@
 extern crate clap;
 extern crate crossbeam;
 extern crate num_cpus;
+#[macro_use]
+extern crate serde;
+#[cfg_attr(test, macro_use)]
 extern crate serde_json;
+
+mod web;
 
 use clap::{App, Arg};
 use crossbeam::channel::{Receiver, Sender};
@@ -16,8 +21,8 @@ use std::sync::{Arc, Mutex};
 use std::{process, thread};
 use walkdir::{DirEntry, WalkDir};
 
-use rust_code_analysis::web::server;
 use rust_code_analysis::*;
+use web::server;
 
 #[derive(Debug)]
 struct Config {

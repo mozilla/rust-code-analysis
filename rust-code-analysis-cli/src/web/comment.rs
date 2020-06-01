@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::comment_rm::rm_comments;
-use crate::traits::{Callback, TSParserTrait};
+use rust_code_analysis::{rm_comments, Callback, TSParserTrait};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WebCommentPayload {

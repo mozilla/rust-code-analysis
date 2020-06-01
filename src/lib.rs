@@ -6,17 +6,14 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde;
 extern crate serde_cbor;
-#[cfg_attr(test, macro_use)]
 extern crate serde_json;
 extern crate serde_yaml;
 extern crate toml;
 
 pub(crate) mod c_macro;
-pub mod web;
 
 #[macro_use]
 mod asttools;
-mod checker;
 
 #[macro_use]
 mod macros;
@@ -30,6 +27,9 @@ pub(crate) use metrics::*;
 
 mod languages;
 pub(crate) use languages::*;
+
+mod checker;
+pub(crate) use checker::*;
 
 mod output;
 pub use output::*;
@@ -45,6 +45,12 @@ pub use crate::find::*;
 
 pub mod function;
 pub use crate::function::*;
+
+mod alterator;
+pub(crate) use crate::alterator::*;
+
+mod ast;
+pub use crate::ast::*;
 
 pub mod count;
 pub use crate::count::*;

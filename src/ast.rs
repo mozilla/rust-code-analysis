@@ -1,8 +1,7 @@
 use serde::ser::{SerializeStruct, Serializer};
 use serde::{Deserialize, Serialize};
 
-use super::alterator::Alterator;
-use crate::traits::{Callback, TSParserTrait};
+use crate::*;
 
 pub type Span = Option<(usize, usize, usize, usize)>;
 

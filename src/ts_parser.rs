@@ -3,13 +3,13 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tree_sitter::{Node, Parser, Tree};
 
+use crate::alterator::Alterator;
 use crate::c_macro;
 use crate::checker::*;
 use crate::getter::Getter;
 use crate::langs::*;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
-use crate::web::alterator::Alterator;
 
 pub struct TSParser<T: TSLanguage + Checker + Getter + Alterator + CodeMetricsT> {
     code: Vec<u8>,

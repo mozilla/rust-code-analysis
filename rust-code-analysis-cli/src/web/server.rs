@@ -8,13 +8,11 @@ use actix_web::{
 use futures::StreamExt;
 use std::path::PathBuf;
 
-use super::ast::{AstCallback, AstCfg, AstPayload};
 use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebCommentPayload};
 use super::function::{WebFunctionCallback, WebFunctionCfg, WebFunctionInfo, WebFunctionPayload};
 use super::metrics::{WebMetricsCallback, WebMetricsCfg, WebMetricsInfo, WebMetricsPayload};
-use crate::langs::action;
-use crate::tools::guess_language;
-use crate::LANG;
+
+use rust_code_analysis::{action, guess_language, AstCallback, AstCfg, AstPayload, LANG};
 
 const INVALID_LANGUAGE: &str = "The file extension doesn't correspond to a valid language";
 
