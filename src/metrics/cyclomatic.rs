@@ -6,6 +6,7 @@ use tree_sitter::Node;
 use crate::checker::Checker;
 use crate::*;
 
+/// The `Cyclomatic` metric.
 #[derive(Debug)]
 pub struct Stats {
     cyclomatic: f64,
@@ -37,16 +38,19 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
+    /// Merges a second `Cyclomatic` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
         self.cyclomatic += other.cyclomatic;
         self.n += other.n;
     }
 
+    /// Returns the `Cyclomatic` metric value
     pub fn cyclomatic(&self) -> f64 {
         self.cyclomatic / self.n as f64
     }
 }
 
+#[doc(hidden)]
 pub trait Cyclomatic
 where
     Self: Checker,

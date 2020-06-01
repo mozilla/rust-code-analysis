@@ -6,6 +6,10 @@ use tree_sitter::Node;
 use crate::checker::Checker;
 use crate::*;
 
+/// The `NArgs` metric.
+///
+/// This metric counts the number of arguments
+/// of a function/method.
 #[derive(Debug)]
 pub struct Stats {
     n_args: usize,
@@ -33,13 +37,16 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
+    #[doc(hidden)]
     pub fn merge(&mut self, _other: &Stats) {}
 
+    /// Returns the `NArgs` metric value
     pub fn n_args(&self) -> f64 {
         self.n_args as f64
     }
 }
 
+#[doc(hidden)]
 pub trait NArgs
 where
     Self: Checker,

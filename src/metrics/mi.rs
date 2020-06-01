@@ -11,6 +11,7 @@ use crate::checker::Checker;
 
 use crate::*;
 
+/// The `Mi` metric.
 #[derive(Default, Debug)]
 pub struct Stats {
     halstead_length: f64,
@@ -47,18 +48,22 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
+    /// Merges a second `Mi` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
         self.halstead_length += other.halstead_length;
         self.halstead_vocabulary += other.halstead_vocabulary;
         self.halstead_volume = self.halstead_length * self.halstead_vocabulary.log2();
     }
 
+    /// Returns the `Mi` metric calculated using the original formula
     #[inline(always)]
     pub fn mi_original(&self) -> f64 {
         // http://www.projectcodemeter.com/cost_estimation/help/GL_maintainability.htm
         171.0 - 5.2 * (self.halstead_volume).ln() - 0.23 * self.cyclomatic - 16.2 * self.sloc.ln()
     }
 
+    /// Returns the `Mi` metric calculated using the derivative formula
+    /// employed by the Software Engineering Insitute (SEI)
     #[inline(always)]
     pub fn mi_sei(&self) -> f64 {
         // http://www.projectcodemeter.com/cost_estimation/help/GL_maintainability.htm
@@ -66,6 +71,8 @@ impl Stats {
             + 50.0 * (self.comments_percentage * 2.4).sqrt().sin()
     }
 
+    /// Returns the `Mi` metric calculated using the derivative formula
+    /// employed by Microsoft Visual Studio
     #[inline(always)]
     pub fn mi_visual_studio(&self) -> f64 {
         // http://www.projectcodemeter.com/cost_estimation/help/GL_maintainability.htm
@@ -77,6 +84,7 @@ impl Stats {
     }
 }
 
+#[doc(hidden)]
 pub trait Mi
 where
     Self: Checker,

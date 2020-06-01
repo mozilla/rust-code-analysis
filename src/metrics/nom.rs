@@ -7,6 +7,7 @@ use crate::checker::Checker;
 
 use crate::*;
 
+/// The `Nom` metric suite.
 #[derive(Default, Debug)]
 pub struct Stats {
     functions: usize,
@@ -41,28 +42,34 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
+    /// Merges a second `Nom` metric suite into the first one
     pub fn merge(&mut self, other: &Stats) {
         self.functions += other.functions;
         self.closures += other.closures;
     }
 
+    /// Counts the number of function definitions in a scope
     #[inline(always)]
     pub fn functions(&self) -> f64 {
         // Only function definitions are considered, not general declarations
         self.functions as f64
     }
 
+    /// Counts the number of closures in a scope
     #[inline(always)]
     pub fn closures(&self) -> f64 {
         self.closures as f64
     }
 
+    /// Returns the total number of function definitions and
+    /// closures in a scope
     #[inline(always)]
     pub fn total(&self) -> f64 {
         self.functions() + self.closures()
     }
 }
 
+#[doc(hidden)]
 pub trait Nom
 where
     Self: Checker,

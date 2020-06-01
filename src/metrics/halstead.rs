@@ -8,10 +8,11 @@ use crate::checker::Checker;
 
 use crate::*;
 
+/// The `Halstead` metric suite.
 #[derive(Default, Debug)]
 pub struct Stats<'a> {
-    pub operators: FxHashMap<u16, u64>,
-    pub operands: FxHashMap<&'a [u8], u64>,
+    operators: FxHashMap<u16, u64>,
+    operands: FxHashMap<&'a [u8], u64>,
 }
 
 impl Serialize for Stats<'_> {
@@ -75,6 +76,7 @@ impl<'a> fmt::Display for Stats<'a> {
 }
 
 impl<'a> Stats<'a> {
+    /// Merges a second `Halstead` metric suite into the first one
     pub fn merge(&mut self, other: &Stats<'a>) {
         for (k, v) in other.operators.iter() {
             *self.operators.entry(*k).or_insert(0) += v;
@@ -84,78 +86,93 @@ impl<'a> Stats<'a> {
         }
     }
 
-    #[inline(always)]
-    pub fn u_operands(&self) -> f64 {
-        self.operands.len() as f64
-    }
-
-    #[inline(always)]
-    pub fn operands(&self) -> f64 {
-        self.operands.values().sum::<u64>() as f64
-    }
-
+    /// Returns `η1`, the number of distinct operators
     #[inline(always)]
     pub fn u_operators(&self) -> f64 {
         self.operators.len() as f64
     }
 
+    /// Returns `N1`, the number of total operators
     #[inline(always)]
     pub fn operators(&self) -> f64 {
         self.operators.values().sum::<u64>() as f64
     }
 
+    /// Returns `η2`, the number of distinct operands
+    #[inline(always)]
+    pub fn u_operands(&self) -> f64 {
+        self.operands.len() as f64
+    }
+
+    /// Returns `N2`, the number of total operands
+    #[inline(always)]
+    pub fn operands(&self) -> f64 {
+        self.operands.values().sum::<u64>() as f64
+    }
+
+    /// Returns the program length
     #[inline(always)]
     pub fn length(&self) -> f64 {
         self.operands() + self.operators()
     }
 
+    /// Returns the calculated estimated program length
     #[inline(always)]
     pub fn estimated_program_length(&self) -> f64 {
         self.u_operators() * self.u_operators().log2()
             + self.u_operands() * self.u_operands().log2()
     }
 
+    /// Returns the purity ratio
     #[inline(always)]
     pub fn purity_ratio(&self) -> f64 {
         self.estimated_program_length() / self.length()
     }
 
+    /// Returns the program vocabulary
     #[inline(always)]
     pub fn vocabulary(&self) -> f64 {
         self.u_operands() + self.u_operators()
     }
 
+    /// Returns the program volume
     #[inline(always)]
     pub fn volume(&self) -> f64 {
         self.length() * self.vocabulary().log2()
     }
 
+    /// Returns the estimated difficulty required to program
     #[inline(always)]
     pub fn difficulty(&self) -> f64 {
         self.u_operators() / 2. * self.operands() / self.u_operands()
     }
 
+    /// Returns the estimated level of difficulty required to program
     #[inline(always)]
     pub fn level(&self) -> f64 {
         1. / self.difficulty()
     }
 
+    /// Returns the estimated effort required to program
     #[inline(always)]
     pub fn effort(&self) -> f64 {
         self.difficulty() * self.volume()
     }
 
+    /// Returns the estimated time required to program
     #[inline(always)]
     pub fn time(&self) -> f64 {
         self.effort() / 18.
     }
 
+    /// Returns the number of delivered bugs
     #[inline(always)]
     pub fn bugs(&self) -> f64 {
         self.effort().powf(2. / 3.) / 3000.
     }
 }
 
+#[doc(hidden)]
 pub trait Halstead
 where
     Self: Checker,

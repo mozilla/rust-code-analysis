@@ -4,6 +4,36 @@ use tree_sitter::Node;
 
 use crate::traits::*;
 
+/// Dumps the `AST` of a code.
+///
+/// Returns a [`Result`] value, when an error occurs.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::{dump_node, CppParser, TSParserTrait};
+///
+/// # fn main() {
+/// let source_code = "int a = 42;";
+///
+/// // The path to a dummy file used to contain the source code
+/// let path = PathBuf::from("foo.c");
+/// let source_as_vec = source_code.as_bytes().to_vec();
+///
+/// // The parser of the code, in this case a CPP parser
+/// let parser = CppParser::new(source_as_vec.clone(), &path, None);
+///
+/// // The root of the AST
+/// let root = parser.get_root();
+///
+/// // Dump the AST from the first line of code in a file to the last one
+/// dump_node(&source_as_vec, &root, -1, None, None).unwrap();
+/// # }
+/// ```
+///
+/// [`Result`]: #variant.Result
 pub fn dump_node(
     code: &[u8],
     node: &Node,
@@ -120,12 +150,23 @@ fn dump_tree_helper(
     Ok(())
 }
 
+/// Configuration options for dumping the `AST` of a code.
 pub struct DumpCfg {
+    /// The first line of code to dump
+    ///
+    /// If `None`, the code is dumped from the first line of code
+    /// in a file
     pub line_start: Option<usize>,
+    /// The last line of code to dump
+    ///
+    /// If `None`, the code is dumped until the last line of code
+    /// in a file
     pub line_end: Option<usize>,
 }
 
-pub struct Dump {}
+pub struct Dump {
+    _guard: (),
+}
 
 impl Callback for Dump {
     type Res = std::io::Result<()>;

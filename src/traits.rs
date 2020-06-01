@@ -16,8 +16,24 @@ use crate::nom::Nom;
 use crate::preproc::PreprocResults;
 use crate::ts_parser::Filter;
 
+/// A trait for callback functions.
+///
+/// Allows to call a private library function, getting as result
+/// its output value.
+pub trait Callback {
+    /// The output type returned by the callee
+    type Res;
+    /// The input type used by the caller to pass the arguments to the callee
+    type Cfg;
+
+    /// Calls a function inside the library and returns its value
+    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
+}
+
+#[doc(hidden)]
 pub trait CodeMetricsT: Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi {}
 
+#[doc(hidden)]
 pub trait TSLanguage {
     type BaseLang;
 
@@ -26,6 +42,7 @@ pub trait TSLanguage {
     fn get_lang_name() -> &'static str;
 }
 
+#[doc(hidden)]
 pub trait TSParserTrait {
     type Checker: Alterator + Checker;
     type Getter: Getter;
@@ -44,14 +61,7 @@ pub trait TSParserTrait {
     fn get_filters(&self, filters: &[String]) -> Filter;
 }
 
-pub trait Callback {
-    type Res;
-    type Cfg;
-
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
-}
-
-pub trait Search<'a> {
+pub(crate) trait Search<'a> {
     fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
     fn act_on_node(&self, pred: &mut dyn FnMut(&Node<'a>));
     fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;

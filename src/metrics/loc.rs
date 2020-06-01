@@ -7,6 +7,7 @@ use tree_sitter::Node;
 
 use crate::*;
 
+/// The `Loc` metric suite.
 #[derive(Debug, Default)]
 pub struct Stats {
     start: usize,
@@ -47,6 +48,7 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
+    /// Merges a second `Loc` metric suite into the first one
     pub fn merge(&mut self, other: &Stats) {
         // Merge ploc lines
         for l in other.lines.iter() {
@@ -60,11 +62,14 @@ impl Stats {
         self.comment_lines += other.comment_lines;
     }
 
+    /// The `Sloc` metric.
+    ///
+    /// Counts the number of lines in a scope
     #[inline(always)]
     pub fn sloc(&self) -> f64 {
-        // This metric counts the number of lines of a file
-        // The if construct is needed to count the line that represents
-        // the signature of a function in a function space
+        // This metric counts the number of lines in a file
+        // The if construct is needed to count the line of code that represents
+        // the function signature in a function space
         let sloc = if self.unit {
             self.end - self.start
         } else {
@@ -73,20 +78,29 @@ impl Stats {
         sloc as f64
     }
 
+    /// The `Ploc` metric.
+    ///
+    /// Counts the number of instruction lines in a scope
     #[inline(always)]
     pub fn ploc(&self) -> f64 {
-        // This metric counts the number of instruction lines present in the code
+        // This metric counts the number of instruction lines in a code
         // https://en.wikipedia.org/wiki/Source_lines_of_code
         self.lines.len() as f64
     }
 
+    /// The `Lloc` metric.
+    ///
+    /// Counts the number of statements in a scope
     #[inline(always)]
     pub fn lloc(&self) -> f64 {
-        // This metric counts the number of statements present in the code
+        // This metric counts the number of statements in a code
         // https://en.wikipedia.org/wiki/Source_lines_of_code
         self.logical_lines as f64
     }
 
+    /// The `Ploc` metric.
+    ///
+    /// Counts the number of comments in a scope
     #[inline(always)]
     pub fn cloc(&self) -> f64 {
         // Comments are counted regardless of their placement
@@ -94,9 +108,12 @@ impl Stats {
         self.comment_lines as f64
     }
 
+    /// The `Blank` metric.
+    ///
+    /// Counts the number of blank lines in a scope
     #[inline(always)]
     pub fn blank(&self) -> f64 {
-        // This metric counts the number of blank lines present in the code
+        // This metric counts the number of blank lines in a code
         // The if construct is needed because sometimes lloc and cloc
         // coincide on the same lines, in that case lloc + cloc could be greater
         // than the number of lines of a file.
@@ -105,6 +122,7 @@ impl Stats {
     }
 }
 
+#[doc(hidden)]
 pub trait Loc
 where
     Self: Checker,

@@ -1,3 +1,49 @@
+//! rust-code-analysis is a library to analyze and extract information
+//! from source codes written in many different programming languages.
+//!
+//! You can find the source code of this software on
+//! <a href="https://github.com/mozilla/rust-code-analysis/" target="_blank">GitHub</a>,
+//! while issues and feature requests can be posted on the respective
+//! <a href="https://github.com/mozilla/rust-code-analysis/issues/" target="_blank">GitHub Issue Tracker</a>.
+//!
+//! ## Supported Languages
+//!
+//! - C++
+//! - C#
+//! - CSS
+//! - Go
+//! - HTML
+//! - Java
+//! - JavaScript
+//! - The JavaScript used in Firefox internal
+//! - Python
+//! - Rust
+//! - Typescript
+//!
+//! ## Supported Metrics
+//!
+//! - CC: it calculates the code complexity examining the
+//!   control flow of a program.
+//! - SLOC: it counts the number of lines in a source file.
+//! - PLOC: it counts the number of physical lines (instructions)
+//!   contained in a source file.
+//! - LLOC: it counts the number of logical lines (statements)
+//!   contained in a source file.
+//! - CLOC: it counts the number of comments in a source file.
+//! - BLANK: it counts the number of blank lines in a source file.
+//! - HALSTEAD: it is a suite that provides a series of information,
+//!   such as the effort required to maintain the analyzed code,
+//!   the size in bits to store the program, the difficulty to understand
+//!   the code, an estimate of the number of bugs present in the codebase,
+//!   and an estimate of the time needed to implement the software.
+//! - MI: it is a suite that allows to evaluate the maintainability
+//!   of a software.
+//! - NOM: it counts the number of functions and closures
+//!   in a file/trait/class.
+//! - NEXITS: it counts the number of possible exit points
+//!   from a method/function.
+//! - NARGS: it counts the number of arguments of a function/method.
+
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
@@ -7,20 +53,21 @@ extern crate serde_json;
 extern crate serde_yaml;
 extern crate toml;
 
-pub(crate) mod c_macro;
-
 #[macro_use]
 mod asttools;
-
+mod c_macro;
 #[macro_use]
 mod macros;
-pub use crate::macros::*;
+mod getter;
 
-pub mod node;
+mod alterator;
+pub(crate) use alterator::*;
+
+mod node;
 pub use crate::node::*;
 
 mod metrics;
-pub(crate) use metrics::*;
+pub use metrics::*;
 
 mod languages;
 pub(crate) use languages::*;
@@ -31,28 +78,22 @@ pub(crate) use checker::*;
 mod output;
 pub use output::*;
 
-pub mod spaces;
+mod spaces;
 pub use crate::spaces::*;
 
-pub mod getter;
-pub use crate::getter::*;
-
-pub mod find;
+mod find;
 pub use crate::find::*;
 
-pub mod function;
+mod function;
 pub use crate::function::*;
-
-mod alterator;
-pub(crate) use crate::alterator::*;
 
 mod ast;
 pub use crate::ast::*;
 
-pub mod count;
+mod count;
 pub use crate::count::*;
 
-pub mod preproc;
+mod preproc;
 pub use crate::preproc::*;
 
 mod langs;

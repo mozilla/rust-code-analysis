@@ -17,16 +17,25 @@ use crate::dump_formats::*;
 use crate::dump_metrics::*;
 use crate::traits::*;
 
+/// The list of supported space kinds.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum SpaceKind {
+    /// An unknown space
     Unknown,
+    /// A function space
     Function,
+    /// A class space
     Class,
+    /// A struct space
     Struct,
+    /// A `Rust` trait space
     Trait,
+    /// A `Rust` implementation space
     Impl,
+    /// A general space
     Unit,
+    /// A `C/C++` namespace
     Namespace,
 }
 
@@ -46,14 +55,22 @@ impl fmt::Display for SpaceKind {
     }
 }
 
+/// All metrics data.
 #[derive(Debug, Serialize)]
 pub struct CodeMetrics<'a> {
+    /// `NArgs` data
     pub nargs: fn_args::Stats,
+    /// `NExits` data
     pub nexits: exit::Stats,
+    /// `Cyclomatic` data
     pub cyclomatic: cyclomatic::Stats,
+    /// `Halstead` data
     pub halstead: halstead::Stats<'a>,
+    /// `Loc` data
     pub loc: loc::Stats,
+    /// `Nom` data
     pub nom: nom::Stats,
+    /// `Mi` data
     pub mi: mi::Stats,
 }
 
@@ -95,13 +112,23 @@ impl<'a> CodeMetrics<'a> {
     }
 }
 
+/// Function space data.
 #[derive(Debug, Serialize)]
 pub struct FuncSpace<'a> {
+    /// The name of a function space
+    ///
+    /// If `None`, an error is occured in parsing
+    /// the name of a function space
     pub name: Option<&'a str>,
+    /// The first line of a function space
     pub start_line: usize,
+    /// The last line of a function space
     pub end_line: usize,
+    /// The space kind
     pub kind: SpaceKind,
+    /// All subspaces contained in a function space
     pub spaces: Vec<FuncSpace<'a>>,
+    /// All metrics of a function space
     pub metrics: CodeMetrics<'a>,
 }
 
@@ -140,6 +167,29 @@ fn finalize<'a>(space_stack: &mut Vec<FuncSpace<'a>>, diff_level: usize) {
     }
 }
 
+/// Returns function space data of the code in a file.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::{CppParser, metrics, TSParserTrait};
+///
+/// # fn main() {
+/// let source_code = "int a = 42;";
+///
+/// // The path to a dummy file used to contain the source code
+/// let path = PathBuf::from("foo.c");
+/// let source_as_vec = source_code.as_bytes().to_vec();
+///
+/// // The parser of the code, in this case a CPP parser
+/// let parser = CppParser::new(source_as_vec.clone(), &path, None);
+///
+/// // Gets the function space data of the code contained in foo.c
+/// metrics(&parser, &path).unwrap();
+/// # }
+/// ```
 pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace<'a>> {
     let code = parser.get_code();
     let node = parser.get_root();
@@ -208,14 +258,25 @@ pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option
     })
 }
 
+/// Configuration options for computing
+/// the metrics of a code.
 pub struct MetricsCfg {
+    /// Path to the file containing the code
     pub path: PathBuf,
+    /// The output format
     pub output_format: Option<Format>,
+    /// If `true`, the `CBOR` and `JSON` output formats are
+    /// pretty-printed
     pub pretty: bool,
+    /// Path to the output file containing the metrics
+    ///
+    /// If `None`, the metrics are dumped on shell
     pub output_path: Option<PathBuf>,
 }
 
-pub struct Metrics {}
+pub struct Metrics {
+    _guard: (),
+}
 
 impl Callback for Metrics {
     type Res = std::io::Result<()>;
