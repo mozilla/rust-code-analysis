@@ -185,10 +185,10 @@ pub fn get_paths_dist(path1: &PathBuf, path2: &PathBuf) -> Option<usize> {
     None
 }
 
-pub fn guess_file(
+pub fn guess_file<S: ::std::hash::BuildHasher>(
     current_path: &PathBuf,
     include_path: &str,
-    all_files: &HashMap<String, Vec<PathBuf>>,
+    all_files: &HashMap<String, Vec<PathBuf>, S>,
 ) -> Vec<PathBuf> {
     //let rpath = include_path.clone();
     let include_path = if include_path.starts_with("mozilla/") {
