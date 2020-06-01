@@ -6,99 +6,48 @@
    <img src="https://img.shields.io/badge/chat%20on%20[m]-%23rust--code--analysis%3Amozilla.org-blue">
 </a>
 
-**rust-code-analysis** is a Rust library to analyze the source code of many different programming languages. It is based on a parser generator tool and an incremental parsing library called [Tree Sitter](https://github.com/tree-sitter/tree-sitter).
-
-## Supported Languages
-
-* C++
-* C#
-* CSS
-* Go
-* HTML
-* Java
-* JavaScript
-* The JavaScript used in Firefox internal
-* Python
-* Rust
-* Typescript
-
-## Supported Metrics
-
-- CC: it calculates the code complexity examining the
-control flow of a program.
-- SLOC: it counts the number of lines in a source file.
-- PLOC: it counts the number of physical lines (instructions) contained in a source file.
-- LLOC: it counts the number of logical lines (statements) contained in a source file.
-- CLOC: it counts the number of comments in a source file.
-- BLANK: it counts the number of blank lines in a source file.
-- HALSTEAD: it is a suite that provides a series of information, such as the effort required to maintain the analyzed code, the size in bits to store the program, the difficulty to understand the code, an estimate of the number of bugs present in the codebase, and an estimate of the time needed to implement the software.
-- MI: it is a suite that allows to evaluate the maintainability of a software.
-- NOM: it counts the number of functions and closures in a file/trait/class.
-- NEXITS: it counts the number of possible exit points from a method/function.
-- NARGS: it counts the number of arguments of a function/method.
-
-# rust-code-analysis-cli
-
-**rust-code-analysis-cli** is a command line tool thought to interact with
-the functions available in the library.
-It can print a series of information on your shell such as nodes and metrics.
-It can also export metrics as a json file.
-Below you can find a series of commands to use the software at best.
-
-### How to get metrics
-
-You can get metrics in your shell in this way
-
-```
-rust-code-analysis-cli --metrics --paths /your/path/to/a/file
-```
-
-or as a `json` file
-
-```
-rust-code-analysis-cli --metrics --output your/path/to/the/output/directory --paths /your/path/to/a/file
-```
-
-or you can run it as a `HTTP` service and use its `REST API`
+**rust-code-analysis** is a Rust library to analyze and extract information
+from source codes written in many different programming languages.
+It is based on a parser generator tool and an incremental parsing library
+called
+<a href="https://tree-sitter.github.io/tree-sitter/" target="_blank">
+    Tree Sitter
+</a>.
 
 
-```
-rust-code-analysis --serve --port 9090
-```
+In addition, we provide a command line tool called **rust-code-analysis-cli**
+to interact with the API of the library in an easy way.
 
+This tool can be used to:
 
-## How to build the software
+- Call **rust-code-analysis** API
+- Print nodes and metrics information
+- Export metrics in different formats
 
-Clone the repository and its submodules through HTTPS
+# Software Usability
 
-```
-git clone --recurse-submodules -j8 https://github.com/mozilla/rust-code-analysis.git
-```
+**rust-code-analysis** supports many types of programming languages and
+computes a great variety of metrics. If you want to discover more on this
+software, read our
+<a href="https://mozilla.github.io/rust-code-analysis/index.html" target="_blank">
+    Documentation
+</a>.
 
-or through SSH
+On the
+<a href="https://mozilla.github.io/rust-code-analysis/commands/index.html" target="_blank">
+    Commands
+</a> page, you will learn which commands need to be run to get information
+about metrics, nodes, and other general data provided by this software.
 
-```
-git clone --recurse-submodules -j8 git@github.com:mozilla/rust-code-analysis.git
-```
+If you want to contribute to the development of this software
+or you are just interested in building **rust-code-analysis**, have a look at the
+<a href="https://mozilla.github.io/rust-code-analysis/developers/index.html" target="_blank">
+    Developers Guide
+</a>.
 
-Build and run the software
+# License
 
-```console
-# Build rust-code-analysis with cargo
-cargo build
-
-# Build rust-code-analysis-cli with cargo
-cargo build --all
-
-# Run through cargo
-cargo run -- -h
-cargo run -- --serve --port 8000
-```
-
-## How to run tests
-
-After the build step, run the following command to verify if all tests pass
-
-```
-cargo test --verbose
-```
+All the source code of **rust-code-analysis** is released under the
+<a href="https://www.mozilla.org/MPL/2.0/" target="_blank">
+    Mozilla Public License v2.0
+</a>.
