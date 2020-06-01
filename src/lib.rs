@@ -11,11 +11,9 @@ extern crate serde_yaml;
 extern crate toml;
 
 pub(crate) mod c_macro;
-pub mod web;
 
 #[macro_use]
 mod asttools;
-mod checker;
 
 #[macro_use]
 mod macros;
@@ -30,12 +28,11 @@ pub(crate) use metrics::*;
 mod languages;
 pub(crate) use languages::*;
 
+mod checker;
+pub(crate) use checker::*;
+
 mod output;
 pub use output::*;
-
-#[macro_use]
-pub mod asttools;
-pub use crate::asttools::*;
 
 pub mod spaces;
 pub use crate::spaces::*;
