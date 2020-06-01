@@ -11,6 +11,13 @@ extern crate serde_json;
 extern crate serde_yaml;
 extern crate toml;
 
+pub(crate) mod c_macro;
+pub mod web;
+
+#[macro_use]
+mod asttools;
+mod checker;
+
 #[macro_use]
 mod macros;
 pub use crate::macros::*;
@@ -27,12 +34,6 @@ pub(crate) use languages::*;
 mod output;
 pub use output::*;
 
-pub mod web;
-
-#[macro_use]
-pub mod asttools;
-pub use crate::asttools::*;
-
 pub mod spaces;
 pub use crate::spaces::*;
 
@@ -48,8 +49,6 @@ pub use crate::function::*;
 pub mod count;
 pub use crate::count::*;
 
-pub mod c_macro;
-
 pub mod preproc;
 pub use crate::preproc::*;
 
@@ -63,10 +62,7 @@ mod traits;
 pub use crate::traits::*;
 
 mod ts_parser;
-pub use crate::ts_parser::*;
-
-mod checker;
-pub use crate::checker::*;
+pub(crate) use crate::ts_parser::*;
 
 mod comment_rm;
 pub use crate::comment_rm::*;

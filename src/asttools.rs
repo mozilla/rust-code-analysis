@@ -1,5 +1,6 @@
 use tree_sitter::Node;
 
+#[allow(dead_code)]
 pub fn get_parent<'a>(node: &'a Node<'a>, level: usize) -> Option<Node<'a>> {
     let mut level = level;
     let mut node = *node;
