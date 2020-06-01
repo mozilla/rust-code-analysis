@@ -6,9 +6,7 @@ building process.
 
 As prerequisite, you need to install the last available version of `Rust`.
 You can learn how to do that
-<a href="https://www.rust-lang.org/tools/install" target="_blank">
-    here
-</a>.
+<a href="https://www.rust-lang.org/tools/install" target="_blank">here</a>.
 
 ## Clone Repository
 

@@ -10,9 +10,7 @@
 from source codes written in many different programming languages.
 It is based on a parser generator tool and an incremental parsing library
 called
-<a href="https://tree-sitter.github.io/tree-sitter/" target="_blank">
-    Tree Sitter
-</a>.
+<a href="https://tree-sitter.github.io/tree-sitter/" target="_blank">Tree Sitter</a>.
 
 
 In addition, we provide a command line tool called **rust-code-analysis-cli**
@@ -29,9 +27,7 @@ This tool can be used to:
 **rust-code-analysis** supports many types of programming languages and
 computes a great variety of metrics. If you want to discover more on this
 software, read our
-<a href="https://mozilla.github.io/rust-code-analysis/index.html" target="_blank">
-    Documentation
-</a>.
+<a href="https://mozilla.github.io/rust-code-analysis/index.html" target="_blank">Documentation</a>.
 
 On the
 <a href="https://mozilla.github.io/rust-code-analysis/commands/index.html" target="_blank">
@@ -41,13 +37,9 @@ about metrics, nodes, and other general data provided by this software.
 
 If you want to contribute to the development of this software
 or you are just interested in building **rust-code-analysis**, have a look at the
-<a href="https://mozilla.github.io/rust-code-analysis/developers/index.html" target="_blank">
-    Developers Guide
-</a>.
+<a href="https://mozilla.github.io/rust-code-analysis/developers/index.html" target="_blank">Developers Guide</a>.
 
 # License
 
 All the source code of **rust-code-analysis** is released under the
-<a href="https://www.mozilla.org/MPL/2.0/" target="_blank">
-    Mozilla Public License v2.0
-</a>.
+<a href="https://www.mozilla.org/MPL/2.0/" target="_blank">Mozilla Public License v2.0</a>.
