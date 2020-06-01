@@ -1,4 +1,3 @@
-#![recursion_limit = "128"]
 #![allow(clippy::implicit_hasher)]
 
 #[macro_use]
