@@ -112,7 +112,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
         action::<Function>(&language, source, &path, pr, cfg)
     } else if !cfg.find_filter.is_empty() {
         let cfg = FindCfg {
-            path: Some(path.clone()),
+            path: path.clone(),
             filters: cfg.find_filter.clone(),
             line_start: cfg.line_start,
             line_end: cfg.line_end,
@@ -120,7 +120,6 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
         action::<Find>(&language, source, &path, pr, cfg)
     } else if cfg.count_lock.is_some() {
         let cfg = CountCfg {
-            path: Some(path.clone()),
             filters: cfg.count_filter.clone(),
             stats: cfg.count_lock.as_ref().unwrap().clone(),
         };

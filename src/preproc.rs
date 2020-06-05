@@ -12,19 +12,27 @@ use crate::traits::*;
 
 include!(concat!(env!("OUT_DIR"), "/gen_c_specials.rs"));
 
+/// Preprocessor data of a `C/C++` file.
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct PreprocFile {
-    pub includes: HashSet<String>,
-    pub extra_includes: HashSet<String>,
+    /// The set of include directives explicitly written in a file
+    pub direct_includes: HashSet<String>,
+    /// The set of include directives implicitly imported in a file
+    /// from other files
+    pub indirect_includes: HashSet<String>,
+    /// The set of macros of a file
     pub macros: HashSet<String>,
 }
 
+/// Preprocessor data of a series of `C/C++` files.
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct PreprocResults {
+    /// The preprocessor data of each `C/C++` file
     pub files: HashMap<PathBuf, PreprocFile>,
 }
 
 impl PreprocFile {
+    /// Adds new macros to the set of macro of a file.
     pub fn new_macros(macros: &[&str]) -> Self {
         let mut pf = Self::default();
         for m in macros {
@@ -34,6 +42,7 @@ impl PreprocFile {
     }
 }
 
+/// Returns the macros contained in a `C/C++` file.
 pub fn get_macros<S: ::std::hash::BuildHasher>(
     file: &PathBuf,
     files: &HashMap<PathBuf, PreprocFile, S>,
@@ -43,7 +52,7 @@ pub fn get_macros<S: ::std::hash::BuildHasher>(
         for m in pf.macros.iter() {
             macros.insert(m.to_string());
         }
-        for f in pf.extra_includes.iter() {
+        for f in pf.indirect_includes.iter() {
             if let Some(pf) = files.get(&PathBuf::from(f)) {
                 for m in pf.macros.iter() {
                     macros.insert(m.to_string());
@@ -54,6 +63,11 @@ pub fn get_macros<S: ::std::hash::BuildHasher>(
     macros
 }
 
+/// Constructs a dependency graph of the include directives
+/// in a `C/C++` file.
+///
+/// The dependency graph is built using both preprocessor data and not
+/// extracted from the considered `C/C++` files.
 pub fn fix_includes<S: ::std::hash::BuildHasher>(
     files: &mut HashMap<PathBuf, PreprocFile, S>,
     all_files: &HashMap<String, Vec<PathBuf>, S>,
@@ -69,8 +83,8 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
             hash_map::Entry::Occupied(l) => *l.get(),
             hash_map::Entry::Vacant(p) => *p.insert(g.add_node(file.clone())),
         };
-        let includes = &pf.includes;
-        for i in includes {
+        let direct_includes = &pf.direct_includes;
+        for i in direct_includes {
             let possibilities = guess_file(&file, i, all_files);
             for i in possibilities {
                 if &i != file {
@@ -141,7 +155,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
     for (path, node) in nodes {
         let mut dfs = Dfs::new(&g, node);
         if let Some(pf) = files.get_mut(&path) {
-            let x_inc = &mut pf.extra_includes;
+            let x_inc = &mut pf.indirect_includes;
             while let Some(node) = dfs.next(&g) {
                 let w = g.node_weight(node).unwrap();
                 if w == &PathBuf::from("") {
@@ -163,6 +177,12 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
     }
 }
 
+/// Extracts preprocessor data from a `C/C++` file
+/// and inserts these data in a [`PreprocResults`]
+/// object shared among threads.
+///
+///
+/// [`PreprocResults`]: struct.PreprocResults.html
 pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: Arc<Mutex<PreprocResults>>) {
     let node = parser.get_root();
     let mut cursor = node.walk();
@@ -211,7 +231,7 @@ pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: Arc<Mutex<Pre
                     let end = file.iter().rposition(|&c| c != b' ' && c != b'\t').unwrap();
                     let file = &file[start..=end];
                     let file = String::from_utf8(file.to_vec()).unwrap();
-                    file_result.includes.insert(file);
+                    file_result.direct_includes.insert(file);
                 }
             }
             _ => {}

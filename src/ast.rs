@@ -3,28 +3,52 @@ use serde::{Deserialize, Serialize};
 
 use crate::*;
 
+/// Start and end positions of a node in a code in terms of rows and columns.
+///
+/// The first and second fields represent the row and column associated to
+/// the start position of a node.
+///
+/// The third and fourth fields represent the row and column associated to
+/// the end position of a node.
 pub type Span = Option<(usize, usize, usize, usize)>;
 
+/// The payload of an `Ast` request.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AstPayload {
+    /// The id associated to a request for an `AST`
     pub id: String,
+    /// The filename associated to a source code file
     pub file_name: String,
+    /// The code to be represented as an `AST`
     pub code: String,
+    /// If `true`, nodes representing comments are ignored
     pub comment: bool,
+    /// If `true`, the start and end positions of a node in a code
+    /// are considered
     pub span: bool,
 }
 
+/// The response of an `AST` request.
 #[derive(Debug, Serialize)]
 pub struct AstResponse {
+    /// The id associated to a request for an `AST`
     id: String,
+    /// The root node of an `AST`
+    ///
+    /// If `None`, an error has occurred
     root: Option<AstNode>,
 }
 
+/// Information on an `AST` node.
 #[derive(Debug)]
 pub struct AstNode {
+    /// The type of node
     pub r#type: &'static str,
+    /// The code associated to a node
     pub value: String,
+    /// The start and end positions of a node in a code
     pub span: Span,
+    /// The children of a node
     pub children: Vec<AstNode>,
 }
 
@@ -99,11 +123,18 @@ fn build<T: TSParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstN
     }
 }
 
-pub struct AstCallback {}
+pub struct AstCallback {
+    _guard: (),
+}
 
+/// Configuration options for retrieving the nodes of an `AST`.
 pub struct AstCfg {
+    /// The id associated to a request for an `AST`
     pub id: String,
+    /// If `true`, nodes representing comments are ignored
     pub comment: bool,
+    /// If `true`, the start and end positions of a node in a code
+    /// are considered
     pub span: bool,
 }
 

@@ -1,7 +1,7 @@
-pub mod dump;
+pub(crate) mod dump;
 pub use dump::*;
 
-pub mod dump_formats;
+pub(crate) mod dump_formats;
 pub use dump_formats::*;
 
-pub mod dump_metrics;
+pub(crate) mod dump_metrics;

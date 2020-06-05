@@ -1,3 +1,4 @@
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_checker {
     ( $name:ident, $( $type:ident ),* ) => {
@@ -13,33 +14,39 @@ macro_rules! mk_checker {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_extern {
     ( $( $name:ident ),* ) => {
         $(
-            extern "C" { pub fn $name() -> Language; }
+            extern "C" { pub(crate) fn $name() -> Language; }
         )*
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_enum {
-    ( $( $camel:ident ),* ) => {
+    ( $( $camel:ident, $description:expr ),* ) => {
+        /// The list of supported languages.
         #[derive(Clone, Copy, Debug, IntoEnumIterator, PartialEq)]
         pub enum LANG {
             $(
+                #[doc = $description]
                 $camel,
             )*
         }
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_impl_lang {
     ( $( ($camel:ident, $name:ident, $display: expr) ),* ) => {
         impl LANG {
 
-            pub fn get_language(&self) -> Language {
+            #[allow(dead_code)]
+            pub(crate) fn get_language(&self) -> Language {
                 unsafe {
                     match self {
                         $(
@@ -49,6 +56,17 @@ macro_rules! mk_impl_lang {
                 }
             }
 
+            /// Returns the name of a language as a `&str`.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// use rust_code_analysis::LANG;
+            ///
+            /// # fn main() {
+            /// println!("{}", LANG::Rust.get_name());
+            /// # }
+            /// ```
             pub fn get_name(&self) -> &'static str {
                 match self {
                     $(
@@ -60,9 +78,44 @@ macro_rules! mk_impl_lang {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_action {
     ( $( ($camel:ident, $parser:ident) ),* ) => {
+        /// Runs a function, which implements the [`Callback`] trait,
+        /// on a code written in one of the supported languages.
+        ///
+        /// # Examples
+        ///
+        /// The following example dumps to shell every metric computed using
+        /// the dummy source code.
+        ///
+        /// ```
+        /// use std::path::PathBuf;
+        ///
+        /// use rust_code_analysis::{action, Callback, LANG, Metrics, MetricsCfg};
+        ///
+        /// # fn main() {
+        /// let source_code = "int a = 42;";
+        /// let language = LANG::Cpp;
+        ///
+        /// // The path to a dummy file used to contain the source code
+        /// let path = PathBuf::from("foo.c");
+        /// let source_as_vec = source_code.as_bytes().to_vec();
+        ///
+        /// // Configuration options used by the function which computes the metrics
+        /// let cfg = MetricsCfg {
+        ///     path,
+        ///     output_format: None,
+        ///     pretty: false,
+        ///     output_path: None,
+        /// };
+        ///
+        /// action::<Metrics>(&language, source_as_vec, &cfg.path.clone(), None, cfg);
+        /// # }
+        /// ```
+        ///
+        /// [`Callback`]: trait.Callback.html
         #[inline(always)]
         pub fn action<T: Callback>(lang: &LANG, source: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>, cfg: T::Cfg) -> T::Res {
             match lang {
@@ -77,9 +130,23 @@ macro_rules! mk_action {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_extensions {
     ( $( ($camel:ident, [ $( $ext:ident ),* ]) ),* ) => {
+        /// Detects the language associated to the input file extension.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// use rust_code_analysis::get_from_ext;
+        ///
+        /// # fn main() {
+        /// let ext = "rs";
+        ///
+        /// get_from_ext(ext).unwrap();
+        /// # }
+        /// ```
         pub fn get_from_ext(ext: &str) -> Option<LANG>{
             match ext {
                 $(
@@ -93,9 +160,26 @@ macro_rules! mk_extensions {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_emacs_mode {
     ( $( ($camel:ident, [ $( $emacs_mode:expr ),* ]) ),* ) => {
+        /// Detects the language associated to the input `Emacs` mode.
+        ///
+        /// An `Emacs` mode is used to detect a language according to
+        /// particular text-information contained in a file.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// use rust_code_analysis::get_from_emacs_mode;
+        ///
+        /// # fn main() {
+        /// let emacs_mode = "rust";
+        ///
+        /// get_from_emacs_mode(emacs_mode).unwrap();
+        /// # }
+        /// ```
         pub fn get_from_emacs_mode(mode: &str) -> Option<LANG>{
             match mode {
                 $(
@@ -109,11 +193,12 @@ macro_rules! mk_emacs_mode {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_code {
-    ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident) ),* ) => {
+    ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident, $docname:expr) ),* ) => {
         $(
-            pub struct $code { }
+            pub struct $code { _guard: (), }
             impl CodeMetricsT for $code { }
 
             impl TSLanguage for $code {
@@ -131,24 +216,29 @@ macro_rules! mk_code {
                     stringify!($camel)
                 }
             }
+            #[doc = "The `"]
+            #[doc = $docname]
+            #[doc = "` language parser."]
             pub type $parser = TSParser<$code>;
         )*
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! mk_langs {
-    ( $( ($camel:ident, $display: expr, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
+    ( $( ($camel:ident, $description: expr, $display: expr, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
         mk_extern!($( $name ),*);
-        mk_enum!($( $camel ),*);
+        mk_enum!($( $camel, $description ),*);
         mk_impl_lang!($( ($camel, $name, $display) ),*);
         mk_action!($( ($camel, $parser) ),*);
         mk_extensions!($( ($camel, [ $( $ext ),* ]) ),*);
         mk_emacs_mode!($( ($camel, [ $( $emacs_mode ),* ]) ),*);
-        mk_code!($( ($camel, $code, $parser, $name) ),*);
+        mk_code!($( ($camel, $code, $parser, $name, stringify!($camel)) ),*);
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! color {
     ( $stdout: ident, $color: ident) => {
@@ -163,6 +253,7 @@ macro_rules! color {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! check_metrics {
     ($source: expr, $file: expr, $parser: ident, $metric: ident,

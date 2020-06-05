@@ -8,14 +8,32 @@ use std::str::FromStr;
 use crate::spaces::FuncSpace;
 
 #[derive(Debug, Clone)]
+/// The list of implemented output formats.
 pub enum Format {
+    /// The `CBOR` format
     Cbor,
+    /// The `JSON` format
     Json,
+    /// The `TOML` format
     Toml,
+    /// The `YAML` format
     Yaml,
 }
 
 impl Format {
+    /// Returns the list of implemented output formats as a slice of `&str`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rust_code_analysis::Format;
+    ///
+    /// # fn main() {
+    /// for format in Format::all().iter(){
+    ///     println!("{}", format);
+    /// }
+    /// # }
+    /// ```
     pub fn all() -> &'static [&'static str] {
         &["cbor", "json", "toml", "yaml"]
     }

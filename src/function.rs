@@ -7,14 +7,25 @@ use crate::traits::*;
 use crate::checker::Checker;
 use crate::getter::Getter;
 
+/// Function span data.
 #[derive(Debug, Serialize)]
 pub struct FunctionSpan {
+    /// The function name
     pub name: String,
+    /// The first line of a function
     pub start_line: usize,
+    /// The last line of a function
     pub end_line: usize,
+    /// If `true`, an error is occured in determining the span
+    /// of a function
     pub error: bool,
 }
 
+/// Detects the span of each function in a code.
+///
+/// Returns a vector containing the [`FunctionSpan`] of each function
+///
+/// [`FunctionSpan`]: struct.FunctionSpan.html
 pub fn function<T: TSParserTrait>(parser: &T) -> Vec<FunctionSpan> {
     let root = parser.get_root();
     let code = parser.get_code();
@@ -96,11 +107,16 @@ fn dump_spans(mut spans: Vec<FunctionSpan>, path: PathBuf) -> std::io::Result<()
     Ok(())
 }
 
+/// Configuration options for detecting the span of
+/// each function in a code.
 pub struct FunctionCfg {
+    /// Path to the file containing the code
     pub path: PathBuf,
 }
 
-pub struct Function {}
+pub struct Function {
+    _guard: (),
+}
 
 impl Callback for Function {
     type Res = std::io::Result<()>;

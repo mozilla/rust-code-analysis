@@ -2,11 +2,12 @@ extern crate num_format;
 
 use num_format::{Locale, ToFormattedString};
 use std::fmt;
-use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use crate::traits::*;
 
+/// Counts the types of nodes specified in the input slice
+/// and the number of nodes in a code.
 pub fn count<'a, T: TSParserTrait>(parser: &'a T, filters: &[String]) -> (usize, usize) {
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
@@ -35,15 +36,21 @@ pub fn count<'a, T: TSParserTrait>(parser: &'a T, filters: &[String]) -> (usize,
     (good, total)
 }
 
+/// Configuration options for counting different
+/// types of nodes in a code.
 pub struct CountCfg {
-    pub path: Option<PathBuf>,
+    /// Types of nodes to count
     pub filters: Vec<String>,
+    /// Number of nodes of a certain type counted by each thread
     pub stats: Arc<Mutex<Count>>,
 }
 
+/// Count of different types of nodes in a code.
 #[derive(Debug, Default)]
 pub struct Count {
+    /// The number of specific types of nodes searched in a code
     pub good: usize,
+    /// The total number of nodes in a code
     pub total: usize,
 }
 

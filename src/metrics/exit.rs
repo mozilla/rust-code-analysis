@@ -6,6 +6,10 @@ use tree_sitter::Node;
 use crate::checker::Checker;
 use crate::*;
 
+/// The `NExit` metric.
+///
+/// This metric counts the number of possible exit points
+/// from a function/method.
 #[derive(Debug)]
 pub struct Stats {
     exit: usize,
@@ -33,15 +37,18 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
+    /// Merges a second `NExit` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
         self.exit += other.exit;
     }
 
+    /// Returns the `NExit` metric value
     pub fn exit(&self) -> f64 {
         self.exit as f64
     }
 }
 
+#[doc(hidden)]
 pub trait Exit
 where
     Self: Checker,

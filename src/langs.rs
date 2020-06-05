@@ -8,14 +8,16 @@ use crate::*;
 
 mk_langs!(
     // 1) Name for enum
-    // 2) Display name
-    // 3) Empty struct name to implement
-    // 4) Parser name
-    // 5) tree-sitter function to call to get a Language
-    // 6) file extensions
-    // 7) emacs modes
+    // 2) Language description
+    // 3) Display name
+    // 4) Empty struct name to implement
+    // 5) Parser name
+    // 6) tree-sitter function to call to get a Language
+    // 7) file extensions
+    // 8) emacs modes
     (
         Mozjs,
+        "The `Mozjs` language is variant of the `JavaScript` language",
         "javascript",
         MozjsCode,
         MozjsParser,
@@ -25,6 +27,7 @@ mk_langs!(
     ),
     (
         Javascript,
+        "The `JavaScript` language",
         "javascript",
         JavascriptCode,
         JavascriptParser,
@@ -34,6 +37,7 @@ mk_langs!(
     ),
     (
         Java,
+        "The `Java` language",
         "java",
         JavaCode,
         JavaParser,
@@ -41,9 +45,19 @@ mk_langs!(
         [java],
         ["java"]
     ),
-    (Go, "go", GoCode, GoParser, tree_sitter_go, [go], ["go"]),
+    (
+        Go,
+        "The `Go` language",
+        "go",
+        GoCode,
+        GoParser,
+        tree_sitter_go,
+        [go],
+        ["go"]
+    ),
     (
         Html,
+        "The `HTML` language",
         "html",
         HtmlCode,
         HtmlParser,
@@ -53,6 +67,7 @@ mk_langs!(
     ),
     (
         CSharp,
+        "The `C#` language",
         "c#",
         CSharpCode,
         CSharpParser,
@@ -62,6 +77,7 @@ mk_langs!(
     ),
     (
         Rust,
+        "The `Rust` language",
         "rust",
         RustCode,
         RustParser,
@@ -71,6 +87,7 @@ mk_langs!(
     ),
     (
         Css,
+        "The `CSS` language",
         "css",
         CssCode,
         CssParser,
@@ -80,6 +97,7 @@ mk_langs!(
     ),
     (
         Cpp,
+        "The `C/C++` language",
         "c/c++",
         CppCode,
         CppParser,
@@ -89,6 +107,7 @@ mk_langs!(
     ),
     (
         Python,
+        "The `Python` language",
         "python",
         PythonCode,
         PythonParser,
@@ -98,6 +117,7 @@ mk_langs!(
     ),
     (
         Tsx,
+        "The `Tsx` language incorporates the `JSX` syntax inside `TypeScript`",
         "typescript",
         TsxCode,
         TsxParser,
@@ -107,6 +127,7 @@ mk_langs!(
     ),
     (
         Typescript,
+        "The `TypeScript` language",
         "typescript",
         TypescriptCode,
         TypescriptParser,
@@ -116,6 +137,7 @@ mk_langs!(
     ),
     (
         Ccomment,
+        "The `Ccomment` language is a variant of the `C` language focused on comments",
         "ccomment",
         CcommentCode,
         CcommentParser,
@@ -125,6 +147,7 @@ mk_langs!(
     ),
     (
         Preproc,
+        "The `PreProc` language is a variant of the `C/C++` language focused on macros",
         "preproc",
         PreprocCode,
         PreprocParser,

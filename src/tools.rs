@@ -7,6 +7,20 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
 
+/// Reads a file.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::read_file;
+///
+/// # fn main() {
+/// let path = PathBuf::from("Cargo.toml");
+/// read_file(&path).unwrap();
+/// # }
+/// ```
 pub fn read_file(path: &PathBuf) -> std::io::Result<Vec<u8>> {
     let mut file = File::open(path)?;
     let mut data = Vec::new();
@@ -15,6 +29,20 @@ pub fn read_file(path: &PathBuf) -> std::io::Result<Vec<u8>> {
     Ok(data)
 }
 
+/// Reads a file and adds an `EOL` at its end.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::read_file_with_eol;
+///
+/// # fn main() {
+/// let path = PathBuf::from("Cargo.toml");
+/// read_file_with_eol(&path).unwrap();
+/// # }
+/// ```
 pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Vec<u8>> {
     let mut file = File::open(path)?;
     let mut data = Vec::new();
@@ -49,6 +77,21 @@ pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Vec<u8>> {
     Ok(data)
 }
 
+/// Writes data to a file.
+///
+/// # Examples
+///
+/// ```no_run
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::write_file;
+///
+/// # fn main() {
+/// let path = PathBuf::from("foo.txt");
+/// let data: [u8; 4] = [0; 4];
+/// write_file(&path, &data).unwrap();
+/// # }
+/// ```
 pub fn write_file(path: &PathBuf, data: &[u8]) -> std::io::Result<()> {
     let mut file = File::create(path)?;
     file.write_all(data)?;
@@ -56,6 +99,21 @@ pub fn write_file(path: &PathBuf, data: &[u8]) -> std::io::Result<()> {
     Ok(())
 }
 
+/// Detects the language of a code using
+/// the extension of a file.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::get_language_for_file;
+///
+/// # fn main() {
+/// let path = PathBuf::from("build.rs");
+/// get_language_for_file(&path).unwrap();
+/// # }
+/// ```
 pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
     if let Some(ext) = path.extension() {
         let ext = ext.to_str().unwrap().to_lowercase();
@@ -103,6 +161,31 @@ fn get_emacs_mode(buf: &[u8]) -> Option<String> {
     None
 }
 
+/// Guesses the language of a code.
+///
+/// Returns a tuple containing a [`LANG`] as first argument
+/// and the language name as a second one.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::guess_language;
+///
+/// # fn main() {
+/// let source_code = "int a = 42;";
+///
+/// // The path to a dummy file used to contain the source code
+/// let path = PathBuf::from("foo.c");
+/// let source_slice = source_code.as_bytes();
+///
+/// // Guess the language of a code
+/// guess_language(&source_slice, &path);
+/// # }
+/// ```
+///
+/// [`LANG`]: enum.LANG.html
 pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, String) {
     let ext = path
         .as_ref()
@@ -146,7 +229,7 @@ pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, Str
     }
 }
 
-pub fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
+pub(crate) fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
     // Copied from Cargo sources: https://github.com/rust-lang/cargo/blob/master/src/cargo/util/paths.rs#L65
     let mut components = path.as_ref().components().peekable();
     let mut ret = if let Some(c @ Component::Prefix(..)) = components.peek().cloned() {
@@ -174,7 +257,7 @@ pub fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
     Some(ret)
 }
 
-pub fn get_paths_dist(path1: &PathBuf, path2: &PathBuf) -> Option<usize> {
+pub(crate) fn get_paths_dist(path1: &PathBuf, path2: &PathBuf) -> Option<usize> {
     for ancestor in path1.ancestors() {
         if path2.starts_with(ancestor) && !ancestor.as_os_str().is_empty() {
             let path1 = path1.strip_prefix(ancestor).unwrap();
@@ -185,7 +268,7 @@ pub fn get_paths_dist(path1: &PathBuf, path2: &PathBuf) -> Option<usize> {
     None
 }
 
-pub fn guess_file<S: ::std::hash::BuildHasher>(
+pub(crate) fn guess_file<S: ::std::hash::BuildHasher>(
     current_path: &PathBuf,
     include_path: &str,
     all_files: &HashMap<String, Vec<PathBuf>, S>,
