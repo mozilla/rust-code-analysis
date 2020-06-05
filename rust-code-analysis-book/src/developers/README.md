@@ -48,7 +48,7 @@ After you have finished changing the code, you should **always** verify whether
 all tests pass with the `cargo test` command.
 
 ```console
-cargo test --all-features --verbose
+cargo test --all --all-features --verbose
 ```
 
 ## Code Formatting
@@ -97,7 +97,7 @@ If you have documented your code, to generate the final documentation,
 run this command:
 
 ```console
-cargo doc --all-features --no-deps
+cargo doc --open --no-deps
 ```
 
 Remove the `--no-deps` option if you also want to build the documentation of
