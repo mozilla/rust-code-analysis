@@ -1455,7 +1455,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis"
-version = "0.0.16"
+version = "0.0.17"
 dependencies = [
  "aho-corasick",
  "cc",
