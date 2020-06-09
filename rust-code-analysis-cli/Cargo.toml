@@ -3,6 +3,9 @@ name = "rust-code-analysis-cli"
 version = "0.0.1"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2018"
+keywords = ["metrics"]
+description = "Tool to compute and export code metrics"
+license = "MPL-2.0"
 
 [dependencies]
 actix-rt = "^1.0"
