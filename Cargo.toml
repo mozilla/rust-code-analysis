@@ -3,6 +3,12 @@ name = "rust-code-analysis"
 version = "0.0.16"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2018"
+repository = "https://github.com/mozilla/rust-code-analysis"
+documentation = "https://docs.rs/rust-code-analysis/"
+readme = "README.md"
+keywords = ["code metrics"]
+description = "Tool to compute and export code metrics"
+license = "MPL-2.0"
 build = "build.rs"
 
 [build-dependencies]
