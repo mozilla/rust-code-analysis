@@ -69,7 +69,12 @@ fn mk_globset(elems: clap::Values) -> GlobSet {
 }
 
 fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::Result<()> {
-    let source = read_file_with_eol(&path)?;
+    let source = if let Some(source) = read_file_with_eol(&path)? {
+        source
+    } else {
+        return Ok(());
+    };
+
     let language = if let Some(language) = language {
         language
     } else if let Some(language) = guess_language(&source, &path).0 {
@@ -147,6 +152,7 @@ fn consumer(receiver: JobReceiver) {
         }
         let job = job.unwrap();
         let path = job.path.clone();
+
         if let Err(err) = act_on_file(job.language, job.path, &job.cfg) {
             eprintln!("{:?} for file {:?}", err, path);
         }
