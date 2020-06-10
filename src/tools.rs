@@ -365,21 +365,18 @@ mod tests {
         let tmp_dir = std::env::temp_dir();
         let tmp_path = tmp_dir.join("test_read");
         let data = vec![
-            (b"\xFF\xFEabc".to_vec(), b"abc\n".to_vec()),
-            (b"\xFE\xFFabc".to_vec(), b"abc\n".to_vec()),
-            (b"\xFE\xFF".to_vec(), b"\n".to_vec()),
-            (b"\xFE".to_vec(), b"\xFE\n".to_vec()),
-            (b"\xEF\xBB\xBFabc".to_vec(), b"abc\n".to_vec()),
-            (b"\xEF\xBB\xBFabc\n".to_vec(), b"abc\n".to_vec()),
-            (b"\xEF\xBBabc\n".to_vec(), b"\xEF\xBBabc\n".to_vec()),
-            (b"abcdef\n".to_vec(), b"abcdef\n".to_vec()),
-            (b"abcdef".to_vec(), b"abcdef\n".to_vec()),
-            (b"ab".to_vec(), b"ab\n".to_vec()),
+            (b"\xFF\xFEabc".to_vec(), Some(b"abc\n".to_vec())),
+            (b"\xFE\xFFabc".to_vec(), Some(b"abc\n".to_vec())),
+            (b"\xEF\xBB\xBFabc".to_vec(), Some(b"abc\n".to_vec())),
+            (b"\xEF\xBB\xBFabc\n".to_vec(), Some(b"abc\n".to_vec())),
+            (b"\xEF\xBBabc\n".to_vec(), None),
+            (b"abcdef\n".to_vec(), Some(b"abcdef\n".to_vec())),
+            (b"abcdef".to_vec(), Some(b"abcdef\n".to_vec())),
         ];
         for (d, expected) in data {
             write_file(&tmp_path, &d).unwrap();
             let res = read_file_with_eol(&tmp_path).unwrap();
-            assert!(res == expected);
+            assert_eq!(res, expected);
         }
     }
 
