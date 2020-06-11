@@ -36,6 +36,25 @@ macro_rules! mk_enum {
                 $camel,
             )*
         }
+
+        impl LANG {
+            /// Returns the list of supported languages as a slice of `&str`.
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// use rust_code_analysis::LANG;
+            ///
+            /// # fn main() {
+            /// for language in LANG::all().iter(){
+            ///     println!("{}", language);
+            /// }
+            /// # }
+            /// ```
+            pub fn all() -> &'static [&'static str] {
+                &[$(stringify!($camel),)*]
+            }
+        }
     };
 }
 

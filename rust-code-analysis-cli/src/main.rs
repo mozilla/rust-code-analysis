@@ -248,6 +248,12 @@ fn main() {
         .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
         .about("Analyze source code")
         .arg(
+            Arg::with_name("show_languages")
+                .help("Shows the supported languages")
+                .short("s")
+                .long("show"),
+        )
+        .arg(
             Arg::with_name("paths")
                 .help("Sets the input files to analyze")
                 .short("p")
@@ -403,6 +409,13 @@ fn main() {
                 .short("w"),
         )
         .get_matches();
+
+    if matches.is_present("show_languages") {
+        for language in LANG::all().iter() {
+            println!("{}", language);
+        }
+        process::exit(0);
+    }
 
     let num_jobs = if let Ok(num_jobs) = matches.value_of("num_jobs").unwrap().parse::<usize>() {
         num_jobs
