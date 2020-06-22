@@ -291,9 +291,9 @@ tasks:
               command:
                 - "/bin/sh"
                 - "-cx"
-                - "git config --global user.email you@example.com &&
+                - "git config --global user.email moz-tools-bot@moz.tools &&
                    git config --global user.name moz.tools Bot &&
-                   git clone --quiet ${repository} &&
+                   git clone --recursive --quiet ${repository} &&
                    cd rust-code-analysis &&
                    taskboot retrieve-artifact --output-path=. \
                             --artifacts=public/book.tar.gz &&
