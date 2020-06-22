@@ -303,7 +303,8 @@ tasks:
                             github.com/mozilla/rust-code-analysis \
                             moz-tools-bot \
                             gh-pages &&
-                   taskboot github-release mozilla/rust-code-analysis ${version} --asset ${linux_artifact}:public/${linux_artifact} ${windows_artifact}:public/${windows_artifact}"
+                   taskboot github-release mozilla/rust-code-analysis ${version} --asset ${linux_artifact}:public/${linux_artifact} ${windows_artifact}:public/${windows_artifact} &&
+                   taskboot cargo-publish"
             metadata:
               name: "rust-code-analysis release publication ${version}"
               description: rust-code-analysis release publication on Github
