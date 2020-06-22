@@ -291,13 +291,13 @@ tasks:
               command:
                 - "/bin/sh"
                 - "-cx"
-                - "git clone --recursive --quiet https://github.com/SoftengPoliTo/rust-code-analysis &&
+                - "git config --global user.email you@example.com &&
+                   git config --global user.name moz.tools Bot &&
+                   git clone --quiet ${repository} &&
                    cd rust-code-analysis &&
                    taskboot retrieve-artifact --output-path=. \
                             --artifacts=public/book.tar.gz &&
                    tar xfz book.tar.gz -C rust-code-analysis-book &&
-                   git config --global user.email you@example.com &&
-                   git config --global user.name Your Name &&
                    ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
                    taskboot git-push --force-push \
                             github.com/mozilla/rust-code-analysis \
