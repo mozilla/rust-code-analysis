@@ -56,6 +56,36 @@ tasks:
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
+      - taskId: {$eval: as_slugid("build_documentation")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '2 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --recursive --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               cargo install mdbook --no-default-features --features search,output --vers \"^0.1.0\" &&
+               cargo doc --release &&
+               cd rust-code-analysis-book &&
+               mdbook build &&
+               tar -zvcf /book.tar.gz book/"
+          artifacts:
+            public/book.tar.gz:
+              expires: {$fromNow: '2 weeks'}
+              path: /book.tar.gz
+              type: file
+        metadata:
+          name: rust-code-analysis documentation
+          description: rust-code-analysis build documentation
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
       - taskId: {$eval: as_slugid("ccov_test_task")}
         created: {$fromNow: ''}
         deadline: {$fromNow: '1 hour'}
@@ -244,6 +274,7 @@ tasks:
             dependencies:
               - {$eval: as_slugid("build_linux_release")}
               - {$eval: as_slugid("strip_windows_binary")}
+              - {$eval: as_slugid("build_documentation")}
             created: {$fromNow: ''}
             deadline: {$fromNow: '2 hour'}
             provisionerId: proj-relman
@@ -254,13 +285,25 @@ tasks:
               features:
                 taskclusterProxy: true
               maxRunTime: 3600
-              image: "mozilla/taskboot:0.2.5"
+              image: "mozilla/taskboot:0.2.7"
               env:
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
                 - "/bin/sh"
                 - "-cx"
-                - "taskboot github-release mozilla/rust-code-analysis ${version} --asset ${linux_artifact}:public/${linux_artifact} ${windows_artifact}:public/${windows_artifact}"
+                - "git config --global user.email moz-tools-bot@moz.tools &&
+                   git config --global user.name moz.tools Bot &&
+                   git clone --recursive --quiet ${repository} &&
+                   cd rust-code-analysis &&
+                   taskboot retrieve-artifact --output-path=. \
+                            --artifacts=public/book.tar.gz &&
+                   tar xfz book.tar.gz -C rust-code-analysis-book &&
+                   ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
+                   taskboot git-push --force-push \
+                            github.com/mozilla/rust-code-analysis \
+                            moz-tools-bot \
+                            gh-pages &&
+                   taskboot github-release mozilla/rust-code-analysis ${version} --asset ${linux_artifact}:public/${linux_artifact} ${windows_artifact}:public/${windows_artifact}"
             metadata:
               name: "rust-code-analysis release publication ${version}"
               description: rust-code-analysis release publication on Github

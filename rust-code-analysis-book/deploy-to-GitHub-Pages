@@ -3,10 +3,8 @@
 [ -d /tmp/book ] || (git worktree prune && git branch -D gh-pages)
 
 git worktree add -b gh-pages /tmp/book
-mdbook build
 rm -rf /tmp/book/* # this won't delete the .git directory
-cp -rp book/* /tmp/book/
+cp -rp rust-code-analysis-book/book/* /tmp/book/
 cd /tmp/book
 git add -A
 git commit -m "Deploy rust-code-analysis"
-git push -f origin gh-pages
