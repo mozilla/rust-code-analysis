@@ -241,14 +241,14 @@ tasks:
           workerType: ci
           payload:
             maxRunTime: 3600
-            image: "mozilla/taskboot:0.2.5"
+            image: "mozilla/taskboot:0.2.7"
             env:
               WINDOWS_BIN: rust-code-analysis-cli.exe
             command:
                 - "/bin/sh"
                 - "-cx"
                 - "taskboot retrieve-artifact --output-path=. \
-                            --artifacts=$WINDOWS_BIN:public/$WINDOWS_BIN &&
+                            --artifacts=public/$WINDOWS_BIN &&
                    apk add --no-cache zip &&
                    strip $WINDOWS_BIN &&
                    zip -9 /rust-code-analysis-win-x86_64.zip $WINDOWS_BIN"
