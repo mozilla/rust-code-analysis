@@ -4,6 +4,7 @@ use tree_sitter::Language;
 
 use crate::alterator::Alterator;
 use crate::checker::Checker;
+use crate::cognitive::Cognitive;
 use crate::cyclomatic::Cyclomatic;
 use crate::exit::Exit;
 use crate::fn_args::NArgs;
@@ -32,7 +33,7 @@ pub trait Callback {
 }
 
 #[doc(hidden)]
-pub trait CodeMetricsT: Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi {}
+pub trait CodeMetricsT: Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi {}
 
 #[doc(hidden)]
 pub trait TSLanguage {
@@ -47,6 +48,7 @@ pub trait TSLanguage {
 pub trait ParserTrait {
     type Checker: Alterator + Checker;
     type Getter: Getter;
+    type Cognitive: Cognitive;
     type Cyclomatic: Cyclomatic;
     type Halstead: Halstead;
     type Loc: Loc;

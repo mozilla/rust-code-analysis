@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use crate::checker::Checker;
 use crate::node::Node;
 
+use crate::cognitive::{self, Cognitive};
 use crate::cyclomatic::{self, Cyclomatic};
 use crate::exit::{self, Exit};
 use crate::fn_args::{self, NArgs};
@@ -62,6 +63,7 @@ pub struct CodeMetrics {
     pub nargs: fn_args::Stats,
     /// `NExits` data
     pub nexits: exit::Stats,
+    pub cognitive: cognitive::Stats,
     /// `Cyclomatic` data
     pub cyclomatic: cyclomatic::Stats,
     /// `Halstead` data
@@ -77,6 +79,7 @@ pub struct CodeMetrics {
 impl Default for CodeMetrics {
     fn default() -> Self {
         Self {
+            cognitive: cognitive::Stats::default(),
             cyclomatic: cyclomatic::Stats::default(),
             halstead: halstead::Stats::default(),
             loc: loc::Stats::default(),
@@ -92,6 +95,7 @@ impl fmt::Display for CodeMetrics {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "{}", self.nargs)?;
         writeln!(f, "{}", self.nexits)?;
+        writeln!(f, "{}", self.cognitive)?;
         writeln!(f, "{}", self.cyclomatic)?;
         writeln!(f, "{}", self.halstead)?;
         writeln!(f, "{}", self.loc)?;
@@ -102,6 +106,7 @@ impl fmt::Display for CodeMetrics {
 
 impl CodeMetrics {
     pub fn merge(&mut self, other: &CodeMetrics) {
+        self.cognitive.merge(&other.cognitive);
         self.cyclomatic.merge(&other.cyclomatic);
         self.halstead.merge(&other.halstead);
         self.loc.merge(&other.loc);
@@ -261,6 +266,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<F
 
         if let Some(state) = state_stack.last_mut() {
             let last = &mut state.space;
+            T::Cognitive::compute(&node, &mut last.metrics.cognitive);
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
             T::Halstead::compute(&node, code, &mut state.halstead_maps);
             T::Loc::compute(&node, &mut last.metrics.loc, func_space, unit);

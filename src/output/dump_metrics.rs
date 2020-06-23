@@ -1,6 +1,7 @@
 use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
 
+use crate::cognitive;
 use crate::cyclomatic;
 use crate::exit;
 use crate::fn_args;
@@ -98,6 +99,7 @@ fn dump_metrics(
     writeln!(stdout, "metrics")?;
 
     let prefix = format!("{}{}", prefix, pref_child);
+    dump_cognitive(&metrics.cognitive, &prefix, false, stdout)?;
     dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout)?;
     dump_nargs(&metrics.nargs, &prefix, false, stdout)?;
     dump_nexits(&metrics.nexits, &prefix, false, stdout)?;
@@ -105,6 +107,24 @@ fn dump_metrics(
     dump_loc(&metrics.loc, &prefix, false, stdout)?;
     dump_nom(&metrics.nom, &prefix, false, stdout)?;
     dump_mi(&metrics.mi, &prefix, true, stdout)
+}
+
+fn dump_cognitive(
+    stats: &cognitive::Stats,
+    prefix: &str,
+    last: bool,
+    stdout: &mut StandardStreamLock,
+) -> std::io::Result<()> {
+    let pref = if last { "`- " } else { "|- " };
+
+    color!(stdout, Blue);
+    write!(stdout, "{}{}", prefix, pref)?;
+
+    color!(stdout, Green, true);
+    write!(stdout, "cognitive: ")?;
+
+    color!(stdout, White);
+    writeln!(stdout, "{}", stats.cognitive())
 }
 
 fn dump_cyclomatic(

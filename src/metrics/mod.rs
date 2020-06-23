@@ -1,3 +1,4 @@
+pub mod cognitive;
 pub mod cyclomatic;
 pub mod exit;
 pub mod fn_args;
