@@ -3,7 +3,6 @@ use petgraph::{
 };
 use std::collections::{hash_map, HashMap, HashSet};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
 
 use crate::langs::*;
 use crate::languages::language_preproc::*;
@@ -178,12 +177,11 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
 }
 
 /// Extracts preprocessor data from a `C/C++` file
-/// and inserts these data in a [`PreprocResults`]
-/// object shared among threads.
+/// and inserts these data in a [`PreprocResults`] object.
 ///
 ///
 /// [`PreprocResults`]: struct.PreprocResults.html
-pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: Arc<Mutex<PreprocResults>>) {
+pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: &mut PreprocResults) {
     let node = parser.get_root();
     let mut cursor = node.walk();
     let mut stack = Vec::new();
@@ -238,6 +236,5 @@ pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: Arc<Mutex<Pre
         }
     }
 
-    let mut results = results.lock().unwrap();
     results.files.insert(path.to_path_buf(), file_result);
 }

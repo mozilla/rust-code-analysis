@@ -132,10 +132,11 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
     } else if cfg.preproc_lock.is_some() {
         if let Some(language) = guess_language(&source, &path).0 {
             if language == LANG::Cpp {
+                let mut results = cfg.preproc_lock.as_ref().unwrap().lock().unwrap();
                 preprocess(
                     &PreprocParser::new(source, &path, None),
                     &path,
-                    cfg.preproc_lock.as_ref().unwrap().clone(),
+                    &mut results,
                 );
             }
         }
