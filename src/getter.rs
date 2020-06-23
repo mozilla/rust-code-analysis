@@ -226,6 +226,20 @@ impl Getter for TsxCode {
 }
 
 impl Getter for RustCode {
+    fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+        // we're in a function or in a class or an impl
+        // for an impl: we've  'impl ... type {...'
+        if let Some(name) = node
+            .child_by_field_name("name")
+            .or(node.child_by_field_name("type"))
+        {
+            let code = &code[name.start_byte()..name.end_byte()];
+            std::str::from_utf8(code).ok()
+        } else {
+            Some("<anonymous>")
+        }
+    }
+
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Rust::*;
 
