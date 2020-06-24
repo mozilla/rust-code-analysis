@@ -184,7 +184,7 @@ fn finalize<'a>(space_stack: &mut Vec<FuncSpace<'a>>, diff_level: usize) {
 /// let source_as_vec = source_code.as_bytes().to_vec();
 ///
 /// // The parser of the code, in this case a CPP parser
-/// let parser = CppParser::new(source_as_vec.clone(), &path, None);
+/// let parser = CppParser::new(source_as_vec, &path, None);
 ///
 /// // Gets the function space data of the code contained in foo.c
 /// metrics(&parser, &path).unwrap();
