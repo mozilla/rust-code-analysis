@@ -1523,11 +1523,7 @@ dependencies = [
  "pretty_assertions",
  "regex",
  "serde",
- "serde_cbor",
- "serde_json",
- "serde_yaml",
  "termcolor",
- "toml",
  "tree-sitter",
 ]
 
@@ -1544,9 +1540,13 @@ dependencies = [
  "globset",
  "num_cpus",
  "pretty_assertions",
+ "regex",
  "rust-code-analysis",
  "serde",
+ "serde_cbor",
  "serde_json",
+ "serde_yaml",
+ "toml",
  "walkdir",
 ]
 
