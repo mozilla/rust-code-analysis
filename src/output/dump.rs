@@ -13,7 +13,7 @@ use crate::traits::*;
 /// ```
 /// use std::path::PathBuf;
 ///
-/// use rust_code_analysis::{dump_node, CppParser, TSParserTrait};
+/// use rust_code_analysis::{dump_node, CppParser, ParserTrait};
 ///
 /// # fn main() {
 /// let source_code = "int a = 42;";
@@ -172,7 +172,7 @@ impl Callback for Dump {
     type Res = std::io::Result<()>;
     type Cfg = DumpCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         dump_node(
             &parser.get_code(),
             &parser.get_root(),

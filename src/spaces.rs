@@ -174,7 +174,7 @@ fn finalize<'a>(space_stack: &mut Vec<FuncSpace<'a>>, diff_level: usize) {
 /// ```
 /// use std::path::PathBuf;
 ///
-/// use rust_code_analysis::{CppParser, metrics, TSParserTrait};
+/// use rust_code_analysis::{CppParser, metrics, ParserTrait};
 ///
 /// # fn main() {
 /// let source_code = "int a = 42;";
@@ -190,7 +190,7 @@ fn finalize<'a>(space_stack: &mut Vec<FuncSpace<'a>>, diff_level: usize) {
 /// metrics(&parser, &path).unwrap();
 /// # }
 /// ```
-pub fn metrics<'a, T: TSParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace<'a>> {
+pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace<'a>> {
     let code = parser.get_code();
     let node = parser.get_root();
     let mut cursor = node.walk();
@@ -282,7 +282,7 @@ impl Callback for Metrics {
     type Res = std::io::Result<()>;
     type Cfg = MetricsCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {
             if let Some(output_format) = cfg.output_format {
                 dump_formats(

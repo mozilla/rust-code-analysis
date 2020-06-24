@@ -216,10 +216,11 @@ macro_rules! mk_code {
                     stringify!($camel)
                 }
             }
+
             #[doc = "The `"]
             #[doc = $docname]
             #[doc = "` language parser."]
-            pub type $parser = TSParser<$code>;
+            pub type $parser = Parser<$code>;
         )*
     };
 }

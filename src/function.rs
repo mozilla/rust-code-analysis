@@ -26,7 +26,7 @@ pub struct FunctionSpan {
 /// Returns a vector containing the [`FunctionSpan`] of each function
 ///
 /// [`FunctionSpan`]: struct.FunctionSpan.html
-pub fn function<T: TSParserTrait>(parser: &T) -> Vec<FunctionSpan> {
+pub fn function<T: ParserTrait>(parser: &T) -> Vec<FunctionSpan> {
     let root = parser.get_root();
     let code = parser.get_code();
     let mut spans = Vec::new();
@@ -122,7 +122,7 @@ impl Callback for Function {
     type Res = std::io::Result<()>;
     type Cfg = FunctionCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         dump_spans(function(parser), cfg.path)
     }
 }

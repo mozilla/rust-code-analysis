@@ -8,7 +8,7 @@ use crate::traits::*;
 
 /// Counts the types of nodes specified in the input slice
 /// and the number of nodes in a code.
-pub fn count<'a, T: TSParserTrait>(parser: &'a T, filters: &[String]) -> (usize, usize) {
+pub fn count<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> (usize, usize) {
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
     let mut cursor = node.walk();
@@ -58,7 +58,7 @@ impl Callback for Count {
     type Res = std::io::Result<()>;
     type Cfg = CountCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         let (good, total) = count(parser, &cfg.filters);
         let mut results = cfg.stats.lock().unwrap();
         results.good += good;

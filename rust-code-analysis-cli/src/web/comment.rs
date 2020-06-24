@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use rust_code_analysis::{rm_comments, Callback, TSParserTrait};
+use rust_code_analysis::{rm_comments, Callback, ParserTrait};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WebCommentPayload {
@@ -30,7 +30,7 @@ impl Callback for WebCommentCallback {
     type Res = WebCommentResponse;
     type Cfg = WebCommentCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         WebCommentResponse {
             id: cfg.id,
             code: rm_comments(parser),

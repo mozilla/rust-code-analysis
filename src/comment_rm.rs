@@ -8,7 +8,7 @@ use crate::traits::*;
 const CR: [u8; 8192] = [b'\n'; 8192];
 
 /// Removes comments from a code.
-pub fn rm_comments<T: TSParserTrait>(parser: &T) -> Option<Vec<u8>> {
+pub fn rm_comments<T: ParserTrait>(parser: &T) -> Option<Vec<u8>> {
     let node = parser.get_root();
     let mut stack = Vec::new();
     let mut cursor = node.walk();
@@ -76,7 +76,7 @@ impl Callback for CommentRm {
     type Res = std::io::Result<()>;
     type Cfg = CommentRmCfg;
 
-    fn call<T: TSParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
+    fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(new_source) = rm_comments(parser) {
             if cfg.in_place {
                 write_file(&cfg.path, &new_source)?;
