@@ -11,7 +11,37 @@ use crate::nom;
 
 use crate::spaces::{CodeMetrics, FuncSpace};
 
-pub(crate) fn dump_root(space: &FuncSpace) -> std::io::Result<()> {
+/// Dumps the metrics of a code.
+///
+/// Returns a [`Result`] value, when an error occurs.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+///
+/// use rust_code_analysis::{dump_root, metrics, CppParser, ParserTrait};
+///
+/// # fn main() {
+/// let source_code = "int a = 42;";
+///
+/// // The path to a dummy file used to contain the source code
+/// let path = PathBuf::from("foo.c");
+/// let source_as_vec = source_code.as_bytes().to_vec();
+///
+/// // The parser of the code, in this case a CPP parser
+/// let parser = CppParser::new(source_as_vec, &path, None);
+///
+/// // Compute metrics
+/// let space = metrics(&parser, &path).unwrap();
+///
+/// // Dump all metrics
+/// dump_root(&space).unwrap();
+/// # }
+/// ```
+///
+/// [`Result`]: #variant.Result
+pub fn dump_root(space: &FuncSpace) -> std::io::Result<()> {
     let stdout = StandardStream::stdout(ColorChoice::Always);
     let mut stdout = stdout.lock();
     dump_space(&space, "", true, &mut stdout)?;
