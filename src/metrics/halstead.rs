@@ -5,6 +5,7 @@ use std::fmt;
 use tree_sitter::Node;
 
 use crate::checker::Checker;
+use crate::getter::Getter;
 
 use crate::*;
 
@@ -180,188 +181,66 @@ where
     fn compute<'a>(_node: &Node<'a>, _code: &'a [u8], _stats: &mut Stats<'a>) {}
 }
 
+#[doc(hidden)]
+pub enum HalsteadType {
+    Operator,
+    Operand,
+    Unknown,
+}
+
 #[inline(always)]
 fn get_id<'a>(node: &Node<'a>, code: &'a [u8]) -> &'a [u8] {
     &code[node.start_byte()..node.end_byte()]
 }
 
+#[inline(always)]
+fn compute_halstead<'a, T: Getter>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+    match T::get_op_type(&node) {
+        HalsteadType::Operator => *stats.operators.entry(node.kind_id()).or_insert(0) += 1,
+        HalsteadType::Operand => *stats.operands.entry(get_id(node, code)).or_insert(0) += 1,
+        _ => {}
+    }
+}
+
 impl Halstead for PythonCode {
     fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        use Python::*;
-
-        let id = node.kind_id();
-        match id.into() {
-            Import | DOT | From | LPAREN | COMMA | As | STAR | GTGT | Assert | COLONEQ | Return
-            | Del | Raise | Pass | Break | Continue | If | Elif | Else | Async | For | In
-            | While | Try | Except | Finally | With | DASHGT | EQ | Global | Exec | AT | Not
-            | And | Or | PLUS | DASH | SLASH | PERCENT | SLASHSLASH | STARSTAR | PIPE | AMP
-            | CARET | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ | GT | LTGT | Is | PLUSEQ
-            | DASHEQ | STAREQ | SLASHEQ | ATEQ | SLASHSLASHEQ | PERCENTEQ | STARSTAREQ | GTGTEQ
-            | LTLTEQ | AMPEQ | CARETEQ | PIPEEQ | Yield | LBRACK | LBRACE | Await | Await2
-            | Print => {
-                *stats.operators.entry(id).or_insert(0) += 1;
-            }
-            Identifier | Integer | Float | True | False | None => {
-                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-            }
-            String => {
-                // check if we've a documentation string or a multiline comment
-                if let Some(parent) = node.parent() {
-                    if parent.kind_id() != ExpressionStatement || parent.child_count() != 1 {
-                        *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-                    }
-                }
-            }
-            _ => {}
-        }
+        compute_halstead::<Self>(node, code, stats);
     }
 }
 
 impl Halstead for MozjsCode {
     fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        use Mozjs::*;
-
-        let id = node.kind_id();
-        match id.into() {
-            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
-            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
-            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
-            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
-            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
-            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
-            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
-                *stats.operators.entry(id).or_insert(0) += 1;
-            }
-            Identifier | Identifier2 | String | Number | True | False | Null | Void | This
-            | Super | Undefined | Set | Get | Typeof | Instanceof => {
-                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-            }
-            _ => {}
-        }
+        compute_halstead::<Self>(node, code, stats);
     }
 }
 
 impl Halstead for JavascriptCode {
     fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        use Javascript::*;
-
-        let id = node.kind_id();
-        match id.into() {
-            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
-            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
-            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
-            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
-            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
-            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
-            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
-                *stats.operators.entry(id).or_insert(0) += 1;
-            }
-            Identifier | Identifier2 | String | Number | True | False | Null | Void | This
-            | Super | Undefined | Set | Get | Typeof | Instanceof => {
-                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-            }
-            _ => {}
-        }
+        compute_halstead::<Self>(node, code, stats);
     }
 }
 
 impl Halstead for TypescriptCode {
     fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        use Typescript::*;
-
-        let id = node.kind_id();
-        match id.into() {
-            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
-            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
-            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
-            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
-            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
-            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
-            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
-                *stats.operators.entry(id).or_insert(0) += 1;
-            }
-            Identifier | NestedIdentifier | String | Number | True | False | Null | Void | This
-            | Super | Undefined | Set | Get | Typeof | Instanceof => {
-                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-            }
-            _ => {}
-        }
+        compute_halstead::<Self>(node, code, stats);
     }
 }
 
 impl Halstead for TsxCode {
     fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        use Tsx::*;
-
-        let id = node.kind_id();
-        match id.into() {
-            Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
-            | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
-            | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
-            | With | EQ | AT | AMPAMP | PIPEPIPE | PLUS | DASH | DASHDASH | PLUSPLUS | SLASH
-            | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
-            | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
-            | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
-                *stats.operators.entry(id).or_insert(0) += 1;
-            }
-            Identifier | NestedIdentifier | String | Number | True | False | Null | Void | This
-            | Super | Undefined | Set | Get | Typeof | Instanceof => {
-                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-            }
-            _ => {}
-        }
+        compute_halstead::<Self>(node, code, stats);
     }
 }
 
 impl Halstead for RustCode {
     fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        use Rust::*;
-
-        let id = node.kind_id();
-        match id.into() {
-            LPAREN | LBRACE | LBRACK | EQGT | PLUS | STAR | Async | Await | Continue | For | If
-            | Let | Loop | Match | Return | Unsafe | While | BANG | EQ | COMMA | DASHGT | QMARK
-            | LT | GT | AMP | MutableSpecifier | DOTDOT | DOTDOTEQ | DASH | AMPAMP | PIPEPIPE
-            | PIPE | CARET | EQEQ | BANGEQ | LTEQ | GTEQ | LTLT | GTGT | SLASH | PERCENT
-            | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ | AMPEQ | PIPEEQ | CARETEQ
-            | LTLTEQ | GTGTEQ | Move | DOT | PrimitiveType => {
-                *stats.operators.entry(id).or_insert(0) += 1;
-            }
-            Identifier | StringLiteral | RawStringLiteral | IntegerLiteral | FloatLiteral
-            | BooleanLiteral | Zelf | CharLiteral | UNDERSCORE => {
-                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-            }
-            _ => {}
-        }
+        compute_halstead::<Self>(node, code, stats);
     }
 }
 
 impl Halstead for CppCode {
     fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        use Cpp::*;
-
-        let id = node.kind_id();
-
-        match id.into() {
-            DOT | LPAREN | LPAREN2 | COMMA | STAR | GTGT | COLON | SEMI | Return | Break
-            | Continue | If | Else | Switch | Case | Default | For | While | Goto | Do | Delete
-            | New | Try | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | DASHDASH | DASHGT
-            | PLUS | PLUSPLUS | SLASH | PERCENT | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ
-            | BANGEQ | GTEQ | GT | GT2 | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ | GTGTEQ
-            | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ | LBRACK | LBRACE | QMARK | COLONCOLON
-            | PrimitiveType | TypeSpecifier | Sizeof => {
-                *stats.operators.entry(id).or_insert(0) += 1;
-            }
-            Identifier | TypeIdentifier | FieldIdentifier | RawStringLiteral | StringLiteral
-            | NumberLiteral | True | False | Null | Nullptr | DOTDOTDOT => {
-                *stats.operands.entry(get_id(node, code)).or_insert(0) += 1;
-            }
-            _ => {}
-        }
+        compute_halstead::<Self>(node, code, stats);
     }
 }
 
