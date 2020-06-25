@@ -258,13 +258,20 @@ macro_rules! color {
 #[macro_export]
 macro_rules! check_metrics {
     ($source: expr, $file: expr, $parser: ident, $metric: ident,
-     [ $( ( $func: ident, $true_value: expr $(,$type: ty)? )$(,)* )* ]) => {
+     [ $( ( $func_int: ident, $true_int_value: expr $(,$type_int: ty)? )$(,)* )* ]$(,)*
+     $( [ $( ( $func_float: ident, $true_float_value: expr )$(,)* )* ] )?) => {
         {
             let path = PathBuf::from($file);
             let parser = $parser::new($source.to_string().into_bytes(), &path, None);
             let func_space = metrics(&parser, &path).unwrap();
 
-            $( assert_eq!(func_space.metrics.$metric.$func() $(as $type)?, $true_value); )*
+            $( assert_eq!(func_space.metrics.$metric.$func_int() $(as $type_int)?, $true_int_value); )*
+
+            $(
+                $(
+                    assert!((func_space.metrics.$metric.$func_float() - $true_float_value).abs() < f64::EPSILON);
+                )*
+            )?
         }
     };
 }
