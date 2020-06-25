@@ -261,16 +261,20 @@ mod tests {
     #[test]
     fn test_halstead_operators_and_operands() {
         check_metrics!(
-            "def f():\n
-                 pass\n",
+            "def foo():\n
+                 def bar():\n
+                     def toto():\n
+                        a = 1 + 1\n
+                     b = 2 + 2\n
+                 c = 3 + 3\n",
             "foo.py",
             PythonParser,
             halstead,
             [
-                (u_operators, 2, usize),
-                (operators, 2, usize),
-                (u_operands, 1, usize),
-                (operands, 1, usize)
+                (u_operators, 3, usize), // def, =, +
+                (operators, 9, usize),   // def, def, def, =, =, =, +, +, +
+                (u_operands, 9, usize),  // foo, bar, toto, a, b, c, 1, 2, 3
+                (operands, 12, usize)    // foo, bar, toto, a, b, c, 1, 1, 2, 2, 3, 3
             ]
         );
     }
