@@ -265,7 +265,7 @@ mod tests {
                  def bar():\n
                      def toto():\n
                         a = 1 + 1\n
-                     b = 2 + 2\n
+                     b = 2 + a\n
                  c = 3 + 3\n",
             "foo.py",
             PythonParser,
@@ -274,7 +274,7 @@ mod tests {
                 (u_operators, 3, usize), // def, =, +
                 (operators, 9, usize),   // def, def, def, =, =, =, +, +, +
                 (u_operands, 9, usize),  // foo, bar, toto, a, b, c, 1, 2, 3
-                (operands, 12, usize)    // foo, bar, toto, a, b, c, 1, 1, 2, 2, 3, 3
+                (operands, 12, usize)    // foo, bar, toto, a, b, c, 1, 1, 2, a, 3, 3
             ]
         );
     }
