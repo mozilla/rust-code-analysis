@@ -9,7 +9,7 @@ use crate::*;
 ///
 /// This metric counts the number of possible exit points
 /// from a function/method.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Stats {
     exit: usize,
 }

@@ -9,7 +9,7 @@ use crate::*;
 ///
 /// This metric counts the number of arguments
 /// of a function/method.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Stats {
     n_args: usize,
 }

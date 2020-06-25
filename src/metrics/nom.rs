@@ -7,7 +7,7 @@ use crate::checker::Checker;
 use crate::*;
 
 /// The `Nom` metric suite.
-#[derive(Default, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct Stats {
     functions: usize,
     closures: usize,

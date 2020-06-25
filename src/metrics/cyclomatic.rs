@@ -6,7 +6,7 @@ use crate::checker::Checker;
 use crate::*;
 
 /// The `Cyclomatic` metric.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Stats {
     cyclomatic: f64,
     n: usize,

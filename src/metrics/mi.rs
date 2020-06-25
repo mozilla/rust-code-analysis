@@ -11,7 +11,7 @@ use crate::checker::Checker;
 use crate::*;
 
 /// The `Mi` metric.
-#[derive(Default, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct Stats {
     halstead_length: f64,
     halstead_vocabulary: f64,
@@ -47,12 +47,7 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
-    /// Merges a second `Mi` metric into the first one
-    pub fn merge(&mut self, other: &Stats) {
-        self.halstead_length += other.halstead_length;
-        self.halstead_vocabulary += other.halstead_vocabulary;
-        self.halstead_volume = self.halstead_length * self.halstead_vocabulary.log2();
-    }
+    pub(crate) fn merge(&mut self, _other: &Stats) {}
 
     /// Returns the `Mi` metric calculated using the original formula
     #[inline(always)]
@@ -89,10 +84,9 @@ where
     Self: Checker,
 {
     fn compute<'a>(
-        _node: &Node<'a>,
         loc: &loc::Stats,
         cyclomatic: &cyclomatic::Stats,
-        halstead: &halstead::Stats<'a>,
+        halstead: &halstead::Stats,
         stats: &mut Stats,
     ) {
         stats.halstead_length = halstead.length();
