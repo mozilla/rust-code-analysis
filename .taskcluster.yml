@@ -40,10 +40,7 @@ tasks:
             - "/bin/bash"
             - "-cx"
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
-               rustup toolchain install stable &&
-               rustup default stable &&
-               rustup component add clippy &&
-               rustup component add rustfmt &&
+               rustup component add clippy rustfmt &&
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
@@ -93,7 +90,7 @@ tasks:
         workerType: ci
         payload:
           maxRunTime: 3600
-          image: "rust:buster"
+          image: "rustlang/rust:nightly"
           env:
             CODECOV_TOKEN: 4df01912-087e-489a-be28-25aa911cb9d2
             CARGO_INCREMENTAL: 0
@@ -104,8 +101,6 @@ tasks:
             - "-cx"
             - "apt-get -qq update &&
                apt-get -qq install -y zip &&
-               rustup toolchain install nightly &&
-               rustup default nightly &&
                curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-linux-x86_64.tar.bz2 | tar jxf - &&
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
