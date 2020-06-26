@@ -115,12 +115,12 @@ impl CodeMetrics {
 
 /// Function space data.
 #[derive(Debug, Clone, Serialize)]
-pub struct FuncSpace<'a> {
+pub struct FuncSpace {
     /// The name of a function space
     ///
     /// If `None`, an error is occured in parsing
     /// the name of a function space
-    pub name: Option<&'a str>,
+    pub name: Option<String>,
     /// The first line of a function space
     pub start_line: usize,
     /// The last line of a function space
@@ -128,13 +128,13 @@ pub struct FuncSpace<'a> {
     /// The space kind
     pub kind: SpaceKind,
     /// All subspaces contained in a function space
-    pub spaces: Vec<FuncSpace<'a>>,
+    pub spaces: Vec<FuncSpace>,
     /// All metrics of a function space
     pub metrics: CodeMetrics,
 }
 
-impl<'a> FuncSpace<'a> {
-    fn new<T: Getter>(node: &Node<'a>, code: &'a [u8], kind: SpaceKind) -> Self {
+impl FuncSpace {
+    fn new<T: Getter>(node: &Node, code: &[u8], kind: SpaceKind) -> Self {
         let (start_position, end_position) = match kind {
             SpaceKind::Unit => {
                 if node.object().child_count() == 0 {
@@ -152,7 +152,7 @@ impl<'a> FuncSpace<'a> {
             ),
         };
         Self {
-            name: T::get_func_space_name(&node, code),
+            name: T::get_func_space_name(&node, code).map(|name| name.to_string()),
             spaces: Vec::new(),
             metrics: CodeMetrics::default(),
             kind,
@@ -196,7 +196,7 @@ fn finalize<'a, T: ParserTrait>(state_stack: &mut Vec<State<'a>>, diff_level: us
 
 #[derive(Debug, Clone)]
 struct State<'a> {
-    space: FuncSpace<'a>,
+    space: FuncSpace,
     halstead_maps: HalsteadMaps<'a>,
 }
 
@@ -223,7 +223,7 @@ struct State<'a> {
 /// metrics(&parser, &path).unwrap();
 /// # }
 /// ```
-pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace<'a>> {
+pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace> {
     let code = parser.get_code();
     let node = parser.get_root();
     let mut cursor = node.object().walk();
@@ -284,7 +284,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<F
     finalize::<T>(&mut state_stack, std::usize::MAX);
 
     state_stack.pop().map(|mut state| {
-        state.space.name = path.to_str();
+        state.space.name = path.to_str().map(|name| name.to_string());
         state.space
     })
 }

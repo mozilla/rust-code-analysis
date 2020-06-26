@@ -65,7 +65,7 @@ fn dump_space(
     write!(stdout, "{}: ", space.kind)?;
 
     color!(stdout, Cyan, true);
-    write!(stdout, "{}", space.name.map_or("", |name| name))?;
+    write!(stdout, "{}", space.name.as_ref().map_or("", |name| &name))?;
 
     color!(stdout, Red, true);
     writeln!(stdout, " (@{})", space.start_line)?;
