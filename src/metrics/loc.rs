@@ -377,7 +377,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_blank_python() {
+    fn test_blank() {
         check_metrics!(
             "\na = 42\n\n",
             "foo.py",
@@ -385,10 +385,7 @@ mod tests {
             loc,
             [(blank, 1, usize)]
         );
-    }
 
-    #[test]
-    fn test_blank_rust() {
         check_metrics!(
             "\nlet a = 42;\n\n",
             "foo.rs",
@@ -404,10 +401,7 @@ mod tests {
             loc,
             [(blank, 0, usize)]
         );
-    }
 
-    #[test]
-    fn test_blank_c() {
         check_metrics!(
             "\nint a = 42;\n\n",
             "foo.c",
@@ -418,7 +412,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cloc_python() {
+    fn test_cloc() {
         check_metrics!(
             "\"\"\"Block comment\nBlock comment\n\"\"\"\n
             # Line Comment\na = 42 # Line Comment\n",
@@ -427,10 +421,7 @@ mod tests {
             loc,
             [(cloc, 5, usize)]
         );
-    }
 
-    #[test]
-    fn test_cloc_rust() {
         check_metrics!(
             "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ let a = 42; // Line Comment\n",
             "foo.rs",
@@ -438,10 +429,7 @@ mod tests {
             loc,
             [(cloc, 5, usize)]
         );
-    }
 
-    #[test]
-    fn test_cloc_c() {
         check_metrics!(
             "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ int a = 42; // Line Comment\n",
             "foo.c",
@@ -452,7 +440,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lloc_python() {
+    fn test_lloc() {
         check_metrics!(
             "for x in range(0,42):\n
                 if x % 2 == 0:\n
@@ -462,10 +450,7 @@ mod tests {
             loc,
             [(lloc, 3, usize)]
         );
-    }
 
-    #[test]
-    fn test_lloc_rust() {
         check_metrics!(
             "for x in 0..42 {\n
                 if x % 2 == 0 {\n
@@ -491,10 +476,7 @@ mod tests {
             loc,
             [(lloc, 3, usize)]
         );
-    }
 
-    #[test]
-    fn test_lloc_c() {
         check_metrics!(
             "for (;;)\n
                 break;\n",
