@@ -486,4 +486,26 @@ mod tests {
             [(lloc, 2, usize)]
         );
     }
+
+    #[test]
+    fn test_general_loc() {
+        check_metrics!(
+            "def func(a,
+                      b,
+                      c):
+                 print(a)
+                 print(b)
+                 print(c)\n",
+            "foo.py",
+            PythonParser,
+            loc,
+            [
+                (sloc, 6, usize),
+                (ploc, 6, usize),
+                (lloc, 3, usize),
+                (cloc, 0, usize),
+                (blank, 0, usize)
+            ]
+        );
+    }
 }
