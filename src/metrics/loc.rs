@@ -379,7 +379,9 @@ mod tests {
     #[test]
     fn test_blank() {
         check_metrics!(
-            "\na = 42\n\n",
+            "
+            a = 42
+            \n",
             "foo.py",
             PythonParser,
             loc,
@@ -387,7 +389,9 @@ mod tests {
         );
 
         check_metrics!(
-            "\nlet a = 42;\n\n",
+            "
+            let a = 42;
+            \n",
             "foo.rs",
             RustParser,
             loc,
@@ -403,7 +407,9 @@ mod tests {
         );
 
         check_metrics!(
-            "\nint a = 42;\n\n",
+            "
+            int a = 42;
+            \n",
             "foo.c",
             CppParser,
             loc,
@@ -414,8 +420,11 @@ mod tests {
     #[test]
     fn test_cloc() {
         check_metrics!(
-            "\"\"\"Block comment\nBlock comment\n\"\"\"\n
-            # Line Comment\na = 42 # Line Comment\n",
+            "\"\"\"Block comment
+            Block comment
+            \"\"\"
+            # Line Comment
+            a = 42 # Line Comment\n",
             "foo.py",
             PythonParser,
             loc,
@@ -423,7 +432,10 @@ mod tests {
         );
 
         check_metrics!(
-            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ let a = 42; // Line Comment\n",
+            "/*Block comment
+             Block Comment*/
+             //Line Comment
+             /*Block Comment*/ let a = 42; // Line Comment\n",
             "foo.rs",
             RustParser,
             loc,
@@ -431,7 +443,10 @@ mod tests {
         );
 
         check_metrics!(
-            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ int a = 42; // Line Comment\n",
+            "/*Block comment
+             Block Comment*/
+             //Line Comment
+             /*Block Comment*/ int a = 42; // Line Comment\n",
             "foo.c",
             CppParser,
             loc,
@@ -442,8 +457,8 @@ mod tests {
     #[test]
     fn test_lloc() {
         check_metrics!(
-            "for x in range(0,42):\n
-                if x % 2 == 0:\n
+            "for x in range(0,42):
+                if x % 2 == 0:
                     print(x)\n",
             "foo.py",
             PythonParser,
@@ -452,10 +467,10 @@ mod tests {
         );
 
         check_metrics!(
-            "for x in 0..42 {\n
-                if x % 2 == 0 {\n
-                    println!(\"{}\", x);\n
-                }\n
+            "for x in 0..42 {
+                if x % 2 == 0 {
+                    println!(\"{}\", x);
+                }
              }\n",
             "foo.rs",
             RustParser,
@@ -465,11 +480,11 @@ mod tests {
 
         // LLOC returns three because there is an empty Rust statement
         check_metrics!(
-            "let a = 42;\n
-             if true {\n
-                42\n
-             } else {\n
-                43\n
+            "let a = 42;
+             if true {
+                42
+             } else {
+                43
              };\n",
             "foo.rs",
             RustParser,
@@ -478,7 +493,7 @@ mod tests {
         );
 
         check_metrics!(
-            "for (;;)\n
+            "for (;;)
                 break;\n",
             "foo.c",
             CppParser,
