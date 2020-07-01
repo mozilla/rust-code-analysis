@@ -535,4 +535,26 @@ mod tests {
             [(lloc, 2, usize)]
         );
     }
+
+    #[test]
+    fn test_general_loc() {
+        check_metrics!(
+            "def func(a,
+                      b,
+                      c):
+                 print(a)
+                 print(b)
+                 print(c)",
+            "foo.py",
+            PythonParser,
+            loc,
+            [
+                (sloc, 6, usize),  // The number of lines is 6
+                (ploc, 6, usize),  // The number of code lines is 6
+                (lloc, 3, usize),  // The number of statements is 3 (print)
+                (cloc, 0, usize),  // The number of comments is 0
+                (blank, 0, usize)  // The number of blank lines is 0
+            ]
+        );
+    }
 }
