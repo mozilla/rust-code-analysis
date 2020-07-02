@@ -251,3 +251,53 @@ impl Halstead for JavaCode {}
 impl Halstead for GoCode {}
 impl Halstead for CssCode {}
 impl Halstead for HtmlCode {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_halstead_operators_and_operands() {
+        check_metrics!(
+            "def foo():\n
+                 def bar():\n
+                     def toto():\n
+                        a = 1 + 1\n
+                     b = 2 + a\n
+                 c = 3 + 3\n",
+            "foo.py",
+            PythonParser,
+            halstead,
+            [
+                (u_operators, 3, usize), // def, =, +
+                (operators, 9, usize),   // def, def, def, =, =, =, +, +, +
+                (u_operands, 9, usize),  // foo, bar, toto, a, b, c, 1, 2, 3
+                (operands, 12, usize)    // foo, bar, toto, a, b, c, 1, 1, 2, a, 3, 3
+            ]
+        );
+    }
+
+    #[test]
+    fn test_halstead_formulas() {
+        check_metrics!(
+            "def f():\n
+                 pass\n",
+            "foo.py",
+            PythonParser,
+            halstead,
+            [(vocabulary, 3, usize), (length, 3, usize)],
+            [
+                (volume, 4.754_887_502_163_468),
+                (estimated_program_length, 2.0),
+                (difficulty, 1.0),
+                (effort, 4.754_887_502_163_468),
+                (purity_ratio, 0.666_666_666_666_666_6),
+                (level, 1.0),
+                (time, 0.264_160_416_786_859_36),
+                (bugs, 0.000_942_552_557_372_941_4)
+            ]
+        );
+    }
+}
