@@ -515,11 +515,11 @@ mod tests {
             PythonParser,
             loc,
             [
-                (sloc, 6, usize),
-                (ploc, 6, usize),
-                (lloc, 3, usize),
-                (cloc, 0, usize),
-                (blank, 0, usize)
+                (sloc, 6, usize),  // The number of lines is 6
+                (ploc, 6, usize),  // The number of code lines is 6
+                (lloc, 3, usize),  // The number of statements is 3 (print)
+                (cloc, 0, usize),  // The number of comments is 0
+                (blank, 0, usize)  // The number of blank lines is 0
             ]
         );
     }
