@@ -9,7 +9,7 @@ use crate::cyclomatic::{self, Cyclomatic};
 use crate::exit::{self, Exit};
 use crate::fn_args::{self, NArgs};
 use crate::getter::Getter;
-use crate::halstead::{self, Halstead};
+use crate::halstead::{self, Halstead, HalsteadMaps};
 use crate::loc::{self, Loc};
 use crate::mi::{self, Mi};
 use crate::nom::{self, Nom};
@@ -57,8 +57,8 @@ impl fmt::Display for SpaceKind {
 }
 
 /// All metrics data.
-#[derive(Debug, Serialize)]
-pub struct CodeMetrics<'a> {
+#[derive(Debug, Clone, Serialize)]
+pub struct CodeMetrics {
     /// `NArgs` data
     pub nargs: fn_args::Stats,
     /// `NExits` data
@@ -66,7 +66,7 @@ pub struct CodeMetrics<'a> {
     /// `Cyclomatic` data
     pub cyclomatic: cyclomatic::Stats,
     /// `Halstead` data
-    pub halstead: halstead::Stats<'a>,
+    pub halstead: halstead::Stats,
     /// `Loc` data
     pub loc: loc::Stats,
     /// `Nom` data
@@ -75,7 +75,7 @@ pub struct CodeMetrics<'a> {
     pub mi: mi::Stats,
 }
 
-impl<'a> Default for CodeMetrics<'a> {
+impl Default for CodeMetrics {
     fn default() -> Self {
         Self {
             cyclomatic: cyclomatic::Stats::default(),
@@ -89,7 +89,7 @@ impl<'a> Default for CodeMetrics<'a> {
     }
 }
 
-impl<'a> fmt::Display for CodeMetrics<'a> {
+impl fmt::Display for CodeMetrics {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "{}", self.nargs)?;
         writeln!(f, "{}", self.nexits)?;
@@ -101,8 +101,8 @@ impl<'a> fmt::Display for CodeMetrics<'a> {
     }
 }
 
-impl<'a> CodeMetrics<'a> {
-    pub fn merge(&mut self, other: &CodeMetrics<'a>) {
+impl CodeMetrics {
+    pub fn merge(&mut self, other: &CodeMetrics) {
         self.cyclomatic.merge(&other.cyclomatic);
         self.halstead.merge(&other.halstead);
         self.loc.merge(&other.loc);
@@ -114,7 +114,7 @@ impl<'a> CodeMetrics<'a> {
 }
 
 /// Function space data.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct FuncSpace<'a> {
     /// The name of a function space
     ///
@@ -130,7 +130,7 @@ pub struct FuncSpace<'a> {
     /// All subspaces contained in a function space
     pub spaces: Vec<FuncSpace<'a>>,
     /// All metrics of a function space
-    pub metrics: CodeMetrics<'a>,
+    pub metrics: CodeMetrics,
 }
 
 impl<'a> FuncSpace<'a> {
@@ -162,16 +162,42 @@ impl<'a> FuncSpace<'a> {
     }
 }
 
-fn finalize<'a>(space_stack: &mut Vec<FuncSpace<'a>>, diff_level: usize) {
+#[inline(always)]
+fn compute_halstead_and_mi<'a, T: ParserTrait>(state: &mut State<'a>) {
+    state
+        .halstead_maps
+        .finalize(&mut state.space.metrics.halstead);
+    T::Mi::compute(
+        &state.space.metrics.loc,
+        &state.space.metrics.cyclomatic,
+        &state.space.metrics.halstead,
+        &mut state.space.metrics.mi,
+    );
+}
+
+fn finalize<'a, T: ParserTrait>(state_stack: &mut Vec<State<'a>>, diff_level: usize) {
     for _ in 0..diff_level {
-        if space_stack.len() <= 1 {
+        if state_stack.len() <= 1 {
             break;
         }
-        let space = space_stack.pop().unwrap();
-        let last_space = space_stack.last_mut().unwrap();
-        last_space.metrics.merge(&space.metrics);
-        last_space.spaces.push(space);
+
+        let mut state = state_stack.pop().unwrap();
+        compute_halstead_and_mi::<T>(&mut state);
+
+        let mut last_state = state_stack.last_mut().unwrap();
+        last_state.halstead_maps.merge(&state.halstead_maps);
+        compute_halstead_and_mi::<T>(&mut last_state);
+
+        // Merge function spaces
+        last_state.space.metrics.merge(&state.space.metrics);
+        last_state.space.spaces.push(state.space);
     }
+}
+
+#[derive(Debug, Clone)]
+struct State<'a> {
+    space: FuncSpace<'a>,
+    halstead_maps: HalsteadMaps<'a>,
 }
 
 /// Returns function space data of the code in a file.
@@ -203,14 +229,14 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<F
     let mut cursor = node.object().walk();
     let mut stack = Vec::new();
     let mut children = Vec::new();
-    let mut space_stack: Vec<FuncSpace> = Vec::new();
+    let mut state_stack: Vec<State> = Vec::new();
     let mut last_level = 0;
 
     stack.push((node, 0));
 
     while let Some((node, level)) = stack.pop() {
         if level < last_level {
-            finalize(&mut space_stack, last_level - level);
+            finalize::<T>(&mut state_stack, last_level - level);
             last_level = level;
         }
 
@@ -220,25 +246,23 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<F
         let unit = kind == SpaceKind::Unit;
 
         let new_level = if func_space {
-            space_stack.push(FuncSpace::new::<T::Getter>(&node, code, kind));
+            let state = State {
+                space: FuncSpace::new::<T::Getter>(&node, code, kind),
+                halstead_maps: HalsteadMaps::new(),
+            };
+            state_stack.push(state);
             last_level = level + 1;
             last_level
         } else {
             level
         };
 
-        if let Some(last) = space_stack.last_mut() {
+        if let Some(state) = state_stack.last_mut() {
+            let last = &mut state.space;
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
-            T::Halstead::compute(&node, code, &mut last.metrics.halstead);
+            T::Halstead::compute(&node, code, &mut state.halstead_maps);
             T::Loc::compute(&node, &mut last.metrics.loc, func_space, unit);
             T::Nom::compute(&node, &mut last.metrics.nom);
-            T::Mi::compute(
-                &node,
-                &last.metrics.loc,
-                &last.metrics.cyclomatic,
-                &last.metrics.halstead,
-                &mut last.metrics.mi,
-            );
             T::NArgs::compute(&node, &mut last.metrics.nargs);
             T::Exit::compute(&node, &mut last.metrics.nexits);
         }
@@ -257,11 +281,11 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<F
         }
     }
 
-    finalize(&mut space_stack, std::usize::MAX);
+    finalize::<T>(&mut state_stack, std::usize::MAX);
 
-    space_stack.pop().map(|mut space| {
-        space.name = path.to_str();
-        space
+    state_stack.pop().map(|mut state| {
+        state.space.name = path.to_str();
+        state.space
     })
 }
 

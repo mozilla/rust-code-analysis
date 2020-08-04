@@ -7,7 +7,7 @@ use std::fmt;
 use crate::*;
 
 /// The `Loc` metric suite.
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct Stats {
     start: usize,
     end: usize,

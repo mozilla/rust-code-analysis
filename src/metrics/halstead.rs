@@ -9,13 +9,57 @@ use crate::getter::Getter;
 use crate::*;
 
 /// The `Halstead` metric suite.
-#[derive(Default, Debug)]
-pub struct Stats<'a> {
+#[derive(Default, Clone, Debug)]
+pub struct Stats {
+    u_operators: u64,
+    operators: u64,
+    u_operands: u64,
+    operands: u64,
+}
+
+/// Specifies the type of nodes accepted by the `Halstead` metric.
+pub enum HalsteadType {
+    /// The node is an `Halstead` operator
+    Operator,
+    /// The node is an `Halstead` operand
+    Operand,
+    /// The node is unknown to the `Halstead` metric
+    Unknown,
+}
+
+#[doc(hidden)]
+#[derive(Debug, Default, Clone)]
+pub struct HalsteadMaps<'a> {
     operators: FxHashMap<u16, u64>,
     operands: FxHashMap<&'a [u8], u64>,
 }
 
-impl Serialize for Stats<'_> {
+impl<'a> HalsteadMaps<'a> {
+    pub(crate) fn new() -> Self {
+        HalsteadMaps {
+            operators: FxHashMap::default(),
+            operands: FxHashMap::default(),
+        }
+    }
+
+    pub(crate) fn merge(&mut self, other: &HalsteadMaps<'a>) {
+        for (k, v) in other.operators.iter() {
+            *self.operators.entry(*k).or_insert(0) += v;
+        }
+        for (k, v) in other.operands.iter() {
+            *self.operands.entry(*k).or_insert(0) += v;
+        }
+    }
+
+    pub(crate) fn finalize(&self, stats: &mut Stats) {
+        stats.u_operators = self.operators.len() as u64;
+        stats.operators = self.operators.values().sum::<u64>();
+        stats.u_operands = self.operands.len() as u64;
+        stats.operands = self.operands.values().sum::<u64>();
+    }
+}
+
+impl Serialize for Stats {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -39,7 +83,7 @@ impl Serialize for Stats<'_> {
     }
 }
 
-impl<'a> fmt::Display for Stats<'a> {
+impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -75,39 +119,31 @@ impl<'a> fmt::Display for Stats<'a> {
     }
 }
 
-impl<'a> Stats<'a> {
-    /// Merges a second `Halstead` metric suite into the first one
-    pub fn merge(&mut self, other: &Stats<'a>) {
-        for (k, v) in other.operators.iter() {
-            *self.operators.entry(*k).or_insert(0) += v;
-        }
-        for (k, v) in other.operands.iter() {
-            *self.operands.entry(*k).or_insert(0) += v;
-        }
-    }
+impl Stats {
+    pub(crate) fn merge(&mut self, _other: &Stats) {}
 
     /// Returns `η1`, the number of distinct operators
     #[inline(always)]
     pub fn u_operators(&self) -> f64 {
-        self.operators.len() as f64
+        self.u_operators as f64
     }
 
     /// Returns `N1`, the number of total operators
     #[inline(always)]
     pub fn operators(&self) -> f64 {
-        self.operators.values().sum::<u64>() as f64
+        self.operators as f64
     }
 
     /// Returns `η2`, the number of distinct operands
     #[inline(always)]
     pub fn u_operands(&self) -> f64 {
-        self.operands.len() as f64
+        self.u_operands as f64
     }
 
     /// Returns `N2`, the number of total operands
     #[inline(always)]
     pub fn operands(&self) -> f64 {
-        self.operands.values().sum::<u64>() as f64
+        self.operands as f64
     }
 
     /// Returns the program length
@@ -177,14 +213,7 @@ pub trait Halstead
 where
     Self: Checker,
 {
-    fn compute<'a>(_node: &Node<'a>, _code: &'a [u8], _stats: &mut Stats<'a>) {}
-}
-
-#[doc(hidden)]
-pub enum HalsteadType {
-    Operator,
-    Operand,
-    Unknown,
+    fn compute<'a>(_node: &Node<'a>, _code: &'a [u8], _halstead_maps: &mut HalsteadMaps<'a>) {}
 }
 
 #[inline(always)]
@@ -193,53 +222,67 @@ fn get_id<'a>(node: &Node<'a>, code: &'a [u8]) -> &'a [u8] {
 }
 
 #[inline(always)]
-fn compute_halstead<'a, T: Getter>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
+fn compute_halstead<'a, T: Getter>(
+    node: &Node<'a>,
+    code: &'a [u8],
+    halstead_maps: &mut HalsteadMaps<'a>,
+) {
     match T::get_op_type(&node) {
-        HalsteadType::Operator => *stats.operators.entry(node.object().kind_id()).or_insert(0) += 1,
-        HalsteadType::Operand => *stats.operands.entry(get_id(node, code)).or_insert(0) += 1,
+        HalsteadType::Operator => {
+            *halstead_maps
+                .operators
+                .entry(node.object().kind_id())
+                .or_insert(0) += 1;
+        }
+        HalsteadType::Operand => {
+            *halstead_maps
+                .operands
+                .entry(get_id(node, code))
+                .or_insert(0) += 1;
+        }
         _ => {}
     }
 }
 
 impl Halstead for PythonCode {
-    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        compute_halstead::<Self>(node, code, stats);
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
     }
 }
 
 impl Halstead for MozjsCode {
-    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        compute_halstead::<Self>(node, code, stats);
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
     }
 }
 
 impl Halstead for JavascriptCode {
-    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        compute_halstead::<Self>(node, code, stats);
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
     }
 }
 
 impl Halstead for TypescriptCode {
-    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        compute_halstead::<Self>(node, code, stats);
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
     }
 }
 
 impl Halstead for TsxCode {
-    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        compute_halstead::<Self>(node, code, stats);
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
     }
 }
 
 impl Halstead for RustCode {
-    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        compute_halstead::<Self>(node, code, stats);
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
     }
 }
 
 impl Halstead for CppCode {
-    fn compute<'a>(node: &Node<'a>, code: &'a [u8], stats: &mut Stats<'a>) {
-        compute_halstead::<Self>(node, code, stats);
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
     }
 }
 
@@ -260,11 +303,11 @@ mod tests {
     #[test]
     fn test_halstead_operators_and_operands() {
         check_metrics!(
-            "def foo():\n
-                 def bar():\n
-                     def toto():\n
-                        a = 1 + 1\n
-                     b = 2 + a\n
+            "def foo():
+                 def bar():
+                     def toto():
+                        a = 1 + 1
+                     b = 2 + a
                  c = 3 + 3\n",
             "foo.py",
             PythonParser,
@@ -281,7 +324,7 @@ mod tests {
     #[test]
     fn test_halstead_formulas() {
         check_metrics!(
-            "def f():\n
+            "def f():
                  pass\n",
             "foo.py",
             PythonParser,
