@@ -1,7 +1,6 @@
 use serde::ser::Serializer;
 use serde::Serialize;
 use std::fmt;
-use tree_sitter::Node;
 
 use crate::checker::Checker;
 use crate::*;
@@ -56,8 +55,9 @@ where
             return;
         }
 
-        if let Some(params) = node.child_by_field_name("parameters") {
-            params.act_on_child(&mut |n| {
+        if let Some(params) = node.object().child_by_field_name("parameters") {
+            let node_params = Node::new(params);
+            node_params.act_on_child(&mut |n| {
                 if !Self::is_non_arg(n) {
                     stats.n_args += 1;
                 }
@@ -72,9 +72,10 @@ impl NArgs for CppCode {
             return;
         }
 
-        if let Some(declarator) = node.child_by_field_name("declarator") {
+        if let Some(declarator) = node.object().child_by_field_name("declarator") {
             if let Some(params) = declarator.child_by_field_name("parameters") {
-                params.act_on_child(&mut |n| {
+                let node_params = Node::new(params);
+                node_params.act_on_child(&mut |n| {
                     if !Self::is_non_arg(n) {
                         stats.n_args += 1;
                     }

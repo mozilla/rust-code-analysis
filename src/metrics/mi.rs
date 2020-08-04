@@ -1,7 +1,6 @@
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
-use tree_sitter::Node;
 
 use super::cyclomatic;
 use super::halstead;

@@ -3,7 +3,6 @@ use fxhash::FxHashSet;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
-use tree_sitter::Node;
 
 use crate::*;
 
@@ -132,8 +131,8 @@ where
 
 #[inline(always)]
 fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (usize, usize) {
-    let start = node.start_position().row;
-    let end = node.end_position().row;
+    let start = node.object().start_position().row;
+    let end = node.object().end_position().row;
 
     if is_func_space {
         stats.start = start;
@@ -149,13 +148,13 @@ impl Loc for PythonCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             DQUOTE | DQUOTE2 | Block | Module => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
             }
             String => {
-                let parent = node.parent().unwrap();
+                let parent = node.object().parent().unwrap();
                 if let ExpressionStatement = parent.kind_id().into() {
                     stats.comment_lines += (end - start) + 1;
                 }
@@ -197,7 +196,7 @@ impl Loc for MozjsCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
@@ -222,7 +221,7 @@ impl Loc for JavascriptCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
@@ -247,7 +246,7 @@ impl Loc for TypescriptCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
@@ -272,7 +271,7 @@ impl Loc for TsxCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 stats.comment_lines += (end - start) + 1;
@@ -297,7 +296,7 @@ impl Loc for RustCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             StringLiteral | RawStringLiteral | Block | SourceFile => {}
             LineComment | BlockComment => {
                 stats.comment_lines += (end - start) + 1;
@@ -342,7 +341,7 @@ impl Loc for CppCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             RawStringLiteral | StringLiteral | DeclarationList | FieldDeclarationList
             | TranslationUnit => {}
             Comment => {

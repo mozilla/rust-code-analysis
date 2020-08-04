@@ -1,12 +1,12 @@
-use tree_sitter::Node;
+use crate::node::Node;
 
 #[allow(dead_code)]
 pub fn get_parent<'a>(node: &'a Node<'a>, level: usize) -> Option<Node<'a>> {
     let mut level = level;
     let mut node = *node;
     while level != 0 {
-        if let Some(parent) = node.parent() {
-            node = parent;
+        if let Some(parent) = node.object().parent() {
+            node = Node::new(parent);
         } else {
             return None;
         }
@@ -24,10 +24,10 @@ macro_rules! has_ancestors {
         loop {
             let mut node = *$node;
             $(
-                if let Some(parent) = node.parent() {
+                if let Some(parent) = node.object().parent() {
                     match parent.kind_id().into() {
                         $typ => {
-                            node = parent;
+                            node = Node::new(parent);
                         },
                         _ => {
                             break;
@@ -37,7 +37,7 @@ macro_rules! has_ancestors {
                     break;
                 }
             )*
-            if let Some(parent) = node.parent() {
+            if let Some(parent) = node.object().parent() {
                 match parent.kind_id().into() {
                     $( $typs )|+ => {
                         res = true;

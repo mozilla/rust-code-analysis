@@ -4,6 +4,8 @@ use petgraph::{
 use std::collections::{hash_map, HashMap, HashSet};
 use std::path::PathBuf;
 
+use crate::node::Node;
+
 use crate::langs::*;
 use crate::languages::language_preproc::*;
 use crate::tools::*;
@@ -183,7 +185,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
 /// [`PreprocResults`]: struct.PreprocResults.html
 pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: &mut PreprocResults) {
     let node = parser.get_root();
-    let mut cursor = node.walk();
+    let mut cursor = node.object().walk();
     let mut stack = Vec::new();
     let code = parser.get_code();
     let mut file_result = PreprocFile::default();
@@ -193,20 +195,20 @@ pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: &mut PreprocR
     stack.push(node);
 
     while let Some(node) = stack.pop() {
-        cursor.reset(node);
+        cursor.reset(node.object());
         if cursor.goto_first_child() {
             loop {
-                stack.push(cursor.node());
+                stack.push(Node::new(cursor.node()));
                 if !cursor.goto_next_sibling() {
                     break;
                 }
             }
         }
 
-        let id = Preproc::from(node.kind_id());
+        let id = Preproc::from(node.object().kind_id());
         match id {
             Preproc::Define | Preproc::Undef => {
-                cursor.reset(node);
+                cursor.reset(node.object());
                 cursor.goto_first_child();
                 let identifier = cursor.node();
 
@@ -218,7 +220,7 @@ pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: &mut PreprocR
                 }
             }
             Preproc::PreprocInclude => {
-                cursor.reset(node);
+                cursor.reset(node.object());
                 cursor.goto_first_child();
                 let file = cursor.node();
 

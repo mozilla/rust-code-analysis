@@ -5,7 +5,7 @@ macro_rules! mk_checker {
         #[inline(always)]
         #[allow(unused_variables)]
         fn $name(node: &Node) -> bool {
-            let typ = node.kind_id();
+            let typ = node.object().kind_id();
             false
             $(
                 || typ == <Self as TSLanguage>::BaseLang::$type

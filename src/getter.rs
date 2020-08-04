@@ -1,6 +1,5 @@
-use tree_sitter::Node;
-
 use crate::metrics::halstead::HalsteadType;
+
 use crate::spaces::SpaceKind;
 use crate::traits::Search;
 
@@ -13,7 +12,7 @@ pub trait Getter {
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
         // we're in a function or in a class
-        if let Some(name) = node.child_by_field_name("name") {
+        if let Some(name) = node.object().child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
@@ -32,7 +31,7 @@ pub trait Getter {
 
 impl Getter for PythonCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             Python::FunctionDefinition => SpaceKind::Function,
             Python::ClassDefinition => SpaceKind::Class,
@@ -44,7 +43,7 @@ impl Getter for PythonCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Python::*;
 
-        let id = node.kind_id();
+        let id = node.object().kind_id();
         match id.into() {
             Import | DOT | From | LPAREN | COMMA | As | STAR | GTGT | Assert | COLONEQ | Return
             | Del | Raise | Pass | Break | Continue | If | Elif | Else | Async | For | In
@@ -58,7 +57,7 @@ impl Getter for PythonCode {
             String => {
                 let mut operator = HalsteadType::Unknown;
                 // check if we've a documentation string or a multiline comment
-                if let Some(parent) = node.parent() {
+                if let Some(parent) = node.object().parent() {
                     if parent.kind_id() != ExpressionStatement || parent.child_count() != 1 {
                         operator = HalsteadType::Operand;
                     };
@@ -74,7 +73,7 @@ impl Getter for MozjsCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Mozjs::*;
 
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             Function
             | MethodDefinition
@@ -89,13 +88,13 @@ impl Getter for MozjsCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.child_by_field_name("name") {
+        if let Some(name) = node.object().child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.parent() {
+            if let Some(parent) = node.object().parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
@@ -119,7 +118,7 @@ impl Getter for MozjsCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Mozjs::*;
 
-        let id = node.kind_id();
+        let id = node.object().kind_id();
         match id.into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
@@ -142,7 +141,7 @@ impl Getter for JavascriptCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Javascript::*;
 
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             Function
             | MethodDefinition
@@ -157,13 +156,13 @@ impl Getter for JavascriptCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.child_by_field_name("name") {
+        if let Some(name) = node.object().child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.parent() {
+            if let Some(parent) = node.object().parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
@@ -187,7 +186,7 @@ impl Getter for JavascriptCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Javascript::*;
 
-        let id = node.kind_id();
+        let id = node.object().kind_id();
         match id.into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
@@ -210,7 +209,7 @@ impl Getter for TypescriptCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Typescript::*;
 
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             Function
             | MethodDefinition
@@ -225,13 +224,13 @@ impl Getter for TypescriptCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.child_by_field_name("name") {
+        if let Some(name) = node.object().child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.parent() {
+            if let Some(parent) = node.object().parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
@@ -255,7 +254,7 @@ impl Getter for TypescriptCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Typescript::*;
 
-        let id = node.kind_id();
+        let id = node.object().kind_id();
         match id.into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
@@ -278,7 +277,7 @@ impl Getter for TsxCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Tsx::*;
 
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             Function
             | MethodDefinition
@@ -293,13 +292,13 @@ impl Getter for TsxCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.child_by_field_name("name") {
+        if let Some(name) = node.object().child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.parent() {
+            if let Some(parent) = node.object().parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
@@ -323,7 +322,7 @@ impl Getter for TsxCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Tsx::*;
 
-        let id = node.kind_id();
+        let id = node.object().kind_id();
         match id.into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
@@ -347,8 +346,9 @@ impl Getter for RustCode {
         // we're in a function or in a class or an impl
         // for an impl: we've  'impl ... type {...'
         if let Some(name) = node
+            .object()
             .child_by_field_name("name")
-            .or(node.child_by_field_name("type"))
+            .or(node.object().child_by_field_name("type"))
         {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
@@ -360,7 +360,7 @@ impl Getter for RustCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Rust::*;
 
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             FunctionItem | ClosureExpression => SpaceKind::Function,
             TraitItem => SpaceKind::Trait,
@@ -373,7 +373,7 @@ impl Getter for RustCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Rust::*;
 
-        let id = node.kind_id();
+        let id = node.object().kind_id();
         match id.into() {
             LPAREN | LBRACE | LBRACK | EQGT | PLUS | STAR | Async | Await | Continue | For | If
             | Let | Loop | Match | Return | Unsafe | While | BANG | EQ | COMMA | DASHGT | QMARK
@@ -390,21 +390,22 @@ impl Getter for RustCode {
 
 impl Getter for CppCode {
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             Cpp::FunctionDefinition | Cpp::FunctionDefinition2 | Cpp::FunctionDefinition3 => {
                 if let Some(op_cast) = node.first_child(|id| Cpp::OperatorCast == id) {
-                    let code = &code[op_cast.start_byte()..op_cast.end_byte()];
+                    let code = &code[op_cast.object().start_byte()..op_cast.object().end_byte()];
                     return std::str::from_utf8(code).ok();
                 }
                 // we're in a function_definition so need to get the declarator
-                if let Some(declarator) = node.child_by_field_name("declarator") {
-                    if let Some(fd) = declarator.first_occurence(|id| {
+                if let Some(declarator) = node.object().child_by_field_name("declarator") {
+                    let declarator_node = Node::new(declarator);
+                    if let Some(fd) = declarator_node.first_occurence(|id| {
                         Cpp::FunctionDeclarator == id
                             || Cpp::FunctionDeclarator2 == id
                             || Cpp::FunctionDeclarator3 == id
                     }) {
-                        if let Some(first) = fd.child(0) {
+                        if let Some(first) = fd.object().child(0) {
                             match first.kind_id().into() {
                                 Cpp::ScopedIdentifier
                                 | Cpp::Identifier
@@ -424,7 +425,7 @@ impl Getter for CppCode {
                 }
             }
             _ => {
-                if let Some(name) = node.child_by_field_name("name") {
+                if let Some(name) = node.object().child_by_field_name("name") {
                     let code = &code[name.start_byte()..name.end_byte()];
                     return std::str::from_utf8(code).ok();
                 }
@@ -436,7 +437,7 @@ impl Getter for CppCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Cpp::*;
 
-        let typ = node.kind_id();
+        let typ = node.object().kind_id();
         match typ.into() {
             FunctionDefinition | FunctionDefinition2 | FunctionDefinition3 => SpaceKind::Function,
             StructSpecifier => SpaceKind::Struct,
@@ -450,7 +451,7 @@ impl Getter for CppCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Cpp::*;
 
-        let id = node.kind_id();
+        let id = node.object().kind_id();
         match id.into() {
             DOT | LPAREN | LPAREN2 | COMMA | STAR | GTGT | COLON | SEMI | Return | Break
             | Continue | If | Else | Switch | Case | Default | For | While | Goto | Do | Delete

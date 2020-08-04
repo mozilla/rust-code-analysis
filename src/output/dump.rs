@@ -1,6 +1,7 @@
 use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
-use tree_sitter::Node;
+
+use crate::node::Node;
 
 use crate::traits::*;
 
@@ -76,7 +77,7 @@ fn dump_tree_helper(
 
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    let node_row = node.start_position().row + 1;
+    let node_row = node.object().start_position().row + 1;
     let mut display = true;
     if let Some(line_start) = line_start {
         display = node_row >= *line_start
@@ -90,28 +91,33 @@ fn dump_tree_helper(
         write!(stdout, "{}{}", prefix, pref)?;
 
         color!(stdout, Yellow, true);
-        write!(stdout, "{{{}:{}}} ", node.kind(), node.kind_id())?;
+        write!(
+            stdout,
+            "{{{}:{}}} ",
+            node.object().kind(),
+            node.object().kind_id()
+        )?;
 
         color!(stdout, White);
         write!(stdout, "from ")?;
 
         color!(stdout, Green);
-        let pos = node.start_position();
+        let pos = node.object().start_position();
         write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
         color!(stdout, White);
         write!(stdout, "to ")?;
 
         color!(stdout, Green);
-        let pos = node.end_position();
+        let pos = node.object().end_position();
         write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
-        if node.start_position().row == node.end_position().row {
+        if node.object().start_position().row == node.object().end_position().row {
             color!(stdout, White);
             write!(stdout, ": ")?;
 
             color!(stdout, Red, true);
-            let code = &code[node.start_byte()..node.end_byte()];
+            let code = &code[node.object().start_byte()..node.object().end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
                 write!(stdout, "{} ", code)?;
             } else {
@@ -122,18 +128,18 @@ fn dump_tree_helper(
         writeln!(stdout)?;
     }
 
-    let count = node.child_count();
+    let count = node.object().child_count();
     if count != 0 {
         let prefix = format!("{}{}", prefix, pref_child);
         let mut i = count;
-        let mut cursor = node.walk();
+        let mut cursor = node.object().walk();
         cursor.goto_first_child();
 
         loop {
             i -= 1;
             dump_tree_helper(
                 &code,
-                &cursor.node(),
+                &Node::new(cursor.node()),
                 &prefix,
                 i == 0,
                 stdout,

@@ -1,5 +1,3 @@
-use tree_sitter::Node;
-
 use crate::*;
 
 pub trait Alterator
@@ -12,13 +10,14 @@ where
 
     fn get_text_span(node: &Node, code: &[u8], span: bool, text: bool) -> (String, Span) {
         let text = if text {
-            String::from_utf8(code[node.start_byte()..node.end_byte()].to_vec()).unwrap()
+            String::from_utf8(code[node.object().start_byte()..node.object().end_byte()].to_vec())
+                .unwrap()
         } else {
             "".to_string()
         };
         if span {
-            let spos = node.start_position();
-            let epos = node.end_position();
+            let spos = node.object().start_position();
+            let epos = node.object().end_position();
             (
                 text,
                 Some((spos.row + 1, spos.column + 1, epos.row + 1, epos.column + 1)),
@@ -29,8 +28,8 @@ where
     }
 
     fn get_default(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        let (text, span) = Self::get_text_span(node, code, span, node.child_count() == 0);
-        AstNode::new(node.kind(), text, span, children)
+        let (text, span) = Self::get_text_span(node, code, span, node.object().child_count() == 0);
+        AstNode::new(node.object().kind(), text, span, children)
     }
 
     fn get_ast_node(
@@ -54,10 +53,10 @@ impl Alterator for CcommentCode {}
 
 impl Alterator for CppCode {
     fn alterate(node: &Node, code: &[u8], span: bool, mut children: Vec<AstNode>) -> AstNode {
-        match Cpp::from(node.kind_id()) {
+        match Cpp::from(node.object().kind_id()) {
             Cpp::StringLiteral | Cpp::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(node.object().kind(), text, span, Vec::new())
             }
             Cpp::PreprocDef | Cpp::PreprocFunctionDef | Cpp::PreprocCall => {
                 if let Some(last) = children.last() {
@@ -80,12 +79,12 @@ impl Alterator for JavaCode {}
 
 impl Alterator for MozjsCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Mozjs::from(node.kind_id()) {
+        match Mozjs::from(node.object().kind_id()) {
             Mozjs::String => {
                 // TODO: have a thought about template_strings:
                 // they may have children for replacement...
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(node.object().kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -94,10 +93,10 @@ impl Alterator for MozjsCode {
 
 impl Alterator for JavascriptCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Javascript::from(node.kind_id()) {
+        match Javascript::from(node.object().kind_id()) {
             Javascript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(node.object().kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -106,10 +105,10 @@ impl Alterator for JavascriptCode {
 
 impl Alterator for TypescriptCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Typescript::from(node.kind_id()) {
+        match Typescript::from(node.object().kind_id()) {
             Typescript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(node.object().kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -118,10 +117,10 @@ impl Alterator for TypescriptCode {
 
 impl Alterator for TsxCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Tsx::from(node.kind_id()) {
+        match Tsx::from(node.object().kind_id()) {
             Tsx::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(node.object().kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -130,10 +129,10 @@ impl Alterator for TsxCode {
 
 impl Alterator for GoCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Go::from(node.kind_id()) {
+        match Go::from(node.object().kind_id()) {
             Go::InterpretedStringLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(node.object().kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -144,7 +143,7 @@ impl Alterator for CssCode {}
 
 impl Alterator for HtmlCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Html::from(node.kind_id()) {
+        match Html::from(node.object().kind_id()) {
             Html::QuotedAttributeValue => {
                 if let [q1, attr, q2] = &children[..] {
                     let span = if span {
@@ -167,10 +166,10 @@ impl Alterator for HtmlCode {
 
 impl Alterator for RustCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Rust::from(node.kind_id()) {
+        match Rust::from(node.object().kind_id()) {
             Rust::StringLiteral | Rust::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(node.object().kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }

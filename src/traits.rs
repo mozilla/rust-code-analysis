@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use std::sync::Arc;
-use tree_sitter::{Language, Node};
+use tree_sitter::Language;
 
 use crate::alterator::Alterator;
 use crate::checker::Checker;
@@ -12,6 +12,7 @@ use crate::halstead::Halstead;
 use crate::langs::*;
 use crate::loc::Loc;
 use crate::mi::Mi;
+use crate::node::Node;
 use crate::nom::Nom;
 use crate::parser::Filter;
 use crate::preproc::PreprocResults;

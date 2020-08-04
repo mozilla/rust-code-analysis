@@ -2,6 +2,8 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 
 use crate::checker::Checker;
+use crate::node::Node;
+
 use crate::tools::*;
 use crate::traits::*;
 
@@ -11,7 +13,7 @@ const CR: [u8; 8192] = [b'\n'; 8192];
 pub fn rm_comments<T: ParserTrait>(parser: &T) -> Option<Vec<u8>> {
     let node = parser.get_root();
     let mut stack = Vec::new();
-    let mut cursor = node.walk();
+    let mut cursor = node.object().walk();
     let mut spans = Vec::new();
 
     stack.push(node);
@@ -19,13 +21,13 @@ pub fn rm_comments<T: ParserTrait>(parser: &T) -> Option<Vec<u8>> {
     while let Some(node) = stack.pop() {
         if T::Checker::is_comment(&node) && !T::Checker::is_useful_comment(&node, parser.get_code())
         {
-            let lines = node.end_position().row - node.start_position().row;
-            spans.push((node.start_byte(), node.end_byte(), lines));
+            let lines = node.object().end_position().row - node.object().start_position().row;
+            spans.push((node.object().start_byte(), node.object().end_byte(), lines));
         } else {
-            cursor.reset(node);
+            cursor.reset(node.object());
             if cursor.goto_first_child() {
                 loop {
-                    stack.push(cursor.node());
+                    stack.push(Node::new(cursor.node()));
                     if !cursor.goto_next_sibling() {
                         break;
                     }

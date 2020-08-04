@@ -1,5 +1,6 @@
 use std::path::PathBuf;
-use tree_sitter::Node;
+
+use crate::node::Node;
 
 use crate::dump::*;
 use crate::traits::*;
@@ -8,7 +9,7 @@ use crate::traits::*;
 pub fn find<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> Option<Vec<Node<'a>>> {
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
-    let mut cursor = node.walk();
+    let mut cursor = node.object().walk();
     let mut stack = Vec::new();
     let mut good = Vec::new();
     let mut children = Vec::new();
@@ -19,10 +20,10 @@ pub fn find<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> Option<Vec
         if filters.any(&node) {
             good.push(node);
         }
-        cursor.reset(node);
+        cursor.reset(node.object());
         if cursor.goto_first_child() {
             loop {
-                children.push(cursor.node());
+                children.push(Node::new(cursor.node()));
                 if !cursor.goto_next_sibling() {
                     break;
                 }

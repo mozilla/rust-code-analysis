@@ -1,13 +1,14 @@
 use std::marker::PhantomData;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tree_sitter::{Node, Parser as TSParser, Tree};
+use tree_sitter::{Parser as TSParser, Tree};
 
 use crate::alterator::Alterator;
 use crate::c_macro;
 use crate::checker::*;
 use crate::getter::Getter;
 use crate::langs::*;
+use crate::node::Node;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
@@ -106,7 +107,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
 
     #[inline(always)]
     fn get_root(&self) -> Node {
-        self.tree.root_node()
+        Node::new(self.tree.root_node())
     }
 
     #[inline(always)]
@@ -126,7 +127,9 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
                 "function" => res.push(Box::new(T::is_func)),
                 _ => {
                     if let Ok(n) = f.parse::<u16>() {
-                        res.push(Box::new(move |node: &Node| -> bool { node.kind_id() == n }));
+                        res.push(Box::new(move |node: &Node| -> bool {
+                            node.object().kind_id() == n
+                        }));
                     }
                 }
             }

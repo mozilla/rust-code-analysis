@@ -1,7 +1,6 @@
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
-use tree_sitter::Node;
 
 use crate::checker::Checker;
 
@@ -81,7 +80,7 @@ impl Nom for PythonCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Python::*;
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             FunctionDefinition => {
                 stats.functions += 1;
             }
@@ -97,7 +96,7 @@ impl Nom for MozjsCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Mozjs::*;
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             Function | FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
@@ -113,7 +112,7 @@ impl Nom for JavascriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Javascript::*;
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             Function | FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
@@ -129,7 +128,7 @@ impl Nom for TypescriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Typescript::*;
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             Function | FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
@@ -145,7 +144,7 @@ impl Nom for TsxCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Tsx::*;
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             Function | FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
@@ -161,7 +160,7 @@ impl Nom for RustCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Rust::*;
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             FunctionItem => {
                 stats.functions += 1;
             }
@@ -177,7 +176,7 @@ impl Nom for CppCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Cpp::*;
 
-        match node.kind_id().into() {
+        match node.object().kind_id().into() {
             FunctionDefinition
             | FunctionDefinition2
             | FunctionDefinition3
