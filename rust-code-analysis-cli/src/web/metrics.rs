@@ -13,10 +13,10 @@ pub struct WebMetricsPayload {
 }
 
 #[derive(Debug, Serialize)]
-pub struct WebMetricsResponse<'a> {
+pub struct WebMetricsResponse {
     pub id: String,
     pub language: String,
-    pub spaces: Option<FuncSpace<'a>>,
+    pub spaces: Option<FuncSpace>,
 }
 
 #[derive(Debug, Deserialize)]
