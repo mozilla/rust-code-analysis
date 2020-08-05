@@ -1,4 +1,4 @@
-use serde::ser::Serializer;
+use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
 
@@ -26,13 +26,21 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        serializer.serialize_f64(self.cyclomatic())
+        let mut st = serializer.serialize_struct("cyclomatic", 2)?;
+        st.serialize_field("sum", &self.cyclomatic())?;
+        st.serialize_field("average", &self.cyclomatic_average())?;
+        st.end()
     }
 }
 
 impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.cyclomatic)
+        write!(
+            f,
+            "sum: {}, average: {}",
+            self.cyclomatic(),
+            self.cyclomatic_average()
+        )
     }
 }
 
@@ -45,7 +53,15 @@ impl Stats {
 
     /// Returns the `Cyclomatic` metric value
     pub fn cyclomatic(&self) -> f64 {
-        self.cyclomatic / self.n as f64
+        self.cyclomatic
+    }
+
+    /// Returns the `Cyclomatic` metric average value
+    ///
+    /// This value is computed dividing the `Cyclomatic` value for the
+    /// number of spaces.
+    pub fn cyclomatic_average(&self) -> f64 {
+        self.cyclomatic() / self.n as f64
     }
 }
 
