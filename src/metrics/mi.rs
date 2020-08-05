@@ -112,3 +112,27 @@ impl Mi for JavaCode {}
 impl Mi for GoCode {}
 impl Mi for CssCode {}
 impl Mi for HtmlCode {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_mi_formulas() {
+        check_metrics!(
+            "def f():
+                 pass\n",
+            "foo.py",
+            PythonParser,
+            mi,
+            [],
+            [
+                (mi_original, 151.433_315_883_223_23),
+                (mi_sei, 142.873_061_717_489_78),
+                (mi_visual_studio, 88.557_494_668_551_6),
+            ]
+        );
+    }
+}
