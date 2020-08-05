@@ -176,3 +176,117 @@ impl Cyclomatic for JavaCode {}
 impl Cyclomatic for GoCode {}
 impl Cyclomatic for CssCode {}
 impl Cyclomatic for HtmlCode {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_cyclomatic() {
+        check_metrics!(
+            "def f(a, b): # +2 (+1 unit space)
+                if a and b:  # +2 (+1 and)
+                   return 1
+                if c and d: # +2 (+1 and)
+                   return 1\n",
+            "foo.py",
+            PythonParser,
+            cyclomatic,
+            [
+                (cyclomatic, 6, usize),
+                (cyclomatic_average, 3, usize) // nspace = 2 (func and unit)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_1_level_nesting_cyclomatic() {
+        check_metrics!(
+            "def f(a, b): # +2 (+1 unit space)
+                if a:  # +1
+                    for i in range(b):  # +1
+                        return 1\n",
+            "foo.py",
+            PythonParser,
+            cyclomatic,
+            [
+                (cyclomatic, 4, usize),
+                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+            ]
+        );
+
+        check_metrics!(
+            "fn f() { // +2 (+1 unit space)
+                 if true { // +1
+                     match true {
+                         true => println!(\"test\"), // +1
+                         false => println!(\"test\"), // +1
+                     }
+                 }
+             }\n",
+            "foo.rs",
+            RustParser,
+            cyclomatic,
+            [
+                (cyclomatic, 5, usize),
+                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_c_switch_cyclomatic() {
+        check_metrics!(
+            "void f() { // +2 (+1 unit space)
+                 switch (1) {
+                     case 1: // +1
+                         printf(\"one\");
+                         break;
+                     case 2: // +1
+                         printf(\"two\");
+                         break;
+                     case 3: // +1
+                         printf(\"three\");
+                         break;
+                     default:
+                         printf(\"all\");
+                         break;
+                 }
+             }\n",
+            "foo.c",
+            CppParser,
+            cyclomatic,
+            [
+                (cyclomatic, 5, usize),
+                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+            ]
+        );
+    }
+
+    #[test]
+    fn test_real_cyclomatic() {
+        check_metrics!(
+            "int sumOfPrimes(int max) { // +2 (+1 unit space)
+                 int total = 0;
+                 OUT: for (int i = 1; i <= max; ++i) { // +1
+                   for (int j = 2; j < i; ++j) { // +1
+                       if (i % j == 0) { // +1
+                          continue OUT;
+                       }
+                   }
+                   total += i;
+                 }
+                 return total;
+            }\n",
+            "foo.c",
+            CppParser,
+            cyclomatic,
+            [
+                (cyclomatic, 5, usize),
+                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+            ]
+        );
+    }
+}
