@@ -376,9 +376,29 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_sloc() {
+        check_metrics!(
+            "
+
+            a = 42
+
+            ",
+            "foo.py",
+            PythonParser,
+            loc,
+            [(sloc, 1, usize)]
+        );
+    }
+
+    #[test]
     fn test_blank_python() {
         check_metrics!(
-            "\na = 42\n\n",
+            "
+            a = 42
+
+            b = 43
+
+            ",
             "foo.py",
             PythonParser,
             loc,
@@ -389,7 +409,13 @@ mod tests {
     #[test]
     fn test_blank_rust() {
         check_metrics!(
-            "\nlet a = 42;\n\n",
+            "
+
+            let a = 42;
+
+            let b = 43;
+
+            ",
             "foo.rs",
             RustParser,
             loc,
@@ -397,7 +423,7 @@ mod tests {
         );
 
         check_metrics!(
-            "fn func() { /* comment */ }\n",
+            "fn func() { /* comment */ }",
             "foo.rs",
             RustParser,
             loc,
@@ -408,7 +434,13 @@ mod tests {
     #[test]
     fn test_blank_c() {
         check_metrics!(
-            "\nint a = 42;\n\n",
+            "
+
+            int a = 42;
+
+            int b = 43;
+
+            ",
             "foo.c",
             CppParser,
             loc,

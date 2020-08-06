@@ -262,7 +262,9 @@ macro_rules! check_metrics {
      $( [ $( ( $func_float: ident, $true_float_value: expr )$(,)* )* ] )?) => {
         {
             let path = PathBuf::from($file);
-            let parser = $parser::new($source.to_string().into_bytes(), &path, None);
+            let mut trimmed_bytes = $source.trim_end().trim_matches('\n').as_bytes().to_vec();
+            trimmed_bytes.push(b'\n');
+            let parser = $parser::new(trimmed_bytes, &path, None);
             let func_space = metrics(&parser, &path).unwrap();
 
             $( assert_eq!(func_space.metrics.$metric.$func_int() $(as $type_int)?, $true_int_value); )*
