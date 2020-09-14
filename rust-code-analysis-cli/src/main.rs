@@ -4,9 +4,13 @@ extern crate crossbeam;
 extern crate num_cpus;
 #[macro_use]
 extern crate serde;
+extern crate serde_cbor;
 #[cfg_attr(test, macro_use)]
 extern crate serde_json;
+extern crate serde_yaml;
+extern crate toml;
 
+mod formats;
 mod web;
 
 use clap::{App, Arg};
@@ -21,6 +25,7 @@ use std::sync::{Arc, Mutex};
 use std::{process, thread};
 use walkdir::{DirEntry, WalkDir};
 
+use formats::Format;
 use rust_code_analysis::*;
 use web::server;
 
@@ -34,7 +39,7 @@ struct Config {
     function: bool,
     metrics: bool,
     output_format: Option<Format>,
-    output: String,
+    output: Option<PathBuf>,
     pretty: bool,
     line_start: Option<usize>,
     line_end: Option<usize>,
@@ -91,17 +96,13 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
         };
         action::<Dump>(&language, source, &path, pr, cfg)
     } else if cfg.metrics {
-        let cfg = MetricsCfg {
-            path,
-            output_format: cfg.output_format.clone(),
-            pretty: cfg.pretty,
-            output_path: if cfg.output.is_empty() {
-                None
-            } else {
-                Some(PathBuf::from(cfg.output.clone()))
-            },
-        };
-        action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
+        if let Some(output_format) = &cfg.output_format {
+            let space = get_function_spaces(&language, source, &path, pr).unwrap();
+            output_format.dump_formats(&space, &path, &cfg.output, cfg.pretty)
+        } else {
+            let cfg = MetricsCfg { path };
+            action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
+        }
     } else if cfg.comments {
         let cfg = CommentRmCfg {
             in_place: cfg.in_place,
@@ -474,9 +475,9 @@ fn main() {
         .value_of("output_format")
         .map(parse_or_exit::<Format>);
     let pretty = matches.is_present("pretty");
-    let output = matches.value_of("output").unwrap().to_string();
-    let output_is_dir = PathBuf::from(output.clone()).is_dir();
-    if metrics && !output.is_empty() && !output_is_dir {
+    let output = matches.value_of("output").map(|s| PathBuf::from(s));
+    let output_is_dir = output.as_ref().map(|p| p.is_dir()).unwrap_or(false);
+    if metrics && output.is_some() && !output_is_dir {
         eprintln!("Error: The output parameter must be a directory");
         process::exit(1);
     }
@@ -576,11 +577,10 @@ fn main() {
         fix_includes(&mut data.files, &all_files);
 
         let data = serde_json::to_string(&data).unwrap();
-        if output.is_empty() {
-            println!("{}", data);
+        if let Some(output_path) = output {
+            write_file(&output_path, data.as_bytes()).unwrap();
         } else {
-            let output = PathBuf::from(output);
-            write_file(&output, data.as_bytes()).unwrap();
+            println!("{}", data);
         }
     }
 }

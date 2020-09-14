@@ -14,7 +14,6 @@ use crate::loc::{self, Loc};
 use crate::mi::{self, Mi};
 use crate::nom::{self, Nom};
 
-use crate::dump_formats::*;
 use crate::dump_metrics::*;
 use crate::traits::*;
 
@@ -202,7 +201,8 @@ struct State<'a> {
     halstead_maps: HalsteadMaps<'a>,
 }
 
-/// Returns function space data of the code in a file.
+/// Returns all function spaces data of a code. This function needs a parser to
+/// be created a priori in order to work.
 ///
 /// # Examples
 ///
@@ -221,7 +221,7 @@ struct State<'a> {
 /// // The parser of the code, in this case a CPP parser
 /// let parser = CppParser::new(source_as_vec, &path, None);
 ///
-/// // Gets the function space data of the code contained in foo.c
+/// // Gets all function spaces data of the code contained in foo.c
 /// metrics(&parser, &path).unwrap();
 /// # }
 /// ```
@@ -296,15 +296,6 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<F
 pub struct MetricsCfg {
     /// Path to the file containing the code
     pub path: PathBuf,
-    /// The output format
-    pub output_format: Option<Format>,
-    /// If `true`, the `CBOR` and `JSON` output formats are
-    /// pretty-printed
-    pub pretty: bool,
-    /// Path to the output file containing the metrics
-    ///
-    /// If `None`, the metrics are dumped on shell
-    pub output_path: Option<PathBuf>,
 }
 
 pub struct Metrics {
@@ -317,17 +308,7 @@ impl Callback for Metrics {
 
     fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         if let Some(space) = metrics(parser, &cfg.path) {
-            if let Some(output_format) = cfg.output_format {
-                dump_formats(
-                    &space,
-                    &cfg.path,
-                    &cfg.output_path,
-                    output_format,
-                    cfg.pretty,
-                )
-            } else {
-                dump_root(&space)
-            }
+            dump_root(&space)
         } else {
             Ok(())
         }

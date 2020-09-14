@@ -106,9 +106,6 @@ macro_rules! mk_action {
         /// // Configuration options used by the function which computes the metrics
         /// let cfg = MetricsCfg {
         ///     path,
-        ///     output_format: None,
-        ///     pretty: false,
-        ///     output_path: None,
         /// };
         ///
         /// action::<Metrics>(&language, source_as_vec, &cfg.path.clone(), None, cfg);
@@ -123,6 +120,38 @@ macro_rules! mk_action {
                     LANG::$camel => {
                         let parser = $parser::new(source, path, pr);
                         T::call(cfg, &parser)
+                    },
+                )*
+            }
+        }
+
+        /// Returns all function spaces data of a code.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// use std::path::PathBuf;
+        ///
+        /// use rust_code_analysis::{get_function_spaces, LANG};
+        ///
+        /// # fn main() {
+        /// let source_code = "int a = 42;";
+        /// let language = LANG::Cpp;
+        ///
+        /// // The path to a dummy file used to contain the source code
+        /// let path = PathBuf::from("foo.c");
+        /// let source_as_vec = source_code.as_bytes().to_vec();
+        ///
+        /// get_function_spaces(&language, source_as_vec, &path, None).unwrap();
+        /// # }
+        /// ```
+        #[inline(always)]
+        pub fn get_function_spaces(lang: &LANG, source: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Option<FuncSpace> {
+            match lang {
+                $(
+                    LANG::$camel => {
+                        let parser = $parser::new(source, &path, pr);
+                        metrics(&parser, &path)
                     },
                 )*
             }
