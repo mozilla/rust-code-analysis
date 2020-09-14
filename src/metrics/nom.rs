@@ -209,9 +209,12 @@ mod tests {
     #[test]
     fn test_nom_python() {
         check_metrics!(
-            "def a():\n    pass\n\n
-             def b():\n    pass\n\n
-             def c():\n    pass\n\n
+            "def a():
+                 pass
+             def b():
+                 pass
+             def c():
+                 pass
              x = lambda a : a + 42\n",
             "foo.py",
             PythonParser,
@@ -227,7 +230,8 @@ mod tests {
     #[test]
     fn test_nom_rust() {
         check_metrics!(
-            "mod A { fn foo() {}}\n mod B { fn foo() {}}\n
+            "mod A { fn foo() {}}
+             mod B { fn foo() {}}
              let closure = |i: i32| -> i32 { i + 42 };\n",
             "foo.rs",
             RustParser,
@@ -243,7 +247,10 @@ mod tests {
     #[test]
     fn test_nom_cpp() {
         check_metrics!(
-            "struct A {\n  void foo(int) {}\n  void foo(double) {}\n};\n
+            "struct A {
+                 void foo(int) {}
+                 void foo(double) {}
+             };
              int b = [](int x) -> int { return x + 42; };\n",
             "foo.cpp",
             CppParser,
@@ -259,7 +266,11 @@ mod tests {
     #[test]
     fn test_nom_c() {
         check_metrics!(
-            "int foo();\n\nint foo() {\n  return 0;\n}\n",
+            "int foo();
+
+             int foo() {
+                 return 0;
+             }\n",
             "foo.c",
             CppParser,
             nom,
