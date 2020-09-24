@@ -45,14 +45,15 @@ impl Getter for PythonCode {
 
         let id = node.object().kind_id();
         match id.into() {
-            Import | DOT | From | LPAREN | COMMA | As | STAR | GTGT | Assert | COLONEQ | Return
+            Import | DOT | From | COMMA | As | STAR | GTGT | Assert | COLONEQ | Return | Def
             | Del | Raise | Pass | Break | Continue | If | Elif | Else | Async | For | In
             | While | Try | Except | Finally | With | DASHGT | EQ | Global | Exec | AT | Not
             | And | Or | PLUS | DASH | SLASH | PERCENT | SLASHSLASH | STARSTAR | PIPE | AMP
             | CARET | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ | GT | LTGT | Is | PLUSEQ
             | DASHEQ | STAREQ | SLASHEQ | ATEQ | SLASHSLASHEQ | PERCENTEQ | STARSTAREQ | GTGTEQ
-            | LTLTEQ | AMPEQ | CARETEQ | PIPEEQ | Yield | LBRACK | LBRACE | Await | Await2
-            | Print => HalsteadType::Operator,
+            | LTLTEQ | AMPEQ | CARETEQ | PIPEEQ | Yield | Await | Await2 | Print => {
+                HalsteadType::Operator
+            }
             Identifier | Integer | Float | True | False | None => HalsteadType::Operand,
             String => {
                 let mut operator = HalsteadType::Unknown;

@@ -322,6 +322,17 @@ mod tests {
     }
 
     #[test]
+    fn test_wrong_halstead_operators() {
+        check_metrics!(
+            "()[]{}",
+            "foo.py",
+            PythonParser,
+            halstead,
+            [(u_operators, 0, usize), (operators, 0, usize)]
+        );
+    }
+
+    #[test]
     fn test_halstead_formulas() {
         check_metrics!(
             "def f():
