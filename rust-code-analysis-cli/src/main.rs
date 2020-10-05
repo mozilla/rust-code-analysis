@@ -355,7 +355,6 @@ fn main() {
                 .help("Output file/directory")
                 .short("o")
                 .long("output")
-                .default_value("")
                 .takes_value(true),
         )
         .arg(
