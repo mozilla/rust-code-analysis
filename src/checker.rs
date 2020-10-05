@@ -11,6 +11,11 @@ pub trait Checker {
         false
     }
 
+    #[inline(always)]
+    fn is_else_if(_: &Node) -> bool {
+        false
+    }
+
     fn is_string(node: &Node) -> bool;
     fn is_call(node: &Node) -> bool;
     fn is_func(node: &Node) -> bool;
@@ -81,6 +86,8 @@ impl Checker for CppCode {
         let code = &code[node.object().start_byte()..node.object().end_byte()];
         AC.is_match(code)
     }
+
+    mk_else_if!(IfStatement);
     mk_checker!(is_non_arg, LPAREN, LPAREN2, COMMA, RPAREN);
 }
 
@@ -161,6 +168,8 @@ impl Checker for MozjsCode {
         ClassDeclaration,
         ArrowFunction
     );
+
+    mk_else_if!(IfStatement);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -189,6 +198,7 @@ impl Checker for JavascriptCode {
         ClassDeclaration,
         ArrowFunction
     );
+    mk_else_if!(IfStatement);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -217,6 +227,7 @@ impl Checker for TypescriptCode {
         ClassDeclaration,
         ArrowFunction
     );
+    mk_else_if!(IfStatement);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -246,6 +257,7 @@ impl Checker for TsxCode {
         ClassDeclaration,
         ArrowFunction
     );
+    mk_else_if!(IfStatement);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -296,6 +308,7 @@ impl Checker for RustCode {
         code.starts_with(b"/// cbindgen:")
     }
 
+    mk_else_if!(IfExpression);
     mk_checker!(is_string, StringLiteral, RawStringLiteral);
     mk_checker!(is_call, CallExpression);
     mk_checker!(is_func, FunctionItem, ClosureExpression);

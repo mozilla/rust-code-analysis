@@ -68,6 +68,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
 {
     type Checker = T;
     type Getter = T;
+    type Cognitive = T;
     type Cyclomatic = T;
     type Halstead = T;
     type Loc = T;
