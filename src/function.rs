@@ -16,7 +16,7 @@ pub struct FunctionSpan {
     pub start_line: usize,
     /// The last line of a function
     pub end_line: usize,
-    /// If `true`, an error is occured in determining the span
+    /// If `true`, an error is occurred in determining the span
     /// of a function
     pub error: bool,
 }
