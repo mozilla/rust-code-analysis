@@ -97,8 +97,11 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
         action::<Dump>(&language, source, &path, pr, cfg)
     } else if cfg.metrics {
         if let Some(output_format) = &cfg.output_format {
-            let space = get_function_spaces(&language, source, &path, pr).unwrap();
-            output_format.dump_formats(&space, &path, &cfg.output, cfg.pretty)
+            if let Some(space) = get_function_spaces(&language, source, &path, pr) {
+                output_format.dump_formats(&space, &path, &cfg.output, cfg.pretty)
+            } else {
+                Ok(())
+            }
         } else {
             let cfg = MetricsCfg { path };
             action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)

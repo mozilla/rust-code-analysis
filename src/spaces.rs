@@ -180,23 +180,26 @@ fn compute_halstead_and_mi<'a, T: ParserTrait>(state: &mut State<'a>) {
 }
 
 fn finalize<'a, T: ParserTrait>(state_stack: &mut Vec<State<'a>>, diff_level: usize) {
+    if state_stack.is_empty() {
+        return;
+    }
     for _ in 0..diff_level {
-        if state_stack.len() <= 1 {
+        if state_stack.len() == 1 {
             let mut last_state = state_stack.last_mut().unwrap();
             compute_halstead_and_mi::<T>(&mut last_state);
             break;
+        } else {
+            let mut state = state_stack.pop().unwrap();
+            compute_halstead_and_mi::<T>(&mut state);
+
+            let mut last_state = state_stack.last_mut().unwrap();
+            last_state.halstead_maps.merge(&state.halstead_maps);
+            compute_halstead_and_mi::<T>(&mut last_state);
+
+            // Merge function spaces
+            last_state.space.metrics.merge(&state.space.metrics);
+            last_state.space.spaces.push(state.space);
         }
-
-        let mut state = state_stack.pop().unwrap();
-        compute_halstead_and_mi::<T>(&mut state);
-
-        let mut last_state = state_stack.last_mut().unwrap();
-        last_state.halstead_maps.merge(&state.halstead_maps);
-        compute_halstead_and_mi::<T>(&mut last_state);
-
-        // Merge function spaces
-        last_state.space.metrics.merge(&state.space.metrics);
-        last_state.space.spaces.push(state.space);
     }
 }
 
