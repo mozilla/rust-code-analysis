@@ -53,6 +53,37 @@ tasks:
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
+      - taskId: {$eval: as_slugid("test_mozilla_central")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --recursive --quiet ${repository} &&
+               [ ! -d \"cache/gecko-dev\" ] &&
+               git clone --quiet https://github.com/mozilla/gecko-dev.git /cache/gecko-dev || true &&
+               pushd /cache/gecko-dev && git pull origin master && popd &&
+               mkdir -p /tmp/mozilla_central_output &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               cargo build --release --all --all-features &&
+               cargo run --release -p rust-code-analysis-cli -- -p /cache/gecko-dev \
+                                      -j24 --metrics -O json -o /tmp/mozilla_central_output"
+          cache:
+            rust-code-analysis-mozilla-central-repository: /cache
+        scopes:
+          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+        metadata:
+          name: rust-code-analysis mozilla-central test
+          description: rust-code-analysis-cli tested on mozilla-central
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
       - taskId: {$eval: as_slugid("build_documentation")}
         created: {$fromNow: ''}
         deadline: {$fromNow: '2 hour'}
