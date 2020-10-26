@@ -1529,7 +1529,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis"
-version = "0.0.17"
+version = "0.0.18"
 dependencies = [
  "aho-corasick",
  "cc",
@@ -1549,7 +1549,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis-cli"
-version = "0.0.1"
+version = "0.0.18"
 dependencies = [
  "actix-rt",
  "actix-web",
