@@ -11,12 +11,12 @@ use crate::*;
 /// of a function/method.
 #[derive(Debug, Clone)]
 pub struct Stats {
-    n_args: usize,
+    nargs: usize,
 }
 
 impl Default for Stats {
     fn default() -> Self {
-        Self { n_args: 0 }
+        Self { nargs: 0 }
     }
 }
 
@@ -25,13 +25,13 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        serializer.serialize_f64(self.n_args())
+        serializer.serialize_f64(self.nargs())
     }
 }
 
 impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.n_args)
+        write!(f, "{}", self.nargs())
     }
 }
 
@@ -40,8 +40,8 @@ impl Stats {
     pub fn merge(&mut self, _other: &Stats) {}
 
     /// Returns the `NArgs` metric value
-    pub fn n_args(&self) -> f64 {
-        self.n_args as f64
+    pub fn nargs(&self) -> f64 {
+        self.nargs as f64
     }
 }
 
@@ -59,7 +59,7 @@ where
             let node_params = Node::new(params);
             node_params.act_on_child(&mut |n| {
                 if !Self::is_non_arg(n) {
-                    stats.n_args += 1;
+                    stats.nargs += 1;
                 }
             });
         }
@@ -77,7 +77,7 @@ impl NArgs for CppCode {
                 let node_params = Node::new(params);
                 node_params.act_on_child(&mut |n| {
                     if !Self::is_non_arg(n) {
-                        stats.n_args += 1;
+                        stats.nargs += 1;
                     }
                 });
             }
