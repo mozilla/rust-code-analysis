@@ -42,7 +42,7 @@ impl Format {
                     } else {
                         serde_json::to_string(&space).unwrap()
                     };
-                    write!(stdout, "{}", json_data)
+                    writeln!(stdout, "{}", json_data)
                 }
                 Format::Toml => {
                     let toml_data = if pretty {
@@ -50,9 +50,9 @@ impl Format {
                     } else {
                         toml::to_string(&space).unwrap()
                     };
-                    write!(stdout, "{}", toml_data)
+                    writeln!(stdout, "{}", toml_data)
                 }
-                Format::Yaml => write!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
+                Format::Yaml => writeln!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
             }
         } else {
             let format_ext = match self {
