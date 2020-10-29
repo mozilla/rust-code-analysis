@@ -36,8 +36,10 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
-    #[doc(hidden)]
-    pub fn merge(&mut self, _other: &Stats) {}
+    /// Merges a second `NArgs` metric into the first one
+    pub fn merge(&mut self, other: &Stats) {
+        self.nargs += other.nargs;
+    }
 
     /// Returns the `NArgs` metric value
     pub fn nargs(&self) -> f64 {
