@@ -248,7 +248,7 @@ where
 }
 
 fn main() {
-    let matches = App::new("code-analysis")
+    let matches = App::new("rust-code-analysis-cli")
         .version(crate_version!())
         .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
         .about("Analyze source code")
