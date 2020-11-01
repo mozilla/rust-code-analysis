@@ -7,6 +7,9 @@ keywords = ["metrics"]
 description = "Tool to compute and export code metrics"
 license = "MPL-2.0"
 
+[[bin]]
+name = "rust-code-analysis-cli"
+
 [dependencies]
 actix-rt = "^1.0"
 actix-web = "^2.0"
