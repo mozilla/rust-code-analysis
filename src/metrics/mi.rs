@@ -49,7 +49,9 @@ impl fmt::Display for Stats {
 impl Stats {
     pub(crate) fn merge(&mut self, _other: &Stats) {}
 
-    /// Returns the `Mi` metric calculated using the original formula
+    /// Returns the `Mi` metric calculated using the original formula.
+    ///
+    /// Its value can be negative.
     #[inline(always)]
     pub fn mi_original(&self) -> f64 {
         // http://www.projectcodemeter.com/cost_estimation/help/GL_maintainability.htm
@@ -57,7 +59,9 @@ impl Stats {
     }
 
     /// Returns the `Mi` metric calculated using the derivative formula
-    /// employed by the Software Engineering Insitute (SEI)
+    /// employed by the Software Engineering Insitute (SEI).
+    ///
+    /// Its value can be negative.
     #[inline(always)]
     pub fn mi_sei(&self) -> f64 {
         // http://www.projectcodemeter.com/cost_estimation/help/GL_maintainability.htm
@@ -66,7 +70,7 @@ impl Stats {
     }
 
     /// Returns the `Mi` metric calculated using the derivative formula
-    /// employed by Microsoft Visual Studio
+    /// employed by Microsoft Visual Studio.
     #[inline(always)]
     pub fn mi_visual_studio(&self) -> f64 {
         // http://www.projectcodemeter.com/cost_estimation/help/GL_maintainability.htm
