@@ -171,9 +171,12 @@ impl Stats {
         self.u_operands() + self.u_operators()
     }
 
-    /// Returns the program volume
+    /// Returns the program volume.
+    ///
+    /// Unit of measurement: bits
     #[inline(always)]
     pub fn volume(&self) -> f64 {
+        // Assumes a uniform binary encoding for the vocabulary is used.
         self.length() * self.vocabulary().log2()
     }
 
@@ -195,15 +198,51 @@ impl Stats {
         self.difficulty() * self.volume()
     }
 
-    /// Returns the estimated time required to program
+    /// Returns the estimated time required to program.
+    ///
+    /// Unit of measurement: seconds
     #[inline(always)]
     pub fn time(&self) -> f64 {
+        // The floating point `18.` aims to describe the processing rate of the
+        // human brain. It is called Stoud number, S, and its
+        // unit of measurement is moments/seconds.
+        // A moment is the time required by the human brain to carry out the
+        // most elementary decision.
+        // 5 <= S <= 20. Halstead uses 18.
+        // The value of S has been empirically developed from psychological
+        // reasoning, and its recommended value for
+        // programming applications is 18.
+        //
+        // Source: https://www.geeksforgeeks.org/software-engineering-halsteads-software-metrics/
         self.effort() / 18.
     }
 
-    /// Returns the number of delivered bugs
+    /// Returns the estimated number of delivered bugs.
+    ///
+    /// This metric represents the average amount of work a programmer can do
+    /// without introducing an error.
     #[inline(always)]
     pub fn bugs(&self) -> f64 {
+        // The floating point `3000.` represents the number of elementary
+        // mental discriminations.
+        // A mental discrimination, in psychology, is the ability to perceive
+        // and respond to differences among stimuli.
+        //
+        // The value above is obtained starting from a constant that
+        // is different for every language and assumes that natural language is
+        // the language of the brain.
+        // For programming languages, the English language constant
+        // has been considered.
+        //
+        // After every 3000 mental discriminations a result is produced.
+        // This result, whether correct or incorrect, is more than likely
+        // either used as an input for the next operation or is output to the
+        // environment.
+        // If incorrect the error should become apparent.
+        // Thus, an opportunity for error occurs every 3000
+        // mental discriminations.
+        //
+        // Source: https://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=1145&context=cstech
         self.effort().powf(2. / 3.) / 3000.
     }
 }
