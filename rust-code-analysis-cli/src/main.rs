@@ -14,8 +14,7 @@ mod formats;
 mod web;
 
 use clap::{App, Arg};
-use crossbeam::channel::{Receiver, Sender};
-use crossbeam::crossbeam_channel::unbounded;
+use crossbeam::channel::{unbounded, Receiver, Sender};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use std::collections::{hash_map, HashMap};
 use std::fmt;
