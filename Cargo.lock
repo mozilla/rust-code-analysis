@@ -1549,7 +1549,6 @@ version = "0.0.18"
 dependencies = [
  "actix-rt",
  "actix-web",
- "bytes",
  "clap",
  "crossbeam",
  "futures",

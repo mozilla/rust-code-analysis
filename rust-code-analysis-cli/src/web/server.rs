@@ -290,8 +290,8 @@ pub fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use actix_web::web::Bytes;
     use actix_web::{http::header::ContentType, http::StatusCode, test};
-    use bytes::Bytes;
     use pretty_assertions::assert_eq;
     use serde_json::value::Value;
 
