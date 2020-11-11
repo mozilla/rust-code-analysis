@@ -1,4 +1,4 @@
-use serde::ser::Serializer;
+use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
 
@@ -12,11 +12,15 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Stats {
     nargs: usize,
+    total_space_functions: usize,
 }
 
 impl Default for Stats {
     fn default() -> Self {
-        Self { nargs: 0 }
+        Self {
+            nargs: 0,
+            total_space_functions: 1,
+        }
     }
 }
 
@@ -25,13 +29,21 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        serializer.serialize_f64(self.nargs())
+        let mut st = serializer.serialize_struct("nargs", 2)?;
+        st.serialize_field("sum", &self.nargs())?;
+        st.serialize_field("average", &self.nargs_average())?;
+        st.end()
     }
 }
 
 impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.nargs())
+        write!(
+            f,
+            "sum: {}, average: {}",
+            self.nargs(),
+            self.nargs_average()
+        )
     }
 }
 
@@ -44,6 +56,18 @@ impl Stats {
     /// Returns the `NArgs` metric value
     pub fn nargs(&self) -> f64 {
         self.nargs as f64
+    }
+
+    /// Returns the `NArgs` metric average value
+    ///
+    /// This value is computed dividing the `NArgs` value
+    /// for the total number of functions/closures in a space.
+    pub fn nargs_average(&self) -> f64 {
+        self.nargs() / self.total_space_functions as f64
+    }
+
+    pub(crate) fn finalize(&mut self, total_space_functions: usize) {
+        self.total_space_functions = total_space_functions;
     }
 }
 
@@ -100,3 +124,73 @@ impl NArgs for JavaCode {}
 impl NArgs for GoCode {}
 impl NArgs for CssCode {}
 impl NArgs for HtmlCode {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_function_nargs() {
+        check_metrics!(
+            "def f(a, b):
+                 if a:
+                     return a",
+            "foo.py",
+            PythonParser,
+            nargs,
+            [(nargs, 2, usize)],
+            [(nargs_average, 2.0)] // 1 function
+        );
+    }
+
+    #[test]
+    fn test_functions_nargs() {
+        check_metrics!(
+            "def f(a, b):
+                 if a:
+                     return a
+            def f(a, b):
+                 if b:
+                     return b",
+            "foo.py",
+            PythonParser,
+            nargs,
+            [(nargs, 4, usize)],
+            [(nargs_average, 2.0)] // 2 functions
+        );
+
+        check_metrics!(
+            "def f(a, b):
+                 if a:
+                     return a
+            def f(a, b, c):
+                 if b:
+                     return b",
+            "foo.py",
+            PythonParser,
+            nargs,
+            [(nargs, 5, usize)],
+            [(nargs_average, 2.5)] // 2 functions
+        );
+    }
+
+    #[test]
+    fn test_nested_functions_nargs() {
+        check_metrics!(
+            "def f(a, b):
+                 def foo(a):
+                     if a:
+                         return 1
+                 bar = lambda a: lambda b: b or True or True
+                 return bar(foo(a))(a)",
+            "foo.py",
+            PythonParser,
+            nargs,
+            // FIXME: Consider lambda arguments also
+            [(nargs, 3, usize)],
+            [(nargs_average, 0.75)] // 2 functions + 2 lambdas = 4
+        );
+    }
+}
