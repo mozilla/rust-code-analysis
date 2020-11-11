@@ -1,4 +1,4 @@
-use serde::ser::Serializer;
+use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
 
@@ -12,11 +12,15 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Stats {
     exit: usize,
+    total_space_functions: usize,
 }
 
 impl Default for Stats {
     fn default() -> Self {
-        Self { exit: 0 }
+        Self {
+            exit: 0,
+            total_space_functions: 1,
+        }
     }
 }
 
@@ -25,13 +29,16 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        serializer.serialize_f64(self.exit())
+        let mut st = serializer.serialize_struct("nexits", 2)?;
+        st.serialize_field("sum", &self.exit())?;
+        st.serialize_field("average", &self.exit_average())?;
+        st.end()
     }
 }
 
 impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.exit)
+        write!(f, "sum: {}, average: {}", self.exit(), self.exit_average())
     }
 }
 
@@ -44,6 +51,18 @@ impl Stats {
     /// Returns the `NExit` metric value
     pub fn exit(&self) -> f64 {
         self.exit as f64
+    }
+
+    /// Returns the `NExit` metric average value
+    ///
+    /// This value is computed dividing the `NExit` value
+    /// for the total number of functions/closures in a space.
+    pub fn exit_average(&self) -> f64 {
+        self.exit() / self.total_space_functions as f64
+    }
+
+    pub(crate) fn finalize(&mut self, total_space_functions: usize) {
+        self.total_space_functions = total_space_functions;
     }
 }
 
@@ -121,3 +140,58 @@ impl Exit for JavaCode {}
 impl Exit for GoCode {}
 impl Exit for CssCode {}
 impl Exit for HtmlCode {}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_function_exit() {
+        check_metrics!(
+            "def f(a, b):
+                 if a:
+                     return a",
+            "foo.py",
+            PythonParser,
+            nexits,
+            [(exit, 1, usize)],
+            [(exit_average, 1.0)] // 1 function
+        );
+    }
+
+    #[test]
+    fn test_functions_exit() {
+        check_metrics!(
+            "def f(a, b):
+                 if a:
+                     return a
+            def f(a, b):
+                 if b:
+                     return b",
+            "foo.py",
+            PythonParser,
+            nexits,
+            [(exit, 2, usize)],
+            [(exit_average, 1.0)] // 2 functions
+        );
+    }
+
+    #[test]
+    fn test_nested_functions_exit() {
+        check_metrics!(
+            "def f(a, b):
+                 def foo(a):
+                     if a:
+                         return 1
+                 bar = lambda a: lambda b: b or True or True
+                 return bar(foo(a))(a)",
+            "foo.py",
+            PythonParser,
+            nexits,
+            [(exit, 2, usize)],
+            [(exit_average, 0.5)] // 2 functions + 2 lambdas = 4
+        );
+    }
+}

@@ -180,12 +180,12 @@ fn compute_halstead_and_mi<'a, T: ParserTrait>(state: &mut State<'a>) {
 }
 
 #[inline(always)]
-fn compute_average<'a>(state: &mut State<'a>) {
-    state
-        .space
-        .metrics
-        .cognitive
-        .finalize(state.space.metrics.nom.total() as usize);
+fn compute_averages<'a>(state: &mut State<'a>) {
+    let nom_total = state.space.metrics.nom.total() as usize;
+    // Cognitive average
+    state.space.metrics.cognitive.finalize(nom_total);
+    // Nexit average
+    state.space.metrics.nexits.finalize(nom_total);
 }
 
 fn finalize<'a, T: ParserTrait>(state_stack: &mut Vec<State<'a>>, diff_level: usize) {
@@ -196,12 +196,12 @@ fn finalize<'a, T: ParserTrait>(state_stack: &mut Vec<State<'a>>, diff_level: us
         if state_stack.len() == 1 {
             let mut last_state = state_stack.last_mut().unwrap();
             compute_halstead_and_mi::<T>(&mut last_state);
-            compute_average(&mut last_state);
+            compute_averages(&mut last_state);
             break;
         } else {
             let mut state = state_stack.pop().unwrap();
             compute_halstead_and_mi::<T>(&mut state);
-            compute_average(&mut state);
+            compute_averages(&mut state);
 
             let mut last_state = state_stack.last_mut().unwrap();
             last_state.halstead_maps.merge(&state.halstead_maps);
