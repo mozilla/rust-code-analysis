@@ -262,10 +262,10 @@ fn dump_nargs(
     write!(stdout, "{}{}", prefix, pref)?;
 
     color!(stdout, Green, true);
-    write!(stdout, "n_args: ")?;
+    write!(stdout, "nargs: ")?;
 
     color!(stdout, White);
-    writeln!(stdout, "{}", stats.n_args())
+    writeln!(stdout, "{}", stats.nargs())
 }
 
 fn dump_nexits(
@@ -280,7 +280,7 @@ fn dump_nexits(
     write!(stdout, "{}{}", prefix, pref)?;
 
     color!(stdout, Green, true);
-    write!(stdout, "n_exits: ")?;
+    write!(stdout, "nexits: ")?;
 
     color!(stdout, White);
     writeln!(stdout, "{}", stats.exit())
