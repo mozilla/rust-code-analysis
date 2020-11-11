@@ -16,7 +16,6 @@ use crate::traits::*;
 ///
 /// use rust_code_analysis::{dump_node, CppParser, ParserTrait};
 ///
-/// # fn main() {
 /// let source_code = "int a = 42;";
 ///
 /// // The path to a dummy file used to contain the source code
@@ -31,7 +30,6 @@ use crate::traits::*;
 ///
 /// // Dump the AST from the first line of code in a file to the last one
 /// dump_node(&source_as_vec, &root, -1, None, None).unwrap();
-/// # }
 /// ```
 ///
 /// [`Result`]: #variant.Result

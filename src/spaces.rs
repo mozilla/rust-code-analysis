@@ -219,7 +219,6 @@ struct State<'a> {
 ///
 /// use rust_code_analysis::{CppParser, metrics, ParserTrait};
 ///
-/// # fn main() {
 /// let source_code = "int a = 42;";
 ///
 /// // The path to a dummy file used to contain the source code
@@ -231,7 +230,6 @@ struct State<'a> {
 ///
 /// // Gets all function spaces data of the code contained in foo.c
 /// metrics(&parser, &path).unwrap();
-/// # }
 /// ```
 pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace> {
     let code = parser.get_code();

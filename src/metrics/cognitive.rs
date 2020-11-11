@@ -141,7 +141,7 @@ impl BoolSequence {
     }
 
     fn eval_based_on_prev(&mut self, bool_id: u16, structural: usize) -> usize {
-        let new_structural = if let Some(prev) = self.boolean_op {
+        if let Some(prev) = self.boolean_op {
             if prev != bool_id {
                 // The boolean operator is different from the previous one, so
                 // the counter is incremented.
@@ -156,8 +156,7 @@ impl BoolSequence {
             // logical operators and increment the counter.
             self.boolean_op = Some(bool_id);
             structural + 1
-        };
-        new_structural
+        }
     }
 }
 

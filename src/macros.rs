@@ -81,9 +81,7 @@ macro_rules! mk_impl_lang {
             /// ```
             /// use rust_code_analysis::LANG;
             ///
-            /// # fn main() {
             /// println!("{}", LANG::Rust.get_name());
-            /// # }
             /// ```
             pub fn get_name(&self) -> &'static str {
                 match self {
@@ -113,7 +111,6 @@ macro_rules! mk_action {
         ///
         /// use rust_code_analysis::{action, Callback, LANG, Metrics, MetricsCfg};
         ///
-        /// # fn main() {
         /// let source_code = "int a = 42;";
         /// let language = LANG::Cpp;
         ///
@@ -127,7 +124,6 @@ macro_rules! mk_action {
         /// };
         ///
         /// action::<Metrics>(&language, source_as_vec, &cfg.path.clone(), None, cfg);
-        /// # }
         /// ```
         ///
         /// [`Callback`]: trait.Callback.html
@@ -152,7 +148,6 @@ macro_rules! mk_action {
         ///
         /// use rust_code_analysis::{get_function_spaces, LANG};
         ///
-        /// # fn main() {
         /// let source_code = "int a = 42;";
         /// let language = LANG::Cpp;
         ///
@@ -161,7 +156,6 @@ macro_rules! mk_action {
         /// let source_as_vec = source_code.as_bytes().to_vec();
         ///
         /// get_function_spaces(&language, source_as_vec, &path, None).unwrap();
-        /// # }
         /// ```
         #[inline(always)]
         pub fn get_function_spaces(lang: &LANG, source: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Option<FuncSpace> {
@@ -188,11 +182,9 @@ macro_rules! mk_extensions {
         /// ```
         /// use rust_code_analysis::get_from_ext;
         ///
-        /// # fn main() {
         /// let ext = "rs";
         ///
         /// get_from_ext(ext).unwrap();
-        /// # }
         /// ```
         pub fn get_from_ext(ext: &str) -> Option<LANG>{
             match ext {
@@ -221,11 +213,9 @@ macro_rules! mk_emacs_mode {
         /// ```
         /// use rust_code_analysis::get_from_emacs_mode;
         ///
-        /// # fn main() {
         /// let emacs_mode = "rust";
         ///
         /// get_from_emacs_mode(emacs_mode).unwrap();
-        /// # }
         /// ```
         pub fn get_from_emacs_mode(mode: &str) -> Option<LANG>{
             match mode {

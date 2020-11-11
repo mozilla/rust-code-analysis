@@ -16,10 +16,8 @@ use std::path::{Component, Path, PathBuf};
 ///
 /// use rust_code_analysis::read_file;
 ///
-/// # fn main() {
 /// let path = PathBuf::from("Cargo.toml");
 /// read_file(&path).unwrap();
-/// # }
 /// ```
 pub fn read_file(path: &PathBuf) -> std::io::Result<Vec<u8>> {
     let mut file = File::open(path)?;
@@ -40,10 +38,8 @@ pub fn read_file(path: &PathBuf) -> std::io::Result<Vec<u8>> {
 ///
 /// use rust_code_analysis::read_file_with_eol;
 ///
-/// # fn main() {
 /// let path = PathBuf::from("Cargo.toml");
 /// read_file_with_eol(&path).unwrap();
-/// # }
 /// ```
 pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Option<Vec<u8>>> {
     let file_size = fs::metadata(&path).map_or(1024 * 1024, |m| m.len() as usize);
@@ -55,7 +51,7 @@ pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Option<Vec<u8>>> {
     let mut file = File::open(path)?;
 
     let mut start = vec![0; 64.min(file_size)];
-    let start = if let Ok(_) = file.read_exact(&mut start) {
+    let start = if file.read_exact(&mut start).is_ok() {
         // Skip the bom if one
         if start[..2] == [b'\xFE', b'\xFF'] || start[..2] == [b'\xFF', b'\xFE'] {
             &start[2..]
@@ -96,11 +92,9 @@ pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Option<Vec<u8>>> {
 ///
 /// use rust_code_analysis::write_file;
 ///
-/// # fn main() {
 /// let path = PathBuf::from("foo.txt");
 /// let data: [u8; 4] = [0; 4];
 /// write_file(&path, &data).unwrap();
-/// # }
 /// ```
 pub fn write_file(path: &PathBuf, data: &[u8]) -> std::io::Result<()> {
     let mut file = File::create(path)?;
@@ -119,10 +113,8 @@ pub fn write_file(path: &PathBuf, data: &[u8]) -> std::io::Result<()> {
 ///
 /// use rust_code_analysis::get_language_for_file;
 ///
-/// # fn main() {
 /// let path = PathBuf::from("build.rs");
 /// get_language_for_file(&path).unwrap();
-/// # }
 /// ```
 pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
     if let Some(ext) = path.extension() {
@@ -183,7 +175,6 @@ fn get_emacs_mode(buf: &[u8]) -> Option<String> {
 ///
 /// use rust_code_analysis::guess_language;
 ///
-/// # fn main() {
 /// let source_code = "int a = 42;";
 ///
 /// // The path to a dummy file used to contain the source code
@@ -192,7 +183,6 @@ fn get_emacs_mode(buf: &[u8]) -> Option<String> {
 ///
 /// // Guess the language of a code
 /// guess_language(&source_slice, &path);
-/// # }
 /// ```
 ///
 /// [`LANG`]: enum.LANG.html

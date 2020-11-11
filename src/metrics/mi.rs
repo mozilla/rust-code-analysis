@@ -87,7 +87,7 @@ pub trait Mi
 where
     Self: Checker,
 {
-    fn compute<'a>(
+    fn compute(
         loc: &loc::Stats,
         cyclomatic: &cyclomatic::Stats,
         halstead: &halstead::Stats,
