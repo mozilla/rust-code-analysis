@@ -25,7 +25,7 @@ repos:
         name: clippy
         language: system
         files: '\.rs$'
-        entry: cargo clippy --all-targets --all --
+        entry: cargo clippy --all-targets --all -- -D warnings
         pass_filenames: false
 
       - id: test
