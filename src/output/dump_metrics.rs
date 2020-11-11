@@ -23,7 +23,6 @@ use crate::spaces::{CodeMetrics, FuncSpace};
 ///
 /// use rust_code_analysis::{dump_root, metrics, CppParser, ParserTrait};
 ///
-/// # fn main() {
 /// let source_code = "int a = 42;";
 ///
 /// // The path to a dummy file used to contain the source code
@@ -38,7 +37,6 @@ use crate::spaces::{CodeMetrics, FuncSpace};
 ///
 /// // Dump all metrics
 /// dump_root(&space).unwrap();
-/// # }
 /// ```
 ///
 /// [`Result`]: #variant.Result

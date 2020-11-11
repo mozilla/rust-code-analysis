@@ -104,17 +104,19 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
             }
         } else {
             let cfg = MetricsCfg { path };
-            action::<Metrics>(&language, source, &cfg.path.clone(), pr, cfg)
+            let path = cfg.path.clone();
+            action::<Metrics>(&language, source, &path, pr, cfg)
         }
     } else if cfg.comments {
         let cfg = CommentRmCfg {
             in_place: cfg.in_place,
             path,
         };
+        let path = cfg.path.clone();
         if language == LANG::Cpp {
-            action::<CommentRm>(&LANG::Ccomment, source, &cfg.path.clone(), pr, cfg)
+            action::<CommentRm>(&LANG::Ccomment, source, &path, pr, cfg)
         } else {
-            action::<CommentRm>(&language, source, &cfg.path.clone(), pr, cfg)
+            action::<CommentRm>(&language, source, &path, pr, cfg)
         }
     } else if cfg.function {
         let cfg = FunctionCfg { path: path.clone() };
@@ -477,7 +479,7 @@ fn main() {
         .value_of("output_format")
         .map(parse_or_exit::<Format>);
     let pretty = matches.is_present("pretty");
-    let output = matches.value_of("output").map(|s| PathBuf::from(s));
+    let output = matches.value_of("output").map(PathBuf::from);
     let output_is_dir = output.as_ref().map(|p| p.is_dir()).unwrap_or(false);
     if metrics && output.is_some() && !output_is_dir {
         eprintln!("Error: The output parameter must be a directory");

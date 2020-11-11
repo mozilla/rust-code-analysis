@@ -349,7 +349,7 @@ impl Getter for RustCode {
         if let Some(name) = node
             .object()
             .child_by_field_name("name")
-            .or(node.object().child_by_field_name("type"))
+            .or_else(|| node.object().child_by_field_name("type"))
         {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
