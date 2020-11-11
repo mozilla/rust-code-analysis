@@ -186,6 +186,8 @@ fn compute_averages<'a>(state: &mut State<'a>) {
     state.space.metrics.cognitive.finalize(nom_total);
     // Nexit average
     state.space.metrics.nexits.finalize(nom_total);
+    // Nargs average
+    state.space.metrics.nargs.finalize(nom_total);
 }
 
 fn finalize<'a, T: ParserTrait>(state_stack: &mut Vec<State<'a>>, diff_level: usize) {
