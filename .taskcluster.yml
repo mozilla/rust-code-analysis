@@ -43,7 +43,7 @@ tasks:
                rustup component add clippy rustfmt &&
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
+               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
                cargo test --all --verbose --all-features"
@@ -66,7 +66,7 @@ tasks:
             - "-cx"
             - "git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
+               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                cargo install mdbook --no-default-features --features search,output --vers \"^0.1.0\" &&
                cargo doc --release &&
                cd rust-code-analysis-book &&
@@ -104,7 +104,7 @@ tasks:
                curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-linux-x86_64.tar.bz2 | tar jxf - &&
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
+               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                cargo test --all --verbose --all-features &&
                zip -0 ccov.zip `find . -name 'rust_code_analysis*.gc*' -print` &&
                ../grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
@@ -135,7 +135,7 @@ tasks:
                               --default-host x86_64-pc-windows-msvc
             - git clone --recursive --quiet ${repository}
             - cd rust-code-analysis
-            - git -c advice.detachedHead=false checkout ${head_rev}
+            - git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev}
             - cargo test --all --verbose --all-features
           mounts:
             - content:
@@ -169,7 +169,7 @@ tasks:
                  pushd /cache/gecko-dev && git pull origin master && popd &&
                  mkdir -p /tmp/mozilla_central_output &&
                  cd rust-code-analysis &&
-                 git -c advice.detachedHead=false checkout ${head_rev} &&
+                 git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                  cargo build --release --all --all-features &&
                  cargo run --release -p rust-code-analysis-cli -- -p /cache/gecko-dev \
                                      -j4 --metrics -O json -o /tmp/mozilla_central_output"
@@ -201,7 +201,7 @@ tasks:
               - "-cx"
               - "git clone --recursive --quiet ${repository} &&
                  cd rust-code-analysis &&
-                 git -c advice.detachedHead=false checkout ${head_rev} &&
+                 git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                  cargo build --all --release &&
                  cd target/release &&
                  strip rust-code-analysis-cli &&
@@ -244,7 +244,7 @@ tasks:
                                 --default-host x86_64-pc-windows-msvc
               - git clone --recursive --quiet ${repository}
               - cd rust-code-analysis
-              - git -c advice.detachedHead=false checkout ${head_rev}
+              - git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev}
               - cargo build --all --release
             mounts:
               - content:
