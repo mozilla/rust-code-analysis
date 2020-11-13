@@ -180,13 +180,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_cyclomatic() {
+    fn python_simple_function() {
         check_metrics!(
             "def f(a, b): # +2 (+1 unit space)
                 if a and b:  # +2 (+1 and)
                    return 1
                 if c and d: # +2 (+1 and)
-                   return 1\n",
+                   return 1",
             "foo.py",
             PythonParser,
             cyclomatic,
@@ -198,12 +198,12 @@ mod tests {
     }
 
     #[test]
-    fn test_1_level_nesting_cyclomatic() {
+    fn python_1_level_nesting() {
         check_metrics!(
             "def f(a, b): # +2 (+1 unit space)
                 if a:  # +1
                     for i in range(b):  # +1
-                        return 1\n",
+                        return 1",
             "foo.py",
             PythonParser,
             cyclomatic,
@@ -212,7 +212,10 @@ mod tests {
                 (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
             ]
         );
+    }
 
+    #[test]
+    fn rust_1_level_nesting() {
         check_metrics!(
             "fn f() { // +2 (+1 unit space)
                  if true { // +1
@@ -221,7 +224,7 @@ mod tests {
                          false => println!(\"test\"), // +1
                      }
                  }
-             }\n",
+             }",
             "foo.rs",
             RustParser,
             cyclomatic,
@@ -233,7 +236,7 @@ mod tests {
     }
 
     #[test]
-    fn test_c_switch_cyclomatic() {
+    fn c_switch() {
         check_metrics!(
             "void f() { // +2 (+1 unit space)
                  switch (1) {
@@ -250,7 +253,7 @@ mod tests {
                          printf(\"all\");
                          break;
                  }
-             }\n",
+             }",
             "foo.c",
             CppParser,
             cyclomatic,
@@ -262,7 +265,7 @@ mod tests {
     }
 
     #[test]
-    fn test_real_cyclomatic() {
+    fn c_real_function() {
         check_metrics!(
             "int sumOfPrimes(int max) { // +2 (+1 unit space)
                  int total = 0;
@@ -275,7 +278,7 @@ mod tests {
                    total += i;
                  }
                  return total;
-            }\n",
+            }",
             "foo.c",
             CppParser,
             cyclomatic,

@@ -120,10 +120,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_mi_formulas() {
+    fn python_check_metrics() {
         check_metrics!(
             "def f():
-                 pass\n",
+                 pass",
             "foo.py",
             PythonParser,
             mi,

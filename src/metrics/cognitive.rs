@@ -412,7 +412,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_simple_cognitive() {
+    fn python_simple_function() {
         check_metrics!(
             "def f(a, b):
                 if a and b:  # +2 (+1 and)
@@ -425,7 +425,10 @@ mod tests {
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
         );
+    }
 
+    #[test]
+    fn rust_simple_function() {
         check_metrics!(
             "fn f() {
                  if a && b { // +2 (+1 &&)
@@ -441,7 +444,10 @@ mod tests {
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
         );
+    }
 
+    #[test]
+    fn c_simple_function() {
         check_metrics!(
             "void f() {
                  if (a && b) { // +2 (+1 &&)
@@ -457,7 +463,10 @@ mod tests {
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
         );
+    }
 
+    #[test]
+    fn mozjs_simple_function() {
         check_metrics!(
             "function f() {
                  if (a && b) { // +2 (+1 &&)
@@ -476,7 +485,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sequence_same_booleans_cognitive() {
+    fn python_sequence_same_booleans() {
         check_metrics!(
             "def f(a, b):
                 if a and b and True:  # +2 (+1 sequence of and)
@@ -487,7 +496,10 @@ mod tests {
             [(cognitive, 2, usize)],
             [(cognitive_average, 2.0)]
         );
+    }
 
+    #[test]
+    fn rust_sequence_same_booleans() {
         check_metrics!(
             "fn f() {
                  if a && b && true { // +2 (+1 sequence of &&)
@@ -496,32 +508,6 @@ mod tests {
              }",
             "foo.rs",
             RustParser,
-            cognitive,
-            [(cognitive, 2, usize)],
-            [(cognitive_average, 2.0)]
-        );
-
-        check_metrics!(
-            "void f() {
-                 if (a && b && 1 == 1) { // +2 (+1 sequence of &&)
-                     printf(\"test\");
-                 }
-             }",
-            "foo.c",
-            CppParser,
-            cognitive,
-            [(cognitive, 2, usize)],
-            [(cognitive_average, 2.0)]
-        );
-
-        check_metrics!(
-            "function f() {
-                 if (a && b && 1 == 1) { // +2 (+1 sequence of &&)
-                     window.print(\"test\");
-                 }
-             }",
-            "foo.js",
-            MozjsParser,
             cognitive,
             [(cognitive, 2, usize)],
             [(cognitive_average, 2.0)]
@@ -539,6 +525,22 @@ mod tests {
             [(cognitive, 2, usize)],
             [(cognitive_average, 2.0)]
         );
+    }
+
+    #[test]
+    fn c_sequence_same_booleans() {
+        check_metrics!(
+            "void f() {
+                 if (a && b && 1 == 1) { // +2 (+1 sequence of &&)
+                     printf(\"test\");
+                 }
+             }",
+            "foo.c",
+            CppParser,
+            cognitive,
+            [(cognitive, 2, usize)],
+            [(cognitive_average, 2.0)]
+        );
 
         check_metrics!(
             "void f() {
@@ -548,6 +550,22 @@ mod tests {
              }",
             "foo.c",
             CppParser,
+            cognitive,
+            [(cognitive, 2, usize)],
+            [(cognitive_average, 2.0)]
+        );
+    }
+
+    #[test]
+    fn mozjs_sequence_same_booleans() {
+        check_metrics!(
+            "function f() {
+                 if (a && b && 1 == 1) { // +2 (+1 sequence of &&)
+                     window.print(\"test\");
+                 }
+             }",
+            "foo.js",
+            MozjsParser,
             cognitive,
             [(cognitive, 2, usize)],
             [(cognitive_average, 2.0)]
@@ -568,7 +586,7 @@ mod tests {
     }
 
     #[test]
-    fn test_not_booleans_cognitive() {
+    fn rust_not_booleans() {
         check_metrics!(
             "fn f() {
                  if !a && !b { // +2 (+1 &&)
@@ -596,32 +614,6 @@ mod tests {
         );
 
         check_metrics!(
-            "void f() {
-                 if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
-                     printf(\"test\");
-                 }
-             }",
-            "foo.c",
-            CppParser,
-            cognitive,
-            [(cognitive, 3, usize)],
-            [(cognitive_average, 3.0)]
-        );
-
-        check_metrics!(
-            "function f() {
-                 if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
-                     window.print(\"test\");
-                 }
-             }",
-            "foo.js",
-            MozjsParser,
-            cognitive,
-            [(cognitive, 3, usize)],
-            [(cognitive_average, 3.0)]
-        );
-
-        check_metrics!(
             "fn f() {
                  if !(a || b) && !(c || d) { // +4 (+1 ||, +1 &&, +1 ||)
                      println!(\"test\");
@@ -632,6 +624,22 @@ mod tests {
             cognitive,
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
+        );
+    }
+
+    #[test]
+    fn c_not_booleans() {
+        check_metrics!(
+            "void f() {
+                 if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
+                     printf(\"test\");
+                 }
+             }",
+            "foo.c",
+            CppParser,
+            cognitive,
+            [(cognitive, 3, usize)],
+            [(cognitive_average, 3.0)]
         );
 
         check_metrics!(
@@ -645,6 +653,22 @@ mod tests {
             cognitive,
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
+        );
+    }
+
+    #[test]
+    fn mozjs_not_booleans() {
+        check_metrics!(
+            "function f() {
+                 if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
+                     window.print(\"test\");
+                 }
+             }",
+            "foo.js",
+            MozjsParser,
+            cognitive,
+            [(cognitive, 3, usize)],
+            [(cognitive_average, 3.0)]
         );
 
         check_metrics!(
@@ -662,7 +686,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sequence_different_booleans_cognitive() {
+    fn python_sequence_different_booleans() {
         check_metrics!(
             "def f(a, b):
                 if a and b or True:  # +3 (+1 and, +1 or)
@@ -673,7 +697,10 @@ mod tests {
             [(cognitive, 3, usize)],
             [(cognitive_average, 3.0)]
         );
+    }
 
+    #[test]
+    fn rust_sequence_different_booleans() {
         check_metrics!(
             "fn f() {
                  if a && b || true { // +3 (+1 &&, +1 ||)
@@ -686,7 +713,10 @@ mod tests {
             [(cognitive, 3, usize)],
             [(cognitive_average, 3.0)]
         );
+    }
 
+    #[test]
+    fn c_sequence_different_booleans() {
         check_metrics!(
             "void f() {
                  if (a && b || 1 == 1) { // +3 (+1 &&, +1 ||)
@@ -699,7 +729,10 @@ mod tests {
             [(cognitive, 3, usize)],
             [(cognitive_average, 3.0)]
         );
+    }
 
+    #[test]
+    fn mozjs_sequence_different_booleans() {
         check_metrics!(
             "function f() {
                  if (a && b || 1 == 1) { // +3 (+1 &&, +1 ||)
@@ -715,7 +748,7 @@ mod tests {
     }
 
     #[test]
-    fn test_formatted_sequence_different_booleans_cognitive() {
+    fn python_formatted_sequence_different_booleans() {
         check_metrics!(
             "def f(a, b):
                 if (  # +1
@@ -732,7 +765,7 @@ mod tests {
     }
 
     #[test]
-    fn test_1_level_nesting_cognitive() {
+    fn python_1_level_nesting() {
         check_metrics!(
             "def f(a, b):
                 if a:  # +1
@@ -744,7 +777,10 @@ mod tests {
             [(cognitive, 3, usize)],
             [(cognitive_average, 3.0)]
         );
+    }
 
+    #[test]
+    fn rust_1_level_nesting() {
         check_metrics!(
             "fn f() {
                  if true { // +1
@@ -769,6 +805,25 @@ mod tests {
         );
 
         check_metrics!(
+            "fn f() {
+                 if true { // +1
+                     match true { // +2 (nesting = 1)
+                         true => println!(\"test\"),
+                         false => println!(\"test\"),
+                     }
+                 }
+             }",
+            "foo.rs",
+            RustParser,
+            cognitive,
+            [(cognitive, 3, usize)],
+            [(cognitive_average, 3.0)]
+        );
+    }
+
+    #[test]
+    fn c_1_level_nesting() {
+        check_metrics!(
             "void f() {
                  if (1 == 1) { // +1
                      if (1 == 1) { // +2 (nesting = 1)
@@ -790,7 +845,10 @@ mod tests {
             [(cognitive, 11, usize)],
             [(cognitive_average, 11.0)]
         );
+    }
 
+    #[test]
+    fn mozjs_1_level_nesting() {
         check_metrics!(
             "function f() {
                  if (1 == 1) { // +1
@@ -813,26 +871,10 @@ mod tests {
             [(cognitive, 11, usize)],
             [(cognitive_average, 11.0)]
         );
-
-        check_metrics!(
-            "fn f() {
-                 if true { // +1
-                     match true { // +2 (nesting = 1)
-                         true => println!(\"test\"),
-                         false => println!(\"test\"),
-                     }
-                 }
-             }",
-            "foo.rs",
-            RustParser,
-            cognitive,
-            [(cognitive, 3, usize)],
-            [(cognitive_average, 3.0)]
-        );
     }
 
     #[test]
-    fn test_2_level_nesting_cognitive() {
+    fn python_2_level_nesting() {
         check_metrics!(
             "def f(a, b):
                 if a:  # +1
@@ -845,7 +887,10 @@ mod tests {
             [(cognitive, 6, usize)],
             [(cognitive_average, 6.0)]
         );
+    }
 
+    #[test]
+    fn rust_2_level_nesting() {
         check_metrics!(
             "fn f() {
                  if true { // +1
@@ -866,7 +911,7 @@ mod tests {
     }
 
     #[test]
-    fn test_try_construct_cognitive() {
+    fn python_try_construct() {
         check_metrics!(
             "def f(a, b):
                 try:
@@ -881,7 +926,10 @@ mod tests {
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
         );
+    }
 
+    #[test]
+    fn mozjs_try_construct() {
         check_metrics!(
             "function asyncOnChannelRedirect(oldChannel, newChannel, flags, callback) {
                  for (const collector of this.collectors) {
@@ -897,7 +945,7 @@ mod tests {
                  callback.onRedirectVerifyCallback(Cr.NS_OK);
              }",
             "foo.js",
-            JavascriptParser,
+            MozjsParser,
             cognitive,
             [(cognitive, 3, usize)],
             [(cognitive_average, 3.0)]
@@ -905,7 +953,7 @@ mod tests {
     }
 
     #[test]
-    fn test_break_continue_cognitive() {
+    fn rust_break_continue() {
         // Only labeled break and continue statements are considered
         check_metrics!(
             "fn f() {
@@ -932,7 +980,7 @@ mod tests {
     }
 
     #[test]
-    fn test_goto_cognitive() {
+    fn c_goto() {
         check_metrics!(
             "void f() {
              OUT: for (int i = 1; i <= max; ++i) { // +1
@@ -952,7 +1000,7 @@ mod tests {
     }
 
     #[test]
-    fn test_switch_cognitive() {
+    fn c_switch() {
         check_metrics!(
             "void f() {
                  switch (1) { // +1
@@ -976,7 +1024,10 @@ mod tests {
             [(cognitive, 1, usize)],
             [(cognitive_average, 1.0)]
         );
+    }
 
+    #[test]
+    fn mozjs_switch() {
         check_metrics!(
             "function f() {
                  switch (1) { // +1
@@ -1003,7 +1054,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ternary_operator_cognitive() {
+    fn python_ternary_operator() {
         check_metrics!(
             "def f(a, b):
                  if a % 2:  # +1
@@ -1018,7 +1069,7 @@ mod tests {
     }
 
     #[test]
-    fn test_nested_functions_cognitive() {
+    fn python_nested_functions_lambdas() {
         check_metrics!(
             "def f(a, b):
                  def foo(a):
@@ -1030,14 +1081,13 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            // 2 functions + 2 lamdas = 4
             [(cognitive, 5, usize)],
-            [(cognitive_average, 1.25)]
+            [(cognitive_average, 1.25)] // 2 functions + 2 lamdas = 4
         );
     }
 
     #[test]
-    fn test_real_function_cognitive() {
+    fn python_real_function() {
         check_metrics!(
             "def process_raw_constant(constant, min_word_length):
                  processed_words = []

@@ -336,14 +336,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_halstead_operators_and_operands() {
+    fn python_operators_and_operands() {
         check_metrics!(
             "def foo():
                  def bar():
                      def toto():
                         a = 1 + 1
                      b = 2 + a
-                 c = 3 + 3\n",
+                 c = 3 + 3",
             "foo.py",
             PythonParser,
             halstead,
@@ -357,7 +357,7 @@ mod tests {
     }
 
     #[test]
-    fn test_wrong_halstead_operators() {
+    fn python_wrong_operators() {
         check_metrics!(
             "()[]{}",
             "foo.py",
@@ -368,10 +368,10 @@ mod tests {
     }
 
     #[test]
-    fn test_halstead_formulas() {
+    fn python_check_metrics() {
         check_metrics!(
             "def f():
-                 pass\n",
+                 pass",
             "foo.py",
             PythonParser,
             halstead,

@@ -372,7 +372,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_sloc() {
+    fn python_sloc() {
         check_metrics!(
             "
 
@@ -387,7 +387,7 @@ mod tests {
     }
 
     #[test]
-    fn test_blank_python() {
+    fn python_blank() {
         check_metrics!(
             "
             a = 42
@@ -403,7 +403,7 @@ mod tests {
     }
 
     #[test]
-    fn test_blank_rust() {
+    fn rust_blank() {
         check_metrics!(
             "
 
@@ -428,7 +428,7 @@ mod tests {
     }
 
     #[test]
-    fn test_blank_c() {
+    fn c_blank() {
         check_metrics!(
             "
 
@@ -445,10 +445,13 @@ mod tests {
     }
 
     #[test]
-    fn test_cloc_python() {
+    fn python_cloc() {
         check_metrics!(
-            "\"\"\"Block comment\nBlock comment\n\"\"\"\n
-            # Line Comment\na = 42 # Line Comment\n",
+            "\"\"\"Block comment
+            Block comment
+            \"\"\"
+            # Line Comment
+            a = 42 # Line Comment",
             "foo.py",
             PythonParser,
             loc,
@@ -457,9 +460,12 @@ mod tests {
     }
 
     #[test]
-    fn test_cloc_rust() {
+    fn rust_cloc() {
         check_metrics!(
-            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ let a = 42; // Line Comment\n",
+            "/*Block comment
+            Block Comment*/
+            //Line Comment
+            /*Block Comment*/ let a = 42; // Line Comment",
             "foo.rs",
             RustParser,
             loc,
@@ -468,9 +474,12 @@ mod tests {
     }
 
     #[test]
-    fn test_cloc_c() {
+    fn c_cloc() {
         check_metrics!(
-            "/*Block comment\nBlock Comment*/\n//Line Comment\n/*Block Comment*/ int a = 42; // Line Comment\n",
+            "/*Block comment
+            Block Comment*/
+            //Line Comment
+            /*Block Comment*/ int a = 42; // Line Comment",
             "foo.c",
             CppParser,
             loc,
@@ -479,11 +488,11 @@ mod tests {
     }
 
     #[test]
-    fn test_lloc_python() {
+    fn python_lloc() {
         check_metrics!(
-            "for x in range(0,42):\n
-                if x % 2 == 0:\n
-                    print(x)\n",
+            "for x in range(0,42):
+                if x % 2 == 0:
+                    print(x)",
             "foo.py",
             PythonParser,
             loc,
@@ -492,13 +501,13 @@ mod tests {
     }
 
     #[test]
-    fn test_lloc_rust() {
+    fn rust_lloc() {
         check_metrics!(
-            "for x in 0..42 {\n
-                if x % 2 == 0 {\n
-                    println!(\"{}\", x);\n
-                }\n
-             }\n",
+            "for x in 0..42 {
+                if x % 2 == 0 {
+                    println!(\"{}\", x);
+                }
+             }",
             "foo.rs",
             RustParser,
             loc,
@@ -507,12 +516,12 @@ mod tests {
 
         // LLOC returns three because there is an empty Rust statement
         check_metrics!(
-            "let a = 42;\n
-             if true {\n
-                42\n
-             } else {\n
-                43\n
-             };\n",
+            "let a = 42;
+             if true {
+                42
+             } else {
+                43
+             };",
             "foo.rs",
             RustParser,
             loc,
@@ -521,10 +530,10 @@ mod tests {
     }
 
     #[test]
-    fn test_lloc_c() {
+    fn c_lloc() {
         check_metrics!(
-            "for (;;)\n
-                break;\n",
+            "for (;;)
+                break;",
             "foo.c",
             CppParser,
             loc,
@@ -533,7 +542,7 @@ mod tests {
     }
 
     #[test]
-    fn test_general_loc() {
+    fn python_general_loc() {
         check_metrics!(
             "def func(a,
                       b,
