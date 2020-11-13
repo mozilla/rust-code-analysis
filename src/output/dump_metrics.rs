@@ -113,16 +113,18 @@ fn dump_cognitive(
     last: bool,
     stdout: &mut StandardStreamLock,
 ) -> std::io::Result<()> {
-    let pref = if last { "`- " } else { "|- " };
+    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
     write!(stdout, "{}{}", prefix, pref)?;
 
     color!(stdout, Green, true);
-    write!(stdout, "cognitive: ")?;
+    writeln!(stdout, "cognitive")?;
 
-    color!(stdout, White);
-    writeln!(stdout, "{}", stats.cognitive())
+    let prefix = format!("{}{}", prefix, pref_child);
+
+    dump_value("sum", stats.cognitive(), &prefix, false, stdout)?;
+    dump_value("average", stats.cognitive_average(), &prefix, true, stdout)
 }
 
 fn dump_cyclomatic(
@@ -131,16 +133,18 @@ fn dump_cyclomatic(
     last: bool,
     stdout: &mut StandardStreamLock,
 ) -> std::io::Result<()> {
-    let pref = if last { "`- " } else { "|- " };
+    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
     write!(stdout, "{}{}", prefix, pref)?;
 
     color!(stdout, Green, true);
-    write!(stdout, "cyclomatic: ")?;
+    writeln!(stdout, "cyclomatic")?;
 
-    color!(stdout, White);
-    writeln!(stdout, "{}", stats.cyclomatic())
+    let prefix = format!("{}{}", prefix, pref_child);
+
+    dump_value("sum", stats.cyclomatic(), &prefix, false, stdout)?;
+    dump_value("average", stats.cyclomatic_average(), &prefix, true, stdout)
 }
 
 fn dump_halstead(
