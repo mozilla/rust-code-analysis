@@ -363,7 +363,6 @@ impl Loc for CppCode {
 
 impl Loc for PreprocCode {}
 impl Loc for CcommentCode {}
-impl Loc for CSharpCode {}
 impl Loc for JavaCode {}
 impl Loc for GoCode {}
 impl Loc for CssCode {}

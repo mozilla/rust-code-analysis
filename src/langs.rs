@@ -66,16 +66,6 @@ mk_langs!(
         ["html"]
     ),
     (
-        CSharp,
-        "The `C#` language",
-        "c#",
-        CSharpCode,
-        CSharpParser,
-        tree_sitter_c_sharp,
-        [cs],
-        ["csharp", "c#"]
-    ),
-    (
         Rust,
         "The `Rust` language",
         "rust",

@@ -327,7 +327,6 @@ impl Halstead for CppCode {
 
 impl Halstead for PreprocCode {}
 impl Halstead for CcommentCode {}
-impl Halstead for CSharpCode {}
 impl Halstead for JavaCode {}
 impl Halstead for GoCode {}
 impl Halstead for CssCode {}

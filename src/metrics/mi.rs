@@ -111,7 +111,6 @@ impl Mi for TypescriptCode {}
 impl Mi for TsxCode {}
 impl Mi for PreprocCode {}
 impl Mi for CcommentCode {}
-impl Mi for CSharpCode {}
 impl Mi for JavaCode {}
 impl Mi for GoCode {}
 impl Mi for CssCode {}

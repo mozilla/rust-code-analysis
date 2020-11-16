@@ -91,30 +91,6 @@ impl Checker for CppCode {
     mk_checker!(is_non_arg, LPAREN, LPAREN2, COMMA, RPAREN);
 }
 
-impl Checker for CSharpCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, StringLiteral);
-    mk_checker!(is_call, InvocationExpression);
-    mk_checker!(
-        is_func,
-        MethodDeclaration,
-        ConstructorDeclaration,
-        ConversionOperatorDeclaration,
-        DestructorDeclaration,
-        OperatorDeclaration,
-        AccessorDeclaration,
-        LocalFunctionStatement
-    );
-    mk_checker!(
-        is_func_space,
-        CompilationUnit,
-        ClassDeclaration,
-        StructDeclaration,
-        NamespaceDeclaration
-    );
-    mk_checker!(is_non_arg,);
-}
-
 impl Checker for PythonCode {
     mk_checker!(is_comment, Comment);
 

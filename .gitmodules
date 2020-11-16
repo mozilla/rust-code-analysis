@@ -22,9 +22,6 @@
 [submodule "tree-sitter-css"]
 	path = tree-sitter-css
 	url = https://github.com/tree-sitter/tree-sitter-css/
-[submodule "tree-sitter-c-sharp"]
-	path = tree-sitter-c-sharp
-	url = https://github.com/tree-sitter/tree-sitter-c-sharp/
 [submodule "tree-sitter-cpp"]
 	path = tree-sitter-cpp
 	url = https://github.com/tree-sitter/tree-sitter-cpp.git

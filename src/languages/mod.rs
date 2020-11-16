@@ -4,9 +4,6 @@ pub use language_ccomment::*;
 pub mod language_cpp;
 pub use language_cpp::*;
 
-pub mod language_csharp;
-pub use language_csharp::*;
-
 pub mod language_css;
 pub use language_css::*;
 
