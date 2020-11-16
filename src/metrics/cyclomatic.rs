@@ -172,7 +172,6 @@ impl Cyclomatic for CppCode {
 impl Cyclomatic for PreprocCode {}
 impl Cyclomatic for CcommentCode {}
 impl Cyclomatic for JavaCode {}
-impl Cyclomatic for GoCode {}
 
 #[cfg(test)]
 mod tests {

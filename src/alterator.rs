@@ -125,18 +125,6 @@ impl Alterator for TsxCode {
     }
 }
 
-impl Alterator for GoCode {
-    fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Go::from(node.object().kind_id()) {
-            Go::InterpretedStringLiteral => {
-                let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.object().kind(), text, span, Vec::new())
-            }
-            _ => Self::get_default(node, code, span, children),
-        }
-    }
-}
-
 impl Alterator for RustCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
         match Rust::from(node.object().kind_id()) {
