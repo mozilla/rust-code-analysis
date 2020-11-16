@@ -196,7 +196,6 @@ impl Nom for PreprocCode {}
 impl Nom for CcommentCode {}
 impl Nom for JavaCode {}
 impl Nom for GoCode {}
-impl Nom for CssCode {}
 impl Nom for HtmlCode {}
 
 #[cfg(test)]

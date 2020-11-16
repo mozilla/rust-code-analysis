@@ -137,8 +137,6 @@ impl Alterator for GoCode {
     }
 }
 
-impl Alterator for CssCode {}
-
 impl Alterator for HtmlCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
         match Html::from(node.object().kind_id()) {

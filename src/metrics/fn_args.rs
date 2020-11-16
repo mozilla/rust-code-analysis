@@ -121,7 +121,6 @@ impl NArgs for PreprocCode {}
 impl NArgs for CcommentCode {}
 impl NArgs for JavaCode {}
 impl NArgs for GoCode {}
-impl NArgs for CssCode {}
 impl NArgs for HtmlCode {}
 
 #[cfg(test)]

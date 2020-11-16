@@ -405,7 +405,6 @@ impl Cognitive for PreprocCode {}
 impl Cognitive for CcommentCode {}
 impl Cognitive for JavaCode {}
 impl Cognitive for GoCode {}
-impl Cognitive for CssCode {}
 impl Cognitive for HtmlCode {}
 
 #[cfg(test)]

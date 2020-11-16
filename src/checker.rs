@@ -252,15 +252,6 @@ impl Checker for GoCode {
     mk_checker!(is_non_arg,);
 }
 
-impl Checker for CssCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, StringValue);
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(is_func,);
-    mk_checker!(is_func_space,);
-    mk_checker!(is_non_arg,);
-}
-
 impl Checker for HtmlCode {
     mk_checker!(is_comment, Comment);
     mk_checker!(is_string,);

@@ -113,7 +113,6 @@ impl Mi for PreprocCode {}
 impl Mi for CcommentCode {}
 impl Mi for JavaCode {}
 impl Mi for GoCode {}
-impl Mi for CssCode {}
 impl Mi for HtmlCode {}
 
 #[cfg(test)]
