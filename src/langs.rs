@@ -76,16 +76,6 @@ mk_langs!(
         ["rust"]
     ),
     (
-        Css,
-        "The `CSS` language",
-        "css",
-        CssCode,
-        CssParser,
-        tree_sitter_css,
-        [css],
-        ["css"]
-    ),
-    (
         Cpp,
         "The `C/C++` language",
         "c/c++",

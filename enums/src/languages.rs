@@ -10,7 +10,6 @@ mk_langs!(
     (Go, tree_sitter_go),
     (Html, tree_sitter_html),
     (Rust, tree_sitter_rust),
-    (Css, tree_sitter_css),
     (Cpp, tree_sitter_cpp),
     (Python, tree_sitter_python),
     (Tsx, tree_sitter_tsx),

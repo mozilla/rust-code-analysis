@@ -472,5 +472,4 @@ impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
 impl Getter for JavaCode {}
 impl Getter for GoCode {}
-impl Getter for CssCode {}
 impl Getter for HtmlCode {}
