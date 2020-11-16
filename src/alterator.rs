@@ -71,8 +71,6 @@ impl Alterator for CppCode {
     }
 }
 
-impl Alterator for CSharpCode {}
-
 impl Alterator for PythonCode {}
 
 impl Alterator for JavaCode {}

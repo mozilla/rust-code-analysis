@@ -194,7 +194,6 @@ impl Nom for CppCode {
 
 impl Nom for PreprocCode {}
 impl Nom for CcommentCode {}
-impl Nom for CSharpCode {}
 impl Nom for JavaCode {}
 impl Nom for GoCode {}
 impl Nom for CssCode {}

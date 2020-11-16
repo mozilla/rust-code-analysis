@@ -470,7 +470,6 @@ impl Getter for CppCode {
 
 impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
-impl Getter for CSharpCode {}
 impl Getter for JavaCode {}
 impl Getter for GoCode {}
 impl Getter for CssCode {}

@@ -119,7 +119,6 @@ impl NArgs for TsxCode {}
 impl NArgs for RustCode {}
 impl NArgs for PreprocCode {}
 impl NArgs for CcommentCode {}
-impl NArgs for CSharpCode {}
 impl NArgs for JavaCode {}
 impl NArgs for GoCode {}
 impl NArgs for CssCode {}

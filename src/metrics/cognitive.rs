@@ -403,7 +403,6 @@ impl Cognitive for TsxCode {
 
 impl Cognitive for PreprocCode {}
 impl Cognitive for CcommentCode {}
-impl Cognitive for CSharpCode {}
 impl Cognitive for JavaCode {}
 impl Cognitive for GoCode {}
 impl Cognitive for CssCode {}

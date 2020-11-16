@@ -135,7 +135,6 @@ impl Exit for CppCode {
 
 impl Exit for PreprocCode {}
 impl Exit for CcommentCode {}
-impl Exit for CSharpCode {}
 impl Exit for JavaCode {}
 impl Exit for GoCode {}
 impl Exit for CssCode {}
