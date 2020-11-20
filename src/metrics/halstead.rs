@@ -328,7 +328,6 @@ impl Halstead for CppCode {
 impl Halstead for PreprocCode {}
 impl Halstead for CcommentCode {}
 impl Halstead for JavaCode {}
-impl Halstead for GoCode {}
 
 #[cfg(test)]
 mod tests {

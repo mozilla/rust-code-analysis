@@ -120,7 +120,6 @@ impl NArgs for RustCode {}
 impl NArgs for PreprocCode {}
 impl NArgs for CcommentCode {}
 impl NArgs for JavaCode {}
-impl NArgs for GoCode {}
 
 #[cfg(test)]
 mod tests {

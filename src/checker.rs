@@ -237,21 +237,6 @@ impl Checker for TsxCode {
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
-impl Checker for GoCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, RawStringLiteral, InterpretedStringLiteral);
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(is_func, FunctionDeclaration, MethodDeclaration, FuncLiteral);
-    mk_checker!(
-        is_func_space,
-        SourceFile,
-        FunctionDeclaration,
-        MethodDeclaration,
-        FuncLiteral
-    );
-    mk_checker!(is_non_arg,);
-}
-
 impl Checker for RustCode {
     mk_checker!(is_comment, LineComment, BlockComment);
 

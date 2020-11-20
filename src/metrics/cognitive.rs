@@ -404,7 +404,6 @@ impl Cognitive for TsxCode {
 impl Cognitive for PreprocCode {}
 impl Cognitive for CcommentCode {}
 impl Cognitive for JavaCode {}
-impl Cognitive for GoCode {}
 
 #[cfg(test)]
 mod tests {

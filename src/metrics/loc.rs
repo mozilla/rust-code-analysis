@@ -364,7 +364,6 @@ impl Loc for CppCode {
 impl Loc for PreprocCode {}
 impl Loc for CcommentCode {}
 impl Loc for JavaCode {}
-impl Loc for GoCode {}
 
 #[cfg(test)]
 mod tests {

@@ -13,9 +13,6 @@
 [submodule "tree-sitter-java"]
 	path = tree-sitter-java
 	url = https://github.com/tree-sitter/tree-sitter-java/
-[submodule "tree-sitter-go"]
-	path = tree-sitter-go
-	url = https://github.com/tree-sitter/tree-sitter-go/
 [submodule "tree-sitter-cpp"]
 	path = tree-sitter-cpp
 	url = https://github.com/tree-sitter/tree-sitter-cpp.git

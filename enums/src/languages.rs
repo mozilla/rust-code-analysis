@@ -7,7 +7,6 @@ mk_langs!(
     // 1) Name for enum
     // 2) tree-sitter function to call to get a Language
     (Java, tree_sitter_java),
-    (Go, tree_sitter_go),
     (Rust, tree_sitter_rust),
     (Cpp, tree_sitter_cpp),
     (Python, tree_sitter_python),
