@@ -65,6 +65,7 @@ def run_rca(repo_dir: pathlib.Path, output_dir: pathlib.Path) -> None:
     run_subprocess(
         "cargo",
         "run",
+        "--release",
         "--package",
         "rust-code-analysis-cli",
         "--",
