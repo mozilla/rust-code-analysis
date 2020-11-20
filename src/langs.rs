@@ -56,16 +56,6 @@ mk_langs!(
         ["go"]
     ),
     (
-        Html,
-        "The `HTML` language",
-        "html",
-        HtmlCode,
-        HtmlParser,
-        tree_sitter_html,
-        [html],
-        ["html"]
-    ),
-    (
         Rust,
         "The `Rust` language",
         "rust",

@@ -137,7 +137,6 @@ impl Exit for PreprocCode {}
 impl Exit for CcommentCode {}
 impl Exit for JavaCode {}
 impl Exit for GoCode {}
-impl Exit for HtmlCode {}
 
 #[cfg(test)]
 mod tests {

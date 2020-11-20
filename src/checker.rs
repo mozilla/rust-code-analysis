@@ -252,15 +252,6 @@ impl Checker for GoCode {
     mk_checker!(is_non_arg,);
 }
 
-impl Checker for HtmlCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string,);
-    mk_checker!(is_call,);
-    mk_checker!(is_func,);
-    mk_checker!(is_func_space,);
-    mk_checker!(is_non_arg,);
-}
-
 impl Checker for RustCode {
     mk_checker!(is_comment, LineComment, BlockComment);
 

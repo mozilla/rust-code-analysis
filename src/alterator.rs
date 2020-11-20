@@ -137,29 +137,6 @@ impl Alterator for GoCode {
     }
 }
 
-impl Alterator for HtmlCode {
-    fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Html::from(node.object().kind_id()) {
-            Html::QuotedAttributeValue => {
-                if let [q1, attr, q2] = &children[..] {
-                    let span = if span {
-                        let (x, y, _, _) = q1.span.unwrap();
-                        let (_, _, t, u) = q2.span.unwrap();
-                        Some((x, y + 1, t, u - 1))
-                    } else {
-                        None
-                    };
-
-                    AstNode::new(attr.r#type, attr.value.clone(), span, Vec::new())
-                } else {
-                    Self::get_default(node, code, span, children)
-                }
-            }
-            _ => Self::get_default(node, code, span, children),
-        }
-    }
-}
-
 impl Alterator for RustCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
         match Rust::from(node.object().kind_id()) {

@@ -7,9 +7,6 @@ pub use language_cpp::*;
 pub mod language_go;
 pub use language_go::*;
 
-pub mod language_html;
-pub use language_html::*;
-
 pub mod language_java;
 pub use language_java::*;
 
