@@ -203,7 +203,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_nom_python() {
+    fn python_nom() {
         check_metrics!(
             "def a():
                  pass
@@ -211,7 +211,7 @@ mod tests {
                  pass
              def c():
                  pass
-             x = lambda a : a + 42\n",
+             x = lambda a : a + 42",
             "foo.py",
             PythonParser,
             nom,
@@ -224,11 +224,11 @@ mod tests {
     }
 
     #[test]
-    fn test_nom_rust() {
+    fn rust_nom() {
         check_metrics!(
             "mod A { fn foo() {}}
              mod B { fn foo() {}}
-             let closure = |i: i32| -> i32 { i + 42 };\n",
+             let closure = |i: i32| -> i32 { i + 42 };",
             "foo.rs",
             RustParser,
             nom,
@@ -241,13 +241,13 @@ mod tests {
     }
 
     #[test]
-    fn test_nom_cpp() {
+    fn cpp_nom() {
         check_metrics!(
             "struct A {
                  void foo(int) {}
                  void foo(double) {}
              };
-             int b = [](int x) -> int { return x + 42; };\n",
+             int b = [](int x) -> int { return x + 42; };",
             "foo.cpp",
             CppParser,
             nom,
@@ -260,13 +260,13 @@ mod tests {
     }
 
     #[test]
-    fn test_nom_c() {
+    fn c_nom() {
         check_metrics!(
             "int foo();
 
              int foo() {
                  return 0;
-             }\n",
+             }",
             "foo.c",
             CppParser,
             nom,

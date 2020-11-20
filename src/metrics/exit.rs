@@ -144,7 +144,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_function_exit() {
+    fn python_simple_function() {
         check_metrics!(
             "def f(a, b):
                  if a:
@@ -158,7 +158,7 @@ mod tests {
     }
 
     #[test]
-    fn test_functions_exit() {
+    fn python_more_functions() {
         check_metrics!(
             "def f(a, b):
                  if a:
@@ -175,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    fn test_nested_functions_exit() {
+    fn python_nested_functions() {
         check_metrics!(
             "def f(a, b):
                  def foo(a):
