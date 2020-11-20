@@ -283,8 +283,8 @@ pub(crate) fn guess_file<S: ::std::hash::BuildHasher>(
     all_files: &HashMap<String, Vec<PathBuf>, S>,
 ) -> Vec<PathBuf> {
     //let rpath = include_path.clone();
-    let include_path = if include_path.starts_with("mozilla/") {
-        &include_path[8..]
+    let include_path = if let Some(end) = include_path.strip_prefix("mozilla/") {
+        end
     } else {
         include_path
     };
