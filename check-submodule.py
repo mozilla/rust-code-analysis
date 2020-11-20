@@ -171,8 +171,8 @@ def save_diff_files(
     old_dir: pathlib.Path, new_dir: pathlib.Path, compare_dir: pathlib.Path
 ) -> None:
     # Get all metric files in old and new directories
-    old_paths = pathlib.Path(old_dir).glob("**/*.json")
-    new_paths = pathlib.Path(new_dir).glob("**/*.json")
+    old_paths = sorted(pathlib.Path(old_dir).glob("*.json"))
+    new_paths = sorted(pathlib.Path(new_dir).glob("*.json"))
 
     # Save the differences between json files in the chosen dir
     for old_filename, new_filename in zip(old_paths, new_paths):
