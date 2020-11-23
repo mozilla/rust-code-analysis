@@ -203,22 +203,25 @@ def compute_metrics(args: argparse.Namespace) -> None:
     old_dir.mkdir(parents=True, exist_ok=True)
     new_dir.mkdir(parents=True, exist_ok=True)
 
-    # Git clone the chosen repository
-    # Note: no submodules repositories are accepted
-    print(f"Cloning {args.url} into {repo_dir}")
-    run_subprocess("git", "clone", "--depth=1", args.url, repo_dir)
+    # Skip if only new metrics are requested
+    if not args.only_new:
 
-    # Compute old metrics
-    print("\nComputing metrics before the update and saving them in", old_dir)
-    run_rca(repo_dir, old_dir)
+        # Git clone the chosen repository
+        # Note: no submodules repositories are accepted
+        print(f"Cloning {args.url} into {repo_dir}")
+        run_subprocess("git", "clone", "--depth=1", args.url, repo_dir)
 
-    # Create a new branch
-    print("\nCreate a new branch called", args.language)
-    run_subprocess("git", "checkout", "-B", args.language)
+        # Compute old metrics
+        print("\nComputing metrics before the update and saving them in", old_dir)
+        run_rca(repo_dir, old_dir)
 
-    # Update tree-sitter-language submodule
-    print("\nUpdate", args.language)
-    run_subprocess("./update-sumbodules.sh", args.language)
+        # Create a new branch
+        print("\nCreate a new branch called", args.language)
+        run_subprocess("git", "checkout", "-B", args.language)
+
+        # Update tree-sitter-language submodule
+        print("\nUpdate", args.language)
+        run_subprocess("./update-sumbodules.sh", args.language)
 
     # Compute new metrics
     print("\nComputing metrics after the update and saving them in", new_dir)
@@ -259,6 +262,14 @@ def main() -> None:
         "compute-metrics",
         help="Computes the metrics of a chosen repository before and after "
         "a tree-sitter-language update.",
+    )
+
+    # Optional arguments
+    compute_metrics_cmd.add_argument(
+        "--only-new",
+        "-n",
+        action="store_true",
+        help="Only compute the metrics after the tree-sitter-language update",
     )
 
     # Arguments
