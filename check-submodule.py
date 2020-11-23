@@ -27,7 +27,9 @@ json-diff has been adopted.
 """
 
 import argparse
+import asyncio
 import json
+import math
 import pathlib
 import re
 import subprocess
@@ -67,21 +69,72 @@ EXTENSIONS = {
     ],
     "tree-sitter-python": ["*.py"],
 }
+
+
+class JsonDiff:
+    def __init__(
+        self,
+        old_metrics: T.List[pathlib.Path],
+        new_metrics: T.List[pathlib.Path],
+        compare_dir: pathlib.Path,
+        max_workers: int,
+    ):
+        self.compare_dir = compare_dir
+        self.max_workers = max_workers
+
+        # Max number of file paths in a sublist
+        n = math.ceil(len(old_metrics) / max_workers)
+
+        # Assign a certain number of filepaths to each worker
+        self.workers_filepaths = [
+            zip(old_metrics[i * n : (i + 1) * n], new_metrics[i * n : (i + 1) * n])
+            for i in range((len(old_metrics) + n - 1) // n)
+        ]
+
+    # Run asynchronous comparisons between json files.
+    async def diff(self):
+        # Define the max number of coroutines used to compare json files
+        await asyncio.gather(
+            *(
+                self._worker(worker_filepaths)
+                for worker_filepaths in self.workers_filepaths
+            )
+        )
+
+    # Save json files of differences and minimal tests in the chosen directory.
+    async def _worker(self, worker_list: T.List[pathlib.Path]):
+        for old_filename, new_filename in worker_list:
+
+            # Run json-diff asynchronously
+            proc = await asyncio.create_subprocess_shell(
+                f"json-diff -j {old_filename} {new_filename}",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+
+            # Wait json-diff to terminate
+            await proc.wait()
+
+            # If two json files are identical, skip to the next pair
+            if proc.returncode == 0:
+                continue
+
+            # Get json-diff output
+            stdout, _ = await proc.communicate()
+
+            # Convert bytes in an unicode string
+            json_output = stdout.decode("utf-8")
+
+            # Dump json file of differences
+            dump_json_file(json_output, new_filename, self.compare_dir)
+
+            # Compute minimal tests
+            compute_minimal_tests(old_filename, new_filename, self.compare_dir)
+
+
 # Run a subprocess.
 def run_subprocess(cmd: str, *args: T.Union[str, pathlib.Path]) -> None:
     subprocess.run([cmd, *args])
-
-
-# Run a subprocess and return its output.
-def get_subprocess_output(
-    cmd: str, *args: T.Union[str, pathlib.Path]
-) -> subprocess.CompletedProcess:
-    return subprocess.run(
-        [cmd, *args],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
 
 
 # Run rust-code-analysis on the chosen repository to compute metrics.
@@ -158,8 +211,14 @@ def dump_minimal_tests(
     filename = code_spans_object["name"]
 
     # Read code spans from the input source code
-    with open(filename, "r") as input_file:
-        lines = input_file.readlines()
+    with open(filename, "r", encoding="utf-8") as input_file:
+        try:
+            # Decode only utf-8 source code files
+            lines = input_file.readlines()
+        except UnicodeDecodeError:
+            # Print the file containing non-utf-8 characters and return
+            print("Contains non-UTF-8 encoding:", filename)
+            return
 
     # Write spans to output file
     output_path = compare_dir / new_filename.stem
@@ -195,7 +254,8 @@ def compute_minimal_tests(
     dump_minimal_tests(code_spans_object, new_filename, compare_dir)
 
 
-# Save json files of differences and minimal tests in the chosen directory.
+# Save json files of differences and minimal tests in the chosen directory
+# concurrently.
 def save_diff_files(
     old_dir: pathlib.Path, new_dir: pathlib.Path, compare_dir: pathlib.Path
 ) -> None:
@@ -203,19 +263,12 @@ def save_diff_files(
     old_paths = sorted(pathlib.Path(old_dir).glob("*.json"))
     new_paths = sorted(pathlib.Path(new_dir).glob("*.json"))
 
-    # Save the differences between json files in the chosen dir
-    for old_filename, new_filename in zip(old_paths, new_paths):
-        ret_value = get_subprocess_output("json-diff", "-j", old_filename, new_filename)
+    # Create a new coroutines handler
+    json_diff = JsonDiff(old_paths, new_paths, compare_dir, 4)
 
-        # If two json files are identical, skip to the next pair
-        if ret_value.returncode == 0:
-            continue
-
-        # Dump json file of differences
-        dump_json_file(ret_value.stdout, new_filename, compare_dir)
-
-        # Compute minimal tests
-        compute_minimal_tests(old_filename, new_filename, compare_dir)
+    # Find the differences between json files and save the results in a
+    # chosen directory asynchronously
+    asyncio.run(json_diff.diff())
 
 
 # Compute metrics before and after a tree-sitter-language update.
