@@ -97,10 +97,10 @@ impl Nom for MozjsCode {
         use Mozjs::*;
 
         match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
+            FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
+            Function | GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
                 stats.closures += 1;
             }
             _ => {}
@@ -113,10 +113,10 @@ impl Nom for JavascriptCode {
         use Javascript::*;
 
         match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
+            FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
+            Function | GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
                 stats.closures += 1;
             }
             _ => {}
@@ -129,10 +129,10 @@ impl Nom for TypescriptCode {
         use Typescript::*;
 
         match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
+            FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
+            Function | GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
                 stats.closures += 1;
             }
             _ => {}
@@ -145,10 +145,10 @@ impl Nom for TsxCode {
         use Tsx::*;
 
         match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
+            FunctionDeclaration | MethodDefinition => {
                 stats.functions += 1;
             }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
+            Function | GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
                 stats.closures += 1;
             }
             _ => {}
@@ -241,6 +241,25 @@ mod tests {
     }
 
     #[test]
+    fn c_nom() {
+        check_metrics!(
+            "int foo();
+
+             int foo() {
+                 return 0;
+             }",
+            "foo.c",
+            CppParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
     fn cpp_nom() {
         check_metrics!(
             "struct A {
@@ -260,20 +279,23 @@ mod tests {
     }
 
     #[test]
-    fn c_nom() {
+    fn javascript_nom() {
         check_metrics!(
-            "int foo();
-
-             int foo() {
-                 return 0;
+            "function f(a, b) {
+                 function foo(a) {
+                     return a;
+                 }
+                 var bar = function (a, b) {return a + b};
+                 var bar1 = function (a) {return a};
+                 return bar(foo(a), a);
              }",
-            "foo.c",
-            CppParser,
+            "foo.js",
+            JavascriptParser,
             nom,
             [
-                (functions, 1, usize),
-                (closures, 0, usize),
-                (total, 1, usize)
+                (functions, 2, usize),
+                (closures, 2, usize),
+                (total, 4, usize)
             ]
         );
     }
