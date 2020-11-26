@@ -23,7 +23,23 @@ use walkdir::{DirEntry, WalkDir};
 
 use formats::Format;
 
-use rust_code_analysis::*;
+// Enums
+use rust_code_analysis::LANG;
+
+// Structs
+use rust_code_analysis::{
+    CommentRm, CommentRmCfg, Count, CountCfg, Dump, DumpCfg, Find, FindCfg, Function, FunctionCfg,
+    Metrics, MetricsCfg, PreprocParser, PreprocResults,
+};
+
+// Functions
+use rust_code_analysis::{
+    action, fix_includes, get_from_ext, get_function_spaces, guess_language, preprocess, read_file,
+    read_file_with_eol, write_file,
+};
+
+// Traits
+use rust_code_analysis::ParserTrait;
 
 #[derive(Debug)]
 struct Config {
