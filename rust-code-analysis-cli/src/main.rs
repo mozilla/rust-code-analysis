@@ -565,5 +565,3 @@ fn main() {
         }
     }
 }
-
-// cargo run --release -- -p ../mozilla-central.hg/ -j24 -X "**/third_party/rust/**/*.*" -X "**/*.mako.rs" -X "**/js/src/jit/**/*MacroAssembler*" -X "**/js/src/vm/Opcodes.h" -X "**/obj-x86_64-pc-linux-gnu/**/*.*" -i -c
