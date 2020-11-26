@@ -1540,14 +1540,10 @@ dependencies = [
 name = "rust-code-analysis-cli"
 version = "0.0.18"
 dependencies = [
- "actix-rt",
- "actix-web",
  "clap",
  "crossbeam",
- "futures",
  "globset",
  "num_cpus",
- "pretty_assertions",
  "regex",
  "rust-code-analysis",
  "serde",
@@ -1556,6 +1552,21 @@ dependencies = [
  "serde_yaml",
  "toml",
  "walkdir",
+]
+
+[[package]]
+name = "rust-code-analysis-web"
+version = "0.0.18"
+dependencies = [
+ "actix-rt",
+ "actix-web",
+ "clap",
+ "futures",
+ "num_cpus",
+ "pretty_assertions",
+ "rust-code-analysis",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

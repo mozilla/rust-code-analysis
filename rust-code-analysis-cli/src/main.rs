@@ -2,16 +2,13 @@
 extern crate clap;
 extern crate crossbeam;
 extern crate num_cpus;
-#[macro_use]
 extern crate serde;
 extern crate serde_cbor;
-#[cfg_attr(test, macro_use)]
 extern crate serde_json;
 extern crate serde_yaml;
 extern crate toml;
 
 mod formats;
-mod web;
 
 use clap::{App, Arg};
 use crossbeam::channel::{unbounded, Receiver, Sender};
@@ -25,8 +22,8 @@ use std::{process, thread};
 use walkdir::{DirEntry, WalkDir};
 
 use formats::Format;
+
 use rust_code_analysis::*;
-use web::server;
 
 #[derive(Debug)]
 struct Config {
@@ -383,52 +380,12 @@ fn main() {
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("serve")
-                .help("Run a web server")
-                .long("serve"),
-        )
-        .arg(
-            Arg::with_name("host")
-                .help("Host for the web server")
-                .long("host")
-                .default_value("127.0.0.1")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("port")
-                .help("Port for the web server")
-                .long("port")
-                .default_value("8080")
-                .takes_value(true),
-        )
-        .arg(
             Arg::with_name("warning")
                 .help("Print the warnings")
                 .long("warning")
                 .short("w"),
         )
         .get_matches();
-
-    let num_jobs = if let Ok(num_jobs) = matches.value_of("num_jobs").unwrap().parse::<usize>() {
-        num_jobs
-    } else {
-        num_cpus::get()
-    };
-
-    let serve = matches.is_present("serve");
-    if serve {
-        let host = matches.value_of("host").unwrap();
-        let port = if let Ok(port) = matches.value_of("port").unwrap().parse::<u16>() {
-            port
-        } else {
-            eprintln!("Invalid port number");
-            return;
-        };
-        if let Err(e) = server::run(host.to_string(), port, num_jobs) {
-            eprintln!("Cannot run the server at {}:{}: {}", host, port, e);
-        }
-        return;
-    }
 
     let paths: Vec<_> = matches.values_of("paths").unwrap().collect();
     let paths: Vec<String> = paths.iter().map(|x| (*x).to_string()).collect();
@@ -495,7 +452,12 @@ fn main() {
     } else {
         get_from_ext(typ)
     };
-    let num_jobs = std::cmp::max(2, num_jobs) - 1;
+
+    let num_jobs = if let Ok(num_jobs) = matches.value_of("num_jobs").unwrap().parse::<usize>() {
+        std::cmp::max(2, num_jobs) - 1
+    } else {
+        std::cmp::max(2, num_cpus::get()) - 1
+    };
 
     let line_start = if let Ok(n) = matches.value_of("line_start").unwrap().parse::<usize>() {
         Some(n)
