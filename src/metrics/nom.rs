@@ -241,6 +241,25 @@ mod tests {
     }
 
     #[test]
+    fn c_nom() {
+        check_metrics!(
+            "int foo();
+
+             int foo() {
+                 return 0;
+             }",
+            "foo.c",
+            CppParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
     fn cpp_nom() {
         check_metrics!(
             "struct A {
