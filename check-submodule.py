@@ -43,6 +43,30 @@ OLD_SUFFIX = "-old"
 # Suffix for the directory containing the new metrics
 NEW_SUFFIX = "-new"
 
+# Extensions parsed by each tree-sitter-language
+EXTENSIONS = {
+    "tree-sitter-mozjs": ["*.js", "*.js2", "*.jsm"],
+    "tree-sitter-javascript": ["*.js", "*.js2"],
+    "tree-sitter-tsx": ["*.tsx"],
+    "tree-sitter-typescript": ["*.ts", "*.jsw", "*.jsmw"],
+    "tree-sitter-java": ["*.java"],
+    "tree-sitter-rust": ["*.rs"],
+    "tree-sitter-cpp": [
+        "*.cpp",
+        "*.cx",
+        "*.cxx",
+        "*.cc",
+        "*.hxx",
+        "*.hpp",
+        "*.c",
+        "*.h",
+        "*.hh",
+        "*.inc",
+        "*.mm",
+        "*.m",
+    ],
+    "tree-sitter-python": ["*.py"],
+}
 # Run a subprocess.
 def run_subprocess(cmd: str, *args: T.Union[str, pathlib.Path]) -> None:
     subprocess.run([cmd, *args])
@@ -61,7 +85,9 @@ def get_subprocess_output(
 
 
 # Run rust-code-analysis on the chosen repository to compute metrics.
-def run_rca(repo_dir: pathlib.Path, output_dir: pathlib.Path) -> None:
+def run_rca(
+    repo_dir: pathlib.Path, output_dir: pathlib.Path, include_languages: T.List[str]
+) -> None:
     run_subprocess(
         "cargo",
         "run",
@@ -72,6 +98,8 @@ def run_rca(repo_dir: pathlib.Path, output_dir: pathlib.Path) -> None:
         "--metrics",
         "--output-format=json",
         "--pr",
+        "-I",
+        *include_languages,
         "-p",
         repo_dir,
         "-o",
@@ -192,6 +220,11 @@ def save_diff_files(
 
 # Compute metrics before and after a tree-sitter-language update.
 def compute_metrics(args: argparse.Namespace) -> None:
+
+    if args.language not in EXTENSIONS.keys():
+        print(args.language, "is not a valid tree-sitter-language")
+        sys.exit(1)
+
     # Repository local directory
     repo_dir = WORKDIR / args.path
     # Old metrics directory
@@ -213,7 +246,7 @@ def compute_metrics(args: argparse.Namespace) -> None:
 
         # Compute old metrics
         print("\nComputing metrics before the update and saving them in", old_dir)
-        run_rca(repo_dir, old_dir)
+        run_rca(repo_dir, old_dir, EXTENSIONS[args.language])
 
         # Create a new branch
         print("\nCreate a new branch called", args.language)
@@ -225,7 +258,7 @@ def compute_metrics(args: argparse.Namespace) -> None:
 
     # Compute new metrics
     print("\nComputing metrics after the update and saving them in", new_dir)
-    run_rca(repo_dir, new_dir)
+    run_rca(repo_dir, new_dir, EXTENSIONS[args.language])
 
 
 # Compare metrics and dump the differences whether there are some.
