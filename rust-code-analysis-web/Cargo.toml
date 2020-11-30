@@ -3,6 +3,7 @@ name = "rust-code-analysis-web"
 version = "0.0.18"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2018"
+repository = "https://github.com/mozilla/rust-code-analysis/tree/master/rust-code-analysis-web"
 keywords = ["metrics"]
 description = "Run a web service to compute and export code metrics"
 license = "MPL-2.0"
