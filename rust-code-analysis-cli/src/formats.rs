@@ -1,4 +1,3 @@
-use regex::Regex;
 use std::fs::File;
 use std::io::Write;
 use std::io::{Error, ErrorKind};
@@ -62,22 +61,23 @@ impl Format {
                 Format::Yaml => ".yml",
             };
 
-            let output_path = output_path.as_ref().unwrap();
+            // Remove . / \ .. symbols from a path to create a unique filename
+            let cleaned_path: Vec<&str> = path
+                .iter()
+                .filter(|v| {
+                    if let Some(s) = v.to_str() {
+                        ![".", ".."].contains(&s)
+                    } else {
+                        false
+                    }
+                })
+                .map(|s| s.to_str().unwrap())
+                .collect();
 
-            let mut file = path.as_path().file_name().unwrap().to_os_string();
-            file.push(format_ext);
+            // Create the filename
+            let filename = cleaned_path.join("_") + format_ext;
 
-            let mut format_path = output_path.clone();
-            format_path.push(file);
-
-            if format_path.as_path().exists() {
-                let mut new_filename = path.to_str().unwrap().to_string();
-                let re = Regex::new(r"[\\:/]").unwrap();
-                new_filename = re.replace_all(&new_filename, "_").to_string();
-                new_filename.push_str(format_ext);
-                format_path.pop();
-                format_path.push(new_filename);
-            }
+            let format_path = output_path.as_ref().unwrap().join(filename);
 
             let mut format_file = File::create(format_path)?;
             match self {
