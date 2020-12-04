@@ -280,6 +280,7 @@ macro_rules! color {
     };
 }
 
+#[cfg(test)]
 #[macro_use]
 macro_rules! check_metrics {
     ($source: expr, $file: expr, $parser: ident, $metric: ident,
