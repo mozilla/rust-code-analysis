@@ -310,7 +310,6 @@ impl Loc for RustCode {
             | AssignmentExpression
             | CompoundAssignmentExpr
             | ReturnExpression
-            | CallExpression
             | ArrayExpression
             | ParenthesizedExpression
             | TupleExpression
@@ -324,10 +323,18 @@ impl Loc for RustCode {
             | ClosureExpression
             | BreakExpression
             | ContinueExpression
-            | IndexExpression
-            | AwaitExpression
-            | MacroInvocation => {
+            | AwaitExpression => {
                 stats.logical_lines += 1;
+            }
+            CallExpression | MacroInvocation => {
+                if count_specific_ancestors!(
+                    node,
+                    CallExpression | MacroInvocation | LetDeclaration,
+                    SourceFile | FunctionItem | ClosureExpression
+                ) == 0
+                {
+                    stats.logical_lines += 1;
+                }
             }
             _ => {
                 stats.lines.insert(start);
@@ -573,6 +580,32 @@ mod tests {
             RustParser,
             loc,
             [(lloc, 1, usize)]
+        );
+    }
+
+    #[test]
+    fn rust_call_function_lloc() {
+        check_metrics!(
+            "let a = foo(); // +1
+             foo(); // +1
+             k!(foo()); // +1",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(lloc, 3, usize)]
+        );
+    }
+
+    #[test]
+    fn rust_macro_invocation_lloc() {
+        check_metrics!(
+            "let a = foo!(); // +1
+             foo!(); // +1
+             k(foo!()); // +1",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(lloc, 3, usize)]
         );
     }
 
