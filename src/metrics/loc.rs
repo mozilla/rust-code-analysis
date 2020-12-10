@@ -324,8 +324,14 @@ impl Loc for RustCode {
             CallExpression | MacroInvocation | ClosureExpression => {
                 if count_specific_ancestors!(
                     node,
-                    CallExpression | MacroInvocation | ClosureExpression | LetDeclaration,
-                    SourceFile | FunctionItem
+                    CallExpression
+                        | MacroInvocation
+                        | ClosureExpression
+                        | LetDeclaration
+                        | WhileExpression
+                        | WhileLetExpression
+                        | ForExpression,
+                    Block
                 ) == 0
                 {
                     stats.logical_lines += 1;
@@ -635,6 +641,19 @@ mod tests {
             "let a = foo!(); // +1
              foo!(); // +1
              k(foo!()); // +1",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(lloc, 3, usize)]
+        );
+    }
+
+    #[test]
+    fn rust_function_in_loop_lloc() {
+        check_metrics!(
+            "for (a, b) in c.iter().enumerate() {} // +1
+             while (a, b) in c.iter().enumerate() {} // +1
+             while let Some(a) = c.strip_prefix(\"hi\") {} // +1",
             "foo.rs",
             RustParser,
             loc,
