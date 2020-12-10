@@ -326,7 +326,6 @@ impl Loc for RustCode {
             | ContinueExpression
             | IndexExpression
             | AwaitExpression
-            | FieldExpression
             | MacroInvocation => {
                 stats.logical_lines += 1;
             }
@@ -559,6 +558,21 @@ mod tests {
                 (cloc, 0, usize),
                 (blank, 0, usize)
             ]
+        );
+    }
+
+    #[test]
+    fn rust_no_field_expression_lloc() {
+        check_metrics!(
+            "struct Foo {
+                field: usize,
+             }
+             let foo = Foo { 42 };
+             foo.field",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(lloc, 1, usize)]
         );
     }
 
