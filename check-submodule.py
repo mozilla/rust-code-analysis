@@ -180,14 +180,9 @@ def dump_minimal_tests(
     filename = code_spans_object["name"]
 
     # Read code spans from the input source code
-    with open(filename, "r", encoding="utf-8") as input_file:
-        try:
-            # Decode only utf-8 source code files
-            lines = input_file.readlines()
-        except UnicodeDecodeError:
-            # Print the file containing non-utf-8 characters and return
-            print("Contains non-UTF-8 encoding:", filename)
-            return
+    with open(filename, "r", encoding="utf-8", errors="ignore") as input_file:
+        # Decode only utf-8 source code files
+        lines = input_file.readlines()
 
     # Write spans to output file
     output_path = compare_dir / new_filename.stem
