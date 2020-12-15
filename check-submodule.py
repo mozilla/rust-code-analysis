@@ -14,14 +14,9 @@ To compute metrics:
 NOTE: The compute-metrics subcommand MUST be run on a clean master branch!
 
 
-To compare metrics:
+To compare metrics and retrieve minimal tests:
 
-The metrics are saved as json files, and to compare them, a specific
-json-diff has been adopted.
-
-1. Install npm on your system
-2. Install json-diff from npm running: npm install -g json-diff
-3. Install deepdiff to retrieve minimal tests: pip install deepdiff
+1. Install deepdiff: pip install deepdiff
 
 ./check-submodule.py compare-metrics -l TREE_SITTER_LANGUAGE
 """
@@ -93,43 +88,17 @@ class JsonDiff:
 
     # Run asynchronous comparisons between json files.
     async def diff(self):
+        # Save minimal tests in the chosen directory.
+        def _worker(worker_list: T.List[pathlib.Path]):
+            for old_filename, new_filename in worker_list:
+
+                # Compute minimal tests
+                compute_minimal_tests(old_filename, new_filename, self.compare_dir)
+
         # Define the max number of coroutines used to compare json files
         await asyncio.gather(
-            *(
-                self._worker(worker_filepaths)
-                for worker_filepaths in self.workers_filepaths
-            )
+            *(_worker(worker_filepaths) for worker_filepaths in self.workers_filepaths)
         )
-
-    # Save json files of differences and minimal tests in the chosen directory.
-    async def _worker(self, worker_list: T.List[pathlib.Path]):
-        for old_filename, new_filename in worker_list:
-
-            # Run json-diff asynchronously
-            proc = await asyncio.create_subprocess_shell(
-                f"json-diff -j {old_filename} {new_filename}",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-
-            # Wait json-diff to terminate
-            await proc.wait()
-
-            # If two json files are identical, skip to the next pair
-            if proc.returncode == 0:
-                continue
-
-            # Get json-diff output
-            stdout, _ = await proc.communicate()
-
-            # Convert bytes in an unicode string
-            json_output = stdout.decode("utf-8")
-
-            # Dump json file of differences
-            dump_json_file(json_output, new_filename, self.compare_dir)
-
-            # Compute minimal tests
-            compute_minimal_tests(old_filename, new_filename, self.compare_dir)
 
 
 # Run a subprocess.
@@ -228,16 +197,6 @@ def dump_minimal_tests(
             output_file.write("".join(lines[span[0] : span[1]]) + "\n")
 
 
-# Dump json file of differences.
-def dump_json_file(
-    stdout: str, new_filename: pathlib.Path, compare_dir: pathlib.Path
-) -> None:
-    # Dump json file of differences
-    output_path = compare_dir / new_filename.name
-    with open(output_path, "w") as output_file:
-        output_file.write(stdout)
-
-
 # Compute minimal tests.
 def compute_minimal_tests(
     old_filename: pathlib.Path, new_filename: pathlib.Path, compare_dir: pathlib.Path
@@ -245,6 +204,10 @@ def compute_minimal_tests(
     # Find the difference between the two json files with the aim of
     # getting some minimal tests
     first_json, diff = get_json_diff(old_filename, new_filename)
+
+    # If two json files are identical, return
+    if not diff:
+        return
 
     # Retrieve the code spans associated to the differences
     code_spans_object = get_metrics_diff_span(first_json, diff)
