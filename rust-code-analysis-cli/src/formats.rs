@@ -61,17 +61,23 @@ impl Format {
                 Format::Yaml => ".yml",
             };
 
-            // Remove . / \ .. symbols from a path to create a unique filename
+            // Remove root /
+            let path = path.strip_prefix("/").unwrap_or(path);
+
+            // Remove root ./
+            let path = path.strip_prefix("./").unwrap_or(path);
+
+            // Replace .. symbol with "_" to create a unique filename
             let cleaned_path: Vec<&str> = path
                 .iter()
-                .filter(|v| {
-                    if let Some(s) = v.to_str() {
-                        ![".", ".."].contains(&s)
+                .map(|os_str| {
+                    let s_str = os_str.to_str().unwrap();
+                    if s_str == ".." {
+                        "_"
                     } else {
-                        false
+                        s_str
                     }
                 })
-                .map(|s| s.to_str().unwrap())
                 .collect();
 
             // Create the filename
