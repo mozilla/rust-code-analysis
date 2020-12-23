@@ -13,6 +13,10 @@ To compute metrics:
 
 NOTE: The compute-metrics subcommand MUST be run on a clean master branch!
 
+To compute metrics on a continuous integration system:
+
+./check-submodule.py compute-ci-metrics -p LOCAL_DIR -l TREE_SITTER_LANGUAGE
+
 
 To compare metrics and retrieve minimal tests:
 
@@ -108,11 +112,16 @@ def run_subprocess(cmd: str, *args: T.Union[str, pathlib.Path]) -> None:
 
 # Run rust-code-analysis on the chosen repository to compute metrics.
 def run_rca(
-    repo_dir: pathlib.Path, output_dir: pathlib.Path, include_languages: T.List[str]
+    repo_dir: pathlib.Path,
+    output_dir: pathlib.Path,
+    manifest_path: T.Optional[pathlib.Path],
+    include_languages: T.List[str],
 ) -> None:
     run_subprocess(
         "cargo",
         "run",
+        "--manifest-path",
+        manifest_path / "Cargo.toml" if manifest_path else "Cargo.toml",
         "--release",
         "--package",
         "rust-code-analysis-cli",
@@ -229,6 +238,54 @@ def save_diff_files(
     asyncio.run(json_diff.diff())
 
 
+# Compute continuous integration metrics before and after a
+# tree-sitter-language update.
+def compute_ci_metrics(args: argparse.Namespace) -> None:
+
+    if args.language not in EXTENSIONS.keys():
+        print(args.language, "is not a valid tree-sitter-language")
+        sys.exit(1)
+
+    # Repository passed as input
+    repo_dir = pathlib.Path(args.path)
+
+    # Create rust-code-analysis repository path
+    rca_path = WORKDIR / "rust-code-analysis"
+
+    # Old metrics directory
+    old_dir = WORKDIR / (args.language + OLD_SUFFIX)
+    # New metrics directory
+    new_dir = WORKDIR / (args.language + NEW_SUFFIX)
+
+    # Create output directories
+    old_dir.mkdir(parents=True, exist_ok=True)
+    new_dir.mkdir(parents=True, exist_ok=True)
+
+    # Git clone rust-code-analysis master branch repository
+    print(f"Cloning rust-code-analysis master branch into /tmp")
+    run_subprocess(
+        "git",
+        "clone",
+        "--depth=1",
+        "--recurse-submodules",
+        "-j8",
+        "https://github.com/mozilla/rust-code-analysis",
+        rca_path,
+    )
+
+    # Compute old metrics
+    print("\nComputing metrics before the update and saving them in", old_dir)
+    run_rca(repo_dir, old_dir, rca_path, EXTENSIONS[args.language])
+
+    # Update tree-sitter-language submodule
+    print("\nUpdate", args.language)
+    run_subprocess("./update-language-bindings.sh")
+
+    # Compute new metrics
+    print("\nComputing metrics after the update and saving them in", new_dir)
+    run_rca(repo_dir, new_dir, None, EXTENSIONS[args.language])
+
+
 # Compute metrics before and after a tree-sitter-language update.
 def compute_metrics(args: argparse.Namespace) -> None:
 
@@ -257,7 +314,7 @@ def compute_metrics(args: argparse.Namespace) -> None:
 
         # Compute old metrics
         print("\nComputing metrics before the update and saving them in", old_dir)
-        run_rca(repo_dir, old_dir, EXTENSIONS[args.language])
+        run_rca(repo_dir, old_dir, None, EXTENSIONS[args.language])
 
         # Create a new branch
         print("\nCreate a new branch called", args.language)
@@ -265,11 +322,11 @@ def compute_metrics(args: argparse.Namespace) -> None:
 
         # Update tree-sitter-language submodule
         print("\nUpdate", args.language)
-        run_subprocess("./update-sumbodules.sh", args.language)
+        run_subprocess("./update-submodule.sh", args.language)
 
     # Compute new metrics
     print("\nComputing metrics after the update and saving them in", new_dir)
-    run_rca(repo_dir, new_dir, EXTENSIONS[args.language])
+    run_rca(repo_dir, new_dir, None, EXTENSIONS[args.language])
 
 
 # Compare metrics and dump the differences whether there are some.
@@ -341,6 +398,31 @@ def main() -> None:
         help="tree-sitter-language to be updated",
     )
     compute_metrics_cmd.set_defaults(func=compute_metrics)
+
+    # Compute continuous integration metrics command
+    compute_ci_metrics_cmd = commands.add_parser(
+        "compute-ci-metrics",
+        help="Computes the metrics of a chosen repository before and after "
+        "a tree-sitter-language update on a continuous integration system.",
+    )
+
+    compute_ci_metrics_cmd.add_argument(
+        "-p",
+        "--path",
+        type=str,
+        required=True,
+        help="Path where the rust-code-analysis repository is saved on the "
+        "continuous integration system",
+    )
+    compute_ci_metrics_cmd.add_argument(
+        "-l",
+        "--language",
+        type=str,
+        required=True,
+        help="tree-sitter-language to be updated",
+    )
+
+    compute_ci_metrics_cmd.set_defaults(func=compute_ci_metrics)
 
     # Compare metrics command
     compare_metrics_cmd = commands.add_parser(
