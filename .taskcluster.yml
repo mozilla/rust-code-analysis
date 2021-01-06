@@ -305,47 +305,40 @@ tasks:
 
       - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
         then:
-          $let:
-            version: {$eval: 'head_branch[10:]'}
-          in:
-            taskId: {$eval: as_slugid("deploy_release")}
-            dependencies:
-              - {$eval: as_slugid("build_linux_release")}
-              - {$eval: as_slugid("strip_windows_binary")}
-              - {$eval: as_slugid("test_mozilla_central")}
-              - {$eval: as_slugid("build_documentation")}
-            created: {$fromNow: ''}
-            deadline: {$fromNow: '2 hour'}
-            provisionerId: proj-relman
-            workerType: ci
-            scopes:
-              - secrets:get:project/relman/rust-code-analysis/deploy
-            payload:
-              features:
-                taskclusterProxy: true
-              maxRunTime: 3600
-              image: "mozilla/taskboot:0.2.7"
-              env:
-                TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
-              command:
-                - "/bin/sh"
-                - "-cx"
-                - "git config --global user.email moz-tools-bot@moz.tools &&
-                   git config --global user.name moz.tools Bot &&
-                   git clone --recursive --quiet ${repository} &&
-                   cd rust-code-analysis &&
-                   taskboot retrieve-artifact --output-path=. \
-                            --artifacts=public/book.tar.gz &&
-                   tar xfz book.tar.gz -C rust-code-analysis-book &&
-                   ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
-                   taskboot git-push --force-push \
-                            github.com/mozilla/rust-code-analysis \
-                            moz-tools-bot \
-                            gh-pages &&
-                   taskboot github-release mozilla/rust-code-analysis ${version} --asset rust-code-analysis-linux-cli-x86_64.tar.gz:public/rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-linux-web-x86_64.tar.gz:public/rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-win-cli-x86_64.zip:public/rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-win-web-x86_64.zip:public/rust-code-analysis-win-web-x86_64.zip &&
-                   taskboot cargo-publish"
-            metadata:
-              name: "rust-code-analysis release publication ${version}"
-              description: rust-code-analysis release publication on Github
-              owner: cdenizet@mozilla.com
-              source: ${repository}/raw/${head_rev}/.taskcluster.yml
+          taskId: {$eval: as_slugid("deploy_release")}
+          dependencies:
+            - {$eval: as_slugid("build_linux_release")}
+            - {$eval: as_slugid("strip_windows_binary")}
+            - {$eval: as_slugid("test_mozilla_central")}
+            - {$eval: as_slugid("build_documentation")}
+          created: {$fromNow: ''}
+          deadline: {$fromNow: '2 hour'}
+          provisionerId: proj-relman
+          workerType: ci
+          scopes:
+            - secrets:get:project/relman/rust-code-analysis/deploy
+          payload:
+            features:
+              taskclusterProxy: true
+            maxRunTime: 3600
+            image: "mozilla/taskboot:0.2.7"
+            env:
+              TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
+            command:
+              - "/bin/sh"
+              - "-cx"
+              - "git config --global user.email moz-tools-bot@moz.tools &&
+                 git config --global user.name moz.tools Bot &&
+                 git clone --recursive --quiet ${repository} &&
+                 cd rust-code-analysis &&
+                 taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz &&
+                 tar xfz book.tar.gz -C rust-code-analysis-book &&
+                 ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
+                 taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages &&
+                 taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset rust-code-analysis-linux-cli-x86_64.tar.gz:public/rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-linux-web-x86_64.tar.gz:public/rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-win-cli-x86_64.zip:public/rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-win-web-x86_64.zip:public/rust-code-analysis-win-web-x86_64.zip &&
+                 taskboot cargo-publish"
+          metadata:
+            name: "rust-code-analysis release publication ${head_branch[10:]}"
+            description: rust-code-analysis release publication on Github
+            owner: cdenizet@mozilla.com
+            source: ${repository}/raw/${head_rev}/.taskcluster.yml
