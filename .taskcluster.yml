@@ -204,14 +204,17 @@ tasks:
                  git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                  cargo build --all --release &&
                  cd target/release &&
-                 strip rust-code-analysis-cli &&
-                 tar -zvcf /build.tar.gz \
-                     --transform 's,^,rust-code-analysis-linux-x86_64/,' \
-                     rust-code-analysis-cli"
+                 strip rust-code-analysis-cli rust-code-analysis-web &&
+                 tar -zvcf rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
+                 tar -zvcf rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web"
             artifacts:
-              public/rust-code-analysis-linux-x86_64.tar.gz:
+              public/rust-code-analysis-linux-cli-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
-                path: /build.tar.gz
+                path: /rust-code-analysis-linux-cli-x86_64.tar.gz
+                type: file
+              public/rust-code-analysis-linux-web-x86_64.tar.gz:
+                expires: {$fromNow: '2 weeks'}
+                path: /rust-code-analysis-linux-web-x86_64.tar.gz
                 type: file
           metadata:
             name: rust-code-analysis linux release build
@@ -255,6 +258,10 @@ tasks:
                 expires: {$fromNow: '2 weeks'}
                 path: rust-code-analysis\target\release\rust-code-analysis-cli.exe
                 type: file
+              - name: public/rust-code-analysis-web.exe
+                expires: {$fromNow: '2 weeks'}
+                path: rust-code-analysis\target\release\rust-code-analysis-web.exe
+                type: file
           metadata:
             name: rust-code-analysis windows release build
             description: rust-code-analysis windows release build
@@ -273,20 +280,22 @@ tasks:
           payload:
             maxRunTime: 3600
             image: "mozilla/taskboot:0.2.7"
-            env:
-              WINDOWS_BIN: rust-code-analysis-cli.exe
             command:
                 - "/bin/sh"
                 - "-cx"
-                - "taskboot retrieve-artifact --output-path=. \
-                            --artifacts=public/$WINDOWS_BIN &&
+                - "taskboot retrieve-artifact --output-path=. --artifacts=public/rust-code-analysis-cli.exe public/rust-code-analysis-web.exe &&
                    apk add --no-cache zip &&
-                   strip $WINDOWS_BIN &&
-                   zip -9 /rust-code-analysis-win-x86_64.zip $WINDOWS_BIN"
+                   strip rust-code-analysis-cli.exe rust-code-analysis-web.exe &&
+                   zip -9 /rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-cli.exe &&
+                   zip -9 /rust-code-analysis-win-web-x86_64.zip rust-code-analysis-web.exe"
             artifacts:
-              public/rust-code-analysis-win-x86_64.zip:
+              public/rust-code-analysis-win-cli-x86_64.zip:
                 expires: {$fromNow: '2 weeks'}
-                path: /rust-code-analysis-win-x86_64.zip
+                path: /rust-code-analysis-win-cli-x86_64.zip
+                type: file
+              public/rust-code-analysis-win-web-x86_64.zip:
+                expires: {$fromNow: '2 weeks'}
+                path: /rust-code-analysis-win-web-x86_64.zip
                 type: file
           metadata:
             name: strip rust-code-analysis windows binary
@@ -298,8 +307,6 @@ tasks:
         then:
           $let:
             version: {$eval: 'head_branch[10:]'}
-            linux_artifact: rust-code-analysis-linux-x86_64.tar.gz
-            windows_artifact: rust-code-analysis-win-x86_64.zip
           in:
             taskId: {$eval: as_slugid("deploy_release")}
             dependencies:
@@ -335,7 +342,7 @@ tasks:
                             github.com/mozilla/rust-code-analysis \
                             moz-tools-bot \
                             gh-pages &&
-                   taskboot github-release mozilla/rust-code-analysis ${version} --asset ${linux_artifact}:public/${linux_artifact} ${windows_artifact}:public/${windows_artifact} &&
+                   taskboot github-release mozilla/rust-code-analysis ${version} --asset rust-code-analysis-linux-cli-x86_64.tar.gz:public/rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-linux-web-x86_64.tar.gz:public/rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-win-cli-x86_64.zip:public/rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-win-web-x86_64.zip:public/rust-code-analysis-win-web-x86_64.zip &&
                    taskboot cargo-publish"
             metadata:
               name: "rust-code-analysis release publication ${version}"
