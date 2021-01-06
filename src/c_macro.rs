@@ -5,12 +5,15 @@ include!(concat!(env!("OUT_DIR"), "/gen_c_macros.rs"));
 
 #[inline(always)]
 fn is_identifier_part(c: u8) -> bool {
-    (b'A' <= c && b'Z' >= c) || (b'a' <= c && b'z' >= c) || (b'0' <= c && b'9' >= c) || c == b'_'
+    (b'A'..=b'Z').contains(&c)
+        || (b'a'..=b'z').contains(&c)
+        || (b'0'..=b'9').contains(&c)
+        || c == b'_'
 }
 
 #[inline(always)]
 fn is_identifier_starter(c: u8) -> bool {
-    (b'A' <= c && b'Z' >= c) || (b'a' <= c && b'z' >= c) || c == b'_'
+    (b'A'..=b'Z').contains(&c) || (b'a'..=b'z').contains(&c) || c == b'_'
 }
 
 #[inline(always)]
