@@ -9,7 +9,7 @@ use crate::traits::*;
 
 /// Counts the types of nodes specified in the input slice
 /// and the number of nodes in a code.
-pub fn count<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> (usize, usize) {
+pub fn count<T: ParserTrait>(parser: &T, filters: &[String]) -> (usize, usize) {
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
     let mut cursor = node.object().walk();

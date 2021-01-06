@@ -167,7 +167,7 @@ impl FuncSpace {
 }
 
 #[inline(always)]
-fn compute_halstead_and_mi<'a, T: ParserTrait>(state: &mut State<'a>) {
+fn compute_halstead_and_mi<T: ParserTrait>(state: &mut State) {
     state
         .halstead_maps
         .finalize(&mut state.space.metrics.halstead);
@@ -180,7 +180,7 @@ fn compute_halstead_and_mi<'a, T: ParserTrait>(state: &mut State<'a>) {
 }
 
 #[inline(always)]
-fn compute_averages<'a>(state: &mut State<'a>) {
+fn compute_averages(state: &mut State) {
     let nom_total = state.space.metrics.nom.total() as usize;
     // Cognitive average
     state.space.metrics.cognitive.finalize(nom_total);
@@ -190,7 +190,7 @@ fn compute_averages<'a>(state: &mut State<'a>) {
     state.space.metrics.nargs.finalize(nom_total);
 }
 
-fn finalize<'a, T: ParserTrait>(state_stack: &mut Vec<State<'a>>, diff_level: usize) {
+fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
     if state_stack.is_empty() {
         return;
     }
