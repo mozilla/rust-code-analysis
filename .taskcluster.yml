@@ -205,8 +205,8 @@ tasks:
                  cargo build --all --release &&
                  cd target/release &&
                  strip rust-code-analysis-cli rust-code-analysis-web &&
-                 tar -zvcf rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
-                 tar -zvcf rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web"
+                 tar -zvcf /rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
+                 tar -zvcf /rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web"
             artifacts:
               public/rust-code-analysis-linux-cli-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
