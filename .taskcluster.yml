@@ -283,7 +283,7 @@ tasks:
             command:
                 - "/bin/sh"
                 - "-cx"
-                - "taskboot retrieve-artifact --output-path=. --artifacts=public/rust-code-analysis-cli.exe public/rust-code-analysis-web.exe &&
+                - "taskboot retrieve-artifact --output-path=. --artifacts public/rust-code-analysis-cli.exe public/rust-code-analysis-web.exe &&
                    apk add --no-cache zip &&
                    strip rust-code-analysis-cli.exe rust-code-analysis-web.exe &&
                    zip -9 /rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-cli.exe &&
