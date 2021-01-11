@@ -241,7 +241,6 @@ tasks:
                  pushd rust-code-analysis-cli && cargo package --all-features --target x86_64-unknown-linux-musl && popd &&
                  pushd rust-code-analysis-web && cargo package --all-features --target x86_64-unknown-linux-musl && popd &&
                  cd target/x86_64-unknown-linux-musl/release &&
-                 strip rust-code-analysis-cli rust-code-analysis-web &&
                  tar -zvcf /home/rust/rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
                  tar -zvcf /home/rust/rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web"
             artifacts:
@@ -307,7 +306,7 @@ tasks:
 
       - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
         then:
-          taskId: {$eval: as_slugid("strip_windows_binary")}
+          taskId: {$eval: as_slugid("package_windows_binary")}
           dependencies:
               - {$eval: as_slugid("build_windows_release")}
           created: {$fromNow: ''}
@@ -322,7 +321,6 @@ tasks:
                 - "-cx"
                 - "taskboot retrieve-artifact --output-path=. --artifacts public/rust-code-analysis-cli.exe public/rust-code-analysis-web.exe &&
                    apk add --no-cache zip &&
-                   strip rust-code-analysis-cli.exe rust-code-analysis-web.exe &&
                    zip -9 /rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-cli.exe &&
                    zip -9 /rust-code-analysis-win-web-x86_64.zip rust-code-analysis-web.exe"
             artifacts:
@@ -335,8 +333,8 @@ tasks:
                 path: /rust-code-analysis-win-web-x86_64.zip
                 type: file
           metadata:
-            name: strip rust-code-analysis windows binary
-            description: strip rust-code-analysis windows binary
+            name: package rust-code-analysis windows binary
+            description: package rust-code-analysis windows binary
             owner: cdenizet@mozilla.com
             source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
@@ -351,7 +349,7 @@ tasks:
             taskId: {$eval: as_slugid("deploy_release")}
             dependencies:
               - {$eval: as_slugid("build_linux_release")}
-              - {$eval: as_slugid("strip_windows_binary")}
+              - {$eval: as_slugid("package_windows_binary")}
               - {$eval: as_slugid("test_mozilla_central")}
               - {$eval: as_slugid("build_documentation")}
             created: {$fromNow: ''}
