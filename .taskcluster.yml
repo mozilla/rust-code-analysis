@@ -204,6 +204,8 @@ tasks:
                  git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                  cargo build --all --release &&
                  cargo package --all-features &&
+                 pushd rust-code-analysis-cli && cargo package --all-features && popd &&
+                 pushd rust-code-analysis-web && cargo package --all-features && popd &&
                  cd target/release &&
                  strip rust-code-analysis-cli rust-code-analysis-web &&
                  tar -zvcf /rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
@@ -337,7 +339,9 @@ tasks:
                  ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
                  taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages &&
                  taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset rust-code-analysis-linux-cli-x86_64.tar.gz:public/rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-linux-web-x86_64.tar.gz:public/rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-win-cli-x86_64.zip:public/rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-win-web-x86_64.zip:public/rust-code-analysis-win-web-x86_64.zip &&
-                 taskboot cargo-publish"
+                 taskboot cargo-publish &&
+                 cd rust-code-analysis-cli && taskboot cargo-publish && cd .. &&
+                 cd rust-code-analysis-web && taskboot cargo-publish"
           metadata:
             name: "rust-code-analysis release publication ${head_branch[10:]}"
             description: rust-code-analysis release publication on Github
