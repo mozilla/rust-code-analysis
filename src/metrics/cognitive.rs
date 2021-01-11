@@ -72,6 +72,8 @@ impl Stats {
     ///
     /// This value is computed dividing the `Cognitive Complexity` value
     /// for the total number of functions/closures in a space.
+    ///
+    /// If there are no functions in a code, its value is `NAN`.
     pub fn cognitive_average(&self) -> f64 {
         self.cognitive() / self.total_space_functions as f64
     }
@@ -410,6 +412,54 @@ mod tests {
     use std::path::PathBuf;
 
     use super::*;
+
+    #[test]
+    fn python_no_cognitive() {
+        check_metrics!(
+            "a = 42",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 0, usize)],
+            [(cognitive_average, f64::NAN)]
+        );
+    }
+
+    #[test]
+    fn rust_no_cognitive() {
+        check_metrics!(
+            "let a = 42;",
+            "foo.rs",
+            RustParser,
+            cognitive,
+            [(cognitive, 0, usize)],
+            [(cognitive_average, f64::NAN)]
+        );
+    }
+
+    #[test]
+    fn c_no_cognitive() {
+        check_metrics!(
+            "int a = 42;",
+            "foo.c",
+            CppParser,
+            cognitive,
+            [(cognitive, 0, usize)],
+            [(cognitive_average, f64::NAN)]
+        );
+    }
+
+    #[test]
+    fn mozjs_no_cognitive() {
+        check_metrics!(
+            "var a = 42;",
+            "foo.js",
+            MozjsParser,
+            cognitive,
+            [(cognitive, 0, usize)],
+            [(cognitive_average, f64::NAN)]
+        );
+    }
 
     #[test]
     fn python_simple_function() {
