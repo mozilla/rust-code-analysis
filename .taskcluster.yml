@@ -203,6 +203,7 @@ tasks:
                  cd rust-code-analysis &&
                  git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                  cargo build --all --release &&
+                 cargo package --all-features &&
                  cd target/release &&
                  strip rust-code-analysis-cli rust-code-analysis-web &&
                  tar -zvcf /rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
