@@ -14,7 +14,6 @@ use crate::languages::*;
 struct RustTemplate {
     c_name: String,
     names: Vec<(String, bool, String)>,
-    ts_count: usize,
     phf_map: String,
 }
 
@@ -29,7 +28,6 @@ pub fn generate_rust(output: &str, file_template: &str) -> std::io::Result<()> {
         let mut file = File::create(path)?;
 
         let names = get_token_names(&language, false);
-        let ts_count = language.node_kind_count();
 
         let mut phf_map = Cursor::new(Vec::new());
         let mut builder = phf_codegen::Map::new();
@@ -44,7 +42,6 @@ pub fn generate_rust(output: &str, file_template: &str) -> std::io::Result<()> {
         let args = RustTemplate {
             c_name,
             names,
-            ts_count,
             phf_map,
         };
 
