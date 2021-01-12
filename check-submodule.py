@@ -205,7 +205,9 @@ def compare_metrics(args: argparse.Namespace) -> None:
 
     # Get JSON of differences
     print("\nSave JSON of differences in", compare_dir)
-    run_subprocess("json-diff-cli", "--raw-json", "-o", compare_dir, old_dir, new_dir)
+    run_subprocess(
+        "json-structural-diff-cli", "--raw-json", "-o", compare_dir, old_dir, new_dir
+    )
 
     # Get minimal tests
     print("\nSave minimal tests in", compare_dir)
