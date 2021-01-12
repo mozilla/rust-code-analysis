@@ -1,6 +1,6 @@
 // Code generated; DO NOT EDIT.
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, FromPrimitive)]
 pub enum {{ c_name }} {
     {% for (name, _, _) in names -%}
     {{ name }} = {{ loop.index - 1 }},
@@ -30,7 +30,7 @@ impl From<&str> for {{ c_name }} {
 impl From<u16> for {{ c_name }} {
     #[inline(always)]
     fn from(x: u16) -> Self {
-        unsafe { std::mem::transmute(x{% if ts_count <= 255 %} as u8{% endif %}) }
+        num::FromPrimitive::from_u16(x).unwrap_or(Self::Error)
     }
 }
 
