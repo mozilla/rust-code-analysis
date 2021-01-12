@@ -1,6 +1,6 @@
 // Code generated; DO NOT EDIT.
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, FromPrimitive)]
 pub enum Rust {
     End = 0,
     Identifier = 1,
@@ -1056,7 +1056,7 @@ impl From<&str> for Rust {
 impl From<u16> for Rust {
     #[inline(always)]
     fn from(x: u16) -> Self {
-        unsafe { std::mem::transmute(x) }
+        num::FromPrimitive::from_u16(x).unwrap_or(Self::Error)
     }
 }
 

@@ -1,6 +1,6 @@
 // Code generated; DO NOT EDIT.
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, FromPrimitive)]
 pub enum Ccomment {
     End = 0,
     Nothing = 1,
@@ -83,7 +83,7 @@ impl From<&str> for Ccomment {
 impl From<u16> for Ccomment {
     #[inline(always)]
     fn from(x: u16) -> Self {
-        unsafe { std::mem::transmute(x as u8) }
+        num::FromPrimitive::from_u16(x).unwrap_or(Self::Error)
     }
 }
 

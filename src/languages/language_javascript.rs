@@ -1,6 +1,6 @@
 // Code generated; DO NOT EDIT.
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, FromPrimitive)]
 pub enum Javascript {
     End = 0,
     Identifier = 1,
@@ -810,7 +810,7 @@ impl From<&str> for Javascript {
 impl From<u16> for Javascript {
     #[inline(always)]
     fn from(x: u16) -> Self {
-        unsafe { std::mem::transmute(x as u8) }
+        num::FromPrimitive::from_u16(x).unwrap_or(Self::Error)
     }
 }
 
