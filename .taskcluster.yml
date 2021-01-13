@@ -164,7 +164,7 @@ tasks:
               - "/bin/bash"
               - "-cx"
               - "git clone --recursive --quiet ${repository} &&
-                 [ ! -d \"cache/gecko-dev\" ] &&
+                 [ ! -d \"/cache/gecko-dev\" ] &&
                  git clone --quiet https://github.com/mozilla/gecko-dev.git /cache/gecko-dev || true &&
                  pushd /cache/gecko-dev && git pull origin master && popd &&
                  mkdir -p /tmp/mozilla_central_output &&
