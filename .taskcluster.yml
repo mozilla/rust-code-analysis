@@ -46,7 +46,7 @@ tasks:
                git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
-               cargo test --all --verbose --all-features"
+               cargo test --workspace --verbose --all-features"
         metadata:
           name: rust-code-analysis lint and test
           description: rust-code-analysis lint and test
@@ -105,7 +105,7 @@ tasks:
                git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
-               cargo test --all --verbose --all-features &&
+               cargo test --workspace --verbose --all-features &&
                zip -0 ccov.zip `find . -name 'rust_code_analysis*.gc*' -print` &&
                ../grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
                bash <(curl -s https://codecov.io/bash) -f lcov.info"
@@ -136,7 +136,7 @@ tasks:
             - git clone --recursive --quiet ${repository}
             - cd rust-code-analysis
             - git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev}
-            - cargo test --all --verbose --all-features
+            - cargo test --workspace --verbose --all-features
           mounts:
             - content:
                 url: https://win.rustup.rs/
@@ -204,7 +204,7 @@ tasks:
                  mkdir -p /tmp/mozilla_central_output &&
                  cd rust-code-analysis &&
                  git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
-                 cargo build --release --all --all-features &&
+                 cargo build --release --workspace --all-features &&
                  cargo run --release -p rust-code-analysis-cli -- -p /cache/gecko-dev \
                                      -j4 --metrics -O json -o /tmp/mozilla_central_output"
             cache:
@@ -236,7 +236,7 @@ tasks:
               - "git clone --recursive --quiet ${repository} &&
                  cd rust-code-analysis &&
                  git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
-                 cargo build --all --release &&
+                 cargo build --workspace --release &&
                  cargo package --all-features &&
                  pushd rust-code-analysis-cli && cargo package --all-features && popd &&
                  pushd rust-code-analysis-web && cargo package --all-features && popd &&
@@ -285,7 +285,7 @@ tasks:
               - git clone --recursive --quiet ${repository}
               - cd rust-code-analysis
               - git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev}
-              - cargo build --all --release
+              - cargo build --workspace --release
             mounts:
               - content:
                   url: https://win.rustup.rs/
