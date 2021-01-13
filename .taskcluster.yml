@@ -316,7 +316,7 @@ tasks:
           workerType: ci
           payload:
             maxRunTime: 3600
-            image: "mozilla/taskboot:0.2.7"
+            image: "mozilla/taskboot:0.3.2"
             command:
                 - "/bin/sh"
                 - "-cx"
