@@ -190,9 +190,9 @@ mod tests {
             "foo.py",
             PythonParser,
             cyclomatic,
+            [(cyclomatic, 6, usize)],
             [
-                (cyclomatic, 6, usize),
-                (cyclomatic_average, 3, usize) // nspace = 2 (func and unit)
+                (cyclomatic_average, 3.0) // nspace = 2 (func and unit)
             ]
         );
     }
@@ -207,9 +207,9 @@ mod tests {
             "foo.py",
             PythonParser,
             cyclomatic,
+            [(cyclomatic, 4, usize)],
             [
-                (cyclomatic, 4, usize),
-                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.0) // nspace = 2 (func and unit)
             ]
         );
     }
@@ -228,9 +228,9 @@ mod tests {
             "foo.rs",
             RustParser,
             cyclomatic,
+            [(cyclomatic, 5, usize)],
             [
-                (cyclomatic, 5, usize),
-                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.5) // nspace = 2 (func and unit)
             ]
         );
     }
@@ -257,9 +257,9 @@ mod tests {
             "foo.c",
             CppParser,
             cyclomatic,
+            [(cyclomatic, 5, usize)],
             [
-                (cyclomatic, 5, usize),
-                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.5) // nspace = 2 (func and unit)
             ]
         );
     }
@@ -282,9 +282,9 @@ mod tests {
             "foo.c",
             CppParser,
             cyclomatic,
+            [(cyclomatic, 5, usize)],
             [
-                (cyclomatic, 5, usize),
-                (cyclomatic_average, 2, usize) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.5) // nspace = 2 (func and unit)
             ]
         );
     }
