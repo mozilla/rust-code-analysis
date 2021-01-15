@@ -58,17 +58,6 @@ macro_rules! mk_impl_lang {
     ( $( ($camel:ident, $name:ident, $display: expr) ),* ) => {
         impl LANG {
 
-            #[allow(dead_code)]
-            pub(crate) fn get_language(&self) -> Language {
-                unsafe {
-                    match self {
-                        $(
-                            LANG::$camel => $name(),
-                        )*
-                    }
-                }
-            }
-
             /// Returns the name of a language as a `&str`.
             ///
             /// # Examples
