@@ -31,15 +31,6 @@ macro_rules! mk_else_if {
 }
 
 #[macro_use]
-macro_rules! mk_extern {
-    ( $( $name:ident ),* ) => {
-        $(
-            extern "C" { pub(crate) fn $name() -> Language; }
-        )*
-    };
-}
-
-#[macro_use]
 macro_rules! mk_enum {
     ( $( $camel:ident, $description:expr ),* ) => {
         /// The list of supported languages.
@@ -226,6 +217,7 @@ macro_rules! mk_code {
                 }
 
                 fn get_language() -> Language {
+                    extern "C" { fn $name() -> Language; }
                     unsafe { $name() }
                 }
 
@@ -245,7 +237,6 @@ macro_rules! mk_code {
 #[macro_use]
 macro_rules! mk_langs {
     ( $( ($camel:ident, $description: expr, $display: expr, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
-        mk_extern!($( $name ),*);
         mk_enum!($( $camel, $description ),*);
         mk_impl_lang!($( ($camel, $name, $display) ),*);
         mk_action!($( ($camel, $parser) ),*);
