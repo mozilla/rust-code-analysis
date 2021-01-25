@@ -57,6 +57,8 @@ impl Stats {
     ///
     /// This value is computed dividing the `NExit` value
     /// for the total number of functions/closures in a space.
+    ///
+    /// If there are no functions in a code, its value is `NAN`.
     pub fn exit_average(&self) -> f64 {
         self.exit() / self.total_space_functions as f64
     }
@@ -142,6 +144,54 @@ mod tests {
     use std::path::PathBuf;
 
     use super::*;
+
+    #[test]
+    fn python_no_exit() {
+        check_metrics!(
+            "a = 42",
+            "foo.py",
+            PythonParser,
+            nexits,
+            [(exit, 0, usize)],
+            [(exit_average, f64::NAN)] // 0 functions
+        );
+    }
+
+    #[test]
+    fn rust_no_exit() {
+        check_metrics!(
+            "let a = 42;",
+            "foo.rs",
+            RustParser,
+            nexits,
+            [(exit, 0, usize)],
+            [(exit_average, f64::NAN)] // 0 functions
+        );
+    }
+
+    #[test]
+    fn c_no_exit() {
+        check_metrics!(
+            "int a = 42;",
+            "foo.c",
+            CppParser,
+            nexits,
+            [(exit, 0, usize)],
+            [(exit_average, f64::NAN)] // 0 functions
+        );
+    }
+
+    #[test]
+    fn javascript_no_exit() {
+        check_metrics!(
+            "var a = 42;",
+            "foo.js",
+            JavascriptParser,
+            nexits,
+            [(exit, 0, usize)],
+            [(exit_average, f64::NAN)] // 0 functions
+        );
+    }
 
     #[test]
     fn python_simple_function() {
