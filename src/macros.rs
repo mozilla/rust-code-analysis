@@ -277,7 +277,12 @@ macro_rules! check_metrics {
 
             $(
                 $(
-                    assert!((func_space.metrics.$metric.$func_float() - $true_float_value).abs() < f64::EPSILON);
+                    let value: f64 = $true_float_value;
+                    if !value.is_nan() {
+                        assert!((func_space.metrics.$metric.$func_float() - value).abs() < f64::EPSILON);
+                    } else {
+                        assert!(func_space.metrics.$metric.$func_float().is_nan());
+                    }
                 )*
             )?
         }
