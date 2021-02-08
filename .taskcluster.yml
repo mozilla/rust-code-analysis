@@ -46,7 +46,9 @@ tasks:
                git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
-               cargo test --workspace --verbose --all-features"
+               cargo test --workspace --verbose --all-features &&
+               cd enums &&
+               cargo build --verbose --all-features"
         metadata:
           name: rust-code-analysis lint and test
           description: rust-code-analysis lint and test
