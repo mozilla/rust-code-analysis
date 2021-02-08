@@ -285,56 +285,24 @@ tasks:
               - cd rust-code-analysis
               - git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev}
               - cargo build --workspace --release
+              - 7z a rust-code-analysis-win-cli-x86_64.zip "target\release\rust-code-analysis-cli.exe"
+              - 7z a rust-code-analysis-win-web-x86_64.zip "target\release\rust-code-analysis-web.exe"
             mounts:
               - content:
                   url: https://win.rustup.rs/
                 file: rustup-init\rustup-init.exe
             artifacts:
-              - name: public/rust-code-analysis-cli.exe
+              - name: public/rust-code-analysis-win-cli-x86_64.zip
                 expires: {$fromNow: '2 weeks'}
-                path: rust-code-analysis\target\release\rust-code-analysis-cli.exe
+                path: rust-code-analysis\rust-code-analysis-win-cli-x86_64.zip
                 type: file
-              - name: public/rust-code-analysis-web.exe
+              - name: public/rust-code-analysis-win-web-x86_64.zip
                 expires: {$fromNow: '2 weeks'}
-                path: rust-code-analysis\target\release\rust-code-analysis-web.exe
+                path: rust-code-analysis\rust-code-analysis-win-web-x86_64.zip
                 type: file
           metadata:
             name: rust-code-analysis windows release build
             description: rust-code-analysis windows release build
-            owner: cdenizet@mozilla.com
-            source: ${repository}/raw/${head_rev}/.taskcluster.yml
-
-      - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
-        then:
-          taskId: {$eval: as_slugid("package_windows_binary")}
-          dependencies:
-              - {$eval: as_slugid("build_windows_release")}
-          created: {$fromNow: ''}
-          deadline: {$fromNow: '2 hour'}
-          provisionerId: proj-relman
-          workerType: ci
-          payload:
-            maxRunTime: 3600
-            image: "mozilla/taskboot:0.3.2"
-            command:
-                - "/bin/sh"
-                - "-cx"
-                - "taskboot retrieve-artifact --output-path=. --artifacts public/rust-code-analysis-cli.exe public/rust-code-analysis-web.exe &&
-                   apk add --no-cache zip &&
-                   zip -9 /rust-code-analysis-win-cli-x86_64.zip rust-code-analysis-cli.exe &&
-                   zip -9 /rust-code-analysis-win-web-x86_64.zip rust-code-analysis-web.exe"
-            artifacts:
-              public/rust-code-analysis-win-cli-x86_64.zip:
-                expires: {$fromNow: '2 weeks'}
-                path: /rust-code-analysis-win-cli-x86_64.zip
-                type: file
-              public/rust-code-analysis-win-web-x86_64.zip:
-                expires: {$fromNow: '2 weeks'}
-                path: /rust-code-analysis-win-web-x86_64.zip
-                type: file
-          metadata:
-            name: package rust-code-analysis windows binary
-            description: package rust-code-analysis windows binary
             owner: cdenizet@mozilla.com
             source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
@@ -349,7 +317,7 @@ tasks:
             taskId: {$eval: as_slugid("deploy_release")}
             dependencies:
               - {$eval: as_slugid("build_linux_release")}
-              - {$eval: as_slugid("package_windows_binary")}
+              - {$eval: as_slugid("build_windows_release")}
               - {$eval: as_slugid("test_mozilla_central")}
               - {$eval: as_slugid("build_documentation")}
             created: {$fromNow: ''}
