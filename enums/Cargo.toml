@@ -17,4 +17,4 @@ phf_codegen = "^0.8"
 libc = "^0.2"
 
 tree-sitter = "^0.17"
-tree-sitter-java = "0.16"
+tree-sitter-java = "^0.16"
