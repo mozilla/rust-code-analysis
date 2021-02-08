@@ -10,9 +10,6 @@
 [submodule "tree-sitter-typescript"]
 	path = tree-sitter-typescript
 	url = https://github.com/tree-sitter/tree-sitter-typescript/
-[submodule "tree-sitter-java"]
-	path = tree-sitter-java
-	url = https://github.com/tree-sitter/tree-sitter-java/
 [submodule "tree-sitter-cpp"]
 	path = tree-sitter-cpp
 	url = https://github.com/tree-sitter/tree-sitter-cpp.git
