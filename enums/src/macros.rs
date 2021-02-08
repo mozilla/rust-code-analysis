@@ -14,6 +14,9 @@ macro_rules! mk_enum {
 macro_rules! mk_get_language {
     ( $( ($camel:ident, $name:ident) ),* ) => {
         pub fn get_language(lang: &LANG) -> Language {
+              if let LANG::Java = lang {
+                  tree_sitter_java::language()
+              } else {
                 match lang {
                     $(
                         LANG::$camel => {
@@ -21,6 +24,7 @@ macro_rules! mk_get_language {
                             unsafe { $name() }
                         },
                     )*
+                }
             }
         }
     };
