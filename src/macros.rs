@@ -31,6 +31,23 @@ macro_rules! mk_else_if {
 }
 
 #[macro_use]
+macro_rules! get_language {
+    (tree_sitter_java) => {
+        fn get_language() -> Language {
+            tree_sitter_java::language()
+        }
+    };
+    ($name:ident) => {
+        fn get_language() -> Language {
+            extern "C" {
+                pub(crate) fn $name() -> Language;
+            }
+            unsafe { $name() }
+        }
+    };
+}
+
+#[macro_use]
 macro_rules! mk_enum {
     ( $( $camel:ident, $description:expr ),* ) => {
         /// The list of supported languages.
@@ -216,10 +233,7 @@ macro_rules! mk_code {
                     LANG::$camel
                 }
 
-                fn get_language() -> Language {
-                    extern "C" { fn $name() -> Language; }
-                    unsafe { $name() }
-                }
+                get_language!($name);
 
                 fn get_lang_name() -> &'static str {
                     stringify!($camel)
