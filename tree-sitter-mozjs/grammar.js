@@ -1,4 +1,4 @@
-const JS = require("../tree-sitter-javascript/grammar.js")
+const JS = require("./tree-sitter-javascript/grammar.js")
 
 module.exports = grammar(JS, {
   name: 'mozjs',
