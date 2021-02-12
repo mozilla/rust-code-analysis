@@ -147,7 +147,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
             for p in paths.iter() {
                 eprintln!("  - {:?}", p);
             }
-            eprintln!("");
+            eprintln!();
 
             scc_map.insert(replacement, paths);
         }
