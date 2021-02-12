@@ -238,7 +238,7 @@ pub(crate) fn remove_blank_lines(data: &mut Vec<u8>) {
     }
 }
 
-pub(crate) fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
+pub(crate) fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
     // Copied from Cargo sources: https://github.com/rust-lang/cargo/blob/master/src/cargo/util/paths.rs#L65
     let mut components = path.as_ref().components().peekable();
     let mut ret = if let Some(c @ Component::Prefix(..)) = components.peek().cloned() {
@@ -263,7 +263,7 @@ pub(crate) fn normalize_path<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
             }
         }
     }
-    Some(ret)
+    ret
 }
 
 pub(crate) fn get_paths_dist(path1: &PathBuf, path2: &PathBuf) -> Option<usize> {
@@ -288,7 +288,7 @@ pub(crate) fn guess_file<S: ::std::hash::BuildHasher>(
     } else {
         include_path
     };
-    let include_path = normalize_path(include_path).unwrap();
+    let include_path = normalize_path(include_path);
     if let Some(possibilities) = all_files.get(include_path.file_name().unwrap().to_str().unwrap())
     {
         if possibilities.len() == 1 {
