@@ -20,12 +20,6 @@ if [ "$RUN_CI" = "no" ]; then
     exit 0
 fi
 
-# Install json-diff
-JSD_LINK="https://github.com/Luni-4/json-structural-diff/releases/download"
-JSD_VERSION="0.1.0"
-curl -L "$JSD_LINK/v$JSD_VERSION/json-structural-diff-linux.tar.gz" |
-tar xz -C $CARGO_HOME/bin
-
 # Install json minimal tests
 JMT_LINK="https://github.com/Luni-4/json-minimal-tests/releases/download"
 JMT_VERSION="0.1.1"
