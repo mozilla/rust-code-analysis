@@ -20,8 +20,7 @@ To compute metrics on a continuous integration system:
 To compare metrics and retrieve the structural JSON of differences
 in addition to the files containing the minimal tests:
 
-1. Install json-diff from here: https://github.com/Luni-4/json-diff/releases
-2. Install json-minimal-tests from here: https://github.com/Luni-4/json-minimal-tests/releases
+1. Install json-minimal-tests from here: https://github.com/Luni-4/json-minimal-tests/releases
 
 ./check-submodule.py compare-metrics -l TREE_SITTER_LANGUAGE
 
@@ -203,13 +202,7 @@ def compare_metrics(args: argparse.Namespace) -> None:
     # Create compare directory
     compare_dir.mkdir(parents=True, exist_ok=True)
 
-    # Get JSON of differences
-    print("\nSave JSON of differences in", compare_dir)
-    run_subprocess(
-        "json-structural-diff-cli", "--raw-json", "-o", compare_dir, old_dir, new_dir
-    )
-
-    # Get minimal tests
+    # Get JSON differences and minimal tests
     print("\nSave minimal tests in", compare_dir)
     run_subprocess("json-minimal-tests", "-o", compare_dir, old_dir, new_dir)
 
