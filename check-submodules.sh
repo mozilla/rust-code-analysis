@@ -45,5 +45,31 @@ ls /tmp/$SUBMODULE_NAME-new | wc -l
 # Create artifacts to be uploaded (if there are any)
 COMPARE=/tmp/$SUBMODULE_NAME-compare
 if [ "$(ls -A $COMPARE)" ]; then
-    tar -czvf /tmp/json-diffs-and-minimal-tests.tar.gz $COMPARE
+    # Maximum number of considered minimal tests for a metric
+    MT_THRESHOLD=30
+
+    # Array containing the considered metrics
+    # TODO: Implement a command into rust-code-analysis-cli that returns all
+    # computed metrics https://github.com/mozilla/rust-code-analysis/issues/478
+    METRICS=("cognitive" "sloc" "ploc" "lloc" "cloc" "blank" "cyclomatic" "halstead" "nom" "nexits" "nargs")
+
+    # Output directory name
+    OUTPUT_DIR=/tmp/output-$SUBMODULE_NAME
+
+    # Create output directory
+    mkdir -p $OUTPUT_DIR
+
+    # Retrieve minimal tests for a metric
+    for METRIC in "${METRICS[@]}"
+    do
+
+        FILES=`grep -i -l $METRIC $COMPARE/* | head -$MT_THRESHOLD`
+        if [ ${#FILES[@]} -ne 0 ]
+        then
+            mkdir -p $OUTPUT_DIR/$METRIC
+            cp $FILES $OUTPUT_DIR/$METRIC
+        fi
+    done
+
+    tar -czvf /tmp/json-diffs-and-minimal-tests.tar.gz $COMPARE $OUTPUT_DIR
 fi
