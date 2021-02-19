@@ -63,7 +63,7 @@ if [ "$(ls -A $COMPARE)" ]; then
     for METRIC in "${METRICS[@]}"
     do
 
-        FILES=`grep -i -l $METRIC $COMPARE/* | head -$MT_THRESHOLD`
+        FILES=`grep -r -i -l $METRIC $COMPARE | head -$MT_THRESHOLD`
         if [ ${#FILES[@]} -ne 0 ]
         then
             mkdir -p $OUTPUT_DIR/$METRIC
