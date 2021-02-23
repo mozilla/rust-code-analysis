@@ -18,3 +18,4 @@ libc = "^0.2"
 
 tree-sitter = "^0.17"
 tree-sitter-java = "^0.16"
+tree-sitter-preproc = { path = "../tree-sitter-preproc" }
