@@ -156,6 +156,7 @@ fn main() {
         mk_predef("c_specials", "SPECIALS");
     }
     let ignore = vec![
+        "tree-sitter-preproc".to_string(),
         "tree-sitter-typescript".to_string(),
         "tree-sitter-cpp".to_string(),
     ];

@@ -37,6 +37,11 @@ macro_rules! get_language {
             tree_sitter_java::language()
         }
     };
+    (tree_sitter_preproc) => {
+        fn get_language() -> Language {
+            tree_sitter_preproc::language()
+        }
+    };
     ($name:ident) => {
         fn get_language() -> Language {
             extern "C" {
