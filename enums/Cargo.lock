@@ -163,6 +163,7 @@ dependencies = [
  "libc",
  "phf_codegen",
  "tree-sitter",
+ "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-preproc",
 ]
@@ -481,6 +482,14 @@ checksum = "d18dcb776d3affaba6db04d11d645946d34a69b3172e588af96ce9fecd20faac"
 dependencies = [
  "cc",
  "regex",
+]
+
+[[package]]
+name = "tree-sitter-ccomment"
+version = "0.16.0"
+dependencies = [
+ "cc",
+ "tree-sitter",
 ]
 
 [[package]]

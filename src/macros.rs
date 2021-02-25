@@ -42,6 +42,11 @@ macro_rules! get_language {
             tree_sitter_preproc::language()
         }
     };
+    (tree_sitter_ccomment) => {
+        fn get_language() -> Language {
+            tree_sitter_ccomment::language()
+        }
+    };
     ($name:ident) => {
         fn get_language() -> Language {
             extern "C" {

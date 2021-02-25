@@ -17,6 +17,7 @@ macro_rules! mk_get_language {
               match lang {
                   LANG::Java => tree_sitter_java::language(),
                   LANG::Preproc => tree_sitter_preproc::language(),
+                  LANG::Ccomment => tree_sitter_ccomment::language(),
                   _ => match lang {
                     $(
                         LANG::$camel => {

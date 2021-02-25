@@ -157,6 +157,7 @@ fn main() {
     }
     let ignore = vec![
         "tree-sitter-preproc".to_string(),
+        "tree-sitter-ccomment".to_string(),
         "tree-sitter-typescript".to_string(),
         "tree-sitter-cpp".to_string(),
     ];
