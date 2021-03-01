@@ -165,6 +165,7 @@ dependencies = [
  "tree-sitter",
  "tree-sitter-ccomment",
  "tree-sitter-java",
+ "tree-sitter-mozcpp",
  "tree-sitter-preproc",
 ]
 
@@ -497,6 +498,14 @@ name = "tree-sitter-java"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0a1817218b66589235a1a234ada9669785095aeeb20597a2bf515d4dbf846d46"
+dependencies = [
+ "cc",
+ "tree-sitter",
+]
+
+[[package]]
+name = "tree-sitter-mozcpp"
+version = "0.16.0"
 dependencies = [
  "cc",
  "tree-sitter",
