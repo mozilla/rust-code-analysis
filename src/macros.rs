@@ -52,6 +52,11 @@ macro_rules! get_language {
             tree_sitter_mozcpp::language()
         }
     };
+    (tree_sitter_mozjs) => {
+        fn get_language() -> Language {
+            tree_sitter_mozjs::language()
+        }
+    };
     ($name:ident) => {
         fn get_language() -> Language {
             extern "C" {

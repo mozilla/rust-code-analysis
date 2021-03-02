@@ -1702,6 +1702,7 @@ dependencies = [
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-mozcpp",
+ "tree-sitter-mozjs",
  "tree-sitter-preproc",
 ]
 
@@ -2236,6 +2237,14 @@ dependencies = [
  "cc",
  "tree-sitter 0.17.1",
  "tree-sitter-cpp",
+]
+
+[[package]]
+name = "tree-sitter-mozjs"
+version = "0.16.0"
+dependencies = [
+ "cc",
+ "tree-sitter",
 ]
 
 [[package]]

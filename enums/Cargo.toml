@@ -21,3 +21,4 @@ tree-sitter-java = "^0.16"
 tree-sitter-preproc = { path = "../tree-sitter-preproc" }
 tree-sitter-ccomment = { path = "../tree-sitter-ccomment" }
 tree-sitter-mozcpp = { path = "../tree-sitter-mozcpp" }
+tree-sitter-mozjs = { path = "../tree-sitter-mozjs" }
