@@ -159,6 +159,7 @@ fn main() {
         "tree-sitter-preproc".to_string(),
         "tree-sitter-ccomment".to_string(),
         "tree-sitter-mozcpp".to_string(),
+        "tree-sitter-mozjs".to_string(),
         "tree-sitter-typescript".to_string(),
     ];
     let dirs = collect_tree_sitter_dirs(ignore);
