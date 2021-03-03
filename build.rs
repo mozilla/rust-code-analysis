@@ -160,7 +160,6 @@ fn main() {
         "tree-sitter-ccomment".to_string(),
         "tree-sitter-mozcpp".to_string(),
         "tree-sitter-typescript".to_string(),
-        "tree-sitter-cpp".to_string(),
     ];
     let dirs = collect_tree_sitter_dirs(ignore);
     for dir in dirs {
