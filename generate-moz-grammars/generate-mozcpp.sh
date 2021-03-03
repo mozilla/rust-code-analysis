@@ -4,10 +4,8 @@
 #
 # Usage: ./generate-moz-grammars/generate-mozcpp.sh
 
-# FIXME we need to remove this line once we are going to use
-# the tree-sitter-cpp bindings
-# Get the tree-sitter-cpp submodule version
-TS_CPP_VERSION=`git submodule status tree-sitter-cpp | awk '{ print $1 }'`
+# Set tree-sitter-cpp version
+TS_CPP_VERSION="a35a275df92e7583df38f2de2562361f2b69987e"
 
 # Enter the mozcpp directory
 pushd tree-sitter-mozcpp
@@ -29,6 +27,9 @@ npm install -y
 
 # Exit tree-sitter-cpp directory
 popd
+
+# Copy tree-sitter-cpp `scanner.cc` functions into the `src` directory
+cp --verbose tree-sitter-cpp/src/scanner.cc ./src/scanner.cc
 
 # Init npm
 npm init -y
