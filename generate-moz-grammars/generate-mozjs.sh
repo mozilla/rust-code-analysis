@@ -27,8 +27,11 @@ git checkout FETCH_HEAD
 # Exit tree-sitter-javascript directory
 popd
 
-# Rename tree-sitter-javascript `scanner.c` functions to avoid multiple
-# definitions in linking phase and save the output file in the `src` directory
+# Since the tree-sitter-mozjs `scanner.cc` file contains the very same functions
+# present in the tree-sitter-javascript `scanner.cc` file, to avoid having a
+# multiple symbols definitions error during the linking phase,
+# to those functions will be assigned a new prefix and the relative
+# output file will be saved into the `src` directory.
 SED_PATTERN="s/tree_sitter_javascript_external_scanner_/tree_sitter_javascript_external_scanner_mozjs_/g"
 sed $SED_PATTERN tree-sitter-javascript/src/scanner.c > ./src/tree_sitter_javascript_scanner.c
 
