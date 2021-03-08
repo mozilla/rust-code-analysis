@@ -162,7 +162,7 @@ dependencies = [
  "enum-iterator",
  "libc",
  "phf_codegen",
- "tree-sitter",
+ "tree-sitter 0.19.1",
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-mozcpp",
@@ -486,11 +486,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tree-sitter"
+version = "0.19.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0553761f355e44bfa49348b3866657db094e0c8296ed88e66ca9cb7cad3bcd77"
+dependencies = [
+ "cc",
+ "regex",
+]
+
+[[package]]
 name = "tree-sitter-ccomment"
 version = "0.16.0"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.17.1",
 ]
 
 [[package]]
@@ -500,7 +510,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0a1817218b66589235a1a234ada9669785095aeeb20597a2bf515d4dbf846d46"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.17.1",
 ]
 
 [[package]]
@@ -508,7 +518,7 @@ name = "tree-sitter-mozcpp"
 version = "0.16.0"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.17.1",
 ]
 
 [[package]]
@@ -516,7 +526,7 @@ name = "tree-sitter-preproc"
 version = "0.16.0"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.17.1",
 ]
 
 [[package]]
