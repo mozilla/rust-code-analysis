@@ -222,7 +222,7 @@ impl Cognitive for PythonCode {
             ExceptClause => {
                 increment(stats);
             }
-            ExpressionList => {
+            ExpressionList | ExpressionStatement => {
                 stats.boolean_seq.reset();
             }
             NotOperator => {
@@ -481,6 +481,19 @@ mod tests {
             cognitive,
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
+        );
+    }
+
+    #[test]
+    fn python_expression_statement() {
+        check_metrics!(
+            "def f(a, b):
+                c = True and True",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 1, usize)],
+            [(cognitive_average, 1.0)]
         );
     }
 
