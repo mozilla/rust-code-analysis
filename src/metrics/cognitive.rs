@@ -222,7 +222,7 @@ impl Cognitive for PythonCode {
             ExceptClause => {
                 increment(stats);
             }
-            ExpressionList | ExpressionStatement => {
+            ExpressionList | ExpressionStatement | Tuple => {
                 stats.boolean_seq.reset();
             }
             NotOperator => {
@@ -494,6 +494,19 @@ mod tests {
             cognitive,
             [(cognitive, 1, usize)],
             [(cognitive_average, 1.0)]
+        );
+    }
+
+    #[test]
+    fn python_tuple() {
+        check_metrics!(
+            "def f(a, b):
+                return \"%s%s\" % (a and \"Get\" or \"Set\", b)",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 2, usize)],
+            [(cognitive_average, 2.0)]
         );
     }
 
