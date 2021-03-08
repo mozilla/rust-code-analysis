@@ -207,7 +207,14 @@ impl Cognitive for PythonCode {
                     [IfStatement | ForStatement | WhileStatement | ExceptClause => FunctionDefinition]
                 );
             }
-            ElifClause | ElseClause | FinallyClause => {
+            ElifClause => {
+                // No nesting increment for them because their cost has already
+                // been paid by the if construct
+                increment_by_one(stats);
+                // Reset the boolean sequence
+                stats.boolean_seq.reset();
+            }
+            ElseClause | FinallyClause => {
                 // No nesting increment for them because their cost has already
                 // been paid by the if construct
                 increment_by_one(stats);
@@ -468,6 +475,22 @@ mod tests {
                 if a and b:  # +2 (+1 and)
                    return 1
                 if c and d: # +2 (+1 and)
+                   return 1",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 4, usize)],
+            [(cognitive_average, 4.0)]
+        );
+    }
+
+    #[test]
+    fn python_elif_function() {
+        check_metrics!(
+            "def f(a, b):
+                if a and b:  # +2 (+1 and)
+                   return 1
+                elif c and d: # +2 (+1 and)
                    return 1",
             "foo.py",
             PythonParser,
