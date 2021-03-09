@@ -2244,7 +2244,7 @@ name = "tree-sitter-mozjs"
 version = "0.16.0"
 dependencies = [
  "cc",
- "tree-sitter",
+ "tree-sitter 0.17.1",
 ]
 
 [[package]]
