@@ -97,7 +97,7 @@ impl Stats {
         self.logical_lines as f64
     }
 
-    /// The `Ploc` metric.
+    /// The `Cloc` metric.
     ///
     /// Counts the number of comments in a scope
     #[inline(always)]
