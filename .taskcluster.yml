@@ -149,6 +149,39 @@ tasks:
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
+      - taskId: {$eval: as_slugid("check_tree_sitter_crates")}
+        dependencies:
+           - {$eval: as_slugid("lint_test_task")}
+           - {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --recursive --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
+               ./check-tree-sitter-crates.sh"
+          cache:
+            rust-code-analysis-mozilla-central-repository: /cache
+          artifacts:
+            public/json-diffs-and-minimal-tests.tar.gz:
+              expires: {$fromNow: '2 weeks'}
+              path: /tmp/json-diffs-and-minimal-tests.tar.gz
+              type: file
+        scopes:
+          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+        metadata:
+          name: rust-code-analysis check tree-sitter crates
+          description: rust-code-analysis check tree-sitter crates
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
       - taskId: {$eval: as_slugid("check_submodules")}
         dependencies:
            - {$eval: as_slugid("lint_test_task")}

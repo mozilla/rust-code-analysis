@@ -33,7 +33,7 @@ git clone --quiet $MOZILLA_CENTRAL_REPO /cache/gecko-dev || true
 pushd /cache/gecko-dev && git pull origin master && popd
 
 # Compute metrics
-./check-submodule.py compute-ci-metrics -p /cache/gecko-dev -l $SUBMODULE_NAME
+./check-submodule.py compute-ci-metrics --submodule -p /cache/gecko-dev -l $SUBMODULE_NAME
 
 # Compare metrics
 ./check-submodule.py compare-metrics -l $SUBMODULE_NAME
