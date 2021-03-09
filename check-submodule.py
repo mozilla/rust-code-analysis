@@ -42,13 +42,14 @@ NEW_SUFFIX = "-new"
 
 # Extensions parsed by each tree-sitter-language
 EXTENSIONS = {
-    "tree-sitter-mozjs": ["*.js", "*.js2", "*.jsm"],
     "tree-sitter-javascript": ["*.js", "*.js2"],
     "tree-sitter-tsx": ["*.tsx"],
     "tree-sitter-typescript": ["*.ts", "*.jsw", "*.jsmw"],
     "tree-sitter-java": ["*.java"],
     "tree-sitter-rust": ["*.rs"],
-    "tree-sitter-cpp": [
+    "tree-sitter-python": ["*.py"],
+    "tree-sitter-mozjs": ["*.js", "*.js2", "*.jsm"],
+    "tree-sitter-mozcpp": [
         "*.cpp",
         "*.cx",
         "*.cxx",
@@ -62,7 +63,6 @@ EXTENSIONS = {
         "*.mm",
         "*.m",
     ],
-    "tree-sitter-python": ["*.py"],
 }
 
 # Run a subprocess.
@@ -102,9 +102,16 @@ def run_rca(
 # tree-sitter-language update.
 def compute_ci_metrics(args: argparse.Namespace) -> None:
 
-    if args.language not in EXTENSIONS.keys():
-        print(args.language, "is not a valid tree-sitter-language")
+    if args.language != "tree-sitter" or args.language not in EXTENSIONS.keys():
+        print(args.language, "is not a valid tree-sitter language")
         sys.exit(1)
+
+    # Use C/C++ files to test if there are any changes in metrics when
+    # the tree-sitter crate is updated
+    if args.language == "tree-sitter":
+        language = "tree-sitter-cpp"
+    else:
+        language = args.language
 
     # Repository passed as input
     repo_dir = pathlib.Path(args.path)
@@ -135,15 +142,16 @@ def compute_ci_metrics(args: argparse.Namespace) -> None:
 
     # Compute old metrics
     print("\nComputing metrics before the update and saving them in", old_dir)
-    run_rca(repo_dir, old_dir, rca_path, EXTENSIONS[args.language])
+    run_rca(repo_dir, old_dir, rca_path, EXTENSIONS[language])
 
-    # Update tree-sitter-language submodule
-    print("\nUpdate", args.language)
-    run_subprocess("./update-language-bindings.sh")
+    # Update a submodule only when a submodule is considered
+    if args.submodule:
+        print("\nUpdate", args.language)
+        run_subprocess("./update-language-bindings.sh")
 
     # Compute new metrics
     print("\nComputing metrics after the update and saving them in", new_dir)
-    run_rca(repo_dir, new_dir, None, EXTENSIONS[args.language])
+    run_rca(repo_dir, new_dir, None, EXTENSIONS[language])
 
 
 # Compute metrics before and after a tree-sitter-language update.
@@ -267,6 +275,15 @@ def main() -> None:
         "a tree-sitter-language update on a continuous integration system.",
     )
 
+    # Optional arguments
+    compute_ci_metrics_cmd.add_argument(
+        "--submodule",
+        "-s",
+        action="store_true",
+        help="Activates the code to update a submodule",
+    )
+
+    # Arguments
     compute_ci_metrics_cmd.add_argument(
         "-p",
         "--path",
