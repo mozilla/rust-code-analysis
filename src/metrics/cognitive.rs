@@ -486,6 +486,8 @@ mod tests {
 
     #[test]
     fn python_expression_statement() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered in assignments
         check_metrics!(
             "def f(a, b):
                 c = True and True",
@@ -499,6 +501,8 @@ mod tests {
 
     #[test]
     fn python_tuple() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered inside tuples
         check_metrics!(
             "def f(a, b):
                 return \"%s%s\" % (a and \"Get\" or \"Set\", b)",
@@ -512,6 +516,8 @@ mod tests {
 
     #[test]
     fn python_elif_function() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered in `elif` statements
         check_metrics!(
             "def f(a, b):
                 if a and b:  # +2 (+1 and)

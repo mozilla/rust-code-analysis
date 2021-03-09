@@ -545,6 +545,7 @@ mod tests {
 
     #[test]
     fn python_string_on_new_line() {
+        // More lines of the same instruction were counted as blank lines
         check_metrics!(
             "capabilities[\"goog:chromeOptions\"][\"androidPackage\"] = \\
                 \"org.chromium.weblayer.shell\"",
