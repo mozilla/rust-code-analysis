@@ -11,6 +11,21 @@ updates:
     interval: weekly
   open-pull-requests-limit: 99
 - package-ecosystem: cargo
+  directory: "/tree-sitter-mozjs"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 99
+- package-ecosystem: cargo
+  directory: "/tree-sitter-preproc"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 99
+- package-ecosystem: cargo
+  directory: "/tree-sitter-ccomment"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 99
+- package-ecosystem: cargo
   directory: "/enums"
   schedule:
     interval: weekly
