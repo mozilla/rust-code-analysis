@@ -533,6 +533,26 @@ mod tests {
     }
 
     #[test]
+    fn python_more_elifs_function() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered when there were more `elif` statements
+        check_metrics!(
+            "def f(a, b):
+                if a and b:  # +2 (+1 and)
+                   return 1
+                elif c and d: # +2 (+1 and)
+                   return 1
+                elif e and f: # +2 (+1 and)
+                   return 1",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 6, usize)],
+            [(cognitive_average, 6.0)]
+        );
+    }
+
+    #[test]
     fn rust_simple_function() {
         check_metrics!(
             "fn f() {
