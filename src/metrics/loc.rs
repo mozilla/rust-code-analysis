@@ -157,6 +157,8 @@ impl Loc for PythonCode {
                 let parent = node.object().parent().unwrap();
                 if let ExpressionStatement = parent.kind_id().into() {
                     stats.comment_lines += (end - start) + 1;
+                } else if parent.start_position().row != start {
+                    stats.lines.insert(start);
                 }
             }
             Statement
@@ -538,6 +540,25 @@ mod tests {
             CppParser,
             loc,
             [(lloc, 2, usize)]
+        );
+    }
+
+    #[test]
+    fn python_string_on_new_line() {
+        // More lines of the same instruction were counted as blank lines
+        check_metrics!(
+            "capabilities[\"goog:chromeOptions\"][\"androidPackage\"] = \\
+                \"org.chromium.weblayer.shell\"",
+            "foo.py",
+            PythonParser,
+            loc,
+            [
+                (sloc, 2, usize),
+                (ploc, 2, usize),
+                (lloc, 1, usize),
+                (cloc, 0, usize),
+                (blank, 0, usize)
+            ]
         );
     }
 

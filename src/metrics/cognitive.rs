@@ -207,7 +207,14 @@ impl Cognitive for PythonCode {
                     [IfStatement | ForStatement | WhileStatement | ExceptClause => FunctionDefinition]
                 );
             }
-            ElifClause | ElseClause | FinallyClause => {
+            ElifClause => {
+                // No nesting increment for them because their cost has already
+                // been paid by the if construct
+                increment_by_one(stats);
+                // Reset the boolean sequence
+                stats.boolean_seq.reset();
+            }
+            ElseClause | FinallyClause => {
                 // No nesting increment for them because their cost has already
                 // been paid by the if construct
                 increment_by_one(stats);
@@ -215,7 +222,7 @@ impl Cognitive for PythonCode {
             ExceptClause => {
                 increment(stats);
             }
-            ExpressionList => {
+            ExpressionList | ExpressionStatement | Tuple => {
                 stats.boolean_seq.reset();
             }
             NotOperator => {
@@ -474,6 +481,74 @@ mod tests {
             cognitive,
             [(cognitive, 4, usize)],
             [(cognitive_average, 4.0)]
+        );
+    }
+
+    #[test]
+    fn python_expression_statement() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered in assignments
+        check_metrics!(
+            "def f(a, b):
+                c = True and True",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 1, usize)],
+            [(cognitive_average, 1.0)]
+        );
+    }
+
+    #[test]
+    fn python_tuple() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered inside tuples
+        check_metrics!(
+            "def f(a, b):
+                return \"%s%s\" % (a and \"Get\" or \"Set\", b)",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 2, usize)],
+            [(cognitive_average, 2.0)]
+        );
+    }
+
+    #[test]
+    fn python_elif_function() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered in `elif` statements
+        check_metrics!(
+            "def f(a, b):
+                if a and b:  # +2 (+1 and)
+                   return 1
+                elif c and d: # +2 (+1 and)
+                   return 1",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 4, usize)],
+            [(cognitive_average, 4.0)]
+        );
+    }
+
+    #[test]
+    fn python_more_elifs_function() {
+        // Boolean expressions containing `And` and `Or` operators were not
+        // considered when there were more `elif` statements
+        check_metrics!(
+            "def f(a, b):
+                if a and b:  # +2 (+1 and)
+                   return 1
+                elif c and d: # +2 (+1 and)
+                   return 1
+                elif e and f: # +2 (+1 and)
+                   return 1",
+            "foo.py",
+            PythonParser,
+            cognitive,
+            [(cognitive, 6, usize)],
+            [(cognitive_average, 6.0)]
         );
     }
 
