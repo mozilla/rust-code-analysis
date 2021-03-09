@@ -37,7 +37,7 @@ tree-sitter-ccomment = { path = "./tree-sitter-ccomment" }
 tree-sitter-mozcpp = { path = "./tree-sitter-mozcpp" }
 
 [dev-dependencies]
-pretty_assertions = "^0.6"
+pretty_assertions = "^0.7"
 
 [workspace]
 members = ["rust-code-analysis-cli", "rust-code-analysis-web"]
