@@ -2204,7 +2204,7 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-ccomment"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "cc",
  "tree-sitter 0.17.1",
