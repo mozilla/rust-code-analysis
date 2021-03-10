@@ -50,9 +50,6 @@ npm install --save-dev tree-sitter-cli
 # Delete node_modules
 rm -rf node_modules
 
-# Delete package files
-rm -rf package-lock.json package.json
-
 # Delete tree-sitter-javascript directory
 rm -rf tree-sitter-javascript
 
