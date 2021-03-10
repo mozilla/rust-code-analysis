@@ -2,7 +2,7 @@
 
 # This script updates the mozjs grammar automatically.
 #
-# Usage: ./generate-moz-grammars/generate-mozjs.sh
+# Usage: ./generate-grammars/generate-mozjs.sh
 
 # FIXME we need to remove this line once we are going to use
 # the tree-sitter-javascript bindings
