@@ -364,5 +364,9 @@
   {
     "type": "preproc_line",
     "named": true
+  },
+  {
+    "type": "raw_string_literal",
+    "named": true
   }
 ]
