@@ -2,7 +2,7 @@
 
 # This script updates the mozcpp grammar automatically.
 #
-# Usage: ./generate-moz-grammars/generate-mozcpp.sh
+# Usage: ./generate-grammars/generate-mozcpp.sh
 
 # Set tree-sitter-cpp version
 TS_CPP_VERSION="a35a275df92e7583df38f2de2562361f2b69987e"
