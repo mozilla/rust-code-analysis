@@ -9,7 +9,7 @@ way.)
 ``` toml
 [dependencies]
 tree-sitter = "0.17"
-tree-sitter-ccomment = "0.16"
+tree-sitter-ccomment = "0.17"
 ```
 
 Typically, you will use the [language][language func] function to add this
