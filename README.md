@@ -39,7 +39,10 @@ If you want to contribute to the development of this software
 or you are just interested in building **rust-code-analysis**, have a look at the
 <a href="https://mozilla.github.io/rust-code-analysis/developers/index.html" target="_blank">Developers Guide</a>.
 
-# License
+# Licenses
 
-All the source code of **rust-code-analysis** is released under the
+- Mozilla-defined grammars are released under the MIT license.
+
+- **rust-code-analysis**, **rust-code-analysis-cli** and **rust-code-analysis-web**
+are released under the
 <a href="https://www.mozilla.org/MPL/2.0/" target="_blank">Mozilla Public License v2.0</a>.
