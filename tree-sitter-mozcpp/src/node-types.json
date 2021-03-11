@@ -2442,7 +2442,7 @@
     "named": true,
     "fields": {
       "designator": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
@@ -5677,6 +5677,10 @@
   {
     "type": "class",
     "named": false
+  },
+  {
+    "type": "comment",
+    "named": true
   },
   {
     "type": "const",

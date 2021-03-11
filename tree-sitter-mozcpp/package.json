@@ -1,0 +1,55 @@
+{
+  "name": "tree-sitter-mozcpp",
+  "version": "0.17.0",
+  "description": "Mozcpp grammar for node-tree-sitter",
+  "main": "index.js",
+  "keywords": [
+    "parser",
+    "lexer"
+  ],
+  "author": "Calixte Denizet",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^2.14.2"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.17.3"
+  },
+  "scripts": {
+    "build": "tree-sitter generate && node-gyp build",
+    "test": "tree-sitter test && tree-sitter parse examples/* --quiet --time",
+    "test-windows": "tree-sitter test",
+    "install": "node-gyp rebuild"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.cpp",
+      "file-types": [
+        "cpp",
+        "cx",
+        "cxx",
+        "cc",
+        "hxx",
+        "hpp",
+        "c",
+        "h",
+        "hh",
+        "inc",
+        "mm",
+        "m"
+      ]
+    }
+  ],
+  "gypfile": true,
+  "directories": {
+    "example": "examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tree-sitter/tree-sitter-cpp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tree-sitter/tree-sitter-cpp/issues"
+  },
+  "homepage": "https://github.com/tree-sitter/tree-sitter-cpp#readme"
+}
