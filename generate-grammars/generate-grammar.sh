@@ -39,4 +39,4 @@ cargo fmt
 
 # Run rust code-analysis to verify if everything works correctly and to
 # update the Cargo.lock
-cargo test --workspace
+cargo clean && cargo test --workspace

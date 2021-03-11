@@ -35,39 +35,11 @@ popd
 SED_PATTERN="s/tree_sitter_javascript_external_scanner_/tree_sitter_javascript_external_scanner_mozjs_/g"
 sed $SED_PATTERN tree-sitter-javascript/src/scanner.c > ./src/tree_sitter_javascript_scanner.c
 
-# Init npm
-npm init -y
-
-# Install a small module that lets the parser be used from Node
-npm install --save nan
-
-# Install the Tree-sitter CLI
-npm install --save-dev tree-sitter-cli
-
-# Generate moz-cpp grammar
-./node_modules/.bin/tree-sitter generate
-
-# Delete node_modules
-rm -rf node_modules
-
-# Delete tree-sitter-javascript directory
-rm -rf tree-sitter-javascript
-
 # Exit tree-sitter-mozjs directory
 popd
 
-# Enter enums directory
-pushd enums
+# Generate tree-sitter-mozjs grammar
+./generate-grammars/generate-grammar.sh tree-sitter-mozjs
 
-# Recreate the grammar for rust-code-analysis
-cargo clean && cargo run -- -lrust -o ../src/languages
-
-# Exit enums directory
-popd
-
-# Format the produced grammars
-cargo fmt
-
-# Run rust code-analysis to verify if everything works correctly and to
-# update the Cargo.lock
-cargo test --workspace
+# Delete tree-sitter-mozjs/tree-sitter-javascript directory
+rm -rf ./tree-sitter-mozjs/tree-sitter-javascript
