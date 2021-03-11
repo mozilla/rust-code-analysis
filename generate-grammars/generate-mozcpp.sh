@@ -31,39 +31,11 @@ popd
 # Copy tree-sitter-cpp `scanner.cc` functions into the `src` directory
 cp --verbose tree-sitter-cpp/src/scanner.cc ./src/scanner.cc
 
-# Init npm
-npm init -y
-
-# Install a small module that lets the parser be used from Node
-npm install --save nan
-
-# Install the Tree-sitter CLI
-npm install --save-dev tree-sitter-cli
-
-# Generate moz-cpp grammar
-./node_modules/.bin/tree-sitter generate
-
-# Delete node_modules
-rm -rf node_modules
-
-# Delete tree-sitter-cpp directory
-rm -rf tree-sitter-cpp
-
 # Exit tree-sitter-mozcpp directory
 popd
 
-# Enter enums directory
-pushd enums
+# Generate tree-sitter-mozcpp grammar
+./generate-grammars/generate-grammar.sh tree-sitter-mozcpp
 
-# Recreate the grammar for rust-code-analysis
-cargo clean && cargo run -- -lrust -o ../src/languages
-
-# Exit enums directory
-popd
-
-# Format the produced grammars
-cargo fmt
-
-# Run rust code-analysis to verify if everything works correctly and to
-# update the Cargo.lock
-cargo test --workspace
+# Delete tree-sitter-mozcpp/tree-sitter-cpp directory
+rm -rf ./tree-sitter-mozcpp/tree-sitter-cpp
