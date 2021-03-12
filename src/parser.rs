@@ -121,6 +121,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
         for f in filters.iter() {
             let f = f.as_str();
             match f {
+                "all" => res.push(Box::new(|_: &Node| -> bool { true })),
                 "call" => res.push(Box::new(T::is_call)),
                 "comment" => res.push(Box::new(T::is_comment)),
                 "error" => res.push(Box::new(T::is_error)),
@@ -130,6 +131,11 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
                     if let Ok(n) = f.parse::<u16>() {
                         res.push(Box::new(move |node: &Node| -> bool {
                             node.object().kind_id() == n
+                        }));
+                    } else {
+                        let f = f.to_owned();
+                        res.push(Box::new(move |node: &Node| -> bool {
+                            node.object().kind().contains(&f)
                         }));
                     }
                 }
