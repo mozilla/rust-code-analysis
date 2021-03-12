@@ -12,8 +12,8 @@ RUN_CI="no"
 # Temporary master branch Cargo.toml filename
 MASTER_CARGO_TOML="master-cargo.toml"
 
-# Download master branch Cargo.toml and save it in a temporary file
-wget -LqO - https://raw.githubusercontent.com/mozilla/rust-code-analysis/master/Cargo.toml | tr -d ' ' > $MASTER_CARGO_TOML
+# Retrieve master branch Cargo.toml and save it in a temporary untracked file
+git checkout master && cat Cargo.toml | tr -d ' ' > $MASTER_CARGO_TOML && git checkout $1
 
 # For each tree-sitter crate from the analyzed branch Cargo.toml
 for TS_CRATE in $TS_CRATES

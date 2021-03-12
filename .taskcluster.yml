@@ -166,7 +166,7 @@ tasks:
             - "git clone --recursive --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
-               ./check-tree-sitter-crates.sh"
+               ./check-tree-sitter-crates.sh ${head_rev}"
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
