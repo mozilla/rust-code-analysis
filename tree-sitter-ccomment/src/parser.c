@@ -5,7 +5,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 
-#define LANGUAGE_VERSION 12
+#define LANGUAGE_VERSION 13
 #define STATE_COUNT 12
 #define LARGE_STATE_COUNT 4
 #define SYMBOL_COUNT 16
@@ -14,6 +14,7 @@
 #define EXTERNAL_TOKEN_COUNT 1
 #define FIELD_COUNT 0
 #define MAX_ALIAS_SEQUENCE_LENGTH 3
+#define PRODUCTION_ID_COUNT 1
 
 enum {
   sym_nothing = 1,
@@ -138,7 +139,7 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
   },
 };
 
-static TSSymbol ts_alias_sequences[1][MAX_ALIAS_SEQUENCE_LENGTH] = {
+static TSSymbol ts_alias_sequences[PRODUCTION_ID_COUNT][MAX_ALIAS_SEQUENCE_LENGTH] = {
   [0] = {0},
 };
 
@@ -189,12 +190,12 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       END_STATE();
     case 5:
       if (lookahead == '"') ADVANCE(29);
-      if (lookahead == '\\') ADVANCE(17);
+      if (lookahead == '\\') ADVANCE(18);
       if (lookahead != 0) ADVANCE(5);
       END_STATE();
     case 6:
       if (lookahead == '\'') ADVANCE(30);
-      if (lookahead == '\\') ADVANCE(18);
+      if (lookahead == '\\') ADVANCE(19);
       if (lookahead != 0) ADVANCE(6);
       END_STATE();
     case 7:
@@ -235,15 +236,15 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
           lookahead == ' ') ADVANCE(28);
       END_STATE();
     case 17:
-      if (lookahead != 0) ADVANCE(5);
-      END_STATE();
-    case 18:
-      if (lookahead != 0) ADVANCE(6);
-      END_STATE();
-    case 19:
       if (lookahead != 0 &&
           lookahead != '\r') ADVANCE(32);
       if (lookahead == '\r') ADVANCE(33);
+      END_STATE();
+    case 18:
+      if (lookahead != 0) ADVANCE(5);
+      END_STATE();
+    case 19:
+      if (lookahead != 0) ADVANCE(6);
       END_STATE();
     case 20:
       ACCEPT_TOKEN(ts_builtin_sym_end);
@@ -310,7 +311,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       END_STATE();
     case 32:
       ACCEPT_TOKEN(sym_comment);
-      if (lookahead == '\\') ADVANCE(19);
+      if (lookahead == '\\') ADVANCE(17);
       if (lookahead != 0 &&
           lookahead != '\n') ADVANCE(32);
       END_STATE();
@@ -318,7 +319,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       ACCEPT_TOKEN(sym_comment);
       if (lookahead != 0 &&
           lookahead != '\\') ADVANCE(32);
-      if (lookahead == '\\') ADVANCE(19);
+      if (lookahead == '\\') ADVANCE(17);
       END_STATE();
     default:
       return false;
@@ -542,13 +543,21 @@ extern const TSLanguage *tree_sitter_ccomment(void) {
     .alias_count = ALIAS_COUNT,
     .token_count = TOKEN_COUNT,
     .external_token_count = EXTERNAL_TOKEN_COUNT,
+    .state_count = STATE_COUNT,
+    .large_state_count = LARGE_STATE_COUNT,
+    .production_id_count = PRODUCTION_ID_COUNT,
+    .field_count = FIELD_COUNT,
+    .max_alias_sequence_length = MAX_ALIAS_SEQUENCE_LENGTH,
+    .parse_table = (const uint16_t *)ts_parse_table,
+    .small_parse_table = (const uint16_t *)ts_small_parse_table,
+    .small_parse_table_map = (const uint32_t *)ts_small_parse_table_map,
+    .parse_actions = ts_parse_actions,
     .symbol_names = ts_symbol_names,
     .symbol_metadata = ts_symbol_metadata,
-    .parse_table = (const uint16_t *)ts_parse_table,
-    .parse_actions = ts_parse_actions,
-    .lex_modes = ts_lex_modes,
+    .public_symbol_map = ts_symbol_map,
+    .alias_map = ts_non_terminal_alias_map,
     .alias_sequences = (const TSSymbol *)ts_alias_sequences,
-    .max_alias_sequence_length = MAX_ALIAS_SEQUENCE_LENGTH,
+    .lex_modes = ts_lex_modes,
     .lex_fn = ts_lex,
     .external_scanner = {
       (const bool *)ts_external_scanner_states,
@@ -559,13 +568,6 @@ extern const TSLanguage *tree_sitter_ccomment(void) {
       tree_sitter_ccomment_external_scanner_serialize,
       tree_sitter_ccomment_external_scanner_deserialize,
     },
-    .field_count = FIELD_COUNT,
-    .large_state_count = LARGE_STATE_COUNT,
-    .small_parse_table = (const uint16_t *)ts_small_parse_table,
-    .small_parse_table_map = (const uint32_t *)ts_small_parse_table_map,
-    .public_symbol_map = ts_symbol_map,
-    .alias_map = ts_non_terminal_alias_map,
-    .state_count = STATE_COUNT,
   };
   return &language;
 }
