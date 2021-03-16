@@ -67,12 +67,23 @@ pushd /cache/gecko-dev && git pull origin master && popd
 # Compute metrics
 ./check-submodule.py compute-ci-metrics -p /cache/gecko-dev -l $TREE_SITTER_CRATE
 
+# Count files in metrics directories
+OLD=`ls /tmp/$TREE_SITTER_CRATE-old | wc -l`
+NEW=`ls /tmp/$TREE_SITTER_CRATE-new | wc -l`
+
+# Print number of files contained in metrics directories
+echo "$TREE_SITTER_CRATE-old: $OLD"
+echo "$TREE_SITTER_CRATE-new: $NEW"
+
+# If metrics directories differ in number of files,
+# exit the script with an error
+if [ $OLD != $NEW ]
+then
+    exit 1
+fi
+
 # Compare metrics
 ./check-submodule.py compare-metrics -l $TREE_SITTER_CRATE
-
-# Count files in metrics directories
-ls /tmp/$TREE_SITTER_CRATE-old | wc -l
-ls /tmp/$TREE_SITTER_CRATE-new | wc -l
 
 # Create artifacts to be uploaded (if there are any)
 COMPARE=/tmp/$TREE_SITTER_CRATE-compare
