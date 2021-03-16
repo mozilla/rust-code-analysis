@@ -12,7 +12,7 @@ module.exports = grammar(JS, {
       /#.*\n/,
     ),
 
-    _statement: ($, original) => choice(
+    statement: ($, original) => choice(
       original,
       $.preproc,
     ),
