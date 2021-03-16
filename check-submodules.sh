@@ -35,12 +35,23 @@ pushd /cache/gecko-dev && git pull origin master && popd
 # Compute metrics
 ./check-submodule.py compute-ci-metrics --submodule -p /cache/gecko-dev -l $SUBMODULE_NAME
 
+# Count files in metrics directories
+OLD=`ls /tmp/$SUBMODULE_NAME-old | wc -l`
+NEW=`ls /tmp/$SUBMODULE_NAME-new | wc -l`
+
+# Print number of files contained in metrics directories
+echo "$SUBMODULE_NAME-old: $OLD"
+echo "$SUBMODULE_NAME-new: $NEW"
+
+# If metrics directories differ in number of files,
+# exit the script with an error
+if [ $OLD != $NEW ]
+then
+    exit 1
+fi
+
 # Compare metrics
 ./check-submodule.py compare-metrics -l $SUBMODULE_NAME
-
-# Count files in metrics directories
-ls /tmp/$SUBMODULE_NAME-old | wc -l
-ls /tmp/$SUBMODULE_NAME-new | wc -l
 
 # Create artifacts to be uploaded (if there are any)
 COMPARE=/tmp/$SUBMODULE_NAME-compare
