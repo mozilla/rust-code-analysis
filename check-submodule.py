@@ -102,14 +102,14 @@ def run_rca(
 # tree-sitter-language update.
 def compute_ci_metrics(args: argparse.Namespace) -> None:
 
-    if args.language != "tree-sitter" or args.language not in EXTENSIONS.keys():
+    if args.language != "tree-sitter" and args.language not in EXTENSIONS.keys():
         print(args.language, "is not a valid tree-sitter language")
         sys.exit(1)
 
     # Use C/C++ files to test if there are any changes in metrics when
     # the tree-sitter crate is updated
     if args.language == "tree-sitter":
-        language = "tree-sitter-cpp"
+        language = "tree-sitter-mozcpp"
     else:
         language = args.language
 
