@@ -260,7 +260,16 @@ impl Checker for RustCode {
         code.starts_with(b"/// cbindgen:")
     }
 
-    mk_else_if!(IfExpression);
+    #[inline(always)]
+    fn is_else_if(node: &Node) -> bool {
+        if node.object().kind_id() != <Self as TSLanguage>::BaseLang::IfExpression {
+            return false;
+        }
+        if let Some(parent) = node.object().parent() {
+            return parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause;
+        }
+        false
+    }
     mk_checker!(is_string, StringLiteral, RawStringLiteral);
     mk_checker!(is_call, CallExpression);
     mk_checker!(is_func, FunctionItem, ClosureExpression);
