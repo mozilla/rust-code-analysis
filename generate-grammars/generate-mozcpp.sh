@@ -5,7 +5,7 @@
 # Usage: ./generate-grammars/generate-mozcpp.sh
 
 # Set tree-sitter-cpp version
-TS_CPP_VERSION="a35a275df92e7583df38f2de2562361f2b69987e"
+TS_CPP_VERSION="05cf2030e5415e9e931f620f0924107f73976796"
 
 # Enter the mozcpp directory
 pushd tree-sitter-mozcpp
