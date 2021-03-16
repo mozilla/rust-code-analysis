@@ -11619,6 +11619,7 @@
       "_constructor_specifiers"
     ]
   ],
+  "precedences": [],
   "externals": [
     {
       "type": "SYMBOL",
