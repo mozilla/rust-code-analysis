@@ -54,7 +54,7 @@ fi
 
 # Install json minimal tests
 JMT_LINK="https://github.com/Luni-4/json-minimal-tests/releases/download"
-JMT_VERSION="0.1.4"
+JMT_VERSION="0.1.5"
 curl -L "$JMT_LINK/v$JMT_VERSION/json-minimal-tests-linux.tar.gz" |
 tar xz -C $CARGO_HOME/bin
 
