@@ -44,10 +44,10 @@ echo "$SUBMODULE_NAME-old: $OLD"
 echo "$SUBMODULE_NAME-new: $NEW"
 
 # If metrics directories differ in number of files,
-# exit the script with an error
+# print the difference of files
 if [ $OLD != $NEW ]
 then
-    exit 1
+    diff -rq /tmp/$SUBMODULE_NAME-old /tmp/$SUBMODULE_NAME-new
 fi
 
 # Compare metrics

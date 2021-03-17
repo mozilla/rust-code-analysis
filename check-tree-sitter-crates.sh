@@ -76,10 +76,10 @@ echo "$TREE_SITTER_CRATE-old: $OLD"
 echo "$TREE_SITTER_CRATE-new: $NEW"
 
 # If metrics directories differ in number of files,
-# exit the script with an error
+# print the difference of files
 if [ $OLD != $NEW ]
 then
-    exit 1
+    diff -rq /tmp/$TREE_SITTER_CRATE-old /tmp/$TREE_SITTER_CRATE-new
 fi
 
 # Compare metrics
