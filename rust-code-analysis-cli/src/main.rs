@@ -277,7 +277,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("dump")
-                .help("Specifies the output file")
+                .help("Outputs the AST to stdout")
                 .short("d")
                 .long("dump"),
         )
