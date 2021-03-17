@@ -44,10 +44,11 @@ echo "$SUBMODULE_NAME-old: $OLD"
 echo "$SUBMODULE_NAME-new: $NEW"
 
 # If metrics directories differ in number of files,
-# print the difference of files
+# print only the files that are in a directory but not in the other one
 if [ $OLD != $NEW ]
 then
-    diff -rq /tmp/$SUBMODULE_NAME-old /tmp/$SUBMODULE_NAME-new
+    ONLY_FILES=`diff -q /tmp/$SUBMODULE_NAME-old /tmp/$SUBMODULE_NAME-new | grep "Only in"`
+    echo "$ONLY_FILES"
 fi
 
 # Compare metrics

@@ -76,10 +76,11 @@ echo "$TREE_SITTER_CRATE-old: $OLD"
 echo "$TREE_SITTER_CRATE-new: $NEW"
 
 # If metrics directories differ in number of files,
-# print the difference of files
+# print only the files that are in a directory but not in the other one
 if [ $OLD != $NEW ]
 then
-    diff -rq /tmp/$TREE_SITTER_CRATE-old /tmp/$TREE_SITTER_CRATE-new
+    ONLY_FILES=`diff -q /tmp/$TREE_SITTER_CRATE-old /tmp/$TREE_SITTER_CRATE-new | grep "Only in"`
+    echo "$ONLY_FILES"
 fi
 
 # Compare metrics
