@@ -108,7 +108,7 @@ if [ "$(ls -A $COMPARE)" ]; then
     do
 
         FILES=`grep -r -i -l $METRIC $COMPARE | head -$MT_THRESHOLD`
-        if [ ${#FILES[@]} -ne 0 ]
+        if [ ! -z $FILES ]
         then
             mkdir -p $OUTPUT_DIR/$METRIC
             cp $FILES $OUTPUT_DIR/$METRIC
