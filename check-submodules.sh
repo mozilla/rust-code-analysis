@@ -75,7 +75,8 @@ if [ "$(ls -A $COMPARE)" ]; then
     for METRIC in "${METRICS[@]}"
     do
 
-        FILES=`grep -r -i -l $METRIC $COMPARE | head -$MT_THRESHOLD`
+        PREFIX_METRIC="\.$METRIC"
+        FILES=`grep -r -i -l $PREFIX_METRIC $COMPARE | head -$MT_THRESHOLD`
         if [ -n "$FILES" ]
         then
             mkdir -p $OUTPUT_DIR/$METRIC
