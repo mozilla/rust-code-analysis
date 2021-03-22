@@ -1697,7 +1697,7 @@ dependencies = [
  "regex",
  "serde",
  "termcolor",
- "tree-sitter 0.17.1",
+ "tree-sitter 0.19.2",
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-mozcpp",
