@@ -396,7 +396,8 @@ mod tests {
             RustParser,
             halstead,
             [
-                (u_operators, 9, usize), // fn, (), {}, let, =, ,, +, /, ;
+                // FIXME tree-sitter-rust does not parse the comma inside the println! macro
+                (u_operators, 9, usize), // fn, (), {}, let, =, +, /, ;, !
                 (operators, 22, usize),
                 (u_operands, 9, usize), // main, a, b, c, avg, 5, 3, println, "{}"
                 (operands, 15, usize)
