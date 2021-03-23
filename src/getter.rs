@@ -332,11 +332,11 @@ impl Getter for TsxCode {
             | PERCENT | STARSTAR | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ | BANGEQ | GTEQ
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
-            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const => {
-                HalsteadType::Operator
-            }
-            Identifier | NestedIdentifier | String | Number | True | False | Null | Void | This
-            | Super | Undefined | Set | Get | Typeof | Instanceof => HalsteadType::Operand,
+            | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
+            | Function | Function2 | SEMI => HalsteadType::Operator,
+            Identifier | NestedIdentifier | MemberExpression | PropertyIdentifier | String
+            | Number | True | False | Null | Void | This | Super | Undefined | Set | Get
+            | Typeof | Instanceof => HalsteadType::Operand,
             _ => HalsteadType::Unknown,
         }
     }
