@@ -357,6 +357,34 @@ mod tests {
     }
 
     #[test]
+    fn cpp_operators_and_operands() {
+        // Define operators and operands for C/C++ grammar according to this specification:
+        // https://www.verifysoft.com/en_halstead_metrics.html
+        // The only difference with the specification above is that
+        // primitive types are treated as operators, since the definition of a
+        // primitive type can be seen as the creation of a slot of a certain size.
+        // i.e. The `int a;` definition creates a n-bytes slot.
+        check_metrics!(
+            "main()
+            {
+              int a, b, c, avg;
+              scanf(\"%d %d %d\", &a, &b, &c);
+              avg = (a + b + c) / 3;
+              printf(\"avg = %d\", avg);
+            }",
+            "foo.c",
+            CppParser,
+            halstead,
+            [
+                (u_operators, 9, usize), // (), {}, int, &, =, +, /, ,, ;
+                (operators, 24, usize),
+                (u_operands, 10, usize), // main, a, b, c, avg, scanf, "%d %d %d", 3, printf, "avg = %d"
+                (operands, 18, usize)
+            ]
+        );
+    }
+
+    #[test]
     fn python_wrong_operators() {
         check_metrics!(
             "()[]{}",
