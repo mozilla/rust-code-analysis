@@ -381,7 +381,7 @@ impl Getter for RustCode {
             | LT | GT | AMP | MutableSpecifier | DOTDOT | DOTDOTEQ | DASH | AMPAMP | PIPEPIPE
             | PIPE | CARET | EQEQ | BANGEQ | LTEQ | GTEQ | LTLT | GTGT | SLASH | PERCENT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ | AMPEQ | PIPEEQ | CARETEQ
-            | LTLTEQ | GTGTEQ | Move | DOT | PrimitiveType => HalsteadType::Operator,
+            | LTLTEQ | GTGTEQ | Move | DOT | PrimitiveType | Fn | SEMI => HalsteadType::Operator,
             Identifier | StringLiteral | RawStringLiteral | IntegerLiteral | FloatLiteral
             | BooleanLiteral | Zelf | CharLiteral | UNDERSCORE => HalsteadType::Operand,
             _ => HalsteadType::Unknown,
