@@ -426,6 +426,27 @@ mod tests {
     }
 
     #[test]
+    fn typescript_operators_and_operands() {
+        check_metrics!(
+            "function main() {
+              var a, b, c, avg;
+              a = 5; b = 5; c = 5;
+              avg = (a + b + c) / 3;
+              console.log(\"{}\", avg);
+            }",
+            "foo.ts",
+            TypescriptParser,
+            halstead,
+            [
+                (u_operators, 10, usize), // function, (), {}, var, =, +, /, ,, ., ;
+                (operators, 24, usize),
+                (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
+                (operands, 21, usize)
+            ]
+        );
+    }
+
+    #[test]
     fn python_wrong_operators() {
         check_metrics!(
             "()[]{}",
