@@ -385,6 +385,26 @@ mod tests {
     }
 
     #[test]
+    fn rust_operators_and_operands() {
+        check_metrics!(
+            "fn main() {
+              let a = 5; let b = 5; let c = 5;
+              let avg = (a + b + c) / 3;
+              println!(\"{}\", avg);
+            }",
+            "foo.rs",
+            RustParser,
+            halstead,
+            [
+                (u_operators, 9, usize), // fn, (), {}, let, =, ,, +, /, ;
+                (operators, 22, usize),
+                (u_operands, 9, usize), // main, a, b, c, avg, 5, 3, println, "{}"
+                (operands, 15, usize)
+            ]
+        );
+    }
+
+    #[test]
     fn python_wrong_operators() {
         check_metrics!(
             "()[]{}",
