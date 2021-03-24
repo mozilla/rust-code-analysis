@@ -250,14 +250,14 @@ impl Cognitive for RustCode {
         //TODO: Implement macros
 
         match node.object().kind_id().into() {
-            IfExpression => {
+            IfExpression | IfLetExpression => {
                 // Check if a node is not an else-if
                 if !Self::is_else_if(&node) {
                     nesting_levels!(
                         node, stats,
                         [FunctionItem => SourceFile],
                         [ClosureExpression => SourceFile],
-                        [IfExpression | ForExpression | WhileExpression | MatchExpression => FunctionItem]
+                        [IfExpression | IfLetExpression | ForExpression | WhileExpression | MatchExpression => FunctionItem]
                     );
                 }
             }
@@ -266,7 +266,7 @@ impl Cognitive for RustCode {
                     node, stats,
                     [FunctionItem => SourceFile],
                     [ClosureExpression => SourceFile],
-                    [IfExpression | ForExpression | WhileExpression | MatchExpression => FunctionItem]
+                    [IfExpression | IfLetExpression | ForExpression | WhileExpression | MatchExpression => FunctionItem]
                 );
             }
             Else /*else-if also */ => {
@@ -1233,6 +1233,27 @@ mod tests {
             cognitive,
             [(cognitive, 9, usize)],
             [(cognitive_average, 9.0)]
+        );
+    }
+
+    #[test]
+    fn rust_if_let_else_if_else() {
+        check_metrics!(
+            "pub fn create_usage_no_title(p: &Parser, used: &[&str]) -> String {
+                 debugln!(\"usage::create_usage_no_title;\");
+                 if let Some(u) = p.meta.usage_str { // +1
+                     String::from(&*u)
+                 } else if used.is_empty() { // +1
+                     create_help_usage(p, true)
+                 } else { // +1
+                     create_smart_usage(p, used)
+                }
+            }",
+            "foo.rs",
+            RustParser,
+            cognitive,
+            [(cognitive, 3, usize)],
+            [(cognitive_average, 3.0)]
         );
     }
 }
