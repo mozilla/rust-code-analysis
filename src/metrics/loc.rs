@@ -723,4 +723,36 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn python_real_loc() {
+        check_metrics!(
+            "def web_socket_transfer_data(request):
+                while True:
+                    line = request.ws_stream.receive_message()
+                    if line is None:
+                        return
+                    code, reason = line.split(' ', 1)
+                    if code is None or reason is None:
+                        return
+                    request.ws_stream.close_connection(int(code), reason)
+                    # close_connection() initiates closing handshake. It validates code
+                    # and reason. If you want to send a broken close frame for a test,
+                    # following code will be useful.
+                    # > data = struct.pack('!H', int(code)) + reason.encode('UTF-8')
+                    # > request.connection.write(stream.create_close_frame(data))
+                    # > # Suppress to re-respond client responding close frame.
+                    # > raise Exception(\"customized server initiated closing handshake\")",
+            "foo.py",
+            PythonParser,
+            loc,
+            [
+                (sloc, 16, usize), // The number of lines is 16
+                (ploc, 9, usize),  // The number of code lines is 9
+                (lloc, 8, usize),  // The number of statements is 8
+                (cloc, 7, usize),  // The number of comments is 7
+                (blank, 0, usize)  // The number of blank lines is 0
+            ]
+        );
+    }
 }
