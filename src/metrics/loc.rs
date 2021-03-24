@@ -755,4 +755,25 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn javascript_real_loc() {
+        check_metrics!(
+            "assert.throws(Test262Error, function() {
+               for (let { poisoned: x = ++initEvalCount } = poisonedProperty; ; ) {
+                 return;
+               }
+             });",
+            "foo.js",
+            JavascriptParser,
+            loc,
+            [
+                (sloc, 5, usize),  // The number of lines is 5
+                (ploc, 5, usize),  // The number of code lines is 5
+                (lloc, 7, usize),  // The number of statements is 7
+                (cloc, 0, usize),  // The number of comments is 0
+                (blank, 0, usize)  // The number of blank lines is 0
+            ]
+        );
+    }
 }
