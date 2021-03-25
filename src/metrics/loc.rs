@@ -14,7 +14,9 @@ pub struct Stats {
     unit: bool,
     lines: FxHashSet<usize>,
     logical_lines: usize,
-    comment_lines: usize,
+    only_comment_lines: usize,
+    code_comment_lines: usize,
+    comment_line_end: Option<usize>,
 }
 
 impl Serialize for Stats {
@@ -58,7 +60,8 @@ impl Stats {
         self.logical_lines += other.logical_lines;
 
         // Merge cloc lines
-        self.comment_lines += other.comment_lines;
+        self.only_comment_lines += other.only_comment_lines;
+        self.code_comment_lines += other.code_comment_lines;
     }
 
     /// The `Sloc` metric.
@@ -104,7 +107,7 @@ impl Stats {
     pub fn cloc(&self) -> f64 {
         // Comments are counted regardless of their placement
         // https://en.wikipedia.org/wiki/Source_lines_of_code
-        self.comment_lines as f64
+        (self.only_comment_lines + self.code_comment_lines) as f64
     }
 
     /// The `Blank` metric.
@@ -112,12 +115,7 @@ impl Stats {
     /// Counts the number of blank lines in a scope
     #[inline(always)]
     pub fn blank(&self) -> f64 {
-        // This metric counts the number of blank lines in a code
-        // The if construct is needed because sometimes lloc and cloc
-        // coincide on the same lines, in that case lloc + cloc could be greater
-        // than the number of lines of a file.
-        let blank = self.sloc() - self.ploc() - self.cloc();
-        blank.max(0.0)
+        self.sloc() - self.ploc() - self.only_comment_lines as f64
     }
 }
 
@@ -142,6 +140,47 @@ fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (
     (start, end)
 }
 
+#[inline(always)]
+// Discriminates among the comments that are *after* a code line and
+// the ones that are on an independent line.
+// This difference is necessary in order to avoid having
+// a wrong count for the blank metric.
+fn add_cloc_lines(stats: &mut Stats, start: usize, end: usize) {
+    let comment_diff = end - start;
+    let is_comment_after_code_line = stats.lines.contains(&start);
+    if is_comment_after_code_line && comment_diff == 0 {
+        // A comment is *entirely* next to a code line
+        stats.code_comment_lines += 1;
+    } else if is_comment_after_code_line && comment_diff > 0 {
+        // A block comment that starts next to a code line and ends on
+        // independent lines.
+        stats.code_comment_lines += 1;
+        stats.only_comment_lines += comment_diff;
+    } else {
+        // A comment on an independent line AND
+        // a block comment on independent lines OR
+        // a comment *before* a code line
+        stats.only_comment_lines += (end - start) + 1;
+        // Save line end of a comment to check whether
+        // a comment *before* a code line is considered
+        stats.comment_line_end = Some(end);
+    }
+}
+
+#[inline(always)]
+// Detects the comments that are on a code line but *before* the code part.
+// This difference is necessary in order to avoid having
+// a wrong count for the blank metric.
+fn check_comment_ends_on_code_line(stats: &mut Stats, start_code_line: usize) {
+    if let Some(end) = stats.comment_line_end {
+        if end == start_code_line && !stats.lines.contains(&start_code_line) {
+            // Comment entirely *before* a code line
+            stats.only_comment_lines -= 1;
+            stats.code_comment_lines += 1;
+        }
+    }
+}
+
 impl Loc for PythonCode {
     fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Python::*;
@@ -151,13 +190,14 @@ impl Loc for PythonCode {
         match node.object().kind_id().into() {
             DQUOTE | DQUOTE2 | Block | Module => {}
             Comment => {
-                stats.comment_lines += (end - start) + 1;
+                add_cloc_lines(stats, start, end);
             }
             String => {
                 let parent = node.object().parent().unwrap();
                 if let ExpressionStatement = parent.kind_id().into() {
-                    stats.comment_lines += (end - start) + 1;
+                    add_cloc_lines(stats, start, end);
                 } else if parent.start_position().row != start {
+                    check_comment_ends_on_code_line(stats, start);
                     stats.lines.insert(start);
                 }
             }
@@ -186,6 +226,7 @@ impl Loc for PythonCode {
                 stats.logical_lines += 1;
             }
             _ => {
+                check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
             }
         }
@@ -201,7 +242,7 @@ impl Loc for MozjsCode {
         match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
-                stats.comment_lines += (end - start) + 1;
+                add_cloc_lines(stats, start, end);
             }
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
@@ -211,6 +252,7 @@ impl Loc for MozjsCode {
                 stats.logical_lines += 1;
             }
             _ => {
+                check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
             }
         }
@@ -226,7 +268,7 @@ impl Loc for JavascriptCode {
         match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
-                stats.comment_lines += (end - start) + 1;
+                add_cloc_lines(stats, start, end);
             }
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
@@ -236,6 +278,7 @@ impl Loc for JavascriptCode {
                 stats.logical_lines += 1;
             }
             _ => {
+                check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
             }
         }
@@ -251,7 +294,7 @@ impl Loc for TypescriptCode {
         match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
-                stats.comment_lines += (end - start) + 1;
+                add_cloc_lines(stats, start, end);
             }
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
@@ -261,6 +304,7 @@ impl Loc for TypescriptCode {
                 stats.logical_lines += 1;
             }
             _ => {
+                check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
             }
         }
@@ -276,7 +320,7 @@ impl Loc for TsxCode {
         match node.object().kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
-                stats.comment_lines += (end - start) + 1;
+                add_cloc_lines(stats, start, end);
             }
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
@@ -286,6 +330,7 @@ impl Loc for TsxCode {
                 stats.logical_lines += 1;
             }
             _ => {
+                check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
             }
         }
@@ -301,7 +346,7 @@ impl Loc for RustCode {
         match node.object().kind_id().into() {
             StringLiteral | RawStringLiteral | Block | SourceFile => {}
             LineComment | BlockComment => {
-                stats.comment_lines += (end - start) + 1;
+                add_cloc_lines(stats, start, end);
             }
             Statement
             | EmptyStatement
@@ -342,6 +387,7 @@ impl Loc for RustCode {
                 }
             }
             _ => {
+                check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
             }
         }
@@ -358,7 +404,7 @@ impl Loc for CppCode {
             RawStringLiteral | StringLiteral | DeclarationList | FieldDeclarationList
             | TranslationUnit => {}
             Comment => {
-                stats.comment_lines += (end - start) + 1;
+                add_cloc_lines(stats, start, end);
             }
             WhileStatement | SwitchStatement | CaseStatement | IfStatement | ForStatement
             | ReturnStatement | BreakStatement | ContinueStatement | GotoStatement
@@ -368,6 +414,7 @@ impl Loc for CppCode {
             }
 
             _ => {
+                check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
             }
         }
@@ -454,6 +501,285 @@ mod tests {
             CppParser,
             loc,
             [(blank, 1, usize)]
+        );
+    }
+
+    #[test]
+    fn python_no_zero_blank() {
+        // Checks that the blank metric is not equal to 0 when there are some
+        // comments next to code lines.
+        check_metrics!(
+            "def ConnectToUpdateServer():
+                 pool = 4
+
+                 updateServer = -42
+                 isConnected = False
+                 currTry = 0
+                 numRetries = 10 # Number of IPC connection retries before
+                                 # giving up.
+                 numTries = 20 # Number of IPC connection tries before
+                               # giving up.",
+            "foo.py",
+            PythonParser,
+            loc,
+            [
+                (sloc, 10, usize), // The number of lines is 10
+                (ploc, 7, usize),  // The number of code lines is 7
+                (cloc, 4, usize),  // The number of comments is 4
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn python_no_blank() {
+        // Checks that the blank metric is equal to 0 when there are no blank
+        // lines and there are comments next to code lines.
+        check_metrics!(
+            "def ConnectToUpdateServer():
+                 pool = 4
+                 updateServer = -42
+                 isConnected = False
+                 currTry = 0
+                 numRetries = 10 # Number of IPC connection retries before
+                                 # giving up.
+                 numTries = 20 # Number of IPC connection tries before
+                               # giving up.",
+            "foo.py",
+            PythonParser,
+            loc,
+            [
+                (sloc, 9, usize),  // The number of lines is 9
+                (ploc, 7, usize),  // The number of code lines is 7
+                (cloc, 4, usize),  // The number of comments is 4
+                (blank, 0, usize)  // The number of blank lines is 0
+            ]
+        );
+    }
+
+    #[test]
+    fn python_no_zero_blank_more_comments() {
+        // Checks that the blank metric is not equal to 0 when there are more
+        // comments next to code lines compared to the previous tests.
+        check_metrics!(
+            "def ConnectToUpdateServer():
+                 pool = 4
+
+                 updateServer = -42
+                 isConnected = False
+                 currTry = 0 # Set this variable to 0
+                 numRetries = 10 # Number of IPC connection retries before
+                                 # giving up.
+                 numTries = 20 # Number of IPC connection tries before
+                               # giving up.",
+            "foo.py",
+            PythonParser,
+            loc,
+            [
+                (sloc, 10, usize), // The number of lines is 10
+                (ploc, 7, usize),  // The number of code lines is 7
+                (cloc, 5, usize),  // The number of comments is 5
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn rust_no_zero_blank() {
+        // Checks that the blank metric is not equal to 0 when there are some
+        // comments next to code lines.
+        check_metrics!(
+            "fn ConnectToUpdateServer() {
+              let pool = 0;
+
+              let updateServer = -42;
+              let isConnected = false;
+              let currTry = 0;
+              let numRetries = 10;  // Number of IPC connection retries before
+                                    // giving up.
+              let numTries = 20;    // Number of IPC connection tries before
+                                    // giving up.
+            }",
+            "foo.rs",
+            RustParser,
+            loc,
+            [
+                (sloc, 11, usize), // The number of lines is 11
+                (ploc, 8, usize),  // The number of code lines is 8
+                (cloc, 4, usize),  // The number of comments is 4
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_no_zero_blank() {
+        // Checks that the blank metric is not equal to 0 when there are some
+        // comments next to code lines.
+        check_metrics!(
+            "function ConnectToUpdateServer() {
+              var pool = 0;
+
+              var updateServer = -42;
+              var isConnected = false;
+              var currTry = 0;
+              var numRetries = 10;  // Number of IPC connection retries before
+                                    // giving up.
+              var numTries = 20;    // Number of IPC connection tries before
+                                    // giving up.
+            }",
+            "foo.js",
+            JavascriptParser,
+            loc,
+            [
+                (sloc, 11, usize), // The number of lines is 11
+                (ploc, 8, usize),  // The number of code lines is 8
+                (cloc, 4, usize),  // The number of comments is 4
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn cpp_no_zero_blank() {
+        // Checks that the blank metric is not equal to 0 when there are some
+        // comments next to code lines.
+        check_metrics!(
+            "void ConnectToUpdateServer() {
+              int pool;
+
+              int updateServer = -42;
+              bool isConnected = false;
+              int currTry = 0;
+              const int numRetries = 10; // Number of IPC connection retries before
+                                         // giving up.
+              const int numTries = 20; // Number of IPC connection tries before
+                                       // giving up.
+            }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [
+                (sloc, 11, usize), // The number of lines is 11
+                (ploc, 8, usize),  // The number of code lines is 8
+                (cloc, 4, usize),  // The number of comments is 4
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn cpp_code_line_start_block_blank() {
+        // Checks that the blank metric is equal to 1 when there are
+        // block comments starting next to code lines.
+        check_metrics!(
+            "void ConnectToUpdateServer() {
+              int pool;
+
+              int updateServer = -42;
+              bool isConnected = false;
+              int currTry = 0;
+              const int numRetries = 10; /* Number of IPC connection retries
+              before
+              giving up. */
+              const int numTries = 20; // Number of IPC connection tries before
+                                       // giving up.
+            }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [
+                (sloc, 12, usize), // The number of lines is 12
+                (ploc, 8, usize),  // The number of code lines is 8
+                (cloc, 5, usize),  // The number of comments is 5
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn cpp_block_comment_blank() {
+        // Checks that the blank metric is equal to 1 when there are
+        // block comments on independent lines.
+        check_metrics!(
+            "void ConnectToUpdateServer() {
+              int pool;
+
+              int updateServer = -42;
+              bool isConnected = false;
+              int currTry = 0;
+              /* Number of IPC connection retries
+              before
+              giving up. */
+              const int numRetries = 10;
+              const int numTries = 20; // Number of IPC connection tries before
+                                       // giving up.
+            }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [
+                (sloc, 13, usize), // The number of lines is 13
+                (ploc, 8, usize),  // The number of code lines is 8
+                (cloc, 5, usize),  // The number of comments is 5
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn cpp_code_line_block_one_line_blank() {
+        // Checks that the blank metric is equal to 1 when there are
+        // block comments before the same code line.
+        check_metrics!(
+            "void ConnectToUpdateServer() {
+              int pool;
+
+              int updateServer = -42;
+              bool isConnected = false;
+              int currTry = 0;
+              /* Number of IPC connection retries before giving up. */ const int numRetries = 10;
+              const int numTries = 20; // Number of IPC connection tries before
+                                       // giving up.
+            }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [
+                (sloc, 10, usize), // The number of lines is 10
+                (ploc, 8, usize),  // The number of code lines is 8
+                (cloc, 3, usize),  // The number of comments is 3
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn cpp_code_line_end_block_blank() {
+        // Checks that the blank metric is equal to 1 when there are
+        // block comments ending next to code lines.
+        check_metrics!(
+            "void ConnectToUpdateServer() {
+              int pool;
+
+              int updateServer = -42;
+              bool isConnected = false;
+              int currTry = 0;
+              /* Number of IPC connection retries
+              before
+              giving up. */ const int numRetries = 10;
+              const int numTries = 20; // Number of IPC connection tries before
+                                       // giving up.
+            }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [
+                (sloc, 12, usize), // The number of lines is 12
+                (ploc, 8, usize),  // The number of code lines is 8
+                (cloc, 5, usize),  // The number of comments is 5
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
         );
     }
 
