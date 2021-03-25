@@ -1,3 +1,6 @@
+// FIXME Change that in the enums crate
+#![allow(clippy::from_over_into)]
+
 pub mod language_ccomment;
 pub use language_ccomment::*;
 

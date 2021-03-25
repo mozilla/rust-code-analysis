@@ -2,7 +2,7 @@ use petgraph::{
     algo::kosaraju_scc, graph::NodeIndex, stable_graph::StableGraph, visit::Dfs, Direction,
 };
 use std::collections::{hash_map, HashMap, HashSet};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::node::Node;
 
@@ -45,7 +45,7 @@ impl PreprocFile {
 
 /// Returns the macros contained in a `C/C++` file.
 pub fn get_macros<S: ::std::hash::BuildHasher>(
-    file: &PathBuf,
+    file: &Path,
     files: &HashMap<PathBuf, PreprocFile, S>,
 ) -> HashSet<String> {
     let mut macros = HashSet::new();
@@ -183,7 +183,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
 ///
 ///
 /// [`PreprocResults`]: struct.PreprocResults.html
-pub fn preprocess(parser: &PreprocParser, path: &PathBuf, results: &mut PreprocResults) {
+pub fn preprocess(parser: &PreprocParser, path: &Path, results: &mut PreprocResults) {
     let node = parser.get_root();
     let mut cursor = node.object().walk();
     let mut stack = Vec::new();

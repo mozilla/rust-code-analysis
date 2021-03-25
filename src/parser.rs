@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use std::path::PathBuf;
+use std::path::Path;
 use std::sync::Arc;
 use tree_sitter::{Parser as TSParser, Tree};
 
@@ -47,7 +47,7 @@ impl Filter {
 #[inline(always)]
 fn get_fake_code<T: TSLanguage>(
     code: &[u8],
-    path: &PathBuf,
+    path: &Path,
     pr: Option<Arc<PreprocResults>>,
 ) -> Option<Vec<u8>> {
     if let Some(pr) = pr {
@@ -77,7 +77,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
     type NArgs = T;
     type Exit = T;
 
-    fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self {
+    fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self {
         let mut parser = TSParser::new();
         parser.set_language(T::get_language()).unwrap();
         let fake_code = get_fake_code::<T>(&code, path, pr);
