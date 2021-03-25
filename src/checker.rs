@@ -212,7 +212,17 @@ impl Checker for TypescriptCode {
         ClassDeclaration,
         ArrowFunction
     );
-    mk_else_if!(IfStatement);
+
+    #[inline(always)]
+    fn is_else_if(node: &Node) -> bool {
+        if node.object().kind_id() != <Self as TSLanguage>::BaseLang::IfStatement {
+            return false;
+        }
+        if let Some(parent) = node.object().parent() {
+            return parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause;
+        }
+        false
+    }
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
