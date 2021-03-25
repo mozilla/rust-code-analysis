@@ -120,7 +120,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn python_check_metrics() {
+    fn check_mi_metrics() {
+        // This test checks that MI metric is computed correctly, so it verifies
+        // the calculations are correct, the adopted source code is irrelevant
         check_metrics!(
             "def f():
                  pass",
