@@ -1256,4 +1256,27 @@ mod tests {
             [(cognitive_average, 3.0)]
         );
     }
+
+    #[test]
+    fn typescript_if_else_if_else() {
+        check_metrics!(
+            "function foo() {
+                 if (this._closed) return Promise.resolve(); // +1
+                 if (this._tempDirectory) { // +1
+                     this.kill();
+                 } else if (this.connection) { // +1
+                     this.kill();
+                 } else { // +1
+                     throw new Error(`Error`);
+                }
+                helper.removeEventListeners(this._listeners);
+                return this._processClosing;
+            }",
+            "foo.ts",
+            TypescriptParser,
+            cognitive,
+            [(cognitive, 4, usize)],
+            [(cognitive_average, 4.0)]
+        );
+    }
 }
