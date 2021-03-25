@@ -91,3 +91,42 @@ impl Callback for CommentRm {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use crate::{CcommentParser, ParserTrait};
+
+    use super::rm_comments;
+
+    const SOURCE_CODE: &str = "/* Remove this code block */\n\
+                               int a = 42; // Remove this comment\n\
+                               // Remove this comment\n\
+                               int b = 42;\n\
+                               /* Remove\n\
+                                * this\n\
+                                * comment\n\
+                                */";
+
+    const SOURCE_CODE_NO_COMMENTS: &str = "\n\
+                                           int a = 42; \n\
+                                           \n\
+                                           int b = 42;\n\
+                                           \n\
+                                           \n\
+                                           \n\
+                                           \n";
+
+    #[test]
+    fn ccomment_remove_comments() {
+        let path = PathBuf::from("foo.c");
+        let mut trimmed_bytes = SOURCE_CODE.as_bytes().to_vec();
+        trimmed_bytes.push(b'\n');
+        let parser = CcommentParser::new(trimmed_bytes, &path, None);
+
+        let no_comments = rm_comments(&parser).unwrap();
+
+        assert_eq!(no_comments.as_slice(), SOURCE_CODE_NO_COMMENTS.as_bytes());
+    }
+}
