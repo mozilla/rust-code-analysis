@@ -2,6 +2,7 @@
 macro_rules! mk_enum {
     ( $( $camel:ident ),* ) => {
         #[derive(Clone, Debug, IntoEnumIterator, PartialEq)]
+        #[allow(clippy::upper_case_acronyms)]
         pub enum LANG {
             $(
                 $camel,

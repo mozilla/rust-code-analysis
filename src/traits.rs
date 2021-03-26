@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 use std::sync::Arc;
 use tree_sitter::Language;
 
@@ -57,7 +57,7 @@ pub trait ParserTrait {
     type NArgs: NArgs;
     type Exit: Exit;
 
-    fn new(code: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Self;
+    fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self;
     fn get_language(&self) -> LANG;
     fn get_root(&self) -> Node;
     fn get_code(&self) -> &[u8];

@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 use std::io::{Error, ErrorKind};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use rust_code_analysis::FuncSpace;
@@ -22,7 +22,7 @@ impl Format {
     pub fn dump_formats(
         &self,
         space: &FuncSpace,
-        path: &PathBuf,
+        path: &Path,
         output_path: &Option<PathBuf>,
         pretty: bool,
     ) -> std::io::Result<()> {

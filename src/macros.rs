@@ -139,7 +139,7 @@ macro_rules! mk_action {
         ///
         /// [`Callback`]: trait.Callback.html
         #[inline(always)]
-        pub fn action<T: Callback>(lang: &LANG, source: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>, cfg: T::Cfg) -> T::Res {
+        pub fn action<T: Callback>(lang: &LANG, source: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>, cfg: T::Cfg) -> T::Res {
             match lang {
                 $(
                     LANG::$camel => {
@@ -169,7 +169,7 @@ macro_rules! mk_action {
         /// get_function_spaces(&language, source_as_vec, &path, None).unwrap();
         /// ```
         #[inline(always)]
-        pub fn get_function_spaces(lang: &LANG, source: Vec<u8>, path: &PathBuf, pr: Option<Arc<PreprocResults>>) -> Option<FuncSpace> {
+        pub fn get_function_spaces(lang: &LANG, source: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Option<FuncSpace> {
             match lang {
                 $(
                     LANG::$camel => {

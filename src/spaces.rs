@@ -1,6 +1,6 @@
 use serde::Serialize;
 use std::fmt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::checker::Checker;
 use crate::node::Node;
@@ -228,14 +228,14 @@ struct State<'a> {
 /// # Examples
 ///
 /// ```
-/// use std::path::PathBuf;
+/// use std::path::Path;
 ///
 /// use rust_code_analysis::{CppParser, metrics, ParserTrait};
 ///
 /// let source_code = "int a = 42;";
 ///
 /// // The path to a dummy file used to contain the source code
-/// let path = PathBuf::from("foo.c");
+/// let path = Path::new("foo.c");
 /// let source_as_vec = source_code.as_bytes().to_vec();
 ///
 /// // The parser of the code, in this case a CPP parser
@@ -244,7 +244,7 @@ struct State<'a> {
 /// // Gets all function spaces data of the code contained in foo.c
 /// metrics(&parser, &path).unwrap();
 /// ```
-pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a PathBuf) -> Option<FuncSpace> {
+pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<FuncSpace> {
     let code = parser.get_code();
     let node = parser.get_root();
     let mut cursor = node.object().walk();

@@ -12,14 +12,14 @@ use std::path::{Component, Path, PathBuf};
 /// # Examples
 ///
 /// ```
-/// use std::path::PathBuf;
+/// use std::path::Path;
 ///
 /// use rust_code_analysis::read_file;
 ///
-/// let path = PathBuf::from("Cargo.toml");
+/// let path = Path::new("Cargo.toml");
 /// read_file(&path).unwrap();
 /// ```
-pub fn read_file(path: &PathBuf) -> std::io::Result<Vec<u8>> {
+pub fn read_file(path: &Path) -> std::io::Result<Vec<u8>> {
     let mut file = File::open(path)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
@@ -34,14 +34,14 @@ pub fn read_file(path: &PathBuf) -> std::io::Result<Vec<u8>> {
 /// # Examples
 ///
 /// ```
-/// use std::path::PathBuf;
+/// use std::path::Path;
 ///
 /// use rust_code_analysis::read_file_with_eol;
 ///
-/// let path = PathBuf::from("Cargo.toml");
+/// let path = Path::new("Cargo.toml");
 /// read_file_with_eol(&path).unwrap();
 /// ```
-pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Option<Vec<u8>>> {
+pub fn read_file_with_eol(path: &Path) -> std::io::Result<Option<Vec<u8>>> {
     let file_size = fs::metadata(&path).map_or(1024 * 1024, |m| m.len() as usize);
     if file_size <= 3 {
         // this file is very likely almost empty... so nothing to do on it
@@ -88,15 +88,15 @@ pub fn read_file_with_eol(path: &PathBuf) -> std::io::Result<Option<Vec<u8>>> {
 /// # Examples
 ///
 /// ```no_run
-/// use std::path::PathBuf;
+/// use std::path::Path;
 ///
 /// use rust_code_analysis::write_file;
 ///
-/// let path = PathBuf::from("foo.txt");
+/// let path = Path::new("foo.txt");
 /// let data: [u8; 4] = [0; 4];
 /// write_file(&path, &data).unwrap();
 /// ```
-pub fn write_file(path: &PathBuf, data: &[u8]) -> std::io::Result<()> {
+pub fn write_file(path: &Path, data: &[u8]) -> std::io::Result<()> {
     let mut file = File::create(path)?;
     file.write_all(data)?;
 
@@ -109,14 +109,14 @@ pub fn write_file(path: &PathBuf, data: &[u8]) -> std::io::Result<()> {
 /// # Examples
 ///
 /// ```
-/// use std::path::PathBuf;
+/// use std::path::Path;
 ///
 /// use rust_code_analysis::get_language_for_file;
 ///
-/// let path = PathBuf::from("build.rs");
+/// let path = Path::new("build.rs");
 /// get_language_for_file(&path).unwrap();
 /// ```
-pub fn get_language_for_file(path: &PathBuf) -> Option<LANG> {
+pub fn get_language_for_file(path: &Path) -> Option<LANG> {
     if let Some(ext) = path.extension() {
         let ext = ext.to_str().unwrap().to_lowercase();
         get_from_ext(&ext)
@@ -266,7 +266,7 @@ pub(crate) fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
     ret
 }
 
-pub(crate) fn get_paths_dist(path1: &PathBuf, path2: &PathBuf) -> Option<usize> {
+pub(crate) fn get_paths_dist(path1: &Path, path2: &Path) -> Option<usize> {
     for ancestor in path1.ancestors() {
         if path2.starts_with(ancestor) && !ancestor.as_os_str().is_empty() {
             let path1 = path1.strip_prefix(ancestor).unwrap();
@@ -278,7 +278,7 @@ pub(crate) fn get_paths_dist(path1: &PathBuf, path2: &PathBuf) -> Option<usize> 
 }
 
 pub(crate) fn guess_file<S: ::std::hash::BuildHasher>(
-    current_path: &PathBuf,
+    current_path: &Path,
     include_path: &str,
     all_files: &HashMap<String, Vec<PathBuf>, S>,
 ) -> Vec<PathBuf> {

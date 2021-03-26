@@ -44,6 +44,8 @@
 //!   from a method/function.
 //! - NARGS: it counts the number of arguments of a function/method.
 
+#![allow(clippy::upper_case_acronyms)]
+
 #[macro_use]
 extern crate lazy_static;
 extern crate num;
