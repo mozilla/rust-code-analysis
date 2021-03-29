@@ -1,9 +1,6 @@
 [submodule "tree-sitter-python"]
 	path = tree-sitter-python
 	url = https://github.com/tree-sitter/tree-sitter-python/
-[submodule "tree-sitter-javascript"]
-	path = tree-sitter-javascript
-	url = https://github.com/tree-sitter/tree-sitter-javascript/
 [submodule "tree-sitter-rust"]
 	path = tree-sitter-rust
 	url = https://github.com/tree-sitter/tree-sitter-rust/

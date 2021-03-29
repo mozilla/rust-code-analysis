@@ -19,6 +19,7 @@ macro_rules! mk_get_language {
                   LANG::Java => tree_sitter_java::language(),
                   LANG::Typescript => tree_sitter_typescript::language_typescript(),
                   LANG::Tsx => tree_sitter_typescript::language_tsx(),
+                  LANG::Javascript => tree_sitter_javascript::language(),
                   LANG::Preproc => tree_sitter_preproc::language(),
                   LANG::Ccomment => tree_sitter_ccomment::language(),
                   LANG::Cpp => tree_sitter_mozcpp::language(),
