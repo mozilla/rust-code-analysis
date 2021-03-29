@@ -52,6 +52,11 @@ macro_rules! get_language {
             tree_sitter_javascript::language()
         }
     };
+    (tree_sitter_python) => {
+        fn get_language() -> Language {
+            tree_sitter_python::language()
+        }
+    };
     (tree_sitter_preproc) => {
         fn get_language() -> Language {
             tree_sitter_preproc::language()
