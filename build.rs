@@ -160,13 +160,10 @@ fn main() {
         "tree-sitter-ccomment".to_string(),
         "tree-sitter-mozcpp".to_string(),
         "tree-sitter-mozjs".to_string(),
-        "tree-sitter-typescript".to_string(),
     ];
     let dirs = collect_tree_sitter_dirs(ignore);
     for dir in dirs {
         let language = &dir[TREE_SITTER.len()..];
         build_dir(&dir, &language);
     }
-    build_dir("tree-sitter-typescript/tsx", "tsx");
-    build_dir("tree-sitter-typescript/typescript", "typescript");
 }

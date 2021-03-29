@@ -37,6 +37,16 @@ macro_rules! get_language {
             tree_sitter_java::language()
         }
     };
+    (tree_sitter_typescript) => {
+        fn get_language() -> Language {
+            tree_sitter_typescript::language_typescript()
+        }
+    };
+    (tree_sitter_tsx) => {
+        fn get_language() -> Language {
+            tree_sitter_typescript::language_tsx()
+        }
+    };
     (tree_sitter_preproc) => {
         fn get_language() -> Language {
             tree_sitter_preproc::language()

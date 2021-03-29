@@ -168,6 +168,7 @@ dependencies = [
  "tree-sitter-mozcpp",
  "tree-sitter-mozjs",
  "tree-sitter-preproc",
+ "tree-sitter-typescript",
 ]
 
 [[package]]
@@ -534,6 +535,16 @@ dependencies = [
 [[package]]
 name = "tree-sitter-preproc"
 version = "0.19.0"
+dependencies = [
+ "cc",
+ "tree-sitter",
+]
+
+[[package]]
+name = "tree-sitter-typescript"
+version = "0.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3f62d49c6e56bf291c412ee5e178ea14dff40f14a5f01a8847933f56d65bf3b"
 dependencies = [
  "cc",
  "tree-sitter",
