@@ -41,50 +41,6 @@ pub enum Preproc {
     Error = 36,
 }
 
-impl Into<&'static str> for Preproc {
-    fn into(self) -> &'static str {
-        match self {
-            Preproc::End => "end",
-            Preproc::Identifier => "identifier",
-            Preproc::Nothing => "nothing",
-            Preproc::PreprocContinuationLine => "preproc_continuation_line",
-            Preproc::PreprocLine => "preproc_line",
-            Preproc::PreprocIncludeToken1 => "preproc_include_token1",
-            Preproc::LT => "<",
-            Preproc::GT => ">",
-            Preproc::Path => "path",
-            Preproc::DefineToken1 => "define_token1",
-            Preproc::LF => "\n",
-            Preproc::PreprocIfToken1 => "preproc_if_token1",
-            Preproc::PreprocIfToken2 => "preproc_if_token2",
-            Preproc::PreprocElifToken1 => "preproc_elif_token1",
-            Preproc::PreprocElseToken1 => "preproc_else_token1",
-            Preproc::UndefToken1 => "undef_token1",
-            Preproc::PreprocNothingToken1 => "preproc_nothing_token1",
-            Preproc::StringLiteralToken1 => "string_literal_token1",
-            Preproc::CharLiteralToken1 => "char_literal_token1",
-            Preproc::IntegerLiteral => "integer_literal",
-            Preproc::Comment => "comment",
-            Preproc::RawStringLiteral => "raw_string_literal",
-            Preproc::TranslationUnit => "translation_unit",
-            Preproc::TopLevelItem => "_top_level_item",
-            Preproc::PreprocInclude => "preproc_include",
-            Preproc::Define => "define",
-            Preproc::PreprocIf => "preproc_if",
-            Preproc::PreprocElif => "preproc_elif",
-            Preproc::PreprocElse => "preproc_else",
-            Preproc::Undef => "undef",
-            Preproc::PreprocNothing => "preproc_nothing",
-            Preproc::StringLiteral => "string_literal",
-            Preproc::CharLiteral => "char_literal",
-            Preproc::TranslationUnitRepeat1 => "translation_unit_repeat1",
-            Preproc::DefineRepeat1 => "define_repeat1",
-            Preproc::PreprocIfRepeat1 => "preproc_if_repeat1",
-            Preproc::Error => "ERROR",
-        }
-    }
-}
-
 #[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Preproc> = ::phf::Map {
     key: 3213172566270843353,

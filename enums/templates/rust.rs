@@ -7,16 +7,6 @@ pub enum {{ c_name }} {
     {% endfor %}
 }
 
-impl Into<&'static str> for {{ c_name }} {
-    fn into(self) -> &'static str {
-        match self {
-            {% for (name, _, ts_name) in names -%}
-            {{ c_name }}::{{ name }} => "{{ ts_name }}",
-            {% endfor -%}
-        }
-    }
-}
-
 #[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, {{ c_name }}> = {{ phf_map }};
 
