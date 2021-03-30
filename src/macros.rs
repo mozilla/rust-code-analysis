@@ -32,58 +32,17 @@ macro_rules! mk_else_if {
 
 #[macro_use]
 macro_rules! get_language {
-    (tree_sitter_java) => {
-        fn get_language() -> Language {
-            tree_sitter_java::language()
-        }
+    (tree_sitter_cpp) => {
+        tree_sitter_mozcpp::language()
     };
     (tree_sitter_typescript) => {
-        fn get_language() -> Language {
-            tree_sitter_typescript::language_typescript()
-        }
+        tree_sitter_typescript::language_typescript()
     };
     (tree_sitter_tsx) => {
-        fn get_language() -> Language {
-            tree_sitter_typescript::language_tsx()
-        }
-    };
-    (tree_sitter_javascript) => {
-        fn get_language() -> Language {
-            tree_sitter_javascript::language()
-        }
-    };
-    (tree_sitter_python) => {
-        fn get_language() -> Language {
-            tree_sitter_python::language()
-        }
-    };
-    (tree_sitter_preproc) => {
-        fn get_language() -> Language {
-            tree_sitter_preproc::language()
-        }
-    };
-    (tree_sitter_ccomment) => {
-        fn get_language() -> Language {
-            tree_sitter_ccomment::language()
-        }
-    };
-    (tree_sitter_cpp) => {
-        fn get_language() -> Language {
-            tree_sitter_mozcpp::language()
-        }
-    };
-    (tree_sitter_mozjs) => {
-        fn get_language() -> Language {
-            tree_sitter_mozjs::language()
-        }
+        tree_sitter_typescript::language_tsx()
     };
     ($name:ident) => {
-        fn get_language() -> Language {
-            extern "C" {
-                pub(crate) fn $name() -> Language;
-            }
-            unsafe { $name() }
-        }
+        $name::language()
     };
 }
 
@@ -273,7 +232,9 @@ macro_rules! mk_code {
                     LANG::$camel
                 }
 
-                get_language!($name);
+                fn get_language() -> Language {
+                    get_language!($name)
+                }
 
                 fn get_lang_name() -> &'static str {
                     stringify!($camel)
