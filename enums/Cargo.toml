@@ -3,11 +3,6 @@ name = "enums"
 version = "0.0.1"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2018"
-build = "../build.rs"
-
-[build-dependencies]
-cc = "^1.0"
-phf_codegen = "^0.8"
 
 [dependencies]
 enum-iterator = "^0.6"
