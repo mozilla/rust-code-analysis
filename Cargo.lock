@@ -1648,7 +1648,6 @@ name = "rust-code-analysis"
 version = "0.0.19"
 dependencies = [
  "aho-corasick",
- "cc",
  "enum-iterator",
  "fxhash",
  "lazy_static",
