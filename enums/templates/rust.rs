@@ -3,7 +3,7 @@
 #[derive(Clone, Debug, PartialEq, FromPrimitive)]
 pub enum {{ c_name }} {
     {% for (name, _, _) in names -%}
-    {{ name }} = {{ loop.index - 1 }},
+    {{ name }} = {{ loop.index0 }},
     {% endfor %}
 }
 
