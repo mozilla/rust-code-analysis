@@ -14,7 +14,7 @@ struct JsonTemplate {
 }
 
 pub fn generate_json(output: &str, file_template: &str) -> std::io::Result<()> {
-    for lang in LANG::into_enum_iter() {
+    for lang in Lang::into_enum_iter() {
         let language = get_language(&lang);
         let name = get_language_name(&lang);
         let c_name = camel_case(name.to_string());

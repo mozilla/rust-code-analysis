@@ -26,7 +26,11 @@ pub fn sanitize_identifier(name: &str) -> String {
 
     let mut result = String::with_capacity(name.len());
     for c in name.chars() {
-        if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') || c == '_' {
+        if ('a'..='z').contains(&c)
+            || ('A'..='Z').contains(&c)
+            || ('0'..='9').contains(&c)
+            || c == '_'
+        {
             result.push(c);
         } else {
             let replacement = match c {
@@ -123,10 +127,10 @@ pub fn get_token_names(language: &Language, escape: bool) -> Vec<(String, bool, 
     let count = language.node_kind_count();
     let mut names = BTreeMap::default();
     let mut name_count = HashMap::new();
-    for anon in vec![false, true] {
+    for anon in &[false, true] {
         for i in 0..count {
             let anonymous = !language.node_kind_is_named(i as u16);
-            if anonymous != anon {
+            if anonymous != *anon {
                 continue;
             }
             let kind = language.node_kind_for_id(i as u16).unwrap();
@@ -146,7 +150,7 @@ pub fn get_token_names(language: &Language, escape: bool) -> Vec<(String, bool, 
             names.insert(i, e);
         }
     }
-    let mut names: Vec<_> = names.values().map(move |x| x.clone()).collect();
+    let mut names: Vec<_> = names.values().cloned().collect();
     names.push(("Error".to_string(), false, "ERROR".to_string()));
 
     names
