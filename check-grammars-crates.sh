@@ -65,7 +65,7 @@ git clone --quiet $MOZILLA_CENTRAL_REPO /cache/gecko-dev || true
 pushd /cache/gecko-dev && git pull origin master && popd
 
 # Compute metrics
-./check-submodule.py compute-ci-metrics -p /cache/gecko-dev -l $TREE_SITTER_CRATE
+./check-grammar-crate.py compute-ci-metrics -p /cache/gecko-dev -g $TREE_SITTER_CRATE
 
 # Count files in metrics directories
 OLD=`ls /tmp/$TREE_SITTER_CRATE-old | wc -l`
@@ -84,7 +84,7 @@ then
 fi
 
 # Compare metrics
-./check-submodule.py compare-metrics -l $TREE_SITTER_CRATE
+./check-grammar-crate.py compare-metrics -g $TREE_SITTER_CRATE
 
 # Create artifacts to be uploaded (if there are any)
 COMPARE=/tmp/$TREE_SITTER_CRATE-compare
