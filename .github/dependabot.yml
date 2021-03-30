@@ -30,8 +30,3 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 99
-- package-ecosystem: gitsubmodule
-  directory: "/"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
