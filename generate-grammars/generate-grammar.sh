@@ -25,17 +25,8 @@ rm -rf node_modules
 # Exit grammar directory
 popd
 
-# Enter enums directory
-pushd enums
-
-# Recreate the grammar for rust-code-analysis
-cargo clean && cargo run -- -lrust -o ../src/languages
-
-# Exit enums directory
-popd
-
-# Format the produced grammars
-cargo fmt
+# Recreate grammars
+./recreate-grammars.sh
 
 # Run rust code-analysis to verify if everything works correctly and to
 # update the Cargo.lock
