@@ -1,28 +1,27 @@
 #!/usr/bin/env python3
 
-"""check-submodule
+"""check-grammar-crate
 This script checks whether breaking changes could be introduced in
-rust-code-analysis code after the update of a tree-sitter-language submodule.
+rust-code-analysis code after the update of a tree-sitter-grammar crate.
 To do so, it compares the differences between the metrics, computed on a
-chosen repository, before and after a tree-sitter-language update.
+chosen repository, before and after a tree-sitter-grammar update.
 
 
 To compute metrics:
 
-./check-submodule.py compute-metrics -u REPO_URL -p LOCAL_DIR -l TREE_SITTER_LANGUAGE
+./check-grammar-crate.py compute-metrics -u REPO_URL -p LOCAL_DIR -l TREE_SITTER_GRAMMAR
 
 NOTE: The compute-metrics subcommand MUST be run on a clean master branch!
 
 To compute metrics on a continuous integration system:
 
-./check-submodule.py compute-ci-metrics -p LOCAL_DIR -l TREE_SITTER_LANGUAGE
+./check-grammar-crate.py compute-ci-metrics -p LOCAL_DIR -l TREE_SITTER_GRAMMAR
 
-To compare metrics and retrieve the structural JSON of differences
-in addition to the files containing the minimal tests:
+To compare metrics and retrieve metrics differences and minimal tests:
 
 1. Install json-minimal-tests from here: https://github.com/Luni-4/json-minimal-tests/releases
 
-./check-submodule.py compare-metrics -l TREE_SITTER_LANGUAGE
+./check-grammar-crate.py compare-metrics -l TREE_SITTER_GRAMMAR
 
 NOTE: Add the paths of the software above to the PATH environment variable!
 """
@@ -40,7 +39,7 @@ OLD_SUFFIX = "-old"
 # Suffix for the directory containing the new metrics
 NEW_SUFFIX = "-new"
 
-# Extensions parsed by each tree-sitter-language
+# Extensions parsed by each tree-sitter-grammar
 EXTENSIONS = {
     "tree-sitter-javascript": ["*.js", "*.js2"],
     "tree-sitter-tsx": ["*.tsx"],
@@ -75,7 +74,7 @@ def run_rca(
     repo_dir: pathlib.Path,
     output_dir: pathlib.Path,
     manifest_path: T.Optional[pathlib.Path],
-    include_languages: T.List[str],
+    include_grammars: T.List[str],
 ) -> None:
     run_subprocess(
         "cargo",
@@ -90,7 +89,7 @@ def run_rca(
         "--output-format=json",
         "--pr",
         "-I",
-        *include_languages,
+        *include_grammars,
         "-p",
         repo_dir,
         "-o",
@@ -99,19 +98,19 @@ def run_rca(
 
 
 # Compute continuous integration metrics before and after a
-# tree-sitter-language update.
+# tree-sitter-grammar update.
 def compute_ci_metrics(args: argparse.Namespace) -> None:
 
-    if args.language != "tree-sitter" and args.language not in EXTENSIONS.keys():
-        print(args.language, "is not a valid tree-sitter language")
+    if args.grammar != "tree-sitter" and args.grammar not in EXTENSIONS.keys():
+        print(args.grammar, "is not a valid tree-sitter grammar")
         sys.exit(1)
 
     # Use C/C++ files to test if there are any changes in metrics when
     # the tree-sitter crate is updated
-    if args.language == "tree-sitter":
-        language = "tree-sitter-mozcpp"
+    if args.grammar == "tree-sitter":
+        grammar = "tree-sitter-mozcpp"
     else:
-        language = args.language
+        grammar = args.grammar
 
     # Repository passed as input
     repo_dir = pathlib.Path(args.path)
@@ -120,9 +119,9 @@ def compute_ci_metrics(args: argparse.Namespace) -> None:
     rca_path = WORKDIR / "rust-code-analysis"
 
     # Old metrics directory
-    old_dir = WORKDIR / (args.language + OLD_SUFFIX)
+    old_dir = WORKDIR / (args.grammar + OLD_SUFFIX)
     # New metrics directory
-    new_dir = WORKDIR / (args.language + NEW_SUFFIX)
+    new_dir = WORKDIR / (args.grammar + NEW_SUFFIX)
 
     # Create output directories
     old_dir.mkdir(parents=True, exist_ok=True)
@@ -142,31 +141,26 @@ def compute_ci_metrics(args: argparse.Namespace) -> None:
 
     # Compute old metrics
     print("\nComputing metrics before the update and saving them in", old_dir)
-    run_rca(repo_dir, old_dir, rca_path, EXTENSIONS[language])
-
-    # Update a submodule only when a submodule is considered
-    if args.submodule:
-        print("\nUpdate", args.language)
-        run_subprocess("./update-language-bindings.sh")
+    run_rca(repo_dir, old_dir, rca_path, EXTENSIONS[grammar])
 
     # Compute new metrics
     print("\nComputing metrics after the update and saving them in", new_dir)
-    run_rca(repo_dir, new_dir, None, EXTENSIONS[language])
+    run_rca(repo_dir, new_dir, None, EXTENSIONS[grammar])
 
 
-# Compute metrics before and after a tree-sitter-language update.
+# Compute metrics before and after a tree-sitter-grammar update.
 def compute_metrics(args: argparse.Namespace) -> None:
 
-    if args.language not in EXTENSIONS.keys():
-        print(args.language, "is not a valid tree-sitter-language")
+    if args.grammar not in EXTENSIONS.keys():
+        print(args.grammar, "is not a valid tree-sitter grammar")
         sys.exit(1)
 
     # Repository local directory
     repo_dir = WORKDIR / args.path
     # Old metrics directory
-    old_dir = WORKDIR / (args.language + OLD_SUFFIX)
+    old_dir = WORKDIR / (args.grammar + OLD_SUFFIX)
     # New metrics directory
-    new_dir = WORKDIR / (args.language + NEW_SUFFIX)
+    new_dir = WORKDIR / (args.grammar + NEW_SUFFIX)
 
     # Create output directories
     old_dir.mkdir(parents=True, exist_ok=True)
@@ -176,36 +170,31 @@ def compute_metrics(args: argparse.Namespace) -> None:
     if not args.only_new:
 
         # Git clone the chosen repository
-        # Note: no submodules repositories are accepted
         print(f"Cloning {args.url} into {repo_dir}")
         run_subprocess("git", "clone", "--depth=1", args.url, repo_dir)
 
         # Compute old metrics
         print("\nComputing metrics before the update and saving them in", old_dir)
-        run_rca(repo_dir, old_dir, None, EXTENSIONS[args.language])
+        run_rca(repo_dir, old_dir, None, EXTENSIONS[args.grammar])
 
         # Create a new branch
-        print("\nCreate a new branch called", args.language)
-        run_subprocess("git", "checkout", "-B", args.language)
-
-        # Update tree-sitter-language submodule
-        print("\nUpdate", args.language)
-        run_subprocess("./update-submodule.sh", args.language)
+        print("\nCreate a new branch called", args.grammar)
+        run_subprocess("git", "checkout", "-B", args.grammar)
 
     # Compute new metrics
     print("\nComputing metrics after the update and saving them in", new_dir)
-    run_rca(repo_dir, new_dir, None, EXTENSIONS[args.language])
+    run_rca(repo_dir, new_dir, None, EXTENSIONS[args.grammar])
 
 
 # Compare metrics and dump the differences whether there are some.
 def compare_metrics(args: argparse.Namespace) -> None:
     # Old metrics directory
-    old_dir = WORKDIR / (args.language + OLD_SUFFIX)
+    old_dir = WORKDIR / (args.grammar + OLD_SUFFIX)
     # New metrics directory
-    new_dir = WORKDIR / (args.language + NEW_SUFFIX)
+    new_dir = WORKDIR / (args.grammar + NEW_SUFFIX)
 
     # Compare metrics directory
-    compare_dir = WORKDIR / (args.language + "-compare")
+    compare_dir = WORKDIR / (args.grammar + "-compare")
 
     # Create compare directory
     compare_dir.mkdir(parents=True, exist_ok=True)
@@ -217,9 +206,9 @@ def compare_metrics(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        prog="check-submodule",
+        prog="check-grammar-crate",
         description="This tool computes the metrics of a chosen repository "
-        "before and after a tree-sitter-language update.",
+        "before and after a tree-sitter grammar update.",
         epilog="The source code of this program can be found on "
         "GitHub at https://github.com/mozilla/rust-code-analysis",
     )
@@ -231,7 +220,7 @@ def main() -> None:
     compute_metrics_cmd = commands.add_parser(
         "compute-metrics",
         help="Computes the metrics of a chosen repository before and after "
-        "a tree-sitter-language update.",
+        "a tree-sitter grammar update.",
     )
 
     # Optional arguments
@@ -239,7 +228,7 @@ def main() -> None:
         "--only-new",
         "-n",
         action="store_true",
-        help="Only compute the metrics after the tree-sitter-language update",
+        help="Only compute the metrics after a tree-sitter grammar update",
     )
 
     # Arguments
@@ -260,11 +249,11 @@ def main() -> None:
     )
 
     compute_metrics_cmd.add_argument(
-        "-l",
-        "--language",
+        "-g",
+        "--grammar",
         type=str,
         required=True,
-        help="tree-sitter-language to be updated",
+        help="tree-sitter grammar to be updated",
     )
     compute_metrics_cmd.set_defaults(func=compute_metrics)
 
@@ -272,15 +261,7 @@ def main() -> None:
     compute_ci_metrics_cmd = commands.add_parser(
         "compute-ci-metrics",
         help="Computes the metrics of a chosen repository before and after "
-        "a tree-sitter-language update on a continuous integration system.",
-    )
-
-    # Optional arguments
-    compute_ci_metrics_cmd.add_argument(
-        "--submodule",
-        "-s",
-        action="store_true",
-        help="Activates the code to update a submodule",
+        "a tree-sitter grammar update on a continuous integration system.",
     )
 
     # Arguments
@@ -293,11 +274,11 @@ def main() -> None:
         "continuous integration system",
     )
     compute_ci_metrics_cmd.add_argument(
-        "-l",
-        "--language",
+        "-g",
+        "--grammar",
         type=str,
         required=True,
-        help="tree-sitter-language to be updated",
+        help="tree-sitter grammar to be updated",
     )
 
     compute_ci_metrics_cmd.set_defaults(func=compute_ci_metrics)
@@ -306,17 +287,17 @@ def main() -> None:
     compare_metrics_cmd = commands.add_parser(
         "compare-metrics",
         help="Compares the metrics before and after "
-        "a tree-sitter-language update in order to discover whether "
+        "a tree-sitter grammar update in order to discover whether "
         "there are differences.",
     )
 
     # Arguments
     compare_metrics_cmd.add_argument(
-        "-l",
-        "--language",
+        "-g",
+        "--grammar",
         type=str,
         required=True,
-        help="tree-sitter-language used to compare the metrics",
+        help="tree-sitter grammar used to compare the metrics",
     )
     compare_metrics_cmd.set_defaults(func=compare_metrics)
 
