@@ -157,7 +157,6 @@ name = "enums"
 version = "0.0.1"
 dependencies = [
  "askama",
- "cc",
  "clap",
  "enum-iterator",
  "libc",
