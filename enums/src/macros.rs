@@ -2,8 +2,7 @@
 macro_rules! mk_enum {
     ( $( $camel:ident ),* ) => {
         #[derive(Clone, Debug, IntoEnumIterator, PartialEq)]
-        #[allow(clippy::upper_case_acronyms)]
-        pub enum LANG {
+        pub enum Lang {
             $(
                 $camel,
             )*
@@ -14,18 +13,18 @@ macro_rules! mk_enum {
 #[macro_export]
 macro_rules! mk_get_language {
     ( $( ($camel:ident, $name:ident) ),* ) => {
-        pub fn get_language(lang: &LANG) -> Language {
+        pub fn get_language(lang: &Lang) -> Language {
             match lang {
-                LANG::Java => tree_sitter_java::language(),
-                LANG::Typescript => tree_sitter_typescript::language_typescript(),
-                LANG::Tsx => tree_sitter_typescript::language_tsx(),
-                LANG::Javascript => tree_sitter_javascript::language(),
-                LANG::Python => tree_sitter_python::language(),
-                LANG::Rust => tree_sitter_rust::language(),
-                LANG::Preproc => tree_sitter_preproc::language(),
-                LANG::Ccomment => tree_sitter_ccomment::language(),
-                LANG::Cpp => tree_sitter_mozcpp::language(),
-                LANG::Mozjs => tree_sitter_mozjs::language(),
+                Lang::Java => tree_sitter_java::language(),
+                Lang::Typescript => tree_sitter_typescript::language_typescript(),
+                Lang::Tsx => tree_sitter_typescript::language_tsx(),
+                Lang::Javascript => tree_sitter_javascript::language(),
+                Lang::Python => tree_sitter_python::language(),
+                Lang::Rust => tree_sitter_rust::language(),
+                Lang::Preproc => tree_sitter_preproc::language(),
+                Lang::Ccomment => tree_sitter_ccomment::language(),
+                Lang::Cpp => tree_sitter_mozcpp::language(),
+                Lang::Mozjs => tree_sitter_mozjs::language(),
             }
         }
     };
@@ -34,10 +33,10 @@ macro_rules! mk_get_language {
 #[macro_export]
 macro_rules! mk_get_language_name {
     ( $( $camel:ident ),* ) => {
-        pub fn get_language_name(lang: &LANG) -> &'static str {
+        pub fn get_language_name(lang: &Lang) -> &'static str {
             match lang {
                 $(
-                    LANG::$camel => stringify!($camel),
+                    Lang::$camel => stringify!($camel),
                 )*
             }
         }
