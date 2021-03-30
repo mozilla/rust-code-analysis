@@ -4,10 +4,8 @@
 #
 # Usage: ./generate-grammars/generate-mozjs.sh
 
-# FIXME we need to remove this line once we are going to use
-# the tree-sitter-javascript bindings
-# Get the tree-sitter-javascript submodule version
-TS_JS_VERSION=`git submodule status tree-sitter-javascript | awk '{ print $1 }'`
+# Set tree-sitter-javascript version
+TS_JS_VERSION="efd8cc9ee8eb919c2ca0f0eebaeb8f39557d8a8a"
 
 # Enter the mozjs directory
 pushd tree-sitter-mozjs
