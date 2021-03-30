@@ -12,7 +12,6 @@ license = "MPL-2.0"
 build = "build.rs"
 
 [build-dependencies]
-cc = "^1.0"
 phf_codegen = "^0.8"
 
 [dependencies]
