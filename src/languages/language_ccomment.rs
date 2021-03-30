@@ -21,30 +21,6 @@ pub enum Ccomment {
     Error = 16,
 }
 
-impl Into<&'static str> for Ccomment {
-    fn into(self) -> &'static str {
-        match self {
-            Ccomment::End => "end",
-            Ccomment::Nothing => "nothing",
-            Ccomment::PreprocContinuationLine => "preproc_continuation_line",
-            Ccomment::PreprocLine => "preproc_line",
-            Ccomment::DefineToken1 => "define_token1",
-            Ccomment::StringLiteralToken1 => "string_literal_token1",
-            Ccomment::CharLiteralToken1 => "char_literal_token1",
-            Ccomment::Comment => "comment",
-            Ccomment::RawStringLiteral => "raw_string_literal",
-            Ccomment::TranslationUnit => "translation_unit",
-            Ccomment::TopLevelItem => "_top_level_item",
-            Ccomment::Define => "define",
-            Ccomment::StringLiteral => "string_literal",
-            Ccomment::CharLiteral => "char_literal",
-            Ccomment::TranslationUnitRepeat1 => "translation_unit_repeat1",
-            Ccomment::DefineRepeat1 => "define_repeat1",
-            Ccomment::Error => "ERROR",
-        }
-    }
-}
-
 #[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Ccomment> = ::phf::Map {
     key: 3558916427560184125,
