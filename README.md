@@ -36,11 +36,45 @@ On the
 </a> page, there is a list of commands that can be run to get information
 about metrics, nodes, and other general data provided by this software.
 
+## Building
+
+To build the `rust-code-analysis` library, you need to run the following
+command:
+
+```console
+cargo build
+```
+
+If you want to build the `cli`:
+
+```console
+cargo build -p rust-code-analysis-cli
+```
+
+If you want to build the `web` server:
+
+```console
+cargo build -p rust-code-analysis-web
+```
+
+If you want to build everything in one fell swoop:
+
+```console
+cargo build --workspace
+```
+
+## Testing
+
+To verify whether all tests pass, run the `cargo test` command.
+
+```console
+cargo test --workspace --all-features --verbose
+```
 
 # Contributing
 
-If you want to contribute to the development of this software
-or you are just interested in building **rust-code-analysis**, have a look at the
+If you want to contribute to the development of this software, have a look at the
+guidelines contained in our
 <a href="https://mozilla.github.io/rust-code-analysis/developers/index.html" target="_blank">Developers Guide</a>.
 
 
