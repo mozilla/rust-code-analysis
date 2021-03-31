@@ -133,7 +133,6 @@ def compute_ci_metrics(args: argparse.Namespace) -> None:
         "git",
         "clone",
         "--depth=1",
-        "--recurse-submodules",
         "-j8",
         "https://github.com/mozilla/rust-code-analysis",
         rca_path,
