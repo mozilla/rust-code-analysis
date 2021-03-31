@@ -3,6 +3,22 @@ use regex::bytes::Regex;
 
 use crate::*;
 
+macro_rules! mk_else_if {
+    ($if_type: ident) => {
+        #[inline(always)]
+        fn is_else_if(node: &Node) -> bool {
+            if node.object().kind_id() != <Self as TSLanguage>::BaseLang::$if_type {
+                return false;
+            }
+            if let Some(parent) = node.object().parent() {
+                parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause
+            } else {
+                false
+            }
+        }
+    };
+}
+
 pub trait Checker {
     fn is_comment(node: &Node) -> bool;
 
