@@ -41,9 +41,9 @@ tasks:
             - "-cx"
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup component add clippy rustfmt &&
-               git clone --recursive --quiet ${repository} &&
+               git clone --quiet ${repository} &&
                cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
                cargo test --workspace --verbose --all-features &&
@@ -66,9 +66,9 @@ tasks:
           command:
             - "/bin/bash"
             - "-cx"
-            - "git clone --recursive --quiet ${repository} &&
+            - "git clone --quiet ${repository} &&
                cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
                cargo install mdbook --no-default-features --features search,output --vers \"^0.1.0\" &&
                cargo doc --release &&
                cd rust-code-analysis-book &&
@@ -104,9 +104,9 @@ tasks:
             - "apt-get -qq update &&
                apt-get -qq install -y zip &&
                curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-linux-x86_64.tar.bz2 | tar jxf - &&
-               git clone --recursive --quiet ${repository} &&
+               git clone --quiet ${repository} &&
                cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
                cargo test --workspace --verbose --all-features &&
                zip -0 ccov.zip `find . -name 'rust_code_analysis*.gc*' -print` &&
                ../grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
@@ -135,9 +135,9 @@ tasks:
             - set PATH=%LIB_PATH%;%PATH%
             - rustup-init -yv --default-toolchain stable ^
                               --default-host x86_64-pc-windows-msvc
-            - git clone --recursive --quiet ${repository}
+            - git clone --quiet ${repository}
             - cd rust-code-analysis
-            - git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev}
+            - git -c advice.detachedHead=false checkout ${head_rev}
             - cargo test --workspace --verbose --all-features
           mounts:
             - content:
@@ -163,9 +163,9 @@ tasks:
           command:
             - "/bin/bash"
             - "-cx"
-            - "git clone --recursive --quiet ${repository} &&
+            - "git clone --quiet ${repository} &&
                cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
                ./check-grammars-crates.sh"
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
@@ -198,13 +198,13 @@ tasks:
             command:
               - "/bin/bash"
               - "-cx"
-              - "git clone --recursive --quiet ${repository} &&
+              - "git clone --quiet ${repository} &&
                  [ ! -d \"/cache/gecko-dev\" ] &&
                  git clone --quiet https://github.com/mozilla/gecko-dev.git /cache/gecko-dev || true &&
                  pushd /cache/gecko-dev && git pull origin master && popd &&
                  mkdir -p /tmp/mozilla_central_output &&
                  cd rust-code-analysis &&
-                 git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
+                 git -c advice.detachedHead=false checkout ${head_rev} &&
                  cargo build --release --workspace --all-features &&
                  cargo run --release -p rust-code-analysis-cli -- -p /cache/gecko-dev \
                                      -j4 --metrics -O json -o /tmp/mozilla_central_output"
@@ -234,9 +234,9 @@ tasks:
             command:
               - "/bin/bash"
               - "-cx"
-              - "git clone --recursive --quiet ${repository} &&
+              - "git clone --quiet ${repository} &&
                  cd rust-code-analysis &&
-                 git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev} &&
+                 git -c advice.detachedHead=false checkout ${head_rev} &&
                  cargo build --workspace --release --target x86_64-unknown-linux-musl &&
                  cargo package --all-features --target x86_64-unknown-linux-musl &&
                  pushd rust-code-analysis-cli && cargo package --all-features --target x86_64-unknown-linux-musl && popd &&
@@ -282,9 +282,9 @@ tasks:
               - set PATH=%LIB_PATH%;%PATH%
               - rustup-init -yv --default-toolchain stable ^
                                 --default-host x86_64-pc-windows-msvc
-              - git clone --recursive --quiet ${repository}
+              - git clone --quiet ${repository}
               - cd rust-code-analysis
-              - git -c advice.detachedHead=false checkout --recurse-submodules ${head_rev}
+              - git -c advice.detachedHead=false checkout ${head_rev}
               - cargo build --workspace --release
               - 7z a rust-code-analysis-win-cli-x86_64.zip "target\release\rust-code-analysis-cli.exe"
               - 7z a rust-code-analysis-win-web-x86_64.zip "target\release\rust-code-analysis-web.exe"
@@ -339,7 +339,7 @@ tasks:
                 - "-cx"
                 - "git config --global user.email moz-tools-bot@moz.tools &&
                    git config --global user.name moz.tools Bot &&
-                   git clone --recursive --quiet ${repository} &&
+                   git clone --quiet ${repository} &&
                    cd rust-code-analysis &&
                    taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz &&
                    tar xfz book.tar.gz -C rust-code-analysis-book &&
