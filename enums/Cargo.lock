@@ -159,7 +159,6 @@ dependencies = [
  "askama",
  "clap",
  "enum-iterator",
- "libc",
  "phf_codegen",
  "tree-sitter",
  "tree-sitter-ccomment",
