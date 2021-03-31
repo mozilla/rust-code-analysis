@@ -10,19 +10,19 @@ You can learn how to do that
 
 ## Clone Repository
 
-First of all, you need to clone the repository and all of its submodules.
+First of all, you need to clone the repository.
 You can do that:
 
 through **HTTPS**
 
 ```
-git clone --recurse-submodules -j8 https://github.com/mozilla/rust-code-analysis.git
+git clone -j8 https://github.com/mozilla/rust-code-analysis.git
 ```
 
 or through **SSH**
 
 ```
-git clone --recurse-submodules -j8 git@github.com:mozilla/rust-code-analysis.git
+git clone -j8 git@github.com:mozilla/rust-code-analysis.git
 ```
 
 ## Building
@@ -34,10 +34,22 @@ command:
 cargo build
 ```
 
-If you are also interested in the cli tool:
+If you want to build the `cli`:
 
 ```console
-cargo build --all
+cargo build -p rust-code-analysis-cli
+```
+
+If you want to build the `web` server:
+
+```console
+cargo build -p rust-code-analysis-web
+```
+
+If you want to build everything in one fell swoop:
+
+```console
+cargo build --workspace
 ```
 
 ## Testing
@@ -46,7 +58,7 @@ After you have finished changing the code, you should **always** verify whether
 all tests pass with the `cargo test` command.
 
 ```console
-cargo test --all --all-features --verbose
+cargo test --workspace --all-features --verbose
 ```
 
 ## Code Formatting
@@ -86,7 +98,7 @@ rustup component add clippy
 To detect errors and warnings:
 
 ```console
-cargo clippy --all-targets --all --
+cargo clippy --workspace --all-targets --
 ```
 
 ## Code Documentation
@@ -106,13 +118,25 @@ each dependency used by **rust-code-analysis**.
 You can run **rust-code-analysis-cli** using:
 
 ```console
-cargo run -- [rust-code-analysis-cli-parameters]
+cargo run -p rust-code-analysis-cli -- [rust-code-analysis-cli-parameters]
 ```
 
 To know the list of **rust-code-analysis-cli** parameters, run:
 
 ```console
 cargo run -p rust-code-analysis-cli -- --help
+```
+
+You can run **rust-code-analysis-web** using:
+
+```console
+cargo run -p rust-code-analysis-web -- [rust-code-analysis-web-parameters]
+```
+
+To know the list of **rust-code-analysis-web** parameters, run:
+
+```console
+cargo run -p rust-code-analysis-web -- --help
 ```
 
 ## Practical advice
