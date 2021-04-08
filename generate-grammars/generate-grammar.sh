@@ -7,14 +7,8 @@
 # Enter grammar directory
 pushd $1
 
-# Init npm
-npm init -y
-
-# Install a small module that lets the parser be used from Node
-npm install --save nan
-
-# Install the Tree-sitter CLI
-npm install --save-dev tree-sitter-cli
+# Install dependencies
+npm install --include=dev
 
 # Generate grammar
 ./node_modules/.bin/tree-sitter generate
