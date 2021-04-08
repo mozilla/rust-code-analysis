@@ -230,28 +230,28 @@ tasks:
           workerType: ci
           payload:
             maxRunTime: 3600
-            image: "ekidd/rust-musl-builder:stable"
+            image: "rust:buster"
             command:
               - "/bin/bash"
               - "-cx"
               - "git clone --quiet ${repository} &&
                  cd rust-code-analysis &&
                  git -c advice.detachedHead=false checkout ${head_rev} &&
-                 cargo build --workspace --release --target x86_64-unknown-linux-musl &&
-                 cargo package --all-features --target x86_64-unknown-linux-musl &&
-                 pushd rust-code-analysis-cli && cargo package --all-features --target x86_64-unknown-linux-musl && popd &&
-                 pushd rust-code-analysis-web && cargo package --all-features --target x86_64-unknown-linux-musl && popd &&
-                 cd target/x86_64-unknown-linux-musl/release &&
-                 tar -zvcf /home/rust/rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
-                 tar -zvcf /home/rust/rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web"
+                 cargo build --workspace --release &&
+                 cargo package --all-features &&
+                 pushd rust-code-analysis-cli && cargo package --all-features && popd &&
+                 pushd rust-code-analysis-web && cargo package --all-features && popd &&
+                 cd target/release &&
+                 tar -zvcf /rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
+                 tar -zvcf /rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web"
             artifacts:
               public/rust-code-analysis-linux-cli-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
-                path: /home/rust/rust-code-analysis-linux-cli-x86_64.tar.gz
+                path: /rust-code-analysis-linux-cli-x86_64.tar.gz
                 type: file
               public/rust-code-analysis-linux-web-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
-                path: /home/rust/rust-code-analysis-linux-web-x86_64.tar.gz
+                path: /rust-code-analysis-linux-web-x86_64.tar.gz
                 type: file
           metadata:
             name: rust-code-analysis linux release build
