@@ -1,6 +1,6 @@
 [package]
 name = "rust-code-analysis-cli"
-version = "0.0.20"
+version = "0.0.21"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 repository = "https://github.com/mozilla/rust-code-analysis/blob/master/rust-code-analysis-cli/"
 edition = "2018"
