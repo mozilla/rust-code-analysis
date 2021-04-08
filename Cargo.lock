@@ -1645,7 +1645,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis"
-version = "0.0.19"
+version = "0.0.20"
 dependencies = [
  "aho-corasick",
  "enum-iterator",
@@ -1676,7 +1676,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis-cli"
-version = "0.0.19"
+version = "0.0.20"
 dependencies = [
  "clap",
  "crossbeam",
@@ -1694,7 +1694,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis-web"
-version = "0.0.19"
+version = "0.0.20"
 dependencies = [
  "actix-rt 2.2.0",
  "actix-web",
