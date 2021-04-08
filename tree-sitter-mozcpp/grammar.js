@@ -84,6 +84,40 @@ module.exports = grammar(CPP, {
       $.macro_annotation,
     ),
 
+    call_expression: ($, original) => choice(
+      original,
+      $._call_macro_with_decl_first_arg,
+    ),
+
+    _call_macro_with_decl_first_arg: $ => seq(
+      field('function', choice(
+        'CACHE_TRY_INSPECT',
+        'CACHE_TRY_UNWRAP',
+        'FORWARD',
+        'FORWARD_SET_ATTRIBUTE',
+        'IDB_TRY_INSPECT',
+        'IDB_TRY_UNWRAP',
+        'LS_TRY_INSPECT',
+        'LS_TRY_UNWRAP',
+        'SDB_TRY_INSPECT',
+        'SDB_TRY_UNWRAP',
+        'PS_GET',
+        'PS_GET_AND_SET',
+        'PS_GET_LOCKLESS',
+        'QM_TRY_INSPECT',
+        'QM_NOTEONLY_TRY_UNWRAP',
+        'QM_TRY_UNWRAP',
+        'QM_WARNONLY_TRY_UNWRAP',
+      )),
+      field('arguments', seq(
+        '(',
+        $.parameter_declaration,
+        ',',
+        commaSep(choice($._expression, $.initializer_list)),
+        ')',
+      )),
+    ),
+
     macro_statement: $ => choice(
       'MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER'
     ),
@@ -156,7 +190,7 @@ module.exports = grammar(CPP, {
       'MOZ_TRIVIAL_CTOR_DTOR',
       'MOZ_TSAN_BLACKLIST',
       'MOZ_UNSAFE_REF',
-      'MOZ_XPCOM_ABI'
+      'MOZ_XPCOM_ABI',
     ),
 
     primitive_type: $ => token(choice(
@@ -361,3 +395,11 @@ module.exports = grammar(CPP, {
     ),
   }
 });
+
+function commaSep(rule) {
+  return optional(commaSep1(rule));
+}
+
+function commaSep1(rule) {
+  return seq(rule, repeat(seq(',', rule)));
+}
