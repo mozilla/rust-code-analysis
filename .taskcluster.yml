@@ -346,6 +346,7 @@ tasks:
                    ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
                    taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages &&
                    taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset ${linux_cli}:public/${linux_cli} ${linux_web}:public/${linux_web} ${win_cli}:public/${win_cli} ${win_web}:public/${win_web} &&
+                   rm -rf book.tar.gz &&
                    taskboot cargo-publish &&
                    cd rust-code-analysis-cli && taskboot cargo-publish && cd .. &&
                    cd rust-code-analysis-web && taskboot cargo-publish"
