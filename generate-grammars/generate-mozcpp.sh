@@ -12,7 +12,7 @@ TS_CPP_CRATE="tree-sitter-cpp"
 JSON_CRATE_FILENAME=".cargo_vcs_info.json"
 
 # Get the current tree-sitter-cpp crate version from the tree-sitter-mozcpp grammar
-TS_CPP_VERSION=`grep $TS_CPP_CRATE Cargo.toml | cut -f2 -d "," | cut -f2 -d "=" | tr -d ' ' | tr -d } | tr -d \"`
+TS_CPP_VERSION=`grep $TS_CPP_CRATE tree-sitter-mozcpp/Cargo.toml | cut -f2 -d "," | cut -f2 -d "=" | tr -d ' ' | tr -d } | tr -d \"`
 
 # Name assigned to the compressed binary crate downloaded from crates.io
 CRATE_OUTPUT="$TS_CPP_CRATE-download.gz"
