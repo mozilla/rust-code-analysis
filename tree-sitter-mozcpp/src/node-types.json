@@ -880,11 +880,35 @@
     "named": true,
     "fields": {
       "arguments": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
+            "type": "(",
+            "named": false
+          },
+          {
+            "type": ")",
+            "named": false
+          },
+          {
+            "type": ",",
+            "named": false
+          },
+          {
+            "type": "_expression",
+            "named": true
+          },
+          {
             "type": "argument_list",
+            "named": true
+          },
+          {
+            "type": "initializer_list",
+            "named": true
+          },
+          {
+            "type": "parameter_declaration",
             "named": true
           }
         ]
@@ -893,6 +917,74 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "CACHE_TRY_INSPECT",
+            "named": false
+          },
+          {
+            "type": "CACHE_TRY_UNWRAP",
+            "named": false
+          },
+          {
+            "type": "FORWARD",
+            "named": false
+          },
+          {
+            "type": "FORWARD_SET_ATTRIBUTE",
+            "named": false
+          },
+          {
+            "type": "IDB_TRY_INSPECT",
+            "named": false
+          },
+          {
+            "type": "IDB_TRY_UNWRAP",
+            "named": false
+          },
+          {
+            "type": "LS_TRY_INSPECT",
+            "named": false
+          },
+          {
+            "type": "LS_TRY_UNWRAP",
+            "named": false
+          },
+          {
+            "type": "PS_GET",
+            "named": false
+          },
+          {
+            "type": "PS_GET_AND_SET",
+            "named": false
+          },
+          {
+            "type": "PS_GET_LOCKLESS",
+            "named": false
+          },
+          {
+            "type": "QM_NOTEONLY_TRY_UNWRAP",
+            "named": false
+          },
+          {
+            "type": "QM_TRY_INSPECT",
+            "named": false
+          },
+          {
+            "type": "QM_TRY_UNWRAP",
+            "named": false
+          },
+          {
+            "type": "QM_WARNONLY_TRY_UNWRAP",
+            "named": false
+          },
+          {
+            "type": "SDB_TRY_INSPECT",
+            "named": false
+          },
+          {
+            "type": "SDB_TRY_UNWRAP",
+            "named": false
+          },
           {
             "type": "_expression",
             "named": true
@@ -5291,11 +5383,43 @@
     "named": false
   },
   {
+    "type": "CACHE_TRY_INSPECT",
+    "named": false
+  },
+  {
+    "type": "CACHE_TRY_UNWRAP",
+    "named": false
+  },
+  {
+    "type": "FORWARD",
+    "named": false
+  },
+  {
+    "type": "FORWARD_SET_ATTRIBUTE",
+    "named": false
+  },
+  {
+    "type": "IDB_TRY_INSPECT",
+    "named": false
+  },
+  {
+    "type": "IDB_TRY_UNWRAP",
+    "named": false
+  },
+  {
     "type": "L\"",
     "named": false
   },
   {
     "type": "L'",
+    "named": false
+  },
+  {
+    "type": "LS_TRY_INSPECT",
+    "named": false
+  },
+  {
+    "type": "LS_TRY_UNWRAP",
     "named": false
   },
   {
@@ -5572,6 +5696,42 @@
   },
   {
     "type": "MOZ_XPCOM_ABI",
+    "named": false
+  },
+  {
+    "type": "PS_GET",
+    "named": false
+  },
+  {
+    "type": "PS_GET_AND_SET",
+    "named": false
+  },
+  {
+    "type": "PS_GET_LOCKLESS",
+    "named": false
+  },
+  {
+    "type": "QM_NOTEONLY_TRY_UNWRAP",
+    "named": false
+  },
+  {
+    "type": "QM_TRY_INSPECT",
+    "named": false
+  },
+  {
+    "type": "QM_TRY_UNWRAP",
+    "named": false
+  },
+  {
+    "type": "QM_WARNONLY_TRY_UNWRAP",
+    "named": false
+  },
+  {
+    "type": "SDB_TRY_INSPECT",
+    "named": false
+  },
+  {
+    "type": "SDB_TRY_UNWRAP",
     "named": false
   },
   {

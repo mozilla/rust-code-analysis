@@ -38,3 +38,9 @@ fn test_fn_id_strings() {
     let samples = vec!["nsPrintfCString(\"%\" PRIi32, lifetime.mTag);"];
     parse(&samples, false);
 }
+
+#[test]
+fn test_fn_qm_try_inspect_cpp() {
+    let samples = vec!["QM_TRY_INSPECT(const int32_t& storageVersion, MOZ_TO_RESULT_INVOKE(aConnection, GetSchemaVersion));"];
+    parse(&samples, false);
+}
