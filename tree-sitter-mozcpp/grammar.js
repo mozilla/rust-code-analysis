@@ -48,7 +48,7 @@ module.exports = grammar(CPP, {
 
     class_specifier: $ => prec.right(seq(
       'class',
-      optional($.macro_annotation),
+      repeat($.macro_annotation),
       choice(
         field('name', $._class_name),
         seq(
