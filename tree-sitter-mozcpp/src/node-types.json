@@ -5407,6 +5407,10 @@
     "named": false
   },
   {
+    "type": "JS_PUBLIC_API",
+    "named": false
+  },
+  {
     "type": "L\"",
     "named": false
   },

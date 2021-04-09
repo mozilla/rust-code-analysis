@@ -2117,7 +2117,7 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-mozcpp"
-version = "0.19.3"
+version = "0.19.4"
 dependencies = [
  "cc",
  "tree-sitter",

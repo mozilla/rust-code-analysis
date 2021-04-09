@@ -191,6 +191,7 @@ module.exports = grammar(CPP, {
       'MOZ_TSAN_BLACKLIST',
       'MOZ_UNSAFE_REF',
       'MOZ_XPCOM_ABI',
+      'JS_PUBLIC_API',
     ),
 
     primitive_type: $ => token(choice(

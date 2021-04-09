@@ -11692,6 +11692,10 @@
         {
           "type": "STRING",
           "value": "MOZ_XPCOM_ABI"
+        },
+        {
+          "type": "STRING",
+          "value": "JS_PUBLIC_API"
         }
       ]
     }
