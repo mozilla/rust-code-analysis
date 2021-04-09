@@ -20,6 +20,7 @@ pub struct Stats {
     structural: usize,
     nesting: usize,
     total_space_functions: usize,
+    else_if_seq: ElseIfSequence,
     boolean_seq: BoolSequence,
 }
 
@@ -29,6 +30,7 @@ impl Default for Stats {
             structural: 0,
             nesting: 0,
             total_space_functions: 1,
+            else_if_seq: ElseIfSequence::default(),
             boolean_seq: BoolSequence::default(),
         }
     }
@@ -150,6 +152,35 @@ macro_rules! nesting_levels {
 }
 
 #[derive(Debug, Default, Clone)]
+struct ElseIfSequence {
+    else_if_seq: usize,
+}
+
+impl ElseIfSequence {
+    fn reset(&mut self) {
+        self.else_if_seq = 0;
+    }
+
+    fn found_else_if(&mut self) {
+        self.else_if_seq += 1;
+    }
+
+    fn is_else_if(&self) -> bool {
+        self.else_if_seq > 0
+    }
+
+    fn eval_based_on_prev(&mut self, structural: usize) -> usize {
+        if self.else_if_seq == 1 {
+            structural - 1
+        } else if self.else_if_seq > 1 {
+            structural + 1
+        } else {
+            structural
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone)]
 struct BoolSequence {
     boolean_op: Option<u16>,
     first_boolean: bool,
@@ -251,14 +282,16 @@ impl Cognitive for RustCode {
 
         match node.object().kind_id().into() {
             IfExpression | IfLetExpression => {
+                stats.structural = stats.else_if_seq.eval_based_on_prev(stats.structural);
                 // Check if a node is not an else-if
-                if !Self::is_else_if(&node) {
+                if !stats.else_if_seq.is_else_if() {
                     nesting_levels!(
                         node, stats,
                         [FunctionItem => SourceFile],
                         [ClosureExpression => SourceFile],
                         [IfExpression | IfLetExpression | ForExpression | WhileExpression | MatchExpression => FunctionItem]
                     );
+                    stats.else_if_seq.reset();
                 }
             }
             ForExpression | WhileExpression | MatchExpression => {
@@ -269,7 +302,10 @@ impl Cognitive for RustCode {
                     [IfExpression | IfLetExpression | ForExpression | WhileExpression | MatchExpression => FunctionItem]
                 );
             }
-            Else /*else-if also */ => {
+            ElseClause /*else-if also */ => {
+                if Self::is_else_if(&node) {
+                    stats.else_if_seq.found_else_if();
+                }
                 increment_by_one(stats);
             }
             BreakExpression | ContinueExpression => {
@@ -298,7 +334,8 @@ impl Cognitive for CppCode {
 
         match node.object().kind_id().into() {
             IfStatement => {
-                if !Self::is_else_if(&node) {
+                stats.structural = stats.else_if_seq.eval_based_on_prev(stats.structural);
+                if !stats.else_if_seq.is_else_if() {
                     nesting_levels!(
                         node, stats,
                         [LambdaExpression => TranslationUnit],
@@ -309,6 +346,7 @@ impl Cognitive for CppCode {
                             | SwitchStatement
                             | CatchClause => FunctionDefinition]
                     );
+                    stats.else_if_seq.reset();
                 }
             }
             ForStatement | WhileStatement | DoStatement | SwitchStatement | CatchClause => {
@@ -323,7 +361,13 @@ impl Cognitive for CppCode {
                         | CatchClause => FunctionDefinition]
                 );
             }
-            GotoStatement | Else /* else-if also */ => {
+            GotoStatement => {
+                increment_by_one(stats);
+            }
+            Else /* else-if also */ => {
+                if Self::is_else_if(&node) {
+                    stats.else_if_seq.found_else_if();
+                }
                 increment_by_one(stats);
             }
             UnaryExpression2 => {
@@ -344,7 +388,8 @@ macro_rules! js_cognitive {
 
             match node.object().kind_id().into() {
                 IfStatement => {
-                    if !Self::is_else_if(&node) {
+                    stats.structural = stats.else_if_seq.eval_based_on_prev(stats.structural);
+                    if !stats.else_if_seq.is_else_if() {
                         nesting_levels!(
                             node, stats,
                             [FunctionDeclaration => Program],
@@ -358,6 +403,7 @@ macro_rules! js_cognitive {
                                 | CatchClause
                                 | TernaryExpression => FunctionDeclaration]
                         );
+                        stats.else_if_seq.reset();
                     }
                 }
                 ForStatement | ForInStatement | WhileStatement | DoStatement | SwitchStatement | CatchClause | TernaryExpression => {
@@ -375,7 +421,10 @@ macro_rules! js_cognitive {
                             | TernaryExpression => FunctionDeclaration]
                     );
                 }
-                Else /* else-if also */ => {
+                ElseClause /* else-if also */ => {
+                    if Self::is_else_if(&node) {
+                        stats.else_if_seq.found_else_if();
+                    }
                     increment_by_one(stats);
                 }
                 ExpressionStatement => {
@@ -916,7 +965,7 @@ mod tests {
                              println!(\"test\");
                          }
                      } else { // +1
-                         if true { // +3 (nesting = 2)
+                         if true { // This is an else if
                              println!(\"test\");
                          }
                      }
@@ -925,8 +974,8 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 11, usize)],
-            [(cognitive_average, 11.0)]
+            [(cognitive, 8, usize)],
+            [(cognitive_average, 8.0)]
         );
 
         check_metrics!(
@@ -958,7 +1007,7 @@ mod tests {
                              printf(\"test\");
                          }
                      } else { // +1
-                         if (1 == 1) { // +3 (nesting = 2)
+                         if (1 == 1) { // This is an else if
                              printf(\"test\");
                          }
                      }
@@ -967,8 +1016,8 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 11, usize)],
-            [(cognitive_average, 11.0)]
+            [(cognitive, 8, usize)],
+            [(cognitive_average, 8.0)]
         );
     }
 
@@ -984,7 +1033,7 @@ mod tests {
                              window.print(\"test\");
                          }
                      } else { // +1
-                         if (1 == 1) { // +3 (nesting = 2)
+                         if (1 == 1) { // This is an else if
                              window.print(\"test\");
                          }
                      }
@@ -993,8 +1042,8 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 11, usize)],
-            [(cognitive_average, 11.0)]
+            [(cognitive, 8, usize)],
+            [(cognitive_average, 8.0)]
         );
     }
 
