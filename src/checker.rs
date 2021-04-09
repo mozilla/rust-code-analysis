@@ -4,21 +4,35 @@ use regex::bytes::Regex;
 use crate::*;
 
 macro_rules! mk_else_if {
-    ($if_type: ident, $block_type: ident) => {
+    ($language: ident, $if_type: ident, $block_type: ident) => {
         #[inline(always)]
         fn is_else_if(node: &Node) -> bool {
-            if node.object().kind_id() != <Self as TSLanguage>::BaseLang::$if_type {
+            use $language::*;
+            if node.object().kind_id() != ElseClause {
                 return false;
             }
-            if let Some(parent) = node.object().parent() {
-                if parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause {
+            // Index is 1 because the 0 one is the `else` keyword
+            if let Some(second_child) = node.object().child(1)
+            /* else, if_type/block_type */
+            {
+                if second_child.kind_id() == $if_type {
                     return true;
                 }
-                if let Some(grandparent) = parent.parent() {
-                    return grandparent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause
-                        && parent.kind_id() == <Self as TSLanguage>::BaseLang::$block_type
-                        && parent.child_count() == 3; // Grammars count { } as children too
+                if second_child.kind_id() != $block_type {
+                    return false;
                 }
+                let mut cursor = second_child.walk();
+                let mut is_else_if = true;
+                for child in second_child.children(&mut cursor) {
+                    match child.kind_id().into() {
+                        $if_type | LBRACE | RBRACE | Comment => {}
+                        _ => {
+                            is_else_if = false;
+                            break;
+                        }
+                    }
+                }
+                return is_else_if;
             }
             false
         }
@@ -117,18 +131,29 @@ impl Checker for CppCode {
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != <Self as TSLanguage>::BaseLang::IfStatement {
+        use Cpp::*;
+        if node.object().kind_id() != Else {
             return false;
         }
-        if let Some(parent) = node.object().parent() {
-            if parent.kind_id() == <Self as TSLanguage>::BaseLang::IfStatement {
+        if let Some(next_sibling) = node.object().next_sibling() {
+            if next_sibling.kind_id() == IfStatement {
                 return true;
             }
-            if let Some(grandparent) = parent.parent() {
-                return grandparent.kind_id() == <Self as TSLanguage>::BaseLang::IfStatement
-                    && parent.kind_id() == <Self as TSLanguage>::BaseLang::CompoundStatement
-                    && parent.child_count() == 3; // Grammar count { } as children too
+            if next_sibling.kind_id() != CompoundStatement {
+                return false;
             }
+            let mut cursor = next_sibling.walk();
+            let mut is_else_if = true;
+            for child in next_sibling.children(&mut cursor) {
+                match child.kind_id().into() {
+                    IfStatement | LBRACE | RBRACE | Comment => {}
+                    _ => {
+                        is_else_if = false;
+                        break;
+                    }
+                }
+            }
+            return is_else_if;
         }
         false
     }
@@ -158,13 +183,18 @@ impl Checker for PythonCode {
         if node.object().kind_id() == <Self as TSLanguage>::BaseLang::ElifClause {
             return true;
         }
-        if node.object().kind_id() == <Self as TSLanguage>::BaseLang::IfStatement {
-            if let Some(parent) = node.object().parent() {
-                if let Some(grandparent) = parent.parent() {
-                    return parent.kind_id() == <Self as TSLanguage>::BaseLang::Block
-                        && grandparent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause
-                        && parent.child_count() == 1;
-                }
+        if node.object().kind_id() != <Self as TSLanguage>::BaseLang::ElseClause {
+            return false;
+        }
+        if let Some(block) = node.object().child(2)
+        /* else, :, block */
+        {
+            if block.kind_id() != <Self as TSLanguage>::BaseLang::Block || block.child_count() != 1
+            {
+                return false;
+            }
+            if let Some(block_first_child) = block.child(0) {
+                return block_first_child.kind_id() == <Self as TSLanguage>::BaseLang::IfStatement;
             }
         }
         false
@@ -211,7 +241,7 @@ impl Checker for MozjsCode {
         ArrowFunction
     );
 
-    mk_else_if!(IfStatement, StatementBlock);
+    mk_else_if!(Mozjs, IfStatement, StatementBlock);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -241,7 +271,7 @@ impl Checker for JavascriptCode {
         ArrowFunction
     );
 
-    mk_else_if!(IfStatement, StatementBlock);
+    mk_else_if!(Javascript, IfStatement, StatementBlock);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -271,7 +301,7 @@ impl Checker for TypescriptCode {
         ArrowFunction
     );
 
-    mk_else_if!(IfStatement, StatementBlock);
+    mk_else_if!(Typescript, IfStatement, StatementBlock);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -301,7 +331,7 @@ impl Checker for TsxCode {
         ClassDeclaration,
         ArrowFunction
     );
-    mk_else_if!(IfStatement, StatementBlock);
+    mk_else_if!(Tsx, IfStatement, StatementBlock);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -330,7 +360,37 @@ impl Checker for RustCode {
         TraitItem,
         ClosureExpression
     );
-    mk_else_if!(IfExpression, Block);
+    #[inline(always)]
+    fn is_else_if(node: &Node) -> bool {
+        use Rust::*;
+        if node.object().kind_id() != ElseClause {
+            return false;
+        }
+        // Index is 1 because the 0 one is the `else` keyword
+        if let Some(second_child) = node.object().child(1)
+        /* else, if_type/block_type */
+        {
+            if second_child.kind_id() == IfExpression {
+                return true;
+            }
+            if second_child.kind_id() != Block {
+                return false;
+            }
+            let mut cursor = second_child.walk();
+            let mut is_else_if = true;
+            for child in second_child.children(&mut cursor) {
+                match child.kind_id().into() {
+                    IfExpression | LBRACE | RBRACE | LineComment | BlockComment => {}
+                    _ => {
+                        is_else_if = false;
+                        break;
+                    }
+                }
+            }
+            return is_else_if;
+        }
+        false
+    }
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN, AttributeItem);
 }
 
