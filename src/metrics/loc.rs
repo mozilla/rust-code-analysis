@@ -412,7 +412,16 @@ impl Loc for CppCode {
             | StatementIdentifier => {
                 stats.logical_lines += 1;
             }
-
+            Declaration => {
+                if count_specific_ancestors!(
+                    node,
+                    WhileStatement | ForStatement | IfStatement,
+                    CompoundStatement
+                ) == 0
+                {
+                    stats.logical_lines += 1;
+                }
+            }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
                 stats.lines.insert(start);
@@ -877,6 +886,60 @@ mod tests {
             CppParser,
             loc,
             [(lloc, 2, usize)]
+        );
+    }
+
+    #[test]
+    fn cpp_lloc() {
+        check_metrics!(
+            "nsTArray<xpcGCCallback> callbacks(extraGCCallbacks.Clone());
+             for (uint32_t i = 0; i < callbacks.Length(); ++i) {
+                 callbacks[i](status);
+             }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [(lloc, 3, usize)] // nsTArray, for, callbacks
+        );
+    }
+
+    #[test]
+    fn cpp_return_lloc() {
+        check_metrics!(
+            "uint8_t* pixel_data = frame.GetFrameDataAtPos(DesktopVector(x, y));
+             return RgbaColor(pixel_data) == blank_pixel_;",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [(lloc, 2, usize)] // pixel_data, return
+        );
+    }
+
+    #[test]
+    fn cpp_for_lloc() {
+        check_metrics!(
+            "for (; start != end; ++start) {
+                 const unsigned char idx = *start;
+                 if (idx > 127 || !kValidTokenMap[idx]) return false;
+             }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [(lloc, 4, usize)] // for, idx, if, return
+        );
+    }
+
+    #[test]
+    fn cpp_while_lloc() {
+        check_metrics!(
+            "while (sHeapAtoms) {
+                 HttpHeapAtom* next = sHeapAtoms->next;
+                 free(sHeapAtoms);
+            }",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [(lloc, 3, usize)] // while, next, free,
         );
     }
 
