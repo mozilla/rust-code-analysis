@@ -7,13 +7,19 @@ pub enum {{ c_name }} {
     {% endfor %}
 }
 
-#[allow(clippy::unreadable_literal)]
-static KEYS: phf::Map<&'static str, {{ c_name }}> = {{ phf_map }};
+impl std::fmt::Display for {{ c_name }} {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
-impl From<&str> for {{ c_name }} {
+#[allow(clippy::unreadable_literal)]
+static KEYS: phf::Map<&'static str, &'static str> = {{ phf_map }};
+
+impl From<{{ c_name }}> for &str {
     #[inline(always)]
-    fn from(key: &str) -> Self {
-        KEYS.get(key).unwrap().clone()
+    fn from(grammar: {{ c_name }}) -> &'static str {
+        KEYS.get(grammar.to_string().as_str()).unwrap()
     }
 }
 

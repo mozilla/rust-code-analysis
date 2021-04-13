@@ -31,10 +31,8 @@ pub fn generate_rust(output: &str, file_template: &str) -> std::io::Result<()> {
 
         let mut phf_map = Cursor::new(Vec::new());
         let mut builder = phf_codegen::Map::new();
-        for (name, dup, ts_name) in names.iter() {
-            if !dup {
-                builder.entry(ts_name.as_str(), format!("{}::{}", c_name, name).as_str());
-            }
+        for (name, _, ts_name) in names.iter() {
+            builder.entry(name.as_str(), format!("\"{}\"", ts_name).as_str());
         }
         writeln!(phf_map, "{}", builder.build()).unwrap();
         let phf_map = String::from_utf8(phf_map.into_inner()).unwrap();
