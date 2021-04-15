@@ -21,38 +21,41 @@ pub enum Ccomment {
     Error = 16,
 }
 
+impl std::fmt::Display for Ccomment {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[allow(clippy::unreadable_literal)]
-static KEYS: phf::Map<&'static str, Ccomment> = ::phf::Map {
-    key: 3558916427560184125,
-    disps: ::phf::Slice::Static(&[(2, 0), (0, 11), (0, 13), (0, 10)]),
+static KEYS: phf::Map<&'static str, &'static str> = ::phf::Map {
+    key: 3347381344252206323,
+    disps: ::phf::Slice::Static(&[(2, 0), (8, 9), (1, 8), (1, 16)]),
     entries: ::phf::Slice::Static(&[
-        ("char_literal_token1", Ccomment::CharLiteralToken1),
-        ("define_token1", Ccomment::DefineToken1),
-        ("raw_string_literal", Ccomment::RawStringLiteral),
-        ("define", Ccomment::Define),
-        ("string_literal", Ccomment::StringLiteral),
-        ("define_repeat1", Ccomment::DefineRepeat1),
-        ("translation_unit", Ccomment::TranslationUnit),
-        ("string_literal_token1", Ccomment::StringLiteralToken1),
-        ("ERROR", Ccomment::Error),
-        ("comment", Ccomment::Comment),
-        ("preproc_line", Ccomment::PreprocLine),
-        ("_top_level_item", Ccomment::TopLevelItem),
-        ("char_literal", Ccomment::CharLiteral),
-        ("end", Ccomment::End),
-        ("translation_unit_repeat1", Ccomment::TranslationUnitRepeat1),
-        ("nothing", Ccomment::Nothing),
-        (
-            "preproc_continuation_line",
-            Ccomment::PreprocContinuationLine,
-        ),
+        ("Nothing", "nothing"),
+        ("RawStringLiteral", "raw_string_literal"),
+        ("StringLiteralToken1", "string_literal_token1"),
+        ("DefineToken1", "define_token1"),
+        ("CharLiteralToken1", "char_literal_token1"),
+        ("CharLiteral", "char_literal"),
+        ("Define", "define"),
+        ("TranslationUnitRepeat1", "translation_unit_repeat1"),
+        ("PreprocLine", "preproc_line"),
+        ("TranslationUnit", "translation_unit"),
+        ("Error", "ERROR"),
+        ("Comment", "comment"),
+        ("End", "end"),
+        ("StringLiteral", "string_literal"),
+        ("TopLevelItem", "_top_level_item"),
+        ("PreprocContinuationLine", "preproc_continuation_line"),
+        ("DefineRepeat1", "define_repeat1"),
     ]),
 };
 
-impl From<&str> for Ccomment {
+impl From<Ccomment> for &str {
     #[inline(always)]
-    fn from(key: &str) -> Self {
-        KEYS.get(key).unwrap().clone()
+    fn from(grammar: Ccomment) -> &'static str {
+        KEYS.get(grammar.to_string().as_str()).unwrap()
     }
 }
 
