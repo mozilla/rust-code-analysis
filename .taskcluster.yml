@@ -331,7 +331,7 @@ tasks:
               features:
                 taskclusterProxy: true
               maxRunTime: 3600
-              image: "mozilla/taskboot:0.3.2"
+              image: "mozilla/taskboot:0.3.3"
               env:
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
@@ -341,6 +341,10 @@ tasks:
                    git config --global user.name moz.tools Bot &&
                    git clone --quiet ${repository} &&
                    cd rust-code-analysis &&
+                   cd tree-sitter-ccomment && taskboot cargo-publish --ignore-published && cd .. &&
+                   cd tree-sitter-preproc && taskboot cargo-publish --ignore-published && cd .. &&
+                   cd tree-sitter-mozjs && taskboot cargo-publish --ignore-published && cd .. &&
+                   cd tree-sitter-mozcpp && taskboot cargo-publish --ignore-published && cd .. &&
                    taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz &&
                    tar xfz book.tar.gz -C rust-code-analysis-book &&
                    ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
