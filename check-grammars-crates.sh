@@ -92,29 +92,12 @@ if [ "$(ls -A $COMPARE)" ]; then
     # Maximum number of considered minimal tests for a metric
     MT_THRESHOLD=30
 
-    # Array containing the considered metrics
-    # TODO: Implement a command into rust-code-analysis-cli that returns all
-    # computed metrics https://github.com/mozilla/rust-code-analysis/issues/478
-    METRICS=("cognitive" "sloc" "ploc" "lloc" "cloc" "blank" "cyclomatic" "halstead" "nom" "nexits" "nargs")
-
-    # Output directory name
+    # Output directory path
     OUTPUT_DIR=/tmp/output-$TREE_SITTER_CRATE
 
-    # Create output directory
-    mkdir -p $OUTPUT_DIR
-
-    # Retrieve minimal tests for a metric
-    for METRIC in "${METRICS[@]}"
-    do
-
-        PREFIX_METRIC="\.$METRIC"
-        FILES=`grep -r -i -l $PREFIX_METRIC $COMPARE | head -$MT_THRESHOLD`
-        if [ -n "$FILES" ]
-        then
-            mkdir -p $OUTPUT_DIR/$METRIC
-            cp $FILES $OUTPUT_DIR/$METRIC
-        fi
-    done
+    # Split files into distinct directories depending on
+    # their metric differences
+    ./split-minimal-tests.py -i $COMPARE -o $OUTPUT_DIR -t $MT_THRESHOLD
 
     tar -czvf /tmp/json-diffs-and-minimal-tests.tar.gz $COMPARE $OUTPUT_DIR
 fi
