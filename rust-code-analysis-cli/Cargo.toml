@@ -16,7 +16,7 @@ clap = "^2.33"
 crossbeam = "^0.8"
 globset = "^0.4"
 num_cpus = "^1.13"
-regex = "^1.4"
+regex = "^1.5"
 rust-code-analysis = { path = "..", version = "0.0"}
 serde = "^1.0"
 serde_cbor = "^0.11"
