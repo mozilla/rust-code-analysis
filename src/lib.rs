@@ -82,6 +82,9 @@ pub use output::*;
 mod spaces;
 pub use crate::spaces::*;
 
+mod ops;
+pub use crate::ops::*;
+
 mod find;
 pub use crate::find::*;
 
