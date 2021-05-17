@@ -30,8 +30,8 @@ pub enum HalsteadType {
 #[doc(hidden)]
 #[derive(Debug, Default, Clone)]
 pub struct HalsteadMaps<'a> {
-    operators: FxHashMap<u16, u64>,
-    operands: FxHashMap<&'a [u8], u64>,
+    pub(crate) operators: FxHashMap<u16, u64>,
+    pub(crate) operands: FxHashMap<&'a [u8], u64>,
 }
 
 impl<'a> HalsteadMaps<'a> {
