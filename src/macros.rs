@@ -152,6 +152,38 @@ macro_rules! mk_action {
                 )*
             }
         }
+
+        /// Returns all operators and operands of each space in a code.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// use std::path::PathBuf;
+        ///
+        /// use rust_code_analysis::{get_ops, LANG};
+        ///
+        /// # fn main() {
+        /// let source_code = "int a = 42;";
+        /// let language = LANG::Cpp;
+        ///
+        /// // The path to a dummy file used to contain the source code
+        /// let path = PathBuf::from("foo.c");
+        /// let source_as_vec = source_code.as_bytes().to_vec();
+        ///
+        /// get_ops(&language, source_as_vec, &path, None).unwrap();
+        /// # }
+        /// ```
+        #[inline(always)]
+        pub fn get_ops(lang: &LANG, source: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Option<Ops> {
+            match lang {
+                $(
+                    LANG::$camel => {
+                        let parser = $parser::new(source, &path, pr);
+                        operands_and_operators(&parser, &path)
+                    },
+                )*
+            }
+        }
     };
 }
 
