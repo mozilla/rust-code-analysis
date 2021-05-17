@@ -62,9 +62,7 @@ macro_rules! count_specific_ancestors {
         while let Some(parent) = node.object().parent() {
             match parent.kind_id().into() {
                 $( $typs )|* => {
-                    if !Self::is_else_if(&Node::new(parent)) {
-                        count += 1;
-                    }
+                    count += 1;
                 },
                 $( $stops )|* => break,
                 _ => {}
