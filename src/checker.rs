@@ -99,6 +99,11 @@ pub trait Checker {
     fn is_func_space(node: &Node) -> bool;
     fn is_non_arg(node: &Node) -> bool;
 
+    #[inline(always)]
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
+
     fn is_error(node: &Node) -> bool {
         node.object().is_error()
     }
@@ -171,6 +176,11 @@ impl Checker for CppCode {
 
     mk_else_if!(IfStatement);
     mk_checker!(is_non_arg, LPAREN, LPAREN2, COMMA, RPAREN);
+
+    #[inline(always)]
+    fn is_primitive(id: u16) -> bool {
+        matches!(id.into(), Cpp::PrimitiveType)
+    }
 }
 
 impl Checker for PythonCode {
@@ -288,6 +298,10 @@ impl Checker for TypescriptCode {
         }
         false
     }
+    #[inline(always)]
+    fn is_primitive(id: u16) -> bool {
+        matches!(id.into(), Typescript::PredefinedType)
+    }
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -313,6 +327,11 @@ impl Checker for TsxCode {
 
     mk_else_if!(IfStatement);
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
+
+    #[inline(always)]
+    fn is_primitive(id: u16) -> bool {
+        matches!(id.into(), Tsx::PredefinedType)
+    }
 }
 
 impl Checker for RustCode {
@@ -338,6 +357,11 @@ impl Checker for RustCode {
             return parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause;
         }
         false
+    }
+
+    #[inline(always)]
+    fn is_primitive(id: u16) -> bool {
+        matches!(id.into(), Rust::PrimitiveType)
     }
     mk_checker!(is_string, StringLiteral, RawStringLiteral);
     mk_checker!(is_call, CallExpression);
