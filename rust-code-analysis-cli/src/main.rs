@@ -29,13 +29,13 @@ use rust_code_analysis::LANG;
 // Structs
 use rust_code_analysis::{
     CommentRm, CommentRmCfg, Count, CountCfg, Dump, DumpCfg, Find, FindCfg, Function, FunctionCfg,
-    Metrics, MetricsCfg, PreprocParser, PreprocResults,
+    Metrics, MetricsCfg, OpsCfg, OpsCode, PreprocParser, PreprocResults,
 };
 
 // Functions
 use rust_code_analysis::{
-    action, fix_includes, get_from_ext, get_function_spaces, guess_language, preprocess, read_file,
-    read_file_with_eol, write_file,
+    action, fix_includes, get_from_ext, get_function_spaces, get_ops, guess_language, preprocess,
+    read_file, read_file_with_eol, write_file,
 };
 
 // Traits
@@ -50,6 +50,7 @@ struct Config {
     count_filter: Vec<String>,
     function: bool,
     metrics: bool,
+    ops: bool,
     output_format: Option<Format>,
     output: Option<PathBuf>,
     pretty: bool,
@@ -118,6 +119,15 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
             let cfg = MetricsCfg { path };
             let path = cfg.path.clone();
             action::<Metrics>(&language, source, &path, pr, cfg)
+        }
+    } else if cfg.ops {
+        if let Some(output_format) = &cfg.output_format {
+            let ops = get_ops(&language, source, &path, pr).unwrap();
+            output_format.dump_ops_formats(&ops, &path, &cfg.output, cfg.pretty)
+        } else {
+            let cfg = OpsCfg { path };
+            let path = cfg.path.clone();
+            action::<OpsCode>(&language, source, &path, pr, cfg)
         }
     } else if cfg.comments {
         let cfg = CommentRmCfg {
@@ -316,6 +326,12 @@ fn main() {
                 .short("m"),
         )
         .arg(
+            Arg::with_name("ops")
+                .help("Retrieves all operands and operators in a code")
+                .long("ops")
+                .conflicts_with("metrics"),
+        )
+        .arg(
             Arg::with_name("in_place")
                 .help("Do action in place")
                 .short("i"),
@@ -427,6 +443,7 @@ fn main() {
         None
     };
     let metrics = matches.is_present("metrics");
+    let ops = matches.is_present("ops");
     let typ = matches.value_of("language_type").unwrap();
     let preproc_value = matches.value_of("preproc").unwrap();
     let (preproc_lock, preproc) = if !preproc_value.is_empty() {
@@ -453,7 +470,7 @@ fn main() {
     let pretty = matches.is_present("pretty");
     let output = matches.value_of("output").map(PathBuf::from);
     let output_is_dir = output.as_ref().map(|p| p.is_dir()).unwrap_or(false);
-    if metrics && output.is_some() && !output_is_dir {
+    if (metrics || ops) && output.is_some() && !output_is_dir {
         eprintln!("Error: The output parameter must be a directory");
         process::exit(1);
     }
@@ -494,6 +511,7 @@ fn main() {
         count_filter,
         function,
         metrics,
+        ops,
         output_format,
         pretty,
         output: output.clone(),
