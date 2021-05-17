@@ -7,13 +7,14 @@ pub enum {{ c_name }} {
     {% endfor %}
 }
 
-#[allow(clippy::unreadable_literal)]
-static KEYS: phf::Map<&'static str, {{ c_name }}> = {{ phf_map }};
-
-impl From<&str> for {{ c_name }} {
+impl From<{{ c_name }}> for &'static str {
     #[inline(always)]
-    fn from(key: &str) -> Self {
-        KEYS.get(key).unwrap().clone()
+    fn from(tok: {{ c_name }}) -> Self {
+        match tok {
+            {% for (name, _, ts_name) in names -%}
+            {{ c_name }}::{{ name }} => "{{ ts_name }}",
+            {% endfor %}
+        }
     }
 }
 
