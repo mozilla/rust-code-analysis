@@ -10,7 +10,7 @@ clap = "^2.33"
 askama = "^0.10"
 phf_codegen = "^0.8"
 
-tree-sitter = "0.19.3"
+tree-sitter = "0.19.5"
 tree-sitter-java = "0.19.0"
 tree-sitter-typescript = "0.19.0"
 tree-sitter-javascript = "0.19.0"
