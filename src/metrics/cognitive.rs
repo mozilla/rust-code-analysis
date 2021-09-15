@@ -252,7 +252,7 @@ impl Cognitive for RustCode {
         match node.object().kind_id().into() {
             IfExpression | IfLetExpression => {
                 // Check if a node is not an else-if
-                if !Self::is_else_if(&node) {
+                if !Self::is_else_if(node) {
                     nesting_levels!(
                         node, stats,
                         [FunctionItem => SourceFile],
@@ -298,7 +298,7 @@ impl Cognitive for CppCode {
 
         match node.object().kind_id().into() {
             IfStatement => {
-                if !Self::is_else_if(&node) {
+                if !Self::is_else_if(node) {
                     nesting_levels!(
                         node, stats,
                         [LambdaExpression => TranslationUnit],

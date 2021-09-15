@@ -266,7 +266,7 @@ fn compute_halstead<'a, T: Getter>(
     code: &'a [u8],
     halstead_maps: &mut HalsteadMaps<'a>,
 ) {
-    match T::get_op_type(&node) {
+    match T::get_op_type(node) {
         HalsteadType::Operator => {
             *halstead_maps
                 .operators

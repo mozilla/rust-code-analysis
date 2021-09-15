@@ -65,7 +65,7 @@ pub fn read_file_with_eol(path: &Path) -> std::io::Result<Option<Vec<u8>>> {
     };
 
     // so start contains more or less 64 chars
-    let mut head = String::from_utf8_lossy(&start).into_owned();
+    let mut head = String::from_utf8_lossy(start).into_owned();
     // The last char could be wrong because we were in the middle of an utf-8 sequence
     head.pop();
     // now check if there is an invalid char
@@ -74,7 +74,7 @@ pub fn read_file_with_eol(path: &Path) -> std::io::Result<Option<Vec<u8>>> {
     }
 
     let mut data = Vec::with_capacity(file_size + 2);
-    data.extend_from_slice(&start);
+    data.extend_from_slice(start);
 
     file.read_to_end(&mut data)?;
 
@@ -327,7 +327,7 @@ pub(crate) fn guess_file<S: ::std::hash::BuildHasher>(
             if current_path == p {
                 continue;
             }
-            if let Some(dist) = get_paths_dist(current_path, &p) {
+            if let Some(dist) = get_paths_dist(current_path, p) {
                 match dist.cmp(&dist_min) {
                     Ordering::Less => {
                         dist_min = dist;

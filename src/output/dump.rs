@@ -43,8 +43,8 @@ pub fn dump_node(
     let stdout = StandardStream::stdout(ColorChoice::Always);
     let mut stdout = stdout.lock();
     let ret = dump_tree_helper(
-        &code,
-        &node,
+        code,
+        node,
         "",
         true,
         &mut stdout,
@@ -136,7 +136,7 @@ fn dump_tree_helper(
         loop {
             i -= 1;
             dump_tree_helper(
-                &code,
+                code,
                 &Node::new(cursor.node()),
                 &prefix,
                 i == 0,
@@ -178,7 +178,7 @@ impl Callback for Dump {
 
     fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
         dump_node(
-            &parser.get_code(),
+            parser.get_code(),
             &parser.get_root(),
             -1,
             cfg.line_start,
