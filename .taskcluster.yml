@@ -69,7 +69,7 @@ tasks:
             - "git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
-               cargo install mdbook --no-default-features --features search,output --vers \"^0.1.0\" &&
+               cargo install mdbook --no-default-features --features output --vers \"^0.1.0\" &&
                cargo doc --release &&
                cd rust-code-analysis-book &&
                mdbook build &&
