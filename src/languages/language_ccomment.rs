@@ -23,30 +23,30 @@ pub enum Ccomment {
 
 #[allow(clippy::unreadable_literal)]
 static KEYS: phf::Map<&'static str, Ccomment> = ::phf::Map {
-    key: 3558916427560184125,
-    disps: ::phf::Slice::Static(&[(2, 0), (0, 11), (0, 13), (0, 10)]),
-    entries: ::phf::Slice::Static(&[
-        ("char_literal_token1", Ccomment::CharLiteralToken1),
+    key: 15467950696543387533,
+    disps: &[(1, 0), (0, 13), (5, 8), (7, 15)],
+    entries: &[
         ("define_token1", Ccomment::DefineToken1),
-        ("raw_string_literal", Ccomment::RawStringLiteral),
-        ("define", Ccomment::Define),
-        ("string_literal", Ccomment::StringLiteral),
-        ("define_repeat1", Ccomment::DefineRepeat1),
-        ("translation_unit", Ccomment::TranslationUnit),
-        ("string_literal_token1", Ccomment::StringLiteralToken1),
-        ("ERROR", Ccomment::Error),
-        ("comment", Ccomment::Comment),
-        ("preproc_line", Ccomment::PreprocLine),
-        ("_top_level_item", Ccomment::TopLevelItem),
-        ("char_literal", Ccomment::CharLiteral),
-        ("end", Ccomment::End),
-        ("translation_unit_repeat1", Ccomment::TranslationUnitRepeat1),
         ("nothing", Ccomment::Nothing),
+        ("char_literal", Ccomment::CharLiteral),
+        ("translation_unit", Ccomment::TranslationUnit),
+        ("define", Ccomment::Define),
         (
             "preproc_continuation_line",
             Ccomment::PreprocContinuationLine,
         ),
-    ]),
+        ("string_literal_token1", Ccomment::StringLiteralToken1),
+        ("ERROR", Ccomment::Error),
+        ("_top_level_item", Ccomment::TopLevelItem),
+        ("char_literal_token1", Ccomment::CharLiteralToken1),
+        ("comment", Ccomment::Comment),
+        ("translation_unit_repeat1", Ccomment::TranslationUnitRepeat1),
+        ("preproc_line", Ccomment::PreprocLine),
+        ("string_literal", Ccomment::StringLiteral),
+        ("define_repeat1", Ccomment::DefineRepeat1),
+        ("raw_string_literal", Ccomment::RawStringLiteral),
+        ("end", Ccomment::End),
+    ],
 };
 
 impl From<&str> for Ccomment {
