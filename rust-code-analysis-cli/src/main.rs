@@ -236,14 +236,14 @@ fn explore(
                         };
                     }
 
-                    send_file(path, &cfg, language, &sender);
+                    send_file(path, cfg, language, sender);
                 }
             }
         } else if (include.is_empty() || include.is_match(&path))
             && (exclude.is_empty() || !exclude.is_match(&path))
             && path.is_file()
         {
-            send_file(path, &cfg, language, &sender);
+            send_file(path, cfg, language, sender);
         }
     }
 

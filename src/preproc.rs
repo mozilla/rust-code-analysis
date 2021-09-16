@@ -86,7 +86,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
         };
         let direct_includes = &pf.direct_includes;
         for i in direct_includes {
-            let possibilities = guess_file(&file, i, all_files);
+            let possibilities = guess_file(file, i, all_files);
             for i in possibilities {
                 if &i != file {
                     let i = match nodes.entry(i.clone()) {
@@ -213,7 +213,7 @@ pub fn preprocess(parser: &PreprocParser, path: &Path, results: &mut PreprocResu
                 let identifier = cursor.node();
 
                 if identifier.kind_id() == Preproc::Identifier {
-                    let r#macro = identifier.utf8_text(&code).unwrap();
+                    let r#macro = identifier.utf8_text(code).unwrap();
                     if !SPECIALS.contains(r#macro) {
                         file_result.macros.insert(r#macro.to_string());
                     }

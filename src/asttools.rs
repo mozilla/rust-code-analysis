@@ -16,7 +16,6 @@ pub fn get_parent<'a>(node: &'a Node<'a>, level: usize) -> Option<Node<'a>> {
     Some(node)
 }
 
-#[macro_use]
 macro_rules! has_ancestors {
     ($node:expr, $( $typs:pat )|*, $( $typ:pat ),+) => {{
         let mut res = false;
@@ -54,7 +53,6 @@ macro_rules! has_ancestors {
     }};
 }
 
-#[macro_use]
 macro_rules! count_specific_ancestors {
     ($node:expr, $( $typs:pat )|*, $( $stops:pat )|*) => {{
         let mut count = 0;

@@ -1,4 +1,3 @@
-#[macro_use]
 macro_rules! mk_checker {
     ( $name:ident, $( $type:ident ),* ) => {
         #[inline(always)]
@@ -13,7 +12,6 @@ macro_rules! mk_checker {
     };
 }
 
-#[macro_use]
 macro_rules! mk_else_if {
     ($if_type:ident) => {
         #[inline(always)]
@@ -30,7 +28,6 @@ macro_rules! mk_else_if {
     };
 }
 
-#[macro_use]
 macro_rules! get_language {
     (tree_sitter_cpp) => {
         tree_sitter_mozcpp::language()
@@ -46,7 +43,6 @@ macro_rules! get_language {
     };
 }
 
-#[macro_use]
 macro_rules! mk_enum {
     ( $( $camel:ident, $description:expr ),* ) => {
         /// The list of supported languages.
@@ -60,7 +56,6 @@ macro_rules! mk_enum {
     };
 }
 
-#[macro_use]
 macro_rules! mk_impl_lang {
     ( $( ($camel:ident, $name:ident, $display: expr) ),* ) => {
         impl LANG {
@@ -85,7 +80,6 @@ macro_rules! mk_impl_lang {
     };
 }
 
-#[macro_use]
 macro_rules! mk_action {
     ( $( ($camel:ident, $parser:ident) ),* ) => {
         /// Runs a function, which implements the [`Callback`] trait,
@@ -161,7 +155,6 @@ macro_rules! mk_action {
     };
 }
 
-#[macro_use]
 macro_rules! mk_extensions {
     ( $( ($camel:ident, [ $( $ext:ident ),* ]) ),* ) => {
         /// Detects the language associated to the input file extension.
@@ -188,7 +181,6 @@ macro_rules! mk_extensions {
     };
 }
 
-#[macro_use]
 macro_rules! mk_emacs_mode {
     ( $( ($camel:ident, [ $( $emacs_mode:expr ),* ]) ),* ) => {
         /// Detects the language associated to the input `Emacs` mode.
@@ -218,7 +210,6 @@ macro_rules! mk_emacs_mode {
     };
 }
 
-#[macro_use]
 macro_rules! mk_code {
     ( $( ($camel:ident, $code:ident, $parser:ident, $name:ident, $docname:expr) ),* ) => {
         $(
@@ -249,7 +240,6 @@ macro_rules! mk_code {
     };
 }
 
-#[macro_use]
 macro_rules! mk_langs {
     ( $( ($camel:ident, $description: expr, $display: expr, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
         mk_enum!($( $camel, $description ),*);
@@ -261,7 +251,6 @@ macro_rules! mk_langs {
     };
 }
 
-#[macro_use]
 macro_rules! color {
     ( $stdout: ident, $color: ident) => {
         $stdout.set_color(ColorSpec::new().set_fg(Some(Color::$color)))?;
@@ -276,7 +265,6 @@ macro_rules! color {
 }
 
 #[cfg(test)]
-#[macro_use]
 macro_rules! check_metrics {
     ($source: expr, $file: expr, $parser: ident, $metric: ident,
      [ $( ( $func_int: ident, $true_int_value: expr $(,$type_int: ty)? )$(,)* )* ]$(,)*

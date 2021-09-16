@@ -43,7 +43,7 @@ use crate::spaces::{CodeMetrics, FuncSpace};
 pub fn dump_root(space: &FuncSpace) -> std::io::Result<()> {
     let stdout = StandardStream::stdout(ColorChoice::Always);
     let mut stdout = stdout.lock();
-    dump_space(&space, "", true, &mut stdout)?;
+    dump_space(space, "", true, &mut stdout)?;
     color!(stdout, White);
 
     Ok(())
@@ -64,7 +64,7 @@ fn dump_space(
     write!(stdout, "{}: ", space.kind)?;
 
     color!(stdout, Cyan, true);
-    write!(stdout, "{}", space.name.as_ref().map_or("", |name| &name))?;
+    write!(stdout, "{}", space.name.as_ref().map_or("", |name| name))?;
 
     color!(stdout, Red, true);
     writeln!(stdout, " (@{})", space.start_line)?;

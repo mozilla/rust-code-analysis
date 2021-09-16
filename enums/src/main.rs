@@ -45,17 +45,17 @@ fn main() {
 
     match language {
         "rust" => {
-            if let Some(err) = generate_rust(&output, &file_template).err() {
+            if let Some(err) = generate_rust(output, file_template).err() {
                 eprintln!("{:?}", err);
             }
         }
         "go" => {
-            if let Some(err) = generate_go(&output, &file_template).err() {
+            if let Some(err) = generate_go(output, file_template).err() {
                 eprintln!("{:?}", err);
             }
         }
         "json" => {
-            if let Some(err) = generate_json(&output, &file_template).err() {
+            if let Some(err) = generate_json(output, file_template).err() {
                 eprintln!("{:?}", err);
             }
         }

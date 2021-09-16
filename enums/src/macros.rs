@@ -1,4 +1,3 @@
-#[macro_use]
 macro_rules! mk_enum {
     ( $( $camel:ident ),* ) => {
         #[derive(Clone, Debug, IntoEnumIterator, PartialEq)]
@@ -10,7 +9,6 @@ macro_rules! mk_enum {
     };
 }
 
-#[macro_use]
 macro_rules! mk_get_language {
     ( $( ($camel:ident, $name:ident) ),* ) => {
         pub fn get_language(lang: &Lang) -> Language {
@@ -30,7 +28,6 @@ macro_rules! mk_get_language {
     };
 }
 
-#[macro_use]
 macro_rules! mk_get_language_name {
     ( $( $camel:ident ),* ) => {
         pub fn get_language_name(lang: &Lang) -> &'static str {
@@ -43,7 +40,6 @@ macro_rules! mk_get_language_name {
     };
 }
 
-#[macro_use]
 macro_rules! mk_langs {
     ( $( ($camel:ident, $name:ident) ),* ) => {
         mk_enum!($( $camel ),*);

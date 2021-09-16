@@ -156,7 +156,7 @@ impl FuncSpace {
             ),
         };
         Self {
-            name: T::get_func_space_name(&node, code).map(|name| name.to_string()),
+            name: T::get_func_space_name(node, code).map(|name| name.to_string()),
             spaces: Vec::new(),
             metrics: CodeMetrics::default(),
             kind,
