@@ -8,11 +8,11 @@ use crate::node::Node;
 use crate::cognitive::{self, Cognitive};
 use crate::cyclomatic::{self, Cyclomatic};
 use crate::exit::{self, Exit};
-use crate::fn_args::{self, NArgs};
 use crate::getter::Getter;
 use crate::halstead::{self, Halstead, HalsteadMaps};
 use crate::loc::{self, Loc};
 use crate::mi::{self, Mi};
+use crate::nargs::{self, NArgs};
 use crate::nom::{self, Nom};
 
 use crate::dump_metrics::*;
@@ -60,7 +60,7 @@ impl fmt::Display for SpaceKind {
 #[derive(Debug, Clone, Serialize)]
 pub struct CodeMetrics {
     /// `NArgs` data
-    pub nargs: fn_args::Stats,
+    pub nargs: nargs::Stats,
     /// `NExits` data
     pub nexits: exit::Stats,
     pub cognitive: cognitive::Stats,
@@ -85,7 +85,7 @@ impl Default for CodeMetrics {
             loc: loc::Stats::default(),
             nom: nom::Stats::default(),
             mi: mi::Stats::default(),
-            nargs: fn_args::Stats::default(),
+            nargs: nargs::Stats::default(),
             nexits: exit::Stats::default(),
         }
     }

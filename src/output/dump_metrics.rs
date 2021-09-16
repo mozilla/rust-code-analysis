@@ -4,10 +4,10 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLoc
 use crate::cognitive;
 use crate::cyclomatic;
 use crate::exit;
-use crate::fn_args;
 use crate::halstead;
 use crate::loc;
 use crate::mi;
+use crate::nargs;
 use crate::nom;
 
 use crate::spaces::{CodeMetrics, FuncSpace};
@@ -255,7 +255,7 @@ fn dump_mi(
 }
 
 fn dump_nargs(
-    stats: &fn_args::Stats,
+    stats: &nargs::Stats,
     prefix: &str,
     last: bool,
     stdout: &mut StandardStreamLock,
