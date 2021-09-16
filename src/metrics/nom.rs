@@ -68,6 +68,105 @@ impl Stats {
     }
 }
 
+#[inline(always)]
+fn is_child(node: &Node, id: u16) -> bool {
+    node.object()
+        .children(&mut node.object().walk())
+        .any(|child| child.kind_id() == id)
+}
+
+#[inline(always)]
+fn has_sibling(node: &Node, id: u16) -> bool {
+    let parent = node.object().parent();
+    if let Some(parent) = parent {
+        node.object()
+            .children(&mut parent.walk())
+            .any(|child| child.kind_id() == id)
+    } else {
+        false
+    }
+}
+
+macro_rules! function {
+    ($node: ident, $stats: ident) => {
+        // If a function node has named ancestors or child then it is a function,
+        // otherwise a closure.
+        if count_specific_ancestors!(
+            $node,
+            VariableDeclarator | AssignmentExpression | LabeledStatement | Pair,
+            StatementBlock | ReturnStatement | NewExpression | Arguments
+        ) > 0
+            || is_child($node, Identifier as u16)
+        {
+            $stats.functions += 1;
+        } else {
+            $stats.closures += 1;
+        }
+    };
+}
+
+macro_rules! arrow_function {
+    ($node: ident, $stats: ident) => {
+        // If an arrow function node has named ancestors then it is a function,
+        // otherwise a closure.
+        if count_specific_ancestors!(
+            $node,
+            VariableDeclarator | AssignmentExpression | LabeledStatement,
+            StatementBlock | ReturnStatement | NewExpression | CallExpression
+        ) > 0
+            || has_sibling($node, PropertyIdentifier as u16)
+        {
+            $stats.functions += 1;
+        } else {
+            $stats.closures += 1;
+        }
+    };
+}
+
+macro_rules! js_grammar {
+    ($grammar: ident, $node: ident, $stats: ident) => {
+        use $grammar::*;
+
+        match $node.object().kind_id().into() {
+            FunctionDeclaration | MethodDefinition => {
+                $stats.functions += 1;
+            }
+            GeneratorFunction | GeneratorFunctionDeclaration => {
+                $stats.closures += 1;
+            }
+            Function => {
+                function!($node, $stats);
+            }
+            ArrowFunction => {
+                arrow_function!($node, $stats);
+            }
+            _ => {}
+        }
+    };
+}
+
+macro_rules! typescript_grammar {
+    ($grammar: ident, $node: ident, $stats: ident) => {
+        use $grammar::*;
+
+        match $node.object().kind_id().into() {
+            FunctionDeclaration | MethodDefinition => {
+                $stats.functions += 1;
+            }
+            GeneratorFunction | GeneratorFunctionDeclaration => {
+                $stats.closures += 1;
+            }
+            Function => {
+                function!($node, $stats);
+            }
+            ArrowFunction => {
+                arrow_function!($node, $stats);
+            }
+            _ => {}
+        }
+    };
+}
+
 #[doc(hidden)]
 pub trait Nom
 where
@@ -94,65 +193,25 @@ impl Nom for PythonCode {
 
 impl Nom for MozjsCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        use Mozjs::*;
-
-        match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
-                stats.functions += 1;
-            }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
-                stats.closures += 1;
-            }
-            _ => {}
-        }
+        js_grammar!(Mozjs, node, stats);
     }
 }
 
 impl Nom for JavascriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        use Javascript::*;
-
-        match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
-                stats.functions += 1;
-            }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
-                stats.closures += 1;
-            }
-            _ => {}
-        }
+        js_grammar!(Javascript, node, stats);
     }
 }
 
 impl Nom for TypescriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        use Typescript::*;
-
-        match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
-                stats.functions += 1;
-            }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
-                stats.closures += 1;
-            }
-            _ => {}
-        }
+        typescript_grammar!(Typescript, node, stats);
     }
 }
 
 impl Nom for TsxCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        use Tsx::*;
-
-        match node.object().kind_id().into() {
-            Function | FunctionDeclaration | MethodDefinition => {
-                stats.functions += 1;
-            }
-            GeneratorFunction | GeneratorFunctionDeclaration | ArrowFunction => {
-                stats.closures += 1;
-            }
-            _ => {}
-        }
+        typescript_grammar!(Tsx, node, stats);
     }
 }
 
@@ -241,6 +300,25 @@ mod tests {
     }
 
     #[test]
+    fn c_nom() {
+        check_metrics!(
+            "int foo();
+
+             int foo() {
+                 return 0;
+             }",
+            "foo.c",
+            CppParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
     fn cpp_nom() {
         check_metrics!(
             "struct A {
@@ -260,19 +338,195 @@ mod tests {
     }
 
     #[test]
-    fn c_nom() {
+    fn javascript_nom() {
         check_metrics!(
-            "int foo();
-
-             int foo() {
-                 return 0;
+            "function f(a, b) {
+                 function foo(a) {
+                     return a;
+                 }
+                 var bar = (function () {
+                     var counter = 0;
+                     return function () {
+                         counter += 1;
+                         return counter
+                     }
+                 })();
+                 return bar(foo(a), a);
              }",
-            "foo.c",
-            CppParser,
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 3, usize), // f, foo, bar
+                (closures, 1, usize),  // return function ()
+                (total, 4, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_call_nom() {
+        check_metrics!(
+            "add_task(async function test_safe_mode() {
+                 gAppInfo.inSafeMode = true;
+             });",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 1, usize), // test_safe_mode
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_assignment_nom() {
+        check_metrics!(
+            "AnimationTest.prototype.enableDisplay = function(element) {};",
+            "foo.js",
+            JavascriptParser,
             nom,
             [
                 (functions, 1, usize),
                 (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_labeled_nom() {
+        check_metrics!(
+            "toJSON: function() {
+                 return this.inspect(true);
+             }",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_labeled_arrow_nom() {
+        check_metrics!(
+            "const dimConverters = {
+                pt: x => x,
+             };",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_pair_nom() {
+        check_metrics!(
+            "return {
+                 initialize: function(object) {
+                     this._object = object.toObject();
+                 },
+             }",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_unnamed_nom() {
+        check_metrics!(
+            "Ajax.getTransport = Try.these(
+                 function() {
+                     return function(){ return new XMLHttpRequest()}
+                 }
+             );",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 0, usize),
+                (closures, 2, usize),
+                (total, 2, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_arrow_nom() {
+        check_metrics!(
+            "var materials = [\"Hydrogen\"];
+             materials.map(material => material.length);
+             let add = (a, b)  => a + b;",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 1, usize), // add
+                (closures, 1, usize),  // materials.map
+                (total, 2, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_arrow_assignment_nom() {
+        check_metrics!(
+            "sink.onPull = () => { };",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 1, usize),
+                (closures, 0, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_arrow_new_nom() {
+        check_metrics!(
+            "const response = new Promise(resolve => channel.port1.onmessage = resolve);",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 0, usize),
+                (closures, 1, usize),
+                (total, 1, usize)
+            ]
+        );
+    }
+
+    #[test]
+    fn javascript_arrow_call_nom() {
+        check_metrics!(
+            "let notDisabled = TestUtils.waitForCondition(
+                 () => !backbutton.hasAttribute(\"disabled\")
+             );",
+            "foo.js",
+            JavascriptParser,
+            nom,
+            [
+                (functions, 0, usize),
+                (closures, 1, usize),
                 (total, 1, usize)
             ]
         );
