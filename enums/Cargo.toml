@@ -5,7 +5,7 @@ authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2018"
 
 [dependencies]
-enum-iterator = "^0.6"
+enum-iterator = "^0.7"
 clap = "^2.33"
 askama = "^0.10"
 phf_codegen = "^0.8"
