@@ -351,5 +351,5 @@ impl Checker for RustCode {
         TraitItem,
         ClosureExpression
     );
-    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN, AttributeItem);
+    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN, PIPE, AttributeItem);
 }
