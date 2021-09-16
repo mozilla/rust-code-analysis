@@ -8,7 +8,7 @@ edition = "2018"
 enum-iterator = "^0.6"
 clap = "^2.33"
 askama = "^0.10"
-phf_codegen = "^0.8"
+phf_codegen = "^0.10"
 
 tree-sitter = "0.19.3"
 tree-sitter-java = "0.19.0"
