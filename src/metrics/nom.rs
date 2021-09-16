@@ -68,189 +68,29 @@ impl Stats {
     }
 }
 
-#[inline(always)]
-fn is_child(node: &Node, id: u16) -> bool {
-    node.object()
-        .children(&mut node.object().walk())
-        .any(|child| child.kind_id() == id)
-}
-
-#[inline(always)]
-fn has_sibling(node: &Node, id: u16) -> bool {
-    let parent = node.object().parent();
-    if let Some(parent) = parent {
-        node.object()
-            .children(&mut parent.walk())
-            .any(|child| child.kind_id() == id)
-    } else {
-        false
-    }
-}
-
-macro_rules! function {
-    ($node: ident, $stats: ident) => {
-        // If a function node has named ancestors or child then it is a function,
-        // otherwise a closure.
-        if count_specific_ancestors!(
-            $node,
-            VariableDeclarator | AssignmentExpression | LabeledStatement | Pair,
-            StatementBlock | ReturnStatement | NewExpression | Arguments
-        ) > 0
-            || is_child($node, Identifier as u16)
-        {
-            $stats.functions += 1;
-        } else {
-            $stats.closures += 1;
-        }
-    };
-}
-
-macro_rules! arrow_function {
-    ($node: ident, $stats: ident) => {
-        // If an arrow function node has named ancestors then it is a function,
-        // otherwise a closure.
-        if count_specific_ancestors!(
-            $node,
-            VariableDeclarator | AssignmentExpression | LabeledStatement,
-            StatementBlock | ReturnStatement | NewExpression | CallExpression
-        ) > 0
-            || has_sibling($node, PropertyIdentifier as u16)
-        {
-            $stats.functions += 1;
-        } else {
-            $stats.closures += 1;
-        }
-    };
-}
-
-macro_rules! js_grammar {
-    ($grammar: ident, $node: ident, $stats: ident) => {
-        use $grammar::*;
-
-        match $node.object().kind_id().into() {
-            FunctionDeclaration | MethodDefinition => {
-                $stats.functions += 1;
-            }
-            GeneratorFunction | GeneratorFunctionDeclaration => {
-                $stats.closures += 1;
-            }
-            Function => {
-                function!($node, $stats);
-            }
-            ArrowFunction => {
-                arrow_function!($node, $stats);
-            }
-            _ => {}
-        }
-    };
-}
-
-macro_rules! typescript_grammar {
-    ($grammar: ident, $node: ident, $stats: ident) => {
-        use $grammar::*;
-
-        match $node.object().kind_id().into() {
-            FunctionDeclaration | MethodDefinition => {
-                $stats.functions += 1;
-            }
-            GeneratorFunction | GeneratorFunctionDeclaration => {
-                $stats.closures += 1;
-            }
-            Function => {
-                function!($node, $stats);
-            }
-            ArrowFunction => {
-                arrow_function!($node, $stats);
-            }
-            _ => {}
-        }
-    };
-}
-
 #[doc(hidden)]
 pub trait Nom
 where
     Self: Checker,
 {
-    fn compute(_node: &Node, _stats: &mut Stats) {}
-}
-
-impl Nom for PythonCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        use Python::*;
-
-        match node.object().kind_id().into() {
-            FunctionDefinition => {
-                stats.functions += 1;
-            }
-            Lambda => {
-                stats.closures += 1;
-            }
-            _ => {}
+        if Self::is_func(node) {
+            stats.functions += 1;
+            return;
+        }
+        if Self::is_closure(node) {
+            stats.closures += 1;
         }
     }
 }
 
-impl Nom for MozjsCode {
-    fn compute(node: &Node, stats: &mut Stats) {
-        js_grammar!(Mozjs, node, stats);
-    }
-}
-
-impl Nom for JavascriptCode {
-    fn compute(node: &Node, stats: &mut Stats) {
-        js_grammar!(Javascript, node, stats);
-    }
-}
-
-impl Nom for TypescriptCode {
-    fn compute(node: &Node, stats: &mut Stats) {
-        typescript_grammar!(Typescript, node, stats);
-    }
-}
-
-impl Nom for TsxCode {
-    fn compute(node: &Node, stats: &mut Stats) {
-        typescript_grammar!(Tsx, node, stats);
-    }
-}
-
-impl Nom for RustCode {
-    fn compute(node: &Node, stats: &mut Stats) {
-        use Rust::*;
-
-        match node.object().kind_id().into() {
-            FunctionItem => {
-                stats.functions += 1;
-            }
-            ClosureExpression => {
-                stats.closures += 1;
-            }
-            _ => {}
-        }
-    }
-}
-
-impl Nom for CppCode {
-    fn compute(node: &Node, stats: &mut Stats) {
-        use Cpp::*;
-
-        match node.object().kind_id().into() {
-            FunctionDefinition
-            | FunctionDefinition2
-            | FunctionDefinition3
-            | FunctionDefinition4
-            | FunctionDefinitionRepeat1 => {
-                stats.functions += 1;
-            }
-            LambdaExpression => {
-                stats.closures += 1;
-            }
-            _ => {}
-        }
-    }
-}
-
+impl Nom for PythonCode {}
+impl Nom for MozjsCode {}
+impl Nom for JavascriptCode {}
+impl Nom for TypescriptCode {}
+impl Nom for TsxCode {}
+impl Nom for RustCode {}
+impl Nom for CppCode {}
 impl Nom for PreprocCode {}
 impl Nom for CcommentCode {}
 impl Nom for JavaCode {}
