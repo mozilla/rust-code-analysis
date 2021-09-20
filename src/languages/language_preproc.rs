@@ -41,67 +41,48 @@ pub enum Preproc {
     Error = 36,
 }
 
-#[allow(clippy::unreadable_literal)]
-static KEYS: phf::Map<&'static str, Preproc> = ::phf::Map {
-    key: 12913932095322966823,
-    disps: &[
-        (1, 0),
-        (2, 13),
-        (0, 28),
-        (2, 16),
-        (0, 0),
-        (0, 27),
-        (5, 36),
-        (12, 16),
-    ],
-    entries: &[
-        ("preproc_elif_token1", Preproc::PreprocElifToken1),
-        ("preproc_else", Preproc::PreprocElse),
-        ("preproc_nothing_token1", Preproc::PreprocNothingToken1),
-        ("raw_string_literal", Preproc::RawStringLiteral),
-        ("_top_level_item", Preproc::TopLevelItem),
-        ("end", Preproc::End),
-        ("preproc_else_token1", Preproc::PreprocElseToken1),
-        ("\\n", Preproc::LF),
-        ("preproc_if", Preproc::PreprocIf),
-        ("undef", Preproc::Undef),
-        ("define_token1", Preproc::DefineToken1),
-        ("preproc_line", Preproc::PreprocLine),
-        ("string_literal_token1", Preproc::StringLiteralToken1),
-        ("path", Preproc::Path),
-        ("define_repeat1", Preproc::DefineRepeat1),
-        ("translation_unit", Preproc::TranslationUnit),
-        ("preproc_if_token1", Preproc::PreprocIfToken1),
-        ("char_literal_token1", Preproc::CharLiteralToken1),
-        (
-            "preproc_continuation_line",
-            Preproc::PreprocContinuationLine,
-        ),
-        ("undef_token1", Preproc::UndefToken1),
-        ("define", Preproc::Define),
-        ("preproc_nothing", Preproc::PreprocNothing),
-        ("char_literal", Preproc::CharLiteral),
-        ("preproc_elif", Preproc::PreprocElif),
-        ("nothing", Preproc::Nothing),
-        ("<", Preproc::LT),
-        ("preproc_include", Preproc::PreprocInclude),
-        ("translation_unit_repeat1", Preproc::TranslationUnitRepeat1),
-        ("string_literal", Preproc::StringLiteral),
-        ("identifier", Preproc::Identifier),
-        ("preproc_if_token2", Preproc::PreprocIfToken2),
-        ("integer_literal", Preproc::IntegerLiteral),
-        ("preproc_include_token1", Preproc::PreprocIncludeToken1),
-        ("preproc_if_repeat1", Preproc::PreprocIfRepeat1),
-        ("ERROR", Preproc::Error),
-        ("comment", Preproc::Comment),
-        (">", Preproc::GT),
-    ],
-};
-
-impl From<&str> for Preproc {
+impl From<Preproc> for &'static str {
     #[inline(always)]
-    fn from(key: &str) -> Self {
-        KEYS.get(key).unwrap().clone()
+    fn from(tok: Preproc) -> Self {
+        match tok {
+            Preproc::End => "end",
+            Preproc::Identifier => "identifier",
+            Preproc::Nothing => "nothing",
+            Preproc::PreprocContinuationLine => "preproc_continuation_line",
+            Preproc::PreprocLine => "preproc_line",
+            Preproc::PreprocIncludeToken1 => "preproc_include_token1",
+            Preproc::LT => "<",
+            Preproc::GT => ">",
+            Preproc::Path => "path",
+            Preproc::DefineToken1 => "define_token1",
+            Preproc::LF => "\n",
+            Preproc::PreprocIfToken1 => "preproc_if_token1",
+            Preproc::PreprocIfToken2 => "preproc_if_token2",
+            Preproc::PreprocElifToken1 => "preproc_elif_token1",
+            Preproc::PreprocElseToken1 => "preproc_else_token1",
+            Preproc::UndefToken1 => "undef_token1",
+            Preproc::PreprocNothingToken1 => "preproc_nothing_token1",
+            Preproc::StringLiteralToken1 => "string_literal_token1",
+            Preproc::CharLiteralToken1 => "char_literal_token1",
+            Preproc::IntegerLiteral => "integer_literal",
+            Preproc::Comment => "comment",
+            Preproc::RawStringLiteral => "raw_string_literal",
+            Preproc::TranslationUnit => "translation_unit",
+            Preproc::TopLevelItem => "_top_level_item",
+            Preproc::PreprocInclude => "preproc_include",
+            Preproc::Define => "define",
+            Preproc::PreprocIf => "preproc_if",
+            Preproc::PreprocElif => "preproc_elif",
+            Preproc::PreprocElse => "preproc_else",
+            Preproc::Undef => "undef",
+            Preproc::PreprocNothing => "preproc_nothing",
+            Preproc::StringLiteral => "string_literal",
+            Preproc::CharLiteral => "char_literal",
+            Preproc::TranslationUnitRepeat1 => "translation_unit_repeat1",
+            Preproc::DefineRepeat1 => "define_repeat1",
+            Preproc::PreprocIfRepeat1 => "preproc_if_repeat1",
+            Preproc::Error => "ERROR",
+        }
     }
 }
 
