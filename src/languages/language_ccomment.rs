@@ -21,38 +21,28 @@ pub enum Ccomment {
     Error = 16,
 }
 
-#[allow(clippy::unreadable_literal)]
-static KEYS: phf::Map<&'static str, Ccomment> = ::phf::Map {
-    key: 15467950696543387533,
-    disps: &[(1, 0), (0, 13), (5, 8), (7, 15)],
-    entries: &[
-        ("define_token1", Ccomment::DefineToken1),
-        ("nothing", Ccomment::Nothing),
-        ("char_literal", Ccomment::CharLiteral),
-        ("translation_unit", Ccomment::TranslationUnit),
-        ("define", Ccomment::Define),
-        (
-            "preproc_continuation_line",
-            Ccomment::PreprocContinuationLine,
-        ),
-        ("string_literal_token1", Ccomment::StringLiteralToken1),
-        ("ERROR", Ccomment::Error),
-        ("_top_level_item", Ccomment::TopLevelItem),
-        ("char_literal_token1", Ccomment::CharLiteralToken1),
-        ("comment", Ccomment::Comment),
-        ("translation_unit_repeat1", Ccomment::TranslationUnitRepeat1),
-        ("preproc_line", Ccomment::PreprocLine),
-        ("string_literal", Ccomment::StringLiteral),
-        ("define_repeat1", Ccomment::DefineRepeat1),
-        ("raw_string_literal", Ccomment::RawStringLiteral),
-        ("end", Ccomment::End),
-    ],
-};
-
-impl From<&str> for Ccomment {
+impl From<Ccomment> for &'static str {
     #[inline(always)]
-    fn from(key: &str) -> Self {
-        KEYS.get(key).unwrap().clone()
+    fn from(tok: Ccomment) -> Self {
+        match tok {
+            Ccomment::End => "end",
+            Ccomment::Nothing => "nothing",
+            Ccomment::PreprocContinuationLine => "preproc_continuation_line",
+            Ccomment::PreprocLine => "preproc_line",
+            Ccomment::DefineToken1 => "define_token1",
+            Ccomment::StringLiteralToken1 => "string_literal_token1",
+            Ccomment::CharLiteralToken1 => "char_literal_token1",
+            Ccomment::Comment => "comment",
+            Ccomment::RawStringLiteral => "raw_string_literal",
+            Ccomment::TranslationUnit => "translation_unit",
+            Ccomment::TopLevelItem => "_top_level_item",
+            Ccomment::Define => "define",
+            Ccomment::StringLiteral => "string_literal",
+            Ccomment::CharLiteral => "char_literal",
+            Ccomment::TranslationUnitRepeat1 => "translation_unit_repeat1",
+            Ccomment::DefineRepeat1 => "define_repeat1",
+            Ccomment::Error => "ERROR",
+        }
     }
 }
 
