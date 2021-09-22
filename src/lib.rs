@@ -56,6 +56,7 @@ extern crate serde;
 
 #[macro_use]
 mod asttools;
+mod c_langs_macros;
 mod c_macro;
 #[macro_use]
 mod macros;

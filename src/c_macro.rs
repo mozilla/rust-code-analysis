@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 
+use crate::c_langs_macros::is_predefined_macros;
+
 const DOLLARS: [u8; 2048] = [b'$'; 2048];
-include!(concat!(env!("OUT_DIR"), "/gen_c_macros.rs"));
 
 #[inline(always)]
 fn is_identifier_part(c: u8) -> bool {
@@ -18,7 +19,7 @@ fn is_identifier_starter(c: u8) -> bool {
 
 #[inline(always)]
 fn is_macro<S: ::std::hash::BuildHasher>(mac: &str, macros: &HashSet<String, S>) -> bool {
-    macros.contains(mac) || PREDEFINED_MACROS.contains(mac)
+    macros.contains(mac) | is_predefined_macros(mac)
 }
 
 pub fn replace<S: ::std::hash::BuildHasher>(
