@@ -2,12 +2,15 @@ extern crate phf_codegen;
 
 use askama::Template;
 use enum_iterator::IntoEnumIterator;
+use std::env;
 use std::fs::File;
-use std::io::Write;
-use std::path::PathBuf;
+use std::io::{BufWriter, Read, Write};
+use std::path::{Path, PathBuf};
 
 use crate::common::*;
 use crate::languages::*;
+
+const MACROS_DEFINITION_DIR: &str = "data";
 
 #[derive(Template)]
 #[template(path = "rust.rs", escape = "none")]
@@ -34,4 +37,42 @@ pub fn generate_rust(output: &str, file_template: &str) -> std::io::Result<()> {
     }
 
     Ok(())
+}
+
+pub fn generate_macros(output: &str) -> std::io::Result<()> {
+    create_macros_file(output, "c_macros", "PREDEFINED_MACROS")?;
+    create_macros_file(output, "c_specials", "SPECIALS")
+}
+
+fn create_macros_file(output: &str, data_name: &str, set_name: &str) -> std::io::Result<()> {
+    let mut set = phf_codegen::Set::new();
+    let mut file = File::open(PathBuf::from(format!(
+        "{}/{}/{}.txt",
+        &env::var("CARGO_MANIFEST_DIR").unwrap(),
+        MACROS_DEFINITION_DIR,
+        data_name
+    )))?;
+    let mut data = Vec::new();
+    file.read_to_end(&mut data)?;
+    for tok in data.split(|c| *c == b'\n') {
+        let tok = std::str::from_utf8(tok).unwrap().trim();
+        if !tok.is_empty() {
+            set.entry(tok);
+        }
+    }
+    let path = Path::new(output).join(format!("{}.rs", data_name));
+    let mut file = BufWriter::new(File::create(&path)?);
+    writeln!(&mut file, "#[allow(clippy::unreadable_literal)]").unwrap();
+    writeln!(
+        &mut file,
+        "static {}: phf::Set<&'static str> =\n{};\n",
+        set_name,
+        set.build()
+    )?;
+    writeln!(
+        &mut file,
+        "pub fn is_{}(mac: &str) -> bool {{ {}.contains(mac) }}\n",
+        set_name.to_lowercase(),
+        set_name,
+    )
 }

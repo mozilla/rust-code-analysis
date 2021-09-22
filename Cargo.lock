@@ -1371,16 +1371,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "phf_codegen"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fb1c3a8bc4dd4e5cfce29b44ffc14bedd2ee294559a294e2a4d4c9e9a6a13cd"
-dependencies = [
- "phf_generator",
- "phf_shared",
-]
-
-[[package]]
 name = "phf_generator"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1656,7 +1646,6 @@ dependencies = [
  "num-traits",
  "petgraph",
  "phf",
- "phf_codegen",
  "pretty_assertions",
  "regex",
  "serde",
