@@ -1,10 +1,8 @@
-extern crate phf_codegen;
-
 use askama::Template;
 use enum_iterator::IntoEnumIterator;
 use std::env;
 use std::fs::File;
-use std::io::{BufWriter, Read, Write};
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use crate::common::*;
@@ -39,40 +37,47 @@ pub fn generate_rust(output: &str, file_template: &str) -> std::io::Result<()> {
     Ok(())
 }
 
+#[derive(Template)]
+#[template(path = "c_macros.rs", escape = "none")]
+struct CMacrosTemplate {
+    u_name: String,
+    l_name: String,
+    names: Vec<String>,
+}
+
 pub fn generate_macros(output: &str) -> std::io::Result<()> {
     create_macros_file(output, "c_macros", "PREDEFINED_MACROS")?;
     create_macros_file(output, "c_specials", "SPECIALS")
 }
 
-fn create_macros_file(output: &str, data_name: &str, set_name: &str) -> std::io::Result<()> {
-    let mut set = phf_codegen::Set::new();
-    let mut file = File::open(PathBuf::from(format!(
+fn create_macros_file(output: &str, filename: &str, u_name: &str) -> std::io::Result<()> {
+    let mut macro_file = File::open(PathBuf::from(format!(
         "{}/{}/{}.txt",
         &env::var("CARGO_MANIFEST_DIR").unwrap(),
         MACROS_DEFINITION_DIR,
-        data_name
+        filename
     )))?;
     let mut data = Vec::new();
-    file.read_to_end(&mut data)?;
+    macro_file.read_to_end(&mut data)?;
+
+    let mut names = Vec::new();
     for tok in data.split(|c| *c == b'\n') {
         let tok = std::str::from_utf8(tok).unwrap().trim();
         if !tok.is_empty() {
-            set.entry(tok);
+            names.push(tok.to_owned());
         }
     }
-    let path = Path::new(output).join(format!("{}.rs", data_name));
-    let mut file = BufWriter::new(File::create(&path)?);
-    writeln!(&mut file, "#[allow(clippy::unreadable_literal)]").unwrap();
-    writeln!(
-        &mut file,
-        "static {}: phf::Set<&'static str> =\n{};\n",
-        set_name,
-        set.build()
-    )?;
-    writeln!(
-        &mut file,
-        "pub fn is_{}(mac: &str) -> bool {{ {}.contains(mac) }}\n",
-        set_name.to_lowercase(),
-        set_name,
-    )
+    let l_name = u_name.to_lowercase();
+
+    let path = Path::new(output).join(format!("{}.rs", filename));
+
+    let mut file = File::create(&path)?;
+
+    let args = CMacrosTemplate {
+        u_name: u_name.to_owned(),
+        l_name,
+        names,
+    };
+
+    file.write_all(args.render().unwrap().as_bytes())
 }
