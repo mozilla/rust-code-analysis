@@ -9,10 +9,6 @@ readme = "README.md"
 keywords = ["metrics"]
 description = "Tool to compute and export code metrics"
 license = "MPL-2.0"
-build = "build.rs"
-
-[build-dependencies]
-phf_codegen = "^0.10"
 
 [dependencies]
 aho-corasick = "^0.7"
@@ -24,7 +20,6 @@ num = "^0.4"
 num-derive = "^0.3"
 num-traits = "^0.2"
 petgraph = "^0.6"
-phf = { version = "^0.10", features = ["macros"] }
 regex = "^1.5"
 serde = { version = "^1.0", features = ["derive"] }
 termcolor = "^1.1"

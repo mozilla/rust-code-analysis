@@ -4,14 +4,13 @@ use petgraph::{
 use std::collections::{hash_map, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
+use crate::c_langs_macros::is_specials;
 use crate::node::Node;
 
 use crate::langs::*;
 use crate::languages::language_preproc::*;
 use crate::tools::*;
 use crate::traits::*;
-
-include!(concat!(env!("OUT_DIR"), "/gen_c_specials.rs"));
 
 /// Preprocessor data of a `C/C++` file.
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -214,7 +213,7 @@ pub fn preprocess(parser: &PreprocParser, path: &Path, results: &mut PreprocResu
 
                 if identifier.kind_id() == Preproc::Identifier {
                     let r#macro = identifier.utf8_text(code).unwrap();
-                    if !SPECIALS.contains(r#macro) {
+                    if !is_specials(r#macro) {
                         file_result.macros.insert(r#macro.to_string());
                     }
                 }

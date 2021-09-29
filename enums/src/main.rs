@@ -59,6 +59,11 @@ fn main() {
                 eprintln!("{:?}", err);
             }
         }
+        "c_macros" => {
+            if let Some(err) = generate_macros(output).err() {
+                eprintln!("{:?}", err);
+            }
+        }
         _ => {
             eprintln!("Invalid target language: {}", language);
         }
