@@ -1557,7 +1557,7 @@ dependencies = [
  "tree-sitter",
  "tree-sitter-ccomment",
  "tree-sitter-java",
- "tree-sitter-javascript",
+ "tree-sitter-javascript 0.20.0",
  "tree-sitter-mozcpp",
  "tree-sitter-mozjs",
  "tree-sitter-preproc",
@@ -2076,9 +2076,19 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-javascript"
-version = "0.19.0"
+version = "0.19.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "840bb4d5f3c384cb76b976ff07297f5a24b6e61a708baa4464f53e395caaa5f9"
+checksum = "fded47e6354ce3c016e433314f87309d86eb020172e1ca4ab8d4a8f345c6a2f9"
+dependencies = [
+ "cc",
+ "tree-sitter",
+]
+
+[[package]]
+name = "tree-sitter-javascript"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2490fab08630b2c8943c320f7b63473cbf65511c8d83aec551beb9b4375906ed"
 dependencies = [
  "cc",
  "tree-sitter",
@@ -2099,7 +2109,7 @@ version = "0.19.0"
 dependencies = [
  "cc",
  "tree-sitter",
- "tree-sitter-javascript",
+ "tree-sitter-javascript 0.19.1",
 ]
 
 [[package]]
