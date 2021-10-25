@@ -17,7 +17,7 @@ pub fn get_parent<'a>(node: &'a Node<'a>, level: usize) -> Option<Node<'a>> {
 }
 
 macro_rules! has_ancestors {
-    ($node:expr, $( $typs:pat )|*, $( $typ:pat ),+) => {{
+    ($node:expr, $( $typs:pat_param )|*, $( $typ:pat_param ),+) => {{
         let mut res = false;
         loop {
             let mut node = *$node;
@@ -54,7 +54,7 @@ macro_rules! has_ancestors {
 }
 
 macro_rules! count_specific_ancestors {
-    ($node:expr, $( $typs:pat )|*, $( $stops:pat )|*) => {{
+    ($node:expr, $( $typs:pat_param )|*, $( $stops:pat_param )|*) => {{
         let mut count = 0;
         let mut node = *$node;
         while let Some(parent) = node.object().parent() {
