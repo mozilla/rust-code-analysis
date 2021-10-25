@@ -2,7 +2,7 @@
 name = "enums"
 version = "0.0.1"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 enum-iterator = "^0.7"
