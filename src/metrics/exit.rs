@@ -118,9 +118,8 @@ impl Exit for TsxCode {
 
 impl Exit for RustCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if let Rust::ReturnExpression = node.object().kind_id().into() {
-            stats.exit += 1;
-        } else if Self::is_func(node) && node.object().child_by_field_name("return_type").is_some()
+        if matches!(node.object().kind_id().into(), Rust::ReturnExpression)
+            || Self::is_func(node) && node.object().child_by_field_name("return_type").is_some()
         {
             stats.exit += 1;
         }
