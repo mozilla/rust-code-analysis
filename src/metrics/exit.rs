@@ -78,7 +78,7 @@ where
 
 impl Exit for PythonCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if let Python::ReturnStatement = node.object().kind_id().into() {
+        if matches!(node.object().kind_id().into(), Python::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -86,7 +86,7 @@ impl Exit for PythonCode {
 
 impl Exit for MozjsCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if let Mozjs::ReturnStatement = node.object().kind_id().into() {
+        if matches!(node.object().kind_id().into(), Mozjs::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -94,7 +94,7 @@ impl Exit for MozjsCode {
 
 impl Exit for JavascriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if let Javascript::ReturnStatement = node.object().kind_id().into() {
+        if matches!(node.object().kind_id().into(), Javascript::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -102,7 +102,7 @@ impl Exit for JavascriptCode {
 
 impl Exit for TypescriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if let Typescript::ReturnStatement = node.object().kind_id().into() {
+        if matches!(node.object().kind_id().into(), Typescript::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -110,7 +110,7 @@ impl Exit for TypescriptCode {
 
 impl Exit for TsxCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if let Tsx::ReturnStatement = node.object().kind_id().into() {
+        if matches!(node.object().kind_id().into(), Tsx::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -128,7 +128,7 @@ impl Exit for RustCode {
 
 impl Exit for CppCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if let Cpp::ReturnStatement = node.object().kind_id().into() {
+        if matches!(node.object().kind_id().into(), Cpp::ReturnStatement) {
             stats.exit += 1;
         }
     }
