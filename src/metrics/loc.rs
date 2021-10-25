@@ -430,9 +430,32 @@ impl Loc for CppCode {
     }
 }
 
+impl Loc for JavaCode {
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
+        use Java::*;
+
+        let (start, end) = init(node, stats, is_func_space, is_unit);
+
+        match node.object().kind_id().into() {
+            Program => {}
+            Comment => {
+                add_cloc_lines(stats, start, end);
+            }
+            AssertStatement | BreakStatement | ContinueStatement | DoStatement
+            | ExpressionStatement | ForStatement | IfStatement | ReturnStatement | Statement
+            | SwitchStatement | ThrowStatement | TryStatement | WhileStatement => {
+                stats.logical_lines += 1;
+            }
+            _ => {
+                check_comment_ends_on_code_line(stats, start);
+                stats.lines.insert(start);
+            }
+        }
+    }
+}
+
 impl Loc for PreprocCode {}
 impl Loc for CcommentCode {}
-impl Loc for JavaCode {}
 
 #[cfg(test)]
 mod tests {
@@ -1183,6 +1206,69 @@ mod tests {
                 (lloc, 7, usize),  // The number of statements is 7
                 (cloc, 0, usize),  // The number of comments is 0
                 (blank, 0, usize)  // The number of blank lines is 0
+            ]
+        );
+    }
+
+    #[test]
+    fn java_single_statement_loc() {
+        check_metrics!(
+            "int max = 10;",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (sloc, 1, usize), // The number of lines is 1
+                                  // (ploc, 1, usize),  // The number of code lines is 1
+                                  // (lloc, 1, usize),  // The number of statements is 1
+                                  // (cloc, 0, usize),  // The number of comments is 0
+                                  // (blank, 0, usize)  // The number of blank lines is 0
+            ]
+        );
+    }
+
+    // #[test]
+    fn java_statement_inline_loc() {
+        check_metrics!(
+            "for (i = 0; i < 100; i++) { printf(\"hello\"); }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (sloc, 1, usize),  // The number of lines is 1
+                (ploc, 1, usize),  // The number of code lines is 1
+                (lloc, 2, usize),  // The number of statements is 1
+                (cloc, 0, usize),  // The number of comments is 0
+                (blank, 0, usize)  // The number of blank lines is 0
+            ]
+        );
+    }
+
+    // #[test]
+    fn java_general_loc() {
+        check_metrics!(
+            "
+            int max = 10;
+
+            /*
+            Loop:
+                from: 0
+                to: max
+            and print each value of i
+            */
+            for (int i = 0; i <= max; i = i = 1) {
+               // Print the value i
+               System.out.println(i);
+            }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (sloc, 13, usize), // The number of lines is 13
+                (ploc, 4, usize),  // The number of code lines is 4
+                (lloc, 2, usize),  // The number of statements is 2
+                (cloc, 7, usize),  // The number of comments is 7
+                (blank, 2, usize)  // The number of blank lines is 2
             ]
         );
     }
