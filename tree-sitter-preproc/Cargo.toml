@@ -8,7 +8,7 @@ readme = "bindings/rust/README.md"
 keywords = ["incremental", "parsing", "preproc"]
 categories = ["parsing", "text-editors"]
 repository = "https://github.com/mozilla/rust-code-analysis"
-edition = "2018"
+edition = "2021"
 
 build = "bindings/rust/build.rs"
 include = [
