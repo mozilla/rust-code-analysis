@@ -220,8 +220,8 @@ fn ping() -> HttpResponse {
 }
 
 pub fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
-    let _ = actix_rt::System::new("server");
-    let mut rt = Runtime::new()?;
+    actix_rt::System::new().run()?;
+    let rt = Runtime::new()?;
     let max_size = 1024 * 1024 * 4;
 
     rt.block_on(async move {
