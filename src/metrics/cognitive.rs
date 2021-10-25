@@ -92,7 +92,7 @@ where
 }
 
 macro_rules! compute_booleans {
-    ($node: ident, $stats: ident, $( $typs: pat )|*) => {
+    ($node: ident, $stats: ident, $( $typs: pat_param )|*) => {
         let mut cursor = $node.object().walk();
         for child in $node.object().children(&mut cursor) {
             if let $( $typs )|* = child.kind_id().into() {
@@ -105,9 +105,9 @@ macro_rules! compute_booleans {
 }
 
 macro_rules! nesting_levels {
-    ($node: ident, $stats: ident, [$nest_func: pat => $nest_func_stop: pat],
-     [$lambdas: pat => $( $lambdas_stop: pat )|*],
-     [$( $nest_level: pat )|* => $( $nest_level_stop: pat )|*]) => {
+    ($node: ident, $stats: ident, [$nest_func: pat_param => $nest_func_stop: pat_param],
+     [$lambdas: pat => $( $lambdas_stop: pat_param )|*],
+     [$( $nest_level: pat_param )|* => $( $nest_level_stop: pat_param )|*]) => {
         // Find the depth of a function (the most external function is
         // not considered)
         $stats.nesting = count_specific_ancestors!($node, $nest_func, $nest_func_stop).max(1) - 1;
@@ -129,8 +129,8 @@ macro_rules! nesting_levels {
         increment($stats);
     };
     ($node: ident, $stats: ident,
-     [$lambdas: pat => $( $lambdas_stop: pat )|*],
-     [$( $nest_level: pat )|* => $( $nest_level_stop: pat )|*]) => {
+     [$lambdas: pat_param => $( $lambdas_stop: pat_param )|*],
+     [$( $nest_level: pat_param )|* => $( $nest_level_stop: pat_param )|*]) => {
         // Find the depth of a lambda
         let lambda_depth = count_specific_ancestors!($node, $lambdas, $( $lambdas_stop )|*);
 
