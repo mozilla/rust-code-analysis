@@ -54,15 +54,7 @@ pub use language_rust::*;
 ## Implementing the metrics
 
 A number of [metrics are supported](https://mozilla.github.io/rust-code-analysis/metrics.html). 
-The exact implementation of each metric depends on the language but this section will give some general guidance on the implementation of each.
+The exact implementation of each metric depends on the language but the following sections will give some general guidance on the implementation of each.
 
-### Lines of Code (LoC)
 
-[Lines of code](https://en.wikipedia.org/wiki/Source_lines_of_code) has 5 variants that count different types of code lines.
-
-- SLOC: it counts the number of lines in a source file.
-- PLOC: it counts the number of physical lines (instructions) contained in a source file.
-- LLOC: it counts the number of logical lines (statements) contained in a source file.
-- CLOC: it counts the number of comments in a source file.
-- BLANK: it counts the number of blank lines in a source file.
 
