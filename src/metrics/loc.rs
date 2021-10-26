@@ -2172,7 +2172,7 @@ mod tests {
             loc,
             [
                 (sloc, 11, usize), // The number of lines is 11
-                (ploc, 5, usize),  // The number of code lines is 5
+                (ploc, 6, usize),  // The number of code lines is 5
                 (lloc, 2, usize),  // The number of statements is 2
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
