@@ -823,6 +823,7 @@ impl Loc for JavaCode {
             }
             AssertStatement
             | BreakStatement
+            | MethodInvocation
             | ContinueStatement
             | DoStatement
             | ExpressionStatement
@@ -832,6 +833,7 @@ impl Loc for JavaCode {
             | ReturnStatement
             | Statement
             | SwitchStatement
+            | TernaryExpression
             | ThrowStatement
             | TryStatement
             | WhileStatement => {
@@ -1952,7 +1954,7 @@ mod tests {
     #[test]
     fn java_sloc() {
         check_metrics!(
-            "for (i = 0; i < 100; i++) {
+            "for (int i = 0; i < 100; i++) {
                System.out.println(i);
              }",
             "foo.java",
@@ -1965,9 +1967,22 @@ mod tests {
     }
 
     #[test]
-    fn java_ploc() {
+    fn java_single_ploc() {
         check_metrics!(
-            "for (i = 0; i < 100; i++) {
+            "int x = 1;",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (ploc, 1, usize), // The number of code lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    fn java_simple_ploc() {
+        check_metrics!(
+            "for (int i = 0; i < 100; i = i++) {
                System.out.println(i);
              }",
             "foo.java",
@@ -1980,7 +1995,23 @@ mod tests {
     }
 
     #[test]
-    fn java_single_statement_loc() {
+    fn java_multi_ploc() {
+        check_metrics!(
+            "int x = 1;
+            for (int i = 0; i < 100; i++) {
+               System.out.println(i);
+             }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (ploc, 4, usize), // The number of code lines is 4
+            ]
+        );
+    }
+
+    #[test]
+    fn java_single_statement_lloc() {
         check_metrics!(
             "int max = 10;",
             "foo.java",
@@ -1993,16 +2024,33 @@ mod tests {
     }
 
     #[test]
-    fn java_lloc() {
+    fn java_simple_lloc() {
         check_metrics!(
-            "for (i = 0; i < 100; i++) { \
-               System.out.println(\"hello\"); \
+            "for (int i = 0; i < 100; i++) {
+               System.out.println(i);
              }",
             "foo.java",
             JavaParser,
             loc,
             [
-                (lloc, 2, usize), // The number of statements is 2
+                (lloc, 4, usize), // The number of statements is 4
+            ]
+        );
+    }
+
+    #[test]
+    fn java_multi_lloc() {
+        check_metrics!(
+            "int max = 10;
+
+            for (int i = 0; i < max; i++) {
+               System.out.println(i);
+             }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 5, usize), // The number of statements is 5
             ]
         );
     }
@@ -2010,7 +2058,7 @@ mod tests {
     #[test]
     fn java_comments() {
         check_metrics!(
-            "for (i = 0; i < 100; i++) { \
+            "for (int i = 0; i < 100; i++) { \
                // Print hello
                System.out.println(\"hello\"); \
                // Print world
@@ -2026,10 +2074,9 @@ mod tests {
     }
 
     #[test]
-    fn java_blank() {
+    fn java_double_blank() {
         check_metrics!(
-            "
-            int x = 1;
+            "int x = 1;
             
 
             int y = 2;",
@@ -2037,7 +2084,7 @@ mod tests {
             JavaParser,
             loc,
             [
-                (blank, 3, usize), // The number of blank lines is 3
+                (blank, 2, usize), // The number of blank lines is 2
             ]
         );
     }
@@ -2045,43 +2092,69 @@ mod tests {
     #[test]
     fn java_statement_inline_loc() {
         check_metrics!(
-            "for (i = 0; i < 100; i++) { System.out.println(\"hello\"); }",
+            "for (int i = 0; i < 100; i++) { System.out.println(\"hello\"); }",
             "foo.java",
             JavaParser,
             loc,
             [
                 (ploc, 1, usize), // The number of code lines is 1
-                (lloc, 2, usize), // The number of statements is 2
+                (lloc, 4, usize), // The number of statements is 4
                 (cloc, 0, usize), // The number of comments is 0
             ]
         );
     }
 
     #[test]
-    // #[ignore] // failing test
     fn java_general_loc() {
         check_metrics!(
-            "int max = 10;
-
+            "int max = 100;
+            
             /*
-            Loop:
+              Loop through and print
                 from: 0
                 to: max
-            and print each value of i
             */
-            for (int i = 0; i <= max; i = i + 1) {
-               // Print the value i
+            for (int i = 0; i < max; i++) {
+               // Print the value
                System.out.println(i);
+             }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (sloc, 11, usize), // The number of lines is 11
+                (ploc, 4, usize),  // The number of code lines is 4
+                (lloc, 5, usize),  // The number of statements is 3
+                (cloc, 6, usize),  // The number of comments is 6
+                (blank, 1, usize)  // The number of blank lines is 1
+            ]
+        );
+    }
+
+    #[test]
+    #[ignore]
+    fn java_class_loc() {
+        check_metrics!(
+            "
+             /**
+             * The HelloWorldApp class implements an application that
+             * simply prints \"Hello World!\" to standard output.
+             */
+            
+            class HelloWorldApp {
+                public static void main(String[] args) {
+                    System.out.println(\"Hello World!\"); // Display the string.
+                }
             }",
             "foo.java",
             JavaParser,
             loc,
             [
-                //(sloc, 12, usize), // The number of lines is 12
-                (ploc, 4, usize),  // The number of code lines is 4
-                (lloc, 3, usize),  // The number of statements is 3
-                (cloc, 7, usize),  // The number of comments is 7
-                (blank, 1, usize)  // The number of blank lines is 2
+                (sloc, 10, usize), // The number of lines is 10
+                (ploc, 5, usize),  // The number of code lines is 5
+                (lloc, 1, usize),  // The number of statements is 3
+                (cloc, 5, usize),  // The number of comments is 6
+                (blank, 1, usize)  // The number of blank lines is 1
             ]
         );
     }
