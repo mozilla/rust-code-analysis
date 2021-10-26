@@ -1952,6 +1952,40 @@ mod tests {
     }
 
     #[test]
+    fn java_comments() {
+        check_metrics!(
+            "for (int i = 0; i < 100; i++) { \
+               // Print hello
+               System.out.println(\"hello\"); \
+               // Print world
+               System.out.println(\"hello\"); \
+             }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (cloc, 2, usize), // The number of comments is 2
+            ]
+        );
+    }
+
+    #[test]
+    fn java_blank() {
+        check_metrics!(
+            "int x = 1;
+            
+
+            int y = 2;",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (blank, 2, usize), // The number of blank lines is 2
+            ]
+        );
+    }
+
+    #[test]
     fn java_sloc() {
         check_metrics!(
             "for (int i = 0; i < 100; i++) {
@@ -2056,35 +2090,23 @@ mod tests {
     }
 
     #[test]
-    fn java_comments() {
+    fn java_class_loc() {
         check_metrics!(
-            "for (int i = 0; i < 100; i++) { \
-               // Print hello
-               System.out.println(\"hello\"); \
-               // Print world
-               System.out.println(\"hello\"); \
-             }",
+            "
+            public class Person {
+              private String name;
+              public Person(String name){
+                this.name = name; // +1
+              }
+              public String getName() {
+                return name; // +1
+              }
+            }",
             "foo.java",
             JavaParser,
             loc,
             [
-                (cloc, 2, usize), // The number of comments is 2
-            ]
-        );
-    }
-
-    #[test]
-    fn java_double_blank() {
-        check_metrics!(
-            "int x = 1;
-            
-
-            int y = 2;",
-            "foo.java",
-            JavaParser,
-            loc,
-            [
-                (blank, 2, usize), // The number of blank lines is 2
+                (lloc, 2, usize), // The number of statements is 2
             ]
         );
     }
@@ -2124,7 +2146,7 @@ mod tests {
             [
                 (sloc, 11, usize), // The number of lines is 11
                 (ploc, 4, usize),  // The number of code lines is 4
-                (lloc, 5, usize),  // The number of statements is 3
+                (lloc, 5, usize),  // The number of statements is 5
                 (cloc, 6, usize),  // The number of comments is 6
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -2132,28 +2154,27 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    fn java_class_loc() {
+    fn java_main_class_loc() {
         check_metrics!(
-            "
+            "package com.company;
              /**
              * The HelloWorldApp class implements an application that
              * simply prints \"Hello World!\" to standard output.
              */
             
             class HelloWorldApp {
-                public static void main(String[] args) {
-                    System.out.println(\"Hello World!\"); // Display the string.
-                }
+              public void main(String[] args) {
+                System.out.println(\"Hello World!\"); // Display the string.
+              }
             }",
             "foo.java",
             JavaParser,
             loc,
             [
-                (sloc, 10, usize), // The number of lines is 10
+                (sloc, 11, usize), // The number of lines is 11
                 (ploc, 5, usize),  // The number of code lines is 5
-                (lloc, 1, usize),  // The number of statements is 3
-                (cloc, 5, usize),  // The number of comments is 6
+                (lloc, 2, usize),  // The number of statements is 2
+                (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
         );
