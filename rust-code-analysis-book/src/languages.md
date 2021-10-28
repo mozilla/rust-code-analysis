@@ -15,4 +15,4 @@ This is the list of programming languages parsed by
 - [x] Rust
 - [x] Typescript
 
-A check indicates that metrics are implemented for the language.
+A check indicates which languages have metrics implemented.
