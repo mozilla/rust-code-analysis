@@ -1,8 +1,10 @@
 # Lines of Code (LoC)
 
+In this document we give some guidance on how to implement the LoC metrics available in this crate.
 [Lines of code](https://en.wikipedia.org/wiki/Source_lines_of_code) is a software metric that gives an indication of the size of some source code by counting the lines of the source code.
+There are many types of LoC so we will first explain those by way of an example.
 
-## Background
+## Types of LoC
 
 ```rust
 /*
@@ -23,7 +25,7 @@ The example above will be used to illustrate each of the **LoC** metrics describ
 ### SLOC
 
 A straight count of all lines in the file including code, comments, and blank lines.  
-METRIC VALUE: 5
+METRIC VALUE: 11
 
 ### PLOC
 
@@ -40,12 +42,12 @@ METRIC VALUE: 1
 ### CLOC
 
 A count of the comments in the code. The type of comment does not matter ie single line, block, or doc.  
-METRIC VALUE: 2
+METRIC VALUE: 6
 
 ### BLANK
 
 Last but not least, this metric counts the blank lines present in a code.
-METRIC VALUE: 
+METRIC VALUE: 2
 
 ## Implementation
 
