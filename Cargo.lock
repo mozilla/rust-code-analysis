@@ -134,9 +134,9 @@ dependencies = [
 
 [[package]]
 name = "actix-rt"
-version = "2.3.0"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea360596a50aa9af459850737f99293e5cb9114ae831118cb6026b3bbc7583ad"
+checksum = "4a0c218d0a17c120f10ee0c69c9f0c45d87319e8f66b1f065e8412b612fc3e24"
 dependencies = [
  "actix-macros 0.2.3",
  "futures-core",
@@ -1646,7 +1646,7 @@ dependencies = [
 name = "rust-code-analysis-web"
 version = "0.0.23"
 dependencies = [
- "actix-rt 2.3.0",
+ "actix-rt 2.4.0",
  "actix-web",
  "clap",
  "futures",
