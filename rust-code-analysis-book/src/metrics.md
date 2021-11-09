@@ -20,4 +20,5 @@
 - **NEXITS**: it counts the number of possible exit points from a method/function.
 - **NARGS**: it counts the number of arguments of a function/method.
 
-The metrics above are still **NOT** implemented for C#, CSS, Go, Java and HTML languages.
+The metrics above are still **NOT** implemented for C#, CSS, Go, HTML, and Java
+languages.
