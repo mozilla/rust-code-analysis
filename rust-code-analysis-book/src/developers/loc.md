@@ -55,7 +55,3 @@ To implement the LoC related metrics described above you need to implement the `
 
 This requires implementing the `compute` function.
 See [/src/metrics/loc.rs](https://github.com/mozilla/rust-code-analysis/blob/master/src/metrics/loc.rs) for where to implement, as well as examples from other languages.
-
-As you implement tests, you may find yourself running into an off by 1 error for SLOC count. 
-For most code we expect the `SpaceKind` to be `SpaceKind::Unit` but the default is `SpaceKind::Unknown`.
-To solve this you need to implement the `Getter` trait in [src/getter.rs](https://github.com/mozilla/rust-code-analysis/blob/master/src/getter.rs). Specifically, the `get_space_kind` function.
