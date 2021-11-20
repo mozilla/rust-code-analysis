@@ -810,12 +810,19 @@ impl Loc for CppCode {
     }
 }
 
+// impl fmt::Display for Java {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//        write!(f, "{:?}", self)
+//     }
+// }
+
 impl Loc for JavaCode {
     fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Java::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
-        let kind_id = node.object().kind_id().into();
+        let kind_id : Java = node.object().kind_id().into();
+        //println!("KINDID {}", kind_id.to_string());
         match kind_id {
             Program => {}
             Comment => {
@@ -823,11 +830,11 @@ impl Loc for JavaCode {
             }
             AssertStatement
             | BreakStatement
-            | MethodInvocation
+            | BinaryExpression
             | ContinueStatement
             | DoStatement
+            | Declaration
             | ExpressionStatement
-            | ForStatement
             | IfStatement
             | LocalVariableDeclaration
             | ReturnStatement
@@ -836,8 +843,20 @@ impl Loc for JavaCode {
             | TernaryExpression
             | ThrowStatement
             | TryStatement
+            | UpdateExpression
             | WhileStatement => {
                 stats.logical_lines += 1;
+            }
+            For => {
+                if count_specific_ancestors!(
+                    node,
+                    ForStatement, Block 
+                ) == 0
+                {
+                    // handle for(int i:arr)
+                    // otherwise the statements in the for are counted elsewhere
+                    stats.logical_lines += 1;
+                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -2058,10 +2077,10 @@ mod tests {
     }
 
     #[test]
-    fn java_simple_lloc() {
+    fn java_for_lloc() {
         check_metrics!(
-            "for (int i = 0; i < 100; i++) {
-               System.out.println(i);
+            "for (int i = 0; i < 100; i++) { // + 3
+               System.out.println(i); // + 1
              }",
             "foo.java",
             JavaParser,
@@ -2073,12 +2092,29 @@ mod tests {
     }
 
     #[test]
+    fn java_foreach_lloc() {
+        check_metrics!(
+            "
+            int arr[]={12,13,14,44}; // +1
+            for (int i:arr) { // +1
+               System.out.println(i); // +1
+             }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 3, usize), // The number of statements is 3
+            ]
+        );
+    }
+
+    #[test]
     fn java_multi_lloc() {
         check_metrics!(
-            "int max = 10;
+            "int max = 10; // +1
 
-            for (int i = 0; i < max; i++) {
-               System.out.println(i);
+            for (int i = 0; i < max; i++) { // +3
+               System.out.println(i); // +1
              }",
             "foo.java",
             JavaParser,
@@ -2164,7 +2200,7 @@ mod tests {
             
             class HelloWorldApp {
               public void main(String[] args) {
-                System.out.println(\"Hello World!\"); // Display the string.
+                System.out.println(\"Hello World!\"); // Display the string. Only statement. +1 lloc
               }
             }",
             "foo.java",
@@ -2173,7 +2209,7 @@ mod tests {
             [
                 (sloc, 11, usize), // The number of lines is 11
                 (ploc, 6, usize),  // The number of code lines is 5
-                (lloc, 2, usize),  // The number of statements is 2
+                (lloc, 1, usize),  // The number of statements is 1
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
