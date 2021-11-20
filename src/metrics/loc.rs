@@ -810,11 +810,11 @@ impl Loc for CppCode {
     }
 }
 
-// impl fmt::Display for Java {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//        write!(f, "{:?}", self)
-//     }
-// }
+impl fmt::Display for Java {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       write!(f, "{:?}", self)
+    }
+}
 
 impl Loc for JavaCode {
     fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
@@ -822,29 +822,30 @@ impl Loc for JavaCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
         let kind_id : Java = node.object().kind_id().into();
-        //println!("KINDID {}", kind_id.to_string());
+        println!("KINDID {}", kind_id.to_string());
         match kind_id {
             Program => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
             }
             AssertStatement
+            | AssignmentExpression
             | BreakStatement
             | BinaryExpression
             | ContinueStatement
             | DoStatement
             | Declaration
-            | ExpressionStatement
             | IfStatement
             | LocalVariableDeclaration
+            | MethodInvocation
             | ReturnStatement
             | Statement
             | SwitchStatement
             | TernaryExpression
             | ThrowStatement
             | TryStatement
-            | UpdateExpression
-            | WhileStatement => {
+            | UpdateExpression => {
+                println!("  lloc increased by {}", kind_id.to_string());
                 stats.logical_lines += 1;
             }
             For => {
@@ -855,6 +856,7 @@ impl Loc for JavaCode {
                 {
                     // handle for(int i:arr)
                     // otherwise the statements in the for are counted elsewhere
+                    println!("  lloc increased by {}", kind_id.to_string());
                     stats.logical_lines += 1;
                 }
             }
@@ -2104,6 +2106,24 @@ mod tests {
             loc,
             [
                 (lloc, 3, usize), // The number of statements is 3
+            ]
+        );
+    }
+
+    #[test]
+    fn java_while_lloc() {
+        check_metrics!(
+            "
+            int i=0; // +1
+            while(i < 10) { // +1
+                i++; // +1
+                System.out.println(i); // +1
+             }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 4, usize), // The number of statements is 4
             ]
         );
     }
