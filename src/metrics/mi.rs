@@ -96,7 +96,7 @@ where
         stats.halstead_length = halstead.length();
         stats.halstead_vocabulary = halstead.vocabulary();
         stats.halstead_volume = halstead.volume();
-        stats.cyclomatic = cyclomatic.cyclomatic();
+        stats.cyclomatic = cyclomatic.cyclomatic_sum();
         stats.sloc = loc.sloc();
         stats.comments_percentage = loc.cloc() / stats.sloc;
     }
