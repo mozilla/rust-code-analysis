@@ -11,6 +11,8 @@ pub struct Stats {
     cyclomatic_sum: f64,
     cyclomatic: f64,
     n: usize,
+    cyclomatic_max: f64,
+    cyclomatic_min: f64,
 }
 
 impl Default for Stats {
@@ -19,6 +21,8 @@ impl Default for Stats {
             cyclomatic_sum: 0.,
             cyclomatic: 1.,
             n: 1,
+            cyclomatic_max: 0.,
+            cyclomatic_min: f64::MAX,
         }
     }
 }
@@ -31,6 +35,8 @@ impl Serialize for Stats {
         let mut st = serializer.serialize_struct("cyclomatic", 2)?;
         st.serialize_field("sum", &self.cyclomatic_sum())?;
         st.serialize_field("average", &self.cyclomatic_average())?;
+        st.serialize_field("min", &self.cyclomatic_min())?;
+        st.serialize_field("max", &self.cyclomatic_max())?;
         st.end()
     }
 }
@@ -39,9 +45,11 @@ impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "sum: {}, average: {}",
+            "sum: {}, average: {}, min: {}, max: {}",
             self.cyclomatic_sum(),
             self.cyclomatic_average(),
+            self.cyclomatic_min(),
+            self.cyclomatic_max()
         )
     }
 }
@@ -49,6 +57,10 @@ impl fmt::Display for Stats {
 impl Stats {
     /// Merges a second `Cyclomatic` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
+        //Calculate minimum and maximum values
+        self.cyclomatic_max = self.cyclomatic_max.max(other.cyclomatic_max);
+        self.cyclomatic_min = self.cyclomatic_min.min(other.cyclomatic_min);
+
         self.cyclomatic_sum += other.cyclomatic_sum;
         self.n += other.n;
     }
@@ -69,9 +81,18 @@ impl Stats {
     pub fn cyclomatic_average(&self) -> f64 {
         self.cyclomatic_sum() / self.n as f64
     }
-
-    /// Last step for updating cyclomatic_sum
-    pub fn compute_sum(&mut self) {
+    /// Returns the `Cyclomatic` maximum value
+    pub fn cyclomatic_max(&self) -> f64 {
+        self.cyclomatic_max
+    }
+    /// Returns the `Cyclomatic` minimum value
+    pub fn cyclomatic_min(&self) -> f64 {
+        self.cyclomatic_min
+    }
+    /// Last step for computing minimum and maximum value and update cyclomatic_sum
+    pub fn compute_minmax(&mut self) {
+        self.cyclomatic_max = self.cyclomatic_max.max(self.cyclomatic);
+        self.cyclomatic_min = self.cyclomatic_min.min(self.cyclomatic);
         self.cyclomatic_sum += self.cyclomatic;
     }
 }
@@ -204,6 +225,8 @@ mod tests {
             [(cyclomatic_sum, 6, usize)],
             [
                 (cyclomatic_average, 3.0), // nspace = 2 (func and unit)
+                (cyclomatic_max, 5.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -221,6 +244,8 @@ mod tests {
             [(cyclomatic_sum, 4, usize)],
             [
                 (cyclomatic_average, 2.0), // nspace = 2 (func and unit)
+                (cyclomatic_max, 3.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -242,6 +267,8 @@ mod tests {
             [(cyclomatic_sum, 5, usize)],
             [
                 (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -271,6 +298,8 @@ mod tests {
             [(cyclomatic_sum, 5, usize)],
             [
                 (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -296,6 +325,8 @@ mod tests {
             [(cyclomatic_sum, 5, usize)],
             [
                 (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -330,6 +361,8 @@ mod tests {
             [(cyclomatic_sum, 7, usize)],
             [
                 (cyclomatic_average, 3.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 3.0)
             ]
         );
     }
@@ -368,6 +401,8 @@ mod tests {
             [(cyclomatic_sum, 7, usize)],
             [
                 (cyclomatic_average, 3.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 3.0)
             ]
         );
     }
