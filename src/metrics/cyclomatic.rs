@@ -8,15 +8,21 @@ use crate::*;
 /// The `Cyclomatic` metric.
 #[derive(Debug, Clone)]
 pub struct Stats {
+    cyclomatic_sum: f64,
     cyclomatic: f64,
     n: usize,
+    cyclomatic_max: f64,
+    cyclomatic_min: f64,
 }
 
 impl Default for Stats {
     fn default() -> Self {
         Self {
+            cyclomatic_sum: 0.,
             cyclomatic: 1.,
             n: 1,
+            cyclomatic_max: 0.,
+            cyclomatic_min: f64::MAX,
         }
     }
 }
@@ -27,8 +33,10 @@ impl Serialize for Stats {
         S: Serializer,
     {
         let mut st = serializer.serialize_struct("cyclomatic", 2)?;
-        st.serialize_field("sum", &self.cyclomatic())?;
+        st.serialize_field("sum", &self.cyclomatic_sum())?;
         st.serialize_field("average", &self.cyclomatic_average())?;
+        st.serialize_field("min", &self.cyclomatic_min())?;
+        st.serialize_field("max", &self.cyclomatic_max())?;
         st.end()
     }
 }
@@ -37,9 +45,11 @@ impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "sum: {}, average: {}",
-            self.cyclomatic(),
-            self.cyclomatic_average()
+            "sum: {}, average: {}, min: {}, max: {}",
+            self.cyclomatic_sum(),
+            self.cyclomatic_average(),
+            self.cyclomatic_min(),
+            self.cyclomatic_max()
         )
     }
 }
@@ -47,7 +57,11 @@ impl fmt::Display for Stats {
 impl Stats {
     /// Merges a second `Cyclomatic` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
-        self.cyclomatic += other.cyclomatic;
+        //Calculate minimum and maximum values
+        self.cyclomatic_max = self.cyclomatic_max.max(other.cyclomatic_max);
+        self.cyclomatic_min = self.cyclomatic_min.min(other.cyclomatic_min);
+
+        self.cyclomatic_sum += other.cyclomatic_sum;
         self.n += other.n;
     }
 
@@ -55,13 +69,31 @@ impl Stats {
     pub fn cyclomatic(&self) -> f64 {
         self.cyclomatic
     }
+    /// Returns the sum
+    pub fn cyclomatic_sum(&self) -> f64 {
+        self.cyclomatic_sum
+    }
 
     /// Returns the `Cyclomatic` metric average value
     ///
     /// This value is computed dividing the `Cyclomatic` value for the
     /// number of spaces.
     pub fn cyclomatic_average(&self) -> f64 {
-        self.cyclomatic() / self.n as f64
+        self.cyclomatic_sum() / self.n as f64
+    }
+    /// Returns the `Cyclomatic` maximum value
+    pub fn cyclomatic_max(&self) -> f64 {
+        self.cyclomatic_max
+    }
+    /// Returns the `Cyclomatic` minimum value
+    pub fn cyclomatic_min(&self) -> f64 {
+        self.cyclomatic_min
+    }
+    /// Last step for computing minimum and maximum value and update cyclomatic_sum
+    pub fn compute_minmax(&mut self) {
+        self.cyclomatic_max = self.cyclomatic_max.max(self.cyclomatic);
+        self.cyclomatic_min = self.cyclomatic_min.min(self.cyclomatic);
+        self.cyclomatic_sum += self.cyclomatic;
     }
 }
 
@@ -190,9 +222,11 @@ mod tests {
             "foo.py",
             PythonParser,
             cyclomatic,
-            [(cyclomatic, 6, usize)],
+            [(cyclomatic_sum, 6, usize)],
             [
-                (cyclomatic_average, 3.0) // nspace = 2 (func and unit)
+                (cyclomatic_average, 3.0), // nspace = 2 (func and unit)
+                (cyclomatic_max, 5.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -207,9 +241,11 @@ mod tests {
             "foo.py",
             PythonParser,
             cyclomatic,
-            [(cyclomatic, 4, usize)],
+            [(cyclomatic_sum, 4, usize)],
             [
-                (cyclomatic_average, 2.0) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.0), // nspace = 2 (func and unit)
+                (cyclomatic_max, 3.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -228,9 +264,11 @@ mod tests {
             "foo.rs",
             RustParser,
             cyclomatic,
-            [(cyclomatic, 5, usize)],
+            [(cyclomatic_sum, 5, usize)],
             [
-                (cyclomatic_average, 2.5) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -257,9 +295,11 @@ mod tests {
             "foo.c",
             CppParser,
             cyclomatic,
-            [(cyclomatic, 5, usize)],
+            [(cyclomatic_sum, 5, usize)],
             [
-                (cyclomatic_average, 2.5) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
@@ -282,9 +322,87 @@ mod tests {
             "foo.c",
             CppParser,
             cyclomatic,
-            [(cyclomatic, 5, usize)],
+            [(cyclomatic_sum, 5, usize)],
             [
-                (cyclomatic_average, 2.5) // nspace = 2 (func and unit)
+                (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 1.0)
+            ]
+        );
+    }
+    #[test]
+    fn c_unit_before() {
+        check_metrics!(
+            "
+            int a=42;
+            if(a==42) //+2(+1 unit space)
+            {
+
+            }
+            if(a==34) //+1
+            {
+                
+            }
+            int sumOfPrimes(int max) { // +1 
+                 int total = 0;
+                 OUT: for (int i = 1; i <= max; ++i) { // +1
+                   for (int j = 2; j < i; ++j) { // +1
+                       if (i % j == 0) { // +1
+                          continue OUT;
+                       }
+                   }
+                   total += i;
+                 }
+                 return total;
+            }",
+            "foo.c",
+            CppParser,
+            cyclomatic,
+            [(cyclomatic_sum, 7, usize)],
+            [
+                (cyclomatic_average, 3.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 3.0)
+            ]
+        );
+    }
+    /// Test to handle the case of min and max when merge happen before the final value of one module are setted.
+    /// In this case the min value should be 3 because the unit space has 2 branches and a complexity of 3
+    /// while the function sumOfPrimes has a complexity of 4.
+    #[test]
+    fn c_unit_after() {
+        check_metrics!(
+            "
+            int sumOfPrimes(int max) { // +1 
+                 int total = 0;
+                 OUT: for (int i = 1; i <= max; ++i) { // +1
+                   for (int j = 2; j < i; ++j) { // +1
+                       if (i % j == 0) { // +1
+                          continue OUT;
+                       }
+                   }
+                   total += i;
+                 }
+                 return total;
+            }
+            
+            int a=42;
+            if(a==42) //+2(+1 unit space)
+            {
+
+            }
+            if(a==34) //+1
+            {
+                
+            }",
+            "foo.c",
+            CppParser,
+            cyclomatic,
+            [(cyclomatic_sum, 7, usize)],
+            [
+                (cyclomatic_average, 3.5), // nspace = 2 (func and unit)
+                (cyclomatic_max, 4.0),
+                (cyclomatic_min, 3.0)
             ]
         );
     }
