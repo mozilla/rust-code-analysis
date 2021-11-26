@@ -1,5 +1,4 @@
 extern crate askama;
-extern crate enum_iterator;
 extern crate tree_sitter;
 
 #[macro_use]

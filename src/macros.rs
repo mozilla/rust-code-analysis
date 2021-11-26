@@ -46,12 +46,18 @@ macro_rules! get_language {
 macro_rules! mk_enum {
     ( $( $camel:ident, $description:expr ),* ) => {
         /// The list of supported languages.
-        #[derive(Clone, Copy, Debug, IntoEnumIterator, PartialEq)]
+        #[derive(Clone, Copy, Debug, PartialEq)]
         pub enum LANG {
             $(
                 #[doc = $description]
                 $camel,
             )*
+        }
+        impl LANG {
+            pub fn into_enum_iter() -> impl Iterator<Item=LANG> {
+                use LANG::*;
+                [$( $camel, )*].into_iter()
+            }
         }
     };
 }

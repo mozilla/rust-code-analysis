@@ -1,4 +1,3 @@
-use enum_iterator::IntoEnumIterator;
 use tree_sitter::Language;
 
 use crate::*;
