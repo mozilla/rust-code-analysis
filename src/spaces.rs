@@ -198,6 +198,7 @@ fn compute_averages(state: &mut State) {
 #[inline(always)]
 fn compute_minmax(state: &mut State) {
     state.space.metrics.cyclomatic.compute_minmax();
+    state.space.metrics.nexits.compute_minmax();
 }
 
 fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
