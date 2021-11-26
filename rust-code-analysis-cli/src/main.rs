@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate clap;
-extern crate crossbeam;
 extern crate num_cpus;
 extern crate serde;
 extern crate serde_cbor;
@@ -11,15 +10,13 @@ extern crate toml;
 mod formats;
 
 use clap::{App, Arg};
-use crossbeam::channel::{unbounded, Receiver, Sender};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use std::collections::{hash_map, HashMap};
 use std::fmt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::process;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use std::{process, thread};
-use walkdir::{DirEntry, WalkDir};
 
 use formats::Format;
 
@@ -28,8 +25,9 @@ use rust_code_analysis::LANG;
 
 // Structs
 use rust_code_analysis::{
-    CommentRm, CommentRmCfg, Count, CountCfg, Dump, DumpCfg, Find, FindCfg, Function, FunctionCfg,
-    Metrics, MetricsCfg, OpsCfg, OpsCode, PreprocParser, PreprocResults,
+    CommentRm, CommentRmCfg, ConcurrentRunner, Count, CountCfg, Dump, DumpCfg, FilesData, Find,
+    FindCfg, Function, FunctionCfg, Metrics, MetricsCfg, OpsCfg, OpsCode, PreprocParser,
+    PreprocResults,
 };
 
 // Functions
@@ -48,6 +46,7 @@ struct Config {
     comments: bool,
     find_filter: Vec<String>,
     count_filter: Vec<String>,
+    language: Option<LANG>,
     function: bool,
     metrics: bool,
     ops: bool,
@@ -60,15 +59,6 @@ struct Config {
     preproc: Option<Arc<PreprocResults>>,
     count_lock: Option<Arc<Mutex<Count>>>,
 }
-
-struct JobItem {
-    language: Option<LANG>,
-    path: PathBuf,
-    cfg: Arc<Config>,
-}
-
-type JobReceiver = Receiver<Option<JobItem>>;
-type JobSender = Sender<Option<JobItem>>;
 
 fn mk_globset(elems: clap::Values) -> GlobSet {
     let mut globset = GlobSetBuilder::new();
@@ -86,14 +76,14 @@ fn mk_globset(elems: clap::Values) -> GlobSet {
     }
 }
 
-fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::Result<()> {
+fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     let source = if let Some(source) = read_file_with_eol(&path)? {
         source
     } else {
         return Ok(());
     };
 
-    let language = if let Some(language) = language {
+    let language = if let Some(language) = cfg.language {
         language
     } else if let Some(language) = guess_language(&source, &path).0 {
         language
@@ -174,90 +164,18 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
     }
 }
 
-fn consumer(receiver: JobReceiver) {
-    while let Ok(job) = receiver.recv() {
-        if job.is_none() {
-            break;
-        }
-        let job = job.unwrap();
-        let path = job.path.clone();
-
-        if let Err(err) = act_on_file(job.language, job.path, &job.cfg) {
-            eprintln!("{:?} for file {:?}", err, path);
-        }
-    }
-}
-
-fn send_file(path: PathBuf, cfg: &Arc<Config>, language: Option<LANG>, sender: &JobSender) {
-    sender
-        .send(Some(JobItem {
-            language,
-            path,
-            cfg: Arc::clone(cfg),
-        }))
-        .unwrap();
-}
-
-fn is_hidden(entry: &DirEntry) -> bool {
-    entry
-        .file_name()
-        .to_str()
-        .map(|s| s.starts_with('.'))
-        .unwrap_or(false)
-}
-
-fn explore(
-    mut paths: Vec<String>,
-    cfg: &Arc<Config>,
-    include: GlobSet,
-    exclude: GlobSet,
-    language: Option<LANG>,
-    sender: &JobSender,
-) -> HashMap<String, Vec<PathBuf>> {
-    let mut all_files: HashMap<String, Vec<PathBuf>> = HashMap::new();
-
-    for path in paths.drain(..) {
-        let path = PathBuf::from(path);
-        if !path.exists() {
-            eprintln!("Warning: File doesn't exist: {}", path.to_str().unwrap());
-            continue;
-        }
-        if path.is_dir() {
-            for entry in WalkDir::new(path)
-                .into_iter()
-                .filter_entry(|e| !is_hidden(e))
-            {
-                let entry = entry.unwrap();
-                let path = entry.path().to_path_buf();
-                if (include.is_empty() || include.is_match(&path))
-                    && (exclude.is_empty() || !exclude.is_match(&path))
-                    && path.is_file()
-                {
-                    if cfg.preproc_lock.is_some() {
-                        let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
-                        let path = path.clone();
-                        match all_files.entry(file_name) {
-                            hash_map::Entry::Occupied(l) => {
-                                l.into_mut().push(path);
-                            }
-                            hash_map::Entry::Vacant(p) => {
-                                p.insert(vec![path]);
-                            }
-                        };
-                    }
-
-                    send_file(path, cfg, language, sender);
-                }
+fn process_dir_path(all_files: &mut HashMap<String, Vec<PathBuf>>, path: &Path, cfg: &Config) {
+    if cfg.preproc_lock.is_some() {
+        let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
+        match all_files.entry(file_name) {
+            hash_map::Entry::Occupied(l) => {
+                l.into_mut().push(path.to_path_buf());
             }
-        } else if (include.is_empty() || include.is_match(&path))
-            && (exclude.is_empty() || !exclude.is_match(&path))
-            && path.is_file()
-        {
-            send_file(path, cfg, language, sender);
-        }
+            hash_map::Entry::Vacant(p) => {
+                p.insert(vec![path.to_path_buf()]);
+            }
+        };
     }
-
-    all_files
 }
 
 fn parse_or_exit<T>(s: &str) -> T
@@ -503,12 +421,16 @@ fn main() {
         None
     };
 
-    let cfg = Arc::new(Config {
+    let include = mk_globset(matches.values_of("include").unwrap());
+    let exclude = mk_globset(matches.values_of("exclude").unwrap());
+
+    let cfg = Config {
         dump,
         in_place,
         comments,
         find_filter,
         count_filter,
+        language,
         function,
         metrics,
         ops,
@@ -520,51 +442,24 @@ fn main() {
         preproc_lock: preproc_lock.clone(),
         preproc,
         count_lock: count_lock.clone(),
-    });
-
-    let (sender, receiver) = unbounded();
-
-    let producer = {
-        let sender = sender.clone();
-        let include = mk_globset(matches.values_of("include").unwrap());
-        let exclude = mk_globset(matches.values_of("exclude").unwrap());
-
-        thread::Builder::new()
-            .name(String::from("Producer"))
-            .spawn(move || explore(paths, &cfg, include, exclude, language, &sender))
-            .unwrap()
     };
 
-    let mut receivers = Vec::with_capacity(num_jobs);
-    for i in 0..num_jobs {
-        let receiver = receiver.clone();
-
-        let t = thread::Builder::new()
-            .name(format!("Consumer {}", i))
-            .spawn(move || {
-                consumer(receiver);
-            })
-            .unwrap();
-
-        receivers.push(t);
-    }
-
-    let all_files = if let Ok(res) = producer.join() {
-        res
-    } else {
-        process::exit(1);
+    let files_data = FilesData {
+        include,
+        exclude,
+        paths,
     };
 
-    // Poison the receiver, now that the producer is finished.
-    for _ in 0..num_jobs {
-        sender.send(None).unwrap();
-    }
-
-    for receiver in receivers {
-        if receiver.join().is_err() {
+    let all_files = match ConcurrentRunner::new(num_jobs, act_on_file)
+        .set_proc_dir_paths(process_dir_path)
+        .run(cfg, files_data)
+    {
+        Ok(all_files) => all_files,
+        Err(e) => {
+            eprintln!("{:?}", e);
             process::exit(1);
         }
-    }
+    };
 
     if let Some(count) = count_lock {
         let count = Arc::try_unwrap(count).unwrap().into_inner().unwrap();

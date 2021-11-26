@@ -1585,7 +1585,6 @@ name = "rust-code-analysis-cli"
 version = "0.0.24"
 dependencies = [
  "clap",
- "crossbeam",
  "globset",
  "num_cpus",
  "regex",
@@ -1595,7 +1594,6 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "toml",
- "walkdir",
 ]
 
 [[package]]
