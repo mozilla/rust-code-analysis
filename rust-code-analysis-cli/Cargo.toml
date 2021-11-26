@@ -13,7 +13,6 @@ name = "rust-code-analysis-cli"
 
 [dependencies]
 clap = "^2.34"
-crossbeam = "^0.8"
 globset = "^0.4"
 num_cpus = "^1.13"
 regex = "^1.5"
@@ -23,4 +22,3 @@ serde_cbor = "^0.11"
 serde_json = "^1.0"
 serde_yaml = "^0.8"
 toml = "^0.5"
-walkdir = "^2.3"
