@@ -12,6 +12,7 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Stats {
     exit: usize,
+    exit_sum: usize,
     total_space_functions: usize,
 }
 
@@ -19,6 +20,7 @@ impl Default for Stats {
     fn default() -> Self {
         Self {
             exit: 0,
+            exit_sum: 0,
             total_space_functions: 1,
         }
     }
@@ -38,19 +40,28 @@ impl Serialize for Stats {
 
 impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "sum: {}, average: {}", self.exit(), self.exit_average())
+        write!(
+            f,
+            "sum: {}, average: {}",
+            self.exit_sum(),
+            self.exit_average(),
+        )
     }
 }
 
 impl Stats {
     /// Merges a second `NExit` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
-        self.exit += other.exit;
+        self.exit_sum += other.exit_sum;
     }
 
     /// Returns the `NExit` metric value
     pub fn exit(&self) -> f64 {
         self.exit as f64
+    }
+    /// Returns the `NExit` metric sum value
+    pub fn exit_sum(&self) -> f64 {
+        self.exit_sum as f64
     }
 
     /// Returns the `NExit` metric average value
@@ -60,9 +71,11 @@ impl Stats {
     ///
     /// If there are no functions in a code, its value is `NAN`.
     pub fn exit_average(&self) -> f64 {
-        self.exit() / self.total_space_functions as f64
+        self.exit_sum() / self.total_space_functions as f64
     }
-
+    pub fn compute_sum(&mut self) {
+        self.exit_sum += self.exit;
+    }
     pub(crate) fn finalize(&mut self, total_space_functions: usize) {
         self.total_space_functions = total_space_functions;
     }
@@ -151,7 +164,7 @@ mod tests {
             "foo.py",
             PythonParser,
             nexits,
-            [(exit, 0, usize)],
+            [(exit_sum, 0, usize),],
             [(exit_average, f64::NAN)] // 0 functions
         );
     }
@@ -163,7 +176,7 @@ mod tests {
             "foo.rs",
             RustParser,
             nexits,
-            [(exit, 0, usize)],
+            [(exit_sum, 0, usize),],
             [(exit_average, f64::NAN)] // 0 functions
         );
     }
@@ -175,7 +188,7 @@ mod tests {
             "foo.c",
             CppParser,
             nexits,
-            [(exit, 0, usize)],
+            [(exit_sum, 0, usize),],
             [(exit_average, f64::NAN)] // 0 functions
         );
     }
@@ -187,7 +200,7 @@ mod tests {
             "foo.js",
             JavascriptParser,
             nexits,
-            [(exit, 0, usize)],
+            [(exit_sum, 0, usize),],
             [(exit_average, f64::NAN)] // 0 functions
         );
     }
@@ -201,7 +214,7 @@ mod tests {
             "foo.py",
             PythonParser,
             nexits,
-            [(exit, 1, usize)],
+            [(exit_sum, 1, usize),],
             [(exit_average, 1.0)] // 1 function
         );
     }
@@ -218,7 +231,7 @@ mod tests {
             "foo.py",
             PythonParser,
             nexits,
-            [(exit, 2, usize)],
+            [(exit_sum, 2, usize),],
             [(exit_average, 1.0)] // 2 functions
         );
     }
@@ -235,7 +248,7 @@ mod tests {
             "foo.py",
             PythonParser,
             nexits,
-            [(exit, 2, usize)],
+            [(exit_sum, 2, usize),],
             [(exit_average, 0.5)] // 2 functions + 2 lambdas = 4
         );
     }
