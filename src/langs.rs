@@ -1,4 +1,3 @@
-use enum_iterator::IntoEnumIterator;
 use std::path::Path;
 use std::sync::Arc;
 use tree_sitter::Language;

@@ -1,10 +1,16 @@
 macro_rules! mk_enum {
     ( $( $camel:ident ),* ) => {
-        #[derive(Clone, Debug, IntoEnumIterator, PartialEq)]
+        #[derive(Clone, Debug, PartialEq)]
         pub enum Lang {
             $(
                 $camel,
             )*
+        }
+        impl Lang {
+            pub fn into_enum_iter() -> impl Iterator<Item=Lang> {
+                use Lang::*;
+                [$( $camel, )*].into_iter()
+            }
         }
     };
 }

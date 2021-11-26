@@ -1,5 +1,4 @@
 use askama::Template;
-use enum_iterator::IntoEnumIterator;
 use std::env;
 use std::fs::File;
 use std::io::{Read, Write};
