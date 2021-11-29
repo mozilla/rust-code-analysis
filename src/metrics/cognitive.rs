@@ -18,6 +18,7 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Stats {
     structural: usize,
+    structural_sum: usize,
     nesting: usize,
     total_space_functions: usize,
     boolean_seq: BoolSequence,
@@ -27,6 +28,7 @@ impl Default for Stats {
     fn default() -> Self {
         Self {
             structural: 0,
+            structural_sum: 0,
             nesting: 0,
             total_space_functions: 1,
             boolean_seq: BoolSequence::default(),
@@ -40,7 +42,7 @@ impl Serialize for Stats {
         S: Serializer,
     {
         let mut st = serializer.serialize_struct("cognitive", 2)?;
-        st.serialize_field("sum", &self.cognitive())?;
+        st.serialize_field("sum", &self.cognitive_sum())?;
         st.serialize_field("average", &self.cognitive_average())?;
         st.end()
     }
@@ -60,12 +62,16 @@ impl fmt::Display for Stats {
 impl Stats {
     /// Merges a second `Cognitive Complexity` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
-        self.structural += other.structural;
+        self.structural_sum += other.structural_sum;
     }
 
     /// Returns the `Cognitive Complexity` metric value
     pub fn cognitive(&self) -> f64 {
         self.structural as f64
+    }
+      /// Returns the `Cognitive Complexity` sum metric value
+      pub fn cognitive_sum(&self) -> f64 {
+        self.structural_sum as f64
     }
 
     /// Returns the `Cognitive Complexity` metric average value
@@ -75,7 +81,10 @@ impl Stats {
     ///
     /// If there are no functions in a code, its value is `NAN`.
     pub fn cognitive_average(&self) -> f64 {
-        self.cognitive() / self.total_space_functions as f64
+        self.cognitive_sum() / self.total_space_functions as f64
+    }
+    pub fn compute_sum(&mut self) {
+        self.structural_sum += self.structural;
     }
 
     pub(crate) fn finalize(&mut self, total_space_functions: usize) {
@@ -427,7 +436,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 0, usize)],
+            [(cognitive_sum, 0, usize)],
             [(cognitive_average, f64::NAN)]
         );
     }
@@ -439,7 +448,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 0, usize)],
+            [(cognitive_sum, 0, usize)],
             [(cognitive_average, f64::NAN)]
         );
     }
@@ -451,7 +460,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 0, usize)],
+            [(cognitive_sum, 0, usize)],
             [(cognitive_average, f64::NAN)]
         );
     }
@@ -463,7 +472,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 0, usize)],
+            [(cognitive_sum, 0, usize)],
             [(cognitive_average, f64::NAN)]
         );
     }
@@ -479,7 +488,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -494,7 +503,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 1, usize)],
+            [(cognitive_sum, 1, usize)],
             [(cognitive_average, 1.0)]
         );
     }
@@ -509,7 +518,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
     }
@@ -527,7 +536,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -547,7 +556,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 6, usize)],
+            [(cognitive_sum, 6, usize)],
             [(cognitive_average, 6.0)]
         );
     }
@@ -566,7 +575,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -585,7 +594,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -604,7 +613,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -618,7 +627,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
     }
@@ -634,7 +643,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
 
@@ -647,7 +656,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
     }
@@ -663,7 +672,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
 
@@ -676,7 +685,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
     }
@@ -692,7 +701,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
 
@@ -705,7 +714,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
     }
@@ -721,7 +730,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 2, usize)],
+            [(cognitive_sum, 2, usize)],
             [(cognitive_average, 2.0)]
         );
 
@@ -734,7 +743,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
 
@@ -747,7 +756,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -763,7 +772,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
 
@@ -776,7 +785,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -792,7 +801,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
 
@@ -805,7 +814,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -819,7 +828,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -835,7 +844,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -851,7 +860,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -867,7 +876,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -884,7 +893,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -899,7 +908,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -925,7 +934,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 11, usize)],
+            [(cognitive_sum, 11, usize)],
             [(cognitive_average, 11.0)]
         );
 
@@ -941,7 +950,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -967,7 +976,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 11, usize)],
+            [(cognitive_sum, 11, usize)],
             [(cognitive_average, 11.0)]
         );
     }
@@ -993,7 +1002,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 11, usize)],
+            [(cognitive_sum, 11, usize)],
             [(cognitive_average, 11.0)]
         );
     }
@@ -1009,7 +1018,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 6, usize)],
+            [(cognitive_sum, 6, usize)],
             [(cognitive_average, 6.0)]
         );
     }
@@ -1030,7 +1039,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 6, usize)],
+            [(cognitive_sum, 6, usize)],
             [(cognitive_average, 6.0)]
         );
     }
@@ -1048,7 +1057,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -1072,7 +1081,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -1099,7 +1108,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 11, usize)],
+            [(cognitive_sum, 11, usize)],
             [(cognitive_average, 11.0)]
         );
     }
@@ -1119,7 +1128,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 7, usize)],
+            [(cognitive_sum, 7, usize)],
             [(cognitive_average, 7.0)]
         );
     }
@@ -1146,7 +1155,7 @@ mod tests {
             "foo.c",
             CppParser,
             cognitive,
-            [(cognitive, 1, usize)],
+            [(cognitive_sum, 1, usize)],
             [(cognitive_average, 1.0)]
         );
     }
@@ -1173,7 +1182,7 @@ mod tests {
             "foo.js",
             MozjsParser,
             cognitive,
-            [(cognitive, 1, usize)],
+            [(cognitive_sum, 1, usize)],
             [(cognitive_average, 1.0)]
         );
     }
@@ -1188,7 +1197,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
@@ -1206,7 +1215,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 5, usize)],
+            [(cognitive_sum, 5, usize)],
             [(cognitive_average, 1.25)] // 2 functions + 2 lamdas = 4
         );
     }
@@ -1231,7 +1240,7 @@ mod tests {
             "foo.py",
             PythonParser,
             cognitive,
-            [(cognitive, 9, usize)],
+            [(cognitive_sum, 9, usize)],
             [(cognitive_average, 9.0)]
         );
     }
@@ -1252,7 +1261,7 @@ mod tests {
             "foo.rs",
             RustParser,
             cognitive,
-            [(cognitive, 3, usize)],
+            [(cognitive_sum, 3, usize)],
             [(cognitive_average, 3.0)]
         );
     }
@@ -1275,7 +1284,7 @@ mod tests {
             "foo.ts",
             TypescriptParser,
             cognitive,
-            [(cognitive, 4, usize)],
+            [(cognitive_sum, 4, usize)],
             [(cognitive_average, 4.0)]
         );
     }
