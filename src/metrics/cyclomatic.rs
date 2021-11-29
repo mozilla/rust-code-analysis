@@ -32,7 +32,7 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("cyclomatic", 2)?;
+        let mut st = serializer.serialize_struct("cyclomatic", 4)?;
         st.serialize_field("sum", &self.cyclomatic_sum())?;
         st.serialize_field("average", &self.cyclomatic_average())?;
         st.serialize_field("min", &self.cyclomatic_min())?;
