@@ -13,6 +13,8 @@ use crate::*;
 pub struct Stats {
     fn_nargs: usize,
     closure_nargs: usize,
+    fn_nargs_sum: usize,
+    closure_nargs_sum: usize,
     total_functions: usize,
     total_closures: usize,
 }
@@ -22,6 +24,8 @@ impl Default for Stats {
         Self {
             fn_nargs: 0,
             closure_nargs: 0,
+            fn_nargs_sum: 0,
+            closure_nargs_sum: 0,
             total_functions: 0,
             total_closures: 0,
         }
@@ -34,8 +38,8 @@ impl Serialize for Stats {
         S: Serializer,
     {
         let mut st = serializer.serialize_struct("nargs", 6)?;
-        st.serialize_field("total_functions", &self.fn_args())?;
-        st.serialize_field("total_closures", &self.closure_args())?;
+        st.serialize_field("total_functions", &self.fn_args_sum())?;
+        st.serialize_field("total_closures", &self.closure_args_sum())?;
         st.serialize_field("average_functions", &self.fn_args_average())?;
         st.serialize_field("average_closures", &self.closure_args_average())?;
         st.serialize_field("total", &self.nargs_total())?;
@@ -62,8 +66,8 @@ impl fmt::Display for Stats {
 impl Stats {
     /// Merges a second `NArgs` metric into the first one
     pub fn merge(&mut self, other: &Stats) {
-        self.fn_nargs += other.fn_nargs;
-        self.closure_nargs += other.closure_nargs;
+        self.fn_nargs_sum += other.fn_nargs_sum;
+        self.closure_nargs_sum += other.closure_nargs_sum;
     }
 
     /// Returns the number of function arguments in a space.
@@ -78,23 +82,35 @@ impl Stats {
         self.closure_nargs as f64
     }
 
+     /// Returns the number of function arguments sum in a space.
+     #[inline(always)]
+     pub fn fn_args_sum(&self) -> f64 {
+         self.fn_nargs_sum as f64
+     }
+ 
+     /// Returns the number of closure arguments sum in a space.
+     #[inline(always)]
+     pub fn closure_args_sum(&self) -> f64 {
+         self.closure_nargs_sum as f64
+     }
+
     /// Returns the average number of functions arguments in a space.
     #[inline(always)]
     pub fn fn_args_average(&self) -> f64 {
-        self.fn_nargs as f64 / self.total_functions.max(1) as f64
+        self.fn_nargs_sum as f64 / self.total_functions.max(1) as f64
     }
 
     /// Returns the average number of closures arguments in a space.
     #[inline(always)]
     pub fn closure_args_average(&self) -> f64 {
-        self.closure_nargs as f64 / self.total_closures.max(1) as f64
+        self.closure_nargs_sum as f64 / self.total_closures.max(1) as f64
     }
 
     /// Returns the total number of arguments of each function and
     /// closure in a space.
     #[inline(always)]
     pub fn nargs_total(&self) -> f64 {
-        self.fn_args() + self.closure_args()
+        self.fn_args_sum() + self.closure_args_sum()
     }
 
     /// Returns the `NArgs` metric average value
@@ -105,7 +121,10 @@ impl Stats {
     pub fn nargs_average(&self) -> f64 {
         self.nargs_total() / (self.total_functions + self.total_closures).max(1) as f64
     }
-
+    pub fn compute_sum(&mut self)  {
+        self.closure_nargs_sum += self.closure_nargs;
+        self.fn_nargs_sum += self.fn_nargs;
+    }
     pub(crate) fn finalize(&mut self, total_functions: usize, total_closures: usize) {
         self.total_functions = total_functions;
         self.total_closures = total_closures;
@@ -185,8 +204,8 @@ mod tests {
             PythonParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 0, usize)
             ],
             [
@@ -205,8 +224,8 @@ mod tests {
             RustParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 0, usize)
             ],
             [
@@ -225,8 +244,8 @@ mod tests {
             CppParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 0, usize)
             ],
             [
@@ -245,8 +264,8 @@ mod tests {
             JavascriptParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 0, usize)
             ],
             [
@@ -267,8 +286,8 @@ mod tests {
             PythonParser,
             nargs,
             [
-                (fn_args, 2, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 2, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 2, usize)
             ],
             [
@@ -291,8 +310,8 @@ mod tests {
             RustParser,
             nargs,
             [
-                (fn_args, 2, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 2, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 2, usize)
             ],
             [
@@ -315,8 +334,8 @@ mod tests {
             CppParser,
             nargs,
             [
-                (fn_args, 2, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 2, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 2, usize)
             ],
             [
@@ -337,8 +356,8 @@ mod tests {
             JavascriptParser,
             nargs,
             [
-                (fn_args, 2, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 2, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 2, usize)
             ],
             [
@@ -357,8 +376,8 @@ mod tests {
             PythonParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 1, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 1, usize),
                 (nargs_total, 1, usize)
             ],
             [
@@ -377,8 +396,8 @@ mod tests {
             RustParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 1, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 1, usize),
                 (nargs_total, 1, usize)
             ],
             [
@@ -397,8 +416,8 @@ mod tests {
             CppParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 2, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 2, usize),
                 (nargs_total, 2, usize)
             ],
             [
@@ -417,8 +436,8 @@ mod tests {
             JavascriptParser,
             nargs,
             [
-                (fn_args, 0, usize),
-                (closure_args, 2, usize),
+                (fn_args_sum, 0, usize),
+                (closure_args_sum, 2, usize),
                 (nargs_total, 2, usize)
             ],
             [
@@ -442,8 +461,8 @@ mod tests {
             PythonParser,
             nargs,
             [
-                (fn_args, 4, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 4, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 4, usize)
             ],
             [
@@ -464,8 +483,8 @@ mod tests {
             PythonParser,
             nargs,
             [
-                (fn_args, 5, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 5, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 5, usize)
             ],
             [
@@ -493,8 +512,8 @@ mod tests {
             RustParser,
             nargs,
             [
-                (fn_args, 4, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 4, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 4, usize)
             ],
             [
@@ -519,8 +538,8 @@ mod tests {
             RustParser,
             nargs,
             [
-                (fn_args, 5, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 5, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 5, usize)
             ],
             [
@@ -548,8 +567,8 @@ mod tests {
             CppParser,
             nargs,
             [
-                (fn_args, 4, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 4, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 4, usize)
             ],
             [
@@ -574,8 +593,8 @@ mod tests {
             CppParser,
             nargs,
             [
-                (fn_args, 5, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 5, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 5, usize)
             ],
             [
@@ -599,8 +618,8 @@ mod tests {
             JavascriptParser,
             nargs,
             [
-                (fn_args, 4, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 4, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 4, usize)
             ],
             [
@@ -621,8 +640,8 @@ mod tests {
             JavascriptParser,
             nargs,
             [
-                (fn_args, 5, usize),
-                (closure_args, 0, usize),
+                (fn_args_sum, 5, usize),
+                (closure_args_sum, 0, usize),
                 (nargs_total, 5, usize)
             ],
             [
@@ -646,8 +665,8 @@ mod tests {
             PythonParser,
             nargs,
             [
-                (fn_args, 3, usize),
-                (closure_args, 2, usize),
+                (fn_args_sum, 3, usize),
+                (closure_args_sum, 2, usize),
                 (nargs_total, 5, usize)
             ],
             [
@@ -673,8 +692,8 @@ mod tests {
             RustParser,
             nargs,
             [
-                (fn_args, 3, usize),
-                (closure_args, 3, usize),
+                (fn_args_sum, 3, usize),
+                (closure_args_sum, 3, usize),
                 (nargs_total, 6, usize)
             ],
             [
@@ -697,8 +716,8 @@ mod tests {
             CppParser,
             nargs,
             [
-                (fn_args, 3, usize),
-                (closure_args, 3, usize),
+                (fn_args_sum, 3, usize),
+                (closure_args_sum, 3, usize),
                 (nargs_total, 6, usize)
             ],
             [
@@ -724,8 +743,8 @@ mod tests {
             JavascriptParser,
             nargs,
             [
-                (fn_args, 6, usize),
-                (closure_args, 1, usize),
+                (fn_args_sum, 6, usize),
+                (closure_args_sum, 1, usize),
                 (nargs_total, 7, usize)
             ],
             [
