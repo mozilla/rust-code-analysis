@@ -13,6 +13,10 @@ pub struct Stats {
     closures: usize,
     functions_sum: usize,
     closures_sum: usize,
+    functions_min: usize,
+    functions_max: usize,
+    closures_min: usize,
+    closures_max: usize,
 }
 impl Default for Stats {
     fn default() -> Self {
@@ -21,6 +25,10 @@ impl Default for Stats {
             closures: 0,
             functions_sum: 0,
             closures_sum: 0,
+            functions_min: usize::MAX,
+            functions_max: 0,
+            closures_min: usize::MAX,
+            closures_max: 0,
         }
     }
 }
@@ -29,10 +37,14 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("nom", 3)?;
+        let mut st = serializer.serialize_struct("nom", 7)?;
         st.serialize_field("functions", &self.functions_sum())?;
         st.serialize_field("closures", &self.closures_sum())?;
         st.serialize_field("total", &self.total())?;
+        st.serialize_field("functions_min", &self.functions_min())?;
+        st.serialize_field("functions_max", &self.functions_max())?;
+        st.serialize_field("closures_min", &self.closures_min())?;
+        st.serialize_field("closures_max", &self.closures_max())?;
         st.end()
     }
 }
@@ -43,10 +55,18 @@ impl fmt::Display for Stats {
             f,
             "functions: {}, \
              closures: {}, \
-             total: {}",
+             total: {} \
+             functions_min: {} \
+             functions_max: {} \
+             closures_min: {} \
+             closures_max: {}",
             self.functions_sum(),
             self.closures_sum(),
             self.total(),
+            self.functions_min(),
+            self.functions_max(),
+            self.closures_min(),
+            self.closures_max(),
         )
     }
 }
@@ -54,6 +74,10 @@ impl fmt::Display for Stats {
 impl Stats {
     /// Merges a second `Nom` metric suite into the first one
     pub fn merge(&mut self, other: &Stats) {
+        self.functions_min = self.functions_min.min(other.functions_min);
+        self.functions_max = self.functions_max.max(other.functions_max);
+        self.closures_min = self.closures_min.min(other.closures_min);
+        self.closures_max = self.closures_max.max(other.closures_max);
         self.functions_sum += other.functions_sum;
         self.closures_sum += other.closures_sum;
     }
@@ -84,13 +108,41 @@ impl Stats {
         self.closures_sum as f64
     }
 
+    /// Counts the number of function definitions in a scope
+    #[inline(always)]
+    pub fn functions_min(&self) -> f64 {
+        // Only function definitions are considered, not general declarations
+        self.functions_min as f64
+    }
+
+    /// Counts the number of closures in a scope
+    #[inline(always)]
+    pub fn closures_min(&self) -> f64 {
+        self.closures_min as f64
+    }
+    /// Counts the number of function definitions in a scope
+    #[inline(always)]
+    pub fn functions_max(&self) -> f64 {
+        // Only function definitions are considered, not general declarations
+        self.functions_max as f64
+    }
+
+    /// Counts the number of closures in a scope
+    #[inline(always)]
+    pub fn closures_max(&self) -> f64 {
+        self.closures_max as f64
+    }
     /// Returns the total number of function definitions and
     /// closures in a scope
     #[inline(always)]
     pub fn total(&self) -> f64 {
         self.functions_sum() + self.closures_sum()
     }
-    pub fn compute_sum(&mut self) {
+    pub fn compute_minmax(&mut self) {
+        self.functions_min = self.functions_min.min(self.functions);
+        self.functions_max = self.functions_max.max(self.functions);
+        self.closures_min = self.closures_min.min(self.closures);
+        self.closures_max = self.closures_max.max(self.closures);
         self.functions_sum += self.functions;
         self.closures_sum += self.closures;
     }
@@ -145,7 +197,11 @@ mod tests {
             [
                 (functions_sum, 3, usize),
                 (closures_sum, 1, usize),
-                (total, 4, usize)
+                (total, 4, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }
@@ -162,7 +218,11 @@ mod tests {
             [
                 (functions_sum, 2, usize),
                 (closures_sum, 1, usize),
-                (total, 3, usize)
+                (total, 3, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }
@@ -181,7 +241,11 @@ mod tests {
             [
                 (functions_sum, 1, usize),
                 (closures_sum, 0, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 0, usize),
             ]
         );
     }
@@ -200,7 +264,11 @@ mod tests {
             [
                 (functions_sum, 2, usize),
                 (closures_sum, 1, usize),
-                (total, 3, usize)
+                (total, 3, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }
@@ -227,7 +295,11 @@ mod tests {
             [
                 (functions_sum, 3, usize), // f, foo, bar
                 (closures_sum, 1, usize),  // return function ()
-                (total, 4, usize)
+                (total, 4, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }
@@ -244,7 +316,11 @@ mod tests {
             [
                 (functions_sum, 1, usize), // test_safe_mode
                 (closures_sum, 0, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 0, usize),
             ]
         );
     }
@@ -259,7 +335,11 @@ mod tests {
             [
                 (functions_sum, 1, usize),
                 (closures_sum, 0, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 0, usize),
             ]
         );
     }
@@ -276,7 +356,11 @@ mod tests {
             [
                 (functions_sum, 1, usize),
                 (closures_sum, 0, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 0, usize),
             ]
         );
     }
@@ -293,7 +377,11 @@ mod tests {
             [
                 (functions_sum, 1, usize),
                 (closures_sum, 0, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 0, usize),
             ]
         );
     }
@@ -312,7 +400,11 @@ mod tests {
             [
                 (functions_sum, 1, usize),
                 (closures_sum, 0, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 0, usize),
             ]
         );
     }
@@ -331,7 +423,11 @@ mod tests {
             [
                 (functions_sum, 0, usize),
                 (closures_sum, 2, usize),
-                (total, 2, usize)
+                (total, 2, usize),
+                (functions_max, 0, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }
@@ -348,7 +444,11 @@ mod tests {
             [
                 (functions_sum, 1, usize), // add
                 (closures_sum, 1, usize),  // materials.map
-                (total, 2, usize)
+                (total, 2, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }
@@ -363,7 +463,11 @@ mod tests {
             [
                 (functions_sum, 1, usize),
                 (closures_sum, 0, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 0, usize),
             ]
         );
     }
@@ -378,7 +482,11 @@ mod tests {
             [
                 (functions_sum, 0, usize),
                 (closures_sum, 1, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 0, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }
@@ -395,7 +503,11 @@ mod tests {
             [
                 (functions_sum, 0, usize),
                 (closures_sum, 1, usize),
-                (total, 1, usize)
+                (total, 1, usize),
+                (functions_max, 0, usize),
+                (functions_min, 0, usize),
+                (closures_min, 0, usize),
+                (closures_max, 1, usize),
             ]
         );
     }

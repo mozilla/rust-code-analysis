@@ -201,7 +201,7 @@ fn compute_minmax(state: &mut State) {
     state.space.metrics.nexits.compute_minmax();
     state.space.metrics.cognitive.compute_minmax();
     state.space.metrics.nargs.compute_minmax();
-    state.space.metrics.nom.compute_sum();
+    state.space.metrics.nom.compute_minmax();
 }
 
 fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
