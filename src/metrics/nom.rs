@@ -7,20 +7,31 @@ use crate::checker::Checker;
 use crate::*;
 
 /// The `Nom` metric suite.
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct Stats {
     functions: usize,
     closures: usize,
+    functions_sum: usize,
+    closures_sum: usize,
 }
-
+impl Default for Stats {
+    fn default() -> Self {
+        Self {
+            functions: 0,
+            closures: 0,
+            functions_sum: 0,
+            closures_sum: 0,
+        }
+    }
+}
 impl Serialize for Stats {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         let mut st = serializer.serialize_struct("nom", 3)?;
-        st.serialize_field("functions", &self.functions())?;
-        st.serialize_field("closures", &self.closures())?;
+        st.serialize_field("functions", &self.functions_sum())?;
+        st.serialize_field("closures", &self.closures_sum())?;
         st.serialize_field("total", &self.total())?;
         st.end()
     }
@@ -33,8 +44,8 @@ impl fmt::Display for Stats {
             "functions: {}, \
              closures: {}, \
              total: {}",
-            self.functions(),
-            self.closures(),
+            self.functions_sum(),
+            self.closures_sum(),
             self.total(),
         )
     }
@@ -43,8 +54,8 @@ impl fmt::Display for Stats {
 impl Stats {
     /// Merges a second `Nom` metric suite into the first one
     pub fn merge(&mut self, other: &Stats) {
-        self.functions += other.functions;
-        self.closures += other.closures;
+        self.functions_sum += other.functions_sum;
+        self.closures_sum += other.closures_sum;
     }
 
     /// Counts the number of function definitions in a scope
@@ -60,11 +71,28 @@ impl Stats {
         self.closures as f64
     }
 
+    /// Return the sum metric for functions
+    #[inline(always)]
+    pub fn functions_sum(&self) -> f64 {
+        // Only function definitions are considered, not general declarations
+        self.functions_sum as f64
+    }
+
+    /// Return the sum metric for closures
+    #[inline(always)]
+    pub fn closures_sum(&self) -> f64 {
+        self.closures_sum as f64
+    }
+
     /// Returns the total number of function definitions and
     /// closures in a scope
     #[inline(always)]
     pub fn total(&self) -> f64 {
-        self.functions() + self.closures()
+        self.functions_sum() + self.closures_sum()
+    }
+    pub fn compute_sum(&mut self) {
+        self.functions_sum += self.functions;
+        self.closures_sum += self.closures;
     }
 }
 
@@ -115,8 +143,8 @@ mod tests {
             PythonParser,
             nom,
             [
-                (functions, 3, usize),
-                (closures, 1, usize),
+                (functions_sum, 3, usize),
+                (closures_sum, 1, usize),
                 (total, 4, usize)
             ]
         );
@@ -132,8 +160,8 @@ mod tests {
             RustParser,
             nom,
             [
-                (functions, 2, usize),
-                (closures, 1, usize),
+                (functions_sum, 2, usize),
+                (closures_sum, 1, usize),
                 (total, 3, usize)
             ]
         );
@@ -151,8 +179,8 @@ mod tests {
             CppParser,
             nom,
             [
-                (functions, 1, usize),
-                (closures, 0, usize),
+                (functions_sum, 1, usize),
+                (closures_sum, 0, usize),
                 (total, 1, usize)
             ]
         );
@@ -170,8 +198,8 @@ mod tests {
             CppParser,
             nom,
             [
-                (functions, 2, usize),
-                (closures, 1, usize),
+                (functions_sum, 2, usize),
+                (closures_sum, 1, usize),
                 (total, 3, usize)
             ]
         );
@@ -197,8 +225,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 3, usize), // f, foo, bar
-                (closures, 1, usize),  // return function ()
+                (functions_sum, 3, usize), // f, foo, bar
+                (closures_sum, 1, usize),  // return function ()
                 (total, 4, usize)
             ]
         );
@@ -214,8 +242,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 1, usize), // test_safe_mode
-                (closures, 0, usize),
+                (functions_sum, 1, usize), // test_safe_mode
+                (closures_sum, 0, usize),
                 (total, 1, usize)
             ]
         );
@@ -229,8 +257,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 1, usize),
-                (closures, 0, usize),
+                (functions_sum, 1, usize),
+                (closures_sum, 0, usize),
                 (total, 1, usize)
             ]
         );
@@ -246,8 +274,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 1, usize),
-                (closures, 0, usize),
+                (functions_sum, 1, usize),
+                (closures_sum, 0, usize),
                 (total, 1, usize)
             ]
         );
@@ -263,8 +291,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 1, usize),
-                (closures, 0, usize),
+                (functions_sum, 1, usize),
+                (closures_sum, 0, usize),
                 (total, 1, usize)
             ]
         );
@@ -282,8 +310,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 1, usize),
-                (closures, 0, usize),
+                (functions_sum, 1, usize),
+                (closures_sum, 0, usize),
                 (total, 1, usize)
             ]
         );
@@ -301,8 +329,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 0, usize),
-                (closures, 2, usize),
+                (functions_sum, 0, usize),
+                (closures_sum, 2, usize),
                 (total, 2, usize)
             ]
         );
@@ -318,8 +346,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 1, usize), // add
-                (closures, 1, usize),  // materials.map
+                (functions_sum, 1, usize), // add
+                (closures_sum, 1, usize),  // materials.map
                 (total, 2, usize)
             ]
         );
@@ -333,8 +361,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 1, usize),
-                (closures, 0, usize),
+                (functions_sum, 1, usize),
+                (closures_sum, 0, usize),
                 (total, 1, usize)
             ]
         );
@@ -348,8 +376,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 0, usize),
-                (closures, 1, usize),
+                (functions_sum, 0, usize),
+                (closures_sum, 1, usize),
                 (total, 1, usize)
             ]
         );
@@ -365,8 +393,8 @@ mod tests {
             JavascriptParser,
             nom,
             [
-                (functions, 0, usize),
-                (closures, 1, usize),
+                (functions_sum, 0, usize),
+                (closures_sum, 1, usize),
                 (total, 1, usize)
             ]
         );
