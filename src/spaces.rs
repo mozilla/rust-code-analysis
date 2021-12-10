@@ -181,8 +181,8 @@ fn compute_halstead_and_mi<T: ParserTrait>(state: &mut State) {
 
 #[inline(always)]
 fn compute_averages(state: &mut State) {
-    let nom_functions = state.space.metrics.nom.functions() as usize;
-    let nom_closures = state.space.metrics.nom.closures() as usize;
+    let nom_functions = state.space.metrics.nom.functions_sum() as usize;
+    let nom_closures = state.space.metrics.nom.closures_sum() as usize;
     let nom_total = state.space.metrics.nom.total() as usize;
     // Cognitive average
     state.space.metrics.cognitive.finalize(nom_total);
@@ -201,6 +201,7 @@ fn compute_minmax(state: &mut State) {
     state.space.metrics.nexits.compute_minmax();
     state.space.metrics.cognitive.compute_minmax();
     state.space.metrics.nargs.compute_minmax();
+    state.space.metrics.nom.compute_minmax();
 }
 
 fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
