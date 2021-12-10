@@ -107,9 +107,9 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
 
     // If there is only the unit space
     if state_stack.len() == 1 {
-        let mut last_state = state_stack.last_mut().unwrap();
+        let last_state = state_stack.last_mut().unwrap();
         // Compute last_state operators and operands
-        compute_operators_and_operands::<T>(&mut last_state);
+        compute_operators_and_operands::<T>(last_state);
     }
 
     for _ in 0..diff_level {
@@ -117,13 +117,13 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
             break;
         } else {
             let mut state = state_stack.pop().unwrap();
-            let mut last_state = state_stack.last_mut().unwrap();
+            let last_state = state_stack.last_mut().unwrap();
 
             // Compute state operators and operands
             compute_operators_and_operands::<T>(&mut state);
 
             // Compute last_state operators and operands
-            compute_operators_and_operands::<T>(&mut last_state);
+            compute_operators_and_operands::<T>(last_state);
 
             // Merge Halstead maps
             last_state.halstead_maps.merge(&state.halstead_maps);

@@ -57,7 +57,7 @@ impl fmt::Display for SpaceKind {
 }
 
 /// All metrics data.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct CodeMetrics {
     /// `NArgs` data
     pub nargs: nargs::Stats,
@@ -74,21 +74,6 @@ pub struct CodeMetrics {
     pub nom: nom::Stats,
     /// `Mi` data
     pub mi: mi::Stats,
-}
-
-impl Default for CodeMetrics {
-    fn default() -> Self {
-        Self {
-            cognitive: cognitive::Stats::default(),
-            cyclomatic: cyclomatic::Stats::default(),
-            halstead: halstead::Stats::default(),
-            loc: loc::Stats::default(),
-            nom: nom::Stats::default(),
-            mi: mi::Stats::default(),
-            nargs: nargs::Stats::default(),
-            nexits: exit::Stats::default(),
-        }
-    }
 }
 
 impl fmt::Display for CodeMetrics {
@@ -210,10 +195,10 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
     }
     for _ in 0..diff_level {
         if state_stack.len() == 1 {
-            let mut last_state = state_stack.last_mut().unwrap();
-            compute_minmax(&mut last_state);
-            compute_halstead_and_mi::<T>(&mut last_state);
-            compute_averages(&mut last_state);
+            let last_state = state_stack.last_mut().unwrap();
+            compute_minmax(last_state);
+            compute_halstead_and_mi::<T>(last_state);
+            compute_averages(last_state);
             break;
         } else {
             let mut state = state_stack.pop().unwrap();
@@ -221,9 +206,9 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
             compute_halstead_and_mi::<T>(&mut state);
             compute_averages(&mut state);
 
-            let mut last_state = state_stack.last_mut().unwrap();
+            let last_state = state_stack.last_mut().unwrap();
             last_state.halstead_maps.merge(&state.halstead_maps);
-            compute_halstead_and_mi::<T>(&mut last_state);
+            compute_halstead_and_mi::<T>(last_state);
 
             // Merge function spaces
             last_state.space.metrics.merge(&state.space.metrics);
