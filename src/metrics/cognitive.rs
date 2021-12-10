@@ -182,7 +182,6 @@ macro_rules! nesting_levels {
 #[derive(Debug, Default, Clone)]
 struct BoolSequence {
     boolean_op: Option<u16>,
-    first_boolean: bool,
 }
 
 impl BoolSequence {
