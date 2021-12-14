@@ -1,6 +1,6 @@
 [package]
 name = "rust-code-analysis-web"
-version = "0.0.23"
+version = "0.0.24"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2021"
 repository = "https://github.com/mozilla/rust-code-analysis/tree/master/rust-code-analysis-web"

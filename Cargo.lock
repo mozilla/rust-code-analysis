@@ -1560,7 +1560,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis"
-version = "0.0.23"
+version = "0.0.24"
 dependencies = [
  "aho-corasick",
  "fxhash",
@@ -1588,7 +1588,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis-cli"
-version = "0.0.23"
+version = "0.0.24"
 dependencies = [
  "clap",
  "crossbeam",
@@ -1606,7 +1606,7 @@ dependencies = [
 
 [[package]]
 name = "rust-code-analysis-web"
-version = "0.0.23"
+version = "0.0.24"
 dependencies = [
  "actix-rt 2.5.0",
  "actix-web",
