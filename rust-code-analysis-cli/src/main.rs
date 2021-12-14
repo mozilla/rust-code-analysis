@@ -123,7 +123,7 @@ fn act_on_file(language: Option<LANG>, path: PathBuf, cfg: &Config) -> std::io::
     } else if cfg.ops {
         if let Some(output_format) = &cfg.output_format {
             let ops = get_ops(&language, source, &path, pr).unwrap();
-            output_format.dump_ops_formats(&ops, &path, &cfg.output, cfg.pretty)
+            output_format.dump_formats(&ops, &path, &cfg.output, cfg.pretty)
         } else {
             let cfg = OpsCfg { path };
             let path = cfg.path.clone();
