@@ -28,3 +28,6 @@ cc = "^1.0"
 # This dependency is not used at all for this crate, but it is here so that
 # dependabot can send notifications when there are updates for this grammar
 tree-sitter-javascript = "0.19.0"
+
+[package.metadata.cargo-udeps.ignore]
+build = ["tree-sitter-javascript"]
