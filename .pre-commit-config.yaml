@@ -28,6 +28,13 @@ repos:
         entry: cargo clippy --all-targets --all -- -D warnings
         pass_filenames: false
 
+      - id: udeps
+        name: udeps
+        language: system
+        files: '\.rs$'
+        entry: cargo +nightly udeps --all-targets
+        pass_filenames: false
+
       - id: test
         name: test
         language: system
