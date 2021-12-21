@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{create_dir_all, File};
 use std::io::Write;
 use std::io::{Error, ErrorKind};
 use std::path::{Path, PathBuf};
@@ -67,13 +67,13 @@ impl Format {
             // Remove root ./
             let path = path.strip_prefix("./").unwrap_or(path);
 
-            // Replace .. symbol with "_" to create a unique filename
+            // Replace .. with . to keep files inside the output folder
             let cleaned_path: Vec<&str> = path
                 .iter()
                 .map(|os_str| {
                     let s_str = os_str.to_str().unwrap();
                     if s_str == ".." {
-                        "_"
+                        "."
                     } else {
                         s_str
                     }
@@ -81,9 +81,13 @@ impl Format {
                 .collect();
 
             // Create the filename
-            let filename = cleaned_path.join("_") + format_ext;
+            let filename = cleaned_path.join("/") + format_ext;
 
+            // Build the file path
             let format_path = output_path.as_ref().unwrap().join(filename);
+
+            // Create directories
+            create_dir_all(&format_path.parent().unwrap()).unwrap();
 
             let mut format_file = File::create(format_path)?;
             match self {
