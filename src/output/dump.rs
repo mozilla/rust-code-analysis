@@ -73,7 +73,13 @@ fn dump_tree_helper(
         return Ok(());
     }
 
-    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
+    let (pref_child, pref) = if node.object().parent().is_none() {
+        ("", "")
+    } else if last {
+        ("   ", "╰─ ")
+    } else {
+        ("│  ", "├─ ")
+    };
 
     let node_row = node.object().start_position().row + 1;
     let mut display = true;
