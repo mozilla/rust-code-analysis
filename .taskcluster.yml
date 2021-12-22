@@ -41,6 +41,8 @@ tasks:
             - "-cx"
             - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup component add clippy rustfmt &&
+               rustup toolchain install nightly &&
+               curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.25/cargo-udeps-v0.1.25-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2 &&
                git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
