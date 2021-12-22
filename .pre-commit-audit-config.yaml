@@ -1,0 +1,17 @@
+# Use a separate pre-commit config that runs only when Rust dependencies
+# are added, removed or modified.
+repos:
+-   repo: local
+    hooks:
+      - id: audit
+        name: audit
+        language: system
+        files: 'Cargo\.lock|Cargo\.toml$'
+        # FIXME
+        # RUSTSEC-2021-0131 --> https://rustsec.org/advisories/RUSTSEC-2021-0131
+        # RUSTSEC-2021-0124 --> https://rustsec.org/advisories/RUSTSEC-2021-0124
+        entry: cargo audit --ignore RUSTSEC-2021-0131 --ignore RUSTSEC-2021-0124
+        pass_filenames: false
+
+default_language_version:
+    python: python3
