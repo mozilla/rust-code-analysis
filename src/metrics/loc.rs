@@ -534,6 +534,7 @@ mod tests {
             [
                 (sloc, 10, usize), // The number of lines is 10
                 (ploc, 7, usize),  // The number of code lines is 7
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -560,6 +561,7 @@ mod tests {
             [
                 (sloc, 9, usize),  // The number of lines is 9
                 (ploc, 7, usize),  // The number of code lines is 7
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 0, usize)  // The number of blank lines is 0
             ]
@@ -587,6 +589,7 @@ mod tests {
             [
                 (sloc, 10, usize), // The number of lines is 10
                 (ploc, 7, usize),  // The number of code lines is 7
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -615,6 +618,7 @@ mod tests {
             [
                 (sloc, 11, usize), // The number of lines is 11
                 (ploc, 8, usize),  // The number of code lines is 8
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -643,6 +647,7 @@ mod tests {
             [
                 (sloc, 11, usize), // The number of lines is 11
                 (ploc, 8, usize),  // The number of code lines is 8
+                (lloc, 1, usize),  // The number of statements is 1
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -671,6 +676,7 @@ mod tests {
             [
                 (sloc, 11, usize), // The number of lines is 11
                 (ploc, 8, usize),  // The number of code lines is 8
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -700,6 +706,7 @@ mod tests {
             [
                 (sloc, 12, usize), // The number of lines is 12
                 (ploc, 8, usize),  // The number of code lines is 8
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -730,6 +737,7 @@ mod tests {
             [
                 (sloc, 13, usize), // The number of lines is 13
                 (ploc, 8, usize),  // The number of code lines is 8
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -757,6 +765,7 @@ mod tests {
             [
                 (sloc, 10, usize), // The number of lines is 10
                 (ploc, 8, usize),  // The number of code lines is 8
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 3, usize),  // The number of comments is 3
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
@@ -786,6 +795,7 @@ mod tests {
             [
                 (sloc, 12, usize), // The number of lines is 12
                 (ploc, 8, usize),  // The number of code lines is 8
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
