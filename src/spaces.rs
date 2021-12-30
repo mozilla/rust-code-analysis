@@ -16,6 +16,7 @@ use crate::nargs::{self, NArgs};
 use crate::nom::{self, Nom};
 
 use crate::dump_metrics::*;
+use crate::langs::*;
 use crate::traits::*;
 
 /// The list of supported space kinds.
@@ -248,6 +249,7 @@ struct State<'a> {
 pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<FuncSpace> {
     let code = parser.get_code();
     let node = parser.get_root();
+    let lang = parser.get_language();
     let mut cursor = node.object().walk();
     let mut stack = Vec::new();
     let mut children = Vec::new();
@@ -293,7 +295,25 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
         cursor.reset(node.object());
         if cursor.goto_first_child() {
             loop {
-                children.push((Node::new(cursor.node()), new_level));
+                if lang == LANG::Python && cursor.node().kind() == "function_definition" {
+                    let func = cursor.node();
+                    children.push((Node::new(cursor.node()), new_level));
+                    while cursor.node().next_sibling() != None
+                        && cursor.node().next_sibling().unwrap().kind() == "comment"
+                    {
+                        let com = cursor.node().next_sibling().unwrap();
+                        if com.start_position().row <= func.end_position().row
+                            || com.start_position().column > func.start_position().column
+                        {
+                            cursor.goto_next_sibling();
+                            children.push((Node::new(cursor.node()), new_level + 1));
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    children.push((Node::new(cursor.node()), new_level));
+                }
                 if !cursor.goto_next_sibling() {
                     break;
                 }
