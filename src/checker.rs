@@ -151,8 +151,7 @@ impl Checker for CppCode {
         FunctionDefinition,
         FunctionDefinition2,
         FunctionDefinition3,
-        FunctionDefinition4,
-        FunctionDefinitionRepeat1
+        FunctionDefinition4
     );
     mk_checker!(is_closure, LambdaExpression);
     mk_checker!(
