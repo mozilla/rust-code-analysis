@@ -7,7 +7,7 @@ use std::fmt;
 use crate::*;
 
 /// The `Loc` metric suite.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct Stats {
     start: usize,
     end: usize,
@@ -17,6 +17,23 @@ pub struct Stats {
     only_comment_lines: usize,
     code_comment_lines: usize,
     comment_line_end: Option<usize>,
+    space_count: usize,
+}
+
+impl Default for Stats {
+    fn default() -> Self {
+        Self {
+            start: 0,
+            end: 0,
+            unit: false,
+            lines: FxHashSet::default(),
+            logical_lines: 0,
+            only_comment_lines: 0,
+            code_comment_lines: 0,
+            comment_line_end: Option::default(),
+            space_count: 1,
+        }
+    }
 }
 
 impl Serialize for Stats {
@@ -24,12 +41,17 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("loc", 5)?;
+        let mut st = serializer.serialize_struct("loc", 10)?;
         st.serialize_field("sloc", &self.sloc())?;
         st.serialize_field("ploc", &self.ploc())?;
         st.serialize_field("lloc", &self.lloc())?;
         st.serialize_field("cloc", &self.cloc())?;
         st.serialize_field("blank", &self.blank())?;
+        st.serialize_field("sloc_average", &self.sloc_average())?;
+        st.serialize_field("ploc_average", &self.ploc_average())?;
+        st.serialize_field("lloc_average", &self.lloc_average())?;
+        st.serialize_field("cloc_average", &self.cloc_average())?;
+        st.serialize_field("blank_average", &self.blank_average())?;
         st.end()
     }
 }
@@ -38,12 +60,17 @@ impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "sloc: {}, ploc: {}, lloc: {}, cloc: {}, blank: {}",
+            "sloc: {}, ploc: {}, lloc: {}, cloc: {}, blank: {}, sloc_average: {}, ploc_average: {}, lloc_average: {}, cloc_average: {}, blank_average: {}",
             self.sloc(),
             self.ploc(),
             self.lloc(),
             self.cloc(),
             self.blank(),
+            self.sloc_average(),
+            self.ploc_average(),
+            self.lloc_average(),
+            self.cloc_average(),
+            self.blank_average(),
         )
     }
 }
@@ -62,6 +89,9 @@ impl Stats {
         // Merge cloc lines
         self.only_comment_lines += other.only_comment_lines;
         self.code_comment_lines += other.code_comment_lines;
+
+        // Count spaces
+        self.space_count += other.space_count;
     }
 
     /// The `Sloc` metric.
@@ -116,6 +146,46 @@ impl Stats {
     #[inline(always)]
     pub fn blank(&self) -> f64 {
         self.sloc() - self.ploc() - self.only_comment_lines as f64
+    }
+
+    /// The `Sloc` metric average value.
+    ///
+    /// This value is computed dividing the `Sloc` value for the number of spaces
+    #[inline(always)]
+    pub fn sloc_average(&self) -> f64 {
+        self.sloc() / self.space_count as f64
+    }
+
+    /// The `Ploc` metric average value.
+    ///
+    /// This value is computed dividing the `Ploc` value for the number of spaces
+    #[inline(always)]
+    pub fn ploc_average(&self) -> f64 {
+        self.ploc() / self.space_count as f64
+    }
+
+    /// The `Lloc` metric average value.
+    ///
+    /// This value is computed dividing the `Lloc` value for the number of spaces
+    #[inline(always)]
+    pub fn lloc_average(&self) -> f64 {
+        self.lloc() / self.space_count as f64
+    }
+
+    /// The `Cloc` metric average value.
+    ///
+    /// This value is computed dividing the `Cloc` value for the number of spaces
+    #[inline(always)]
+    pub fn cloc_average(&self) -> f64 {
+        self.cloc() / self.space_count as f64
+    }
+
+    /// The `Blank` metric average value.
+    ///
+    /// This value is computed dividing the `Blank` value for the number of spaces
+    #[inline(always)]
+    pub fn blank_average(&self) -> f64 {
+        self.blank() / self.space_count as f64
     }
 }
 
@@ -451,7 +521,8 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(sloc, 1, usize)]
+            [(sloc, 1, usize)],
+            [(sloc_average, 1.0)] // The number of spaces is 1
         );
     }
 
@@ -467,7 +538,8 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(blank, 1, usize)]
+            [(blank, 1, usize)],
+            [(blank_average, 1.0)] // The number of spaces is 1
         );
     }
 
@@ -484,7 +556,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(blank, 1, usize)]
+            [(blank, 1, usize)],
+            [(blank_average, 1.0)] // The number of spaces is 1
         );
 
         check_metrics!(
@@ -492,7 +565,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(blank, 0, usize)]
+            [(blank, 0, usize)],
+            [(blank_average, 0.0)] // The number of spaces is 2
         );
     }
 
@@ -509,7 +583,8 @@ mod tests {
             "foo.c",
             CppParser,
             loc,
-            [(blank, 1, usize)]
+            [(blank, 1, usize)],
+            [(blank_average, 1.0)] // The number of spaces is 1
         );
     }
 
@@ -537,6 +612,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 5.0), // The number of spaces is 2
+                (ploc_average, 3.5),
+                (lloc_average, 3.0),
+                (cloc_average, 2.0),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -564,6 +646,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 0, usize)  // The number of blank lines is 0
+            ],
+            [
+                (sloc_average, 4.5), // The number of spaces is 2
+                (ploc_average, 3.5),
+                (lloc_average, 3.0),
+                (cloc_average, 2.0),
+                (blank_average, 0.0)
             ]
         );
     }
@@ -592,6 +681,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 5.0), // The number of spaces is 2
+                (ploc_average, 3.5),
+                (lloc_average, 3.0),
+                (cloc_average, 2.5),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -621,6 +717,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 5.5), // The number of spaces is 2
+                (ploc_average, 4.0),
+                (lloc_average, 3.0),
+                (cloc_average, 2.0),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -650,6 +753,13 @@ mod tests {
                 (lloc, 1, usize),  // The number of statements is 1
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 5.5), // The number of spaces is 2
+                (ploc_average, 4.0),
+                (lloc_average, 0.5),
+                (cloc_average, 2.0),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -679,6 +789,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 5.5), // The number of spaces is 2
+                (ploc_average, 4.0),
+                (lloc_average, 3.0),
+                (cloc_average, 2.0),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -709,6 +826,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 6.0), // The number of spaces is 2
+                (ploc_average, 4.0),
+                (lloc_average, 3.0),
+                (cloc_average, 2.5),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -740,6 +864,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 6.5), // The number of spaces is 2
+                (ploc_average, 4.0),
+                (lloc_average, 3.0),
+                (cloc_average, 2.5),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -768,6 +899,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 3, usize),  // The number of comments is 3
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 5.0), // The number of spaces is 2
+                (ploc_average, 4.0),
+                (lloc_average, 3.0),
+                (cloc_average, 1.5),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -798,6 +936,13 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
+            ],
+            [
+                (sloc_average, 6.0), // The number of spaces is 2
+                (ploc_average, 4.0),
+                (lloc_average, 3.0),
+                (cloc_average, 2.5),
+                (blank_average, 0.5)
             ]
         );
     }
@@ -813,7 +958,8 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(cloc, 5, usize)]
+            [(cloc, 5, usize)],
+            [(cloc_average, 5.0)] // The number of spaces is 1
         );
     }
 
@@ -827,7 +973,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(cloc, 5, usize)]
+            [(cloc, 5, usize)],
+            [(cloc_average, 5.0)] // The number of spaces is 1
         );
     }
 
@@ -841,7 +988,8 @@ mod tests {
             "foo.c",
             CppParser,
             loc,
-            [(cloc, 5, usize)]
+            [(cloc, 5, usize)],
+            [(cloc_average, 5.0)] // The number of spaces is 1
         );
     }
 
@@ -854,7 +1002,8 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(lloc, 3, usize)]
+            [(lloc, 3, usize)],
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
 
@@ -869,7 +1018,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)]
+            [(lloc, 3, usize)],
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
 
         // LLOC returns three because there is an empty Rust statement
@@ -883,7 +1033,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)]
+            [(lloc, 3, usize)],
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
 
@@ -895,7 +1046,8 @@ mod tests {
             "foo.c",
             CppParser,
             loc,
-            [(lloc, 2, usize)]
+            [(lloc, 2, usize)],
+            [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
 
@@ -909,7 +1061,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 3, usize)] // nsTArray, for, callbacks
+            [(lloc, 3, usize)],    // nsTArray, for, callbacks
+            [(lloc_average, 3.0)]  // The number of spaces is 1
         );
     }
 
@@ -921,7 +1074,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 2, usize)] // pixel_data, return
+            [(lloc, 2, usize)],    // pixel_data, return
+            [(lloc_average, 2.0)]  // The number of spaces is 1
         );
     }
 
@@ -935,7 +1089,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 4, usize)] // for, idx, if, return
+            [(lloc, 4, usize)],    // for, idx, if, return
+            [(lloc_average, 4.0)]  // The number of spaces is 1
         );
     }
 
@@ -949,7 +1104,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 3, usize)] // while, next, free,
+            [(lloc, 3, usize)],    // while, next, free,
+            [(lloc_average, 3.0)]  // The number of spaces is 1
         );
     }
 
@@ -968,6 +1124,13 @@ mod tests {
                 (lloc, 1, usize),
                 (cloc, 0, usize),
                 (blank, 0, usize)
+            ],
+            [
+                (sloc_average, 2.0), // The number of spaces is 1
+                (ploc_average, 2.0),
+                (lloc_average, 1.0),
+                (cloc_average, 0.0),
+                (blank_average, 0.0)
             ]
         );
     }
@@ -983,7 +1146,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)]
+            [(lloc, 1, usize)],
+            [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
 
@@ -994,7 +1158,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)]
+            [(lloc, 1, usize)],
+            [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
 
@@ -1005,7 +1170,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)]
+            [(lloc, 1, usize)],
+            [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
 
@@ -1016,13 +1182,21 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)]
+            [(lloc, 1, usize)],
+            [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
 
     #[test]
     fn rust_no_unit_expression_lloc() {
-        check_metrics!("let a = ();", "foo.rs", RustParser, loc, [(lloc, 1, usize)]);
+        check_metrics!(
+            "let a = ();",
+            "foo.rs",
+            RustParser,
+            loc,
+            [(lloc, 1, usize)],
+            [(lloc_average, 1.0)] // The number of spaces is 1
+        );
     }
 
     #[test]
@@ -1034,7 +1208,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)]
+            [(lloc, 3, usize)],
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
 
@@ -1047,7 +1222,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)]
+            [(lloc, 3, usize)],
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
 
@@ -1060,7 +1236,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)]
+            [(lloc, 3, usize)],
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
 
@@ -1072,7 +1249,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 2, usize)]
+            [(lloc, 2, usize)],
+            [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
 
@@ -1084,7 +1262,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 2, usize)]
+            [(lloc, 2, usize)],
+            [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
 
@@ -1097,7 +1276,8 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)]
+            [(lloc, 3, usize)],
+            [(lloc_average, 1.0)] // The number of spaces is 3
         );
     }
 
@@ -1119,6 +1299,13 @@ mod tests {
                 (lloc, 3, usize),  // The number of statements is 3 (print)
                 (cloc, 0, usize),  // The number of comments is 0
                 (blank, 0, usize)  // The number of blank lines is 0
+            ],
+            [
+                (sloc_average, 3.0), // The number of spaces is 2
+                (ploc_average, 3.0),
+                (lloc_average, 1.5),
+                (cloc_average, 0.0),
+                (blank_average, 0.0)
             ]
         );
     }
@@ -1151,6 +1338,13 @@ mod tests {
                 (lloc, 8, usize),  // The number of statements is 8
                 (cloc, 7, usize),  // The number of comments is 7
                 (blank, 0, usize)  // The number of blank lines is 0
+            ],
+            [
+                (sloc_average, 8.0), // The number of spaces is 2
+                (ploc_average, 4.5),
+                (lloc_average, 4.0),
+                (cloc_average, 3.5),
+                (blank_average, 0.0)
             ]
         );
     }
@@ -1172,6 +1366,13 @@ mod tests {
                 (lloc, 7, usize),  // The number of statements is 7
                 (cloc, 0, usize),  // The number of comments is 0
                 (blank, 0, usize)  // The number of blank lines is 0
+            ],
+            [
+                (sloc_average, 2.5), // The number of spaces is 2
+                (ploc_average, 2.5),
+                (lloc_average, 3.5),
+                (cloc_average, 0.0),
+                (blank_average, 0.0)
             ]
         );
     }
@@ -1193,6 +1394,13 @@ mod tests {
                 (lloc, 7, usize),  // The number of statements is 7
                 (cloc, 0, usize),  // The number of comments is 0
                 (blank, 0, usize)  // The number of blank lines is 0
+            ],
+            [
+                (sloc_average, 2.5), // The number of spaces is 2
+                (ploc_average, 2.5),
+                (lloc_average, 3.5),
+                (cloc_average, 0.0),
+                (blank_average, 0.0)
             ]
         );
     }
