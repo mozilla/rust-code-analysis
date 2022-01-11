@@ -1169,7 +1169,7 @@ mod tests {
             [
                 (sloc, 5, usize),  // The number of lines is 5
                 (ploc, 5, usize),  // The number of code lines is 5
-                (lloc, 7, usize),  // The number of statements is 7
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 0, usize),  // The number of comments is 0
                 (blank, 0, usize)  // The number of blank lines is 0
             ]
