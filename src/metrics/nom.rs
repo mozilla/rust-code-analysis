@@ -17,6 +17,7 @@ pub struct Stats {
     functions_max: usize,
     closures_min: usize,
     closures_max: usize,
+    space_count: usize,
 }
 impl Default for Stats {
     fn default() -> Self {
@@ -29,6 +30,7 @@ impl Default for Stats {
             functions_max: 0,
             closures_min: usize::MAX,
             closures_max: 0,
+            space_count: 1,
         }
     }
 }
@@ -37,10 +39,13 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("nom", 7)?;
+        let mut st = serializer.serialize_struct("nom", 10)?;
         st.serialize_field("functions", &self.functions_sum())?;
         st.serialize_field("closures", &self.closures_sum())?;
+        st.serialize_field("functions_average", &self.functions_average())?;
+        st.serialize_field("closures_average", &self.closures_average())?;
         st.serialize_field("total", &self.total())?;
+        st.serialize_field("average", &self.average())?;
         st.serialize_field("functions_min", &self.functions_min())?;
         st.serialize_field("functions_max", &self.functions_max())?;
         st.serialize_field("closures_min", &self.closures_min())?;
@@ -55,14 +60,20 @@ impl fmt::Display for Stats {
             f,
             "functions: {}, \
              closures: {}, \
+             functions_average: {}, \
+             closures_average: {}, \
              total: {} \
+             average: {} \
              functions_min: {} \
              functions_max: {} \
              closures_min: {} \
              closures_max: {}",
             self.functions_sum(),
             self.closures_sum(),
+            self.functions_average(),
+            self.closures_average(),
             self.total(),
+            self.average(),
             self.functions_min(),
             self.functions_max(),
             self.closures_min(),
@@ -80,6 +91,7 @@ impl Stats {
         self.closures_max = self.closures_max.max(other.closures_max);
         self.functions_sum += other.functions_sum;
         self.closures_sum += other.closures_sum;
+        self.space_count += other.space_count;
     }
 
     /// Counts the number of function definitions in a scope
@@ -106,6 +118,24 @@ impl Stats {
     #[inline(always)]
     pub fn closures_sum(&self) -> f64 {
         self.closures_sum as f64
+    }
+
+    /// Returns the average number of function definitions over all spaces
+    #[inline(always)]
+    pub fn functions_average(&self) -> f64 {
+        self.functions_sum() / self.space_count as f64
+    }
+
+    /// Returns the average number of closures over all spaces
+    #[inline(always)]
+    pub fn closures_average(&self) -> f64 {
+        self.closures_sum() / self.space_count as f64
+    }
+
+    /// Returns the average number of function definitions and closures over all spaces
+    #[inline(always)]
+    pub fn average(&self) -> f64 {
+        self.total() / self.space_count as f64
     }
 
     /// Counts the number of function definitions in a scope
@@ -202,6 +232,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.75), // number of spaces = 4
+                (closures_average, 0.25),
+                (average, 1.0)
             ]
         );
     }
@@ -223,6 +258,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 4
+                (closures_average, 0.25),
+                (average, 0.75)
             ]
         );
     }
@@ -246,6 +286,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 2
+                (closures_average, 0.0),
+                (average, 0.5)
             ]
         );
     }
@@ -269,6 +314,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 4
+                (closures_average, 0.25),
+                (average, 0.75)
             ]
         );
     }
@@ -300,6 +350,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.6), // number of spaces = 5
+                (closures_average, 0.2),
+                (average, 0.8)
             ]
         );
     }
@@ -321,6 +376,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 2
+                (closures_average, 0.0),
+                (average, 0.5)
             ]
         );
     }
@@ -340,6 +400,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 2
+                (closures_average, 0.0),
+                (average, 0.5)
             ]
         );
     }
@@ -361,6 +426,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 2
+                (closures_average, 0.0),
+                (average, 0.5)
             ]
         );
     }
@@ -382,6 +452,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 2
+                (closures_average, 0.0),
+                (average, 0.5)
             ]
         );
     }
@@ -405,6 +480,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 2
+                (closures_average, 0.0),
+                (average, 0.5)
             ]
         );
     }
@@ -428,6 +508,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.0), // number of spaces = 3
+                (closures_average, 0.6666666666666666),
+                (average, 0.6666666666666666)
             ]
         );
     }
@@ -449,6 +534,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.3333333333333333), // number of spaces = 3
+                (closures_average, 0.3333333333333333),
+                (average, 0.6666666666666666)
             ]
         );
     }
@@ -468,6 +558,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 2
+                (closures_average, 0.0),
+                (average, 0.5)
             ]
         );
     }
@@ -487,6 +582,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.0), // number of spaces = 2
+                (closures_average, 0.5),
+                (average, 0.5)
             ]
         );
     }
@@ -508,6 +608,11 @@ mod tests {
                 (functions_min, 0, usize),
                 (closures_min, 0, usize),
                 (closures_max, 1, usize),
+            ],
+            [
+                (functions_average, 0.0), // number of spaces = 2
+                (closures_average, 0.5),
+                (average, 0.5)
             ]
         );
     }
