@@ -446,10 +446,9 @@ impl Getter for CppCode {
                     }) {
                         if let Some(first) = fd.object().child(0) {
                             match first.kind_id().into() {
-                                Cpp::ScopedIdentifier
+                                Cpp::TypeIdentifier
                                 | Cpp::Identifier
                                 | Cpp::FieldIdentifier
-                                | Cpp::ScopedFieldIdentifier
                                 | Cpp::DestructorName
                                 | Cpp::OperatorName
                                 | Cpp::TemplateFunction
