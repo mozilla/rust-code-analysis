@@ -1404,4 +1404,28 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn cpp_namespace_loc() {
+        check_metrics!(
+            "namespace mozilla::dom::quota {} // namespace mozilla::dom::quota",
+            "foo.cpp",
+            CppParser,
+            loc,
+            [
+                (sloc, 1, usize),  // The number of lines is 1
+                (ploc, 1, usize),  // The number of code lines is 1
+                (lloc, 0, usize),  // The number of statements is 0
+                (cloc, 1, usize),  // The number of comments is 1
+                (blank, 0, usize)  // The number of blank lines is 0
+            ],
+            [
+                (sloc_average, 0.5), // The number of spaces is 2
+                (ploc_average, 0.5),
+                (lloc_average, 0.0),
+                (cloc_average, 0.5),
+                (blank_average, 0.0)
+            ]
+        );
+    }
 }
