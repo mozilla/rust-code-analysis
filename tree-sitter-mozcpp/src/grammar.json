@@ -11225,7 +11225,8 @@
       ]
     },
     "operator_name": {
-      "type": "TOKEN",
+      "type": "PREC",
+      "value": 1,
       "content": {
         "type": "SEQ",
         "members": [
@@ -11234,12 +11235,12 @@
             "value": "operator"
           },
           {
-            "type": "PATTERN",
-            "value": "\\s*"
-          },
-          {
             "type": "CHOICE",
             "members": [
+              {
+                "type": "STRING",
+                "value": "co_await"
+              },
               {
                 "type": "STRING",
                 "value": "+"
@@ -11393,20 +11394,47 @@
                 "value": "[]"
               },
               {
-                "type": "STRING",
-                "value": "new"
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "new"
+                      },
+                      {
+                        "type": "STRING",
+                        "value": "delete"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "[]"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  }
+                ]
               },
               {
-                "type": "STRING",
-                "value": "delete"
-              },
-              {
-                "type": "STRING",
-                "value": "new[]"
-              },
-              {
-                "type": "STRING",
-                "value": "delete[]"
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "\"\""
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "identifier"
+                  }
+                ]
               }
             ]
           }

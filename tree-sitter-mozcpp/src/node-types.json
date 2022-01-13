@@ -3266,6 +3266,21 @@
     }
   },
   {
+    "type": "operator_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "optional_parameter_declaration",
     "named": true,
     "fields": {
@@ -5531,6 +5546,10 @@
     "named": false
   },
   {
+    "type": "\"\"",
+    "named": false
+  },
+  {
     "type": "#define",
     "named": false
   },
@@ -5591,6 +5610,10 @@
     "named": false
   },
   {
+    "type": "()",
+    "named": false
+  },
+  {
     "type": ")",
     "named": false
   },
@@ -5632,6 +5655,10 @@
   },
   {
     "type": "->",
+    "named": false
+  },
+  {
+    "type": "->*",
     "named": false
   },
   {
@@ -6079,6 +6106,10 @@
     "named": false
   },
   {
+    "type": "[]",
+    "named": false
+  },
+  {
     "type": "]",
     "named": false
   },
@@ -6325,10 +6356,6 @@
   {
     "type": "operator",
     "named": false
-  },
-  {
-    "type": "operator_name",
-    "named": true
   },
   {
     "type": "override",
