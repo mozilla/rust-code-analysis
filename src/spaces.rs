@@ -295,6 +295,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
         cursor.reset(node.object());
         if cursor.goto_first_child() {
             loop {
+                // FIX ME: This code fixes the python parser error for comments , when the tree-sitter-python parser will be fixed revert the changes
                 if lang == LANG::Python && cursor.node().kind() == "function_definition" {
                     let func = cursor.node();
                     children.push((Node::new(cursor.node()), new_level));
