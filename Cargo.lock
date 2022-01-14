@@ -1572,6 +1572,7 @@ dependencies = [
  "pretty_assertions",
  "regex",
  "serde",
+ "serde_json",
  "termcolor",
  "tree-sitter 0.19.3",
  "tree-sitter-ccomment",
