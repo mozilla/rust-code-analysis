@@ -224,10 +224,48 @@ tasks:
 
       - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
         then:
+            taskId: {$eval: as_slugid("publish_crates")}
+            dependencies:
+              - {$eval: as_slugid("test_mozilla_central")}
+              - {$eval: as_slugid("build_documentation")}
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '2 hour'}
+            provisionerId: proj-relman
+            workerType: ci
+            scopes:
+              - secrets:get:project/relman/rust-code-analysis/deploy
+            payload:
+              features:
+                taskclusterProxy: true
+              maxRunTime: 3600
+              image: "mozilla/taskboot:0.3.3"
+              env:
+                TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
+              command:
+                - "/bin/sh"
+                - "-cx"
+                - "git config --global user.email moz-tools-bot@moz.tools &&
+                   git config --global user.name moz.tools Bot &&
+                   git clone --quiet ${repository} &&
+                   cd rust-code-analysis &&
+                   cd tree-sitter-ccomment && taskboot cargo-publish --ignore-published && cd .. &&
+                   cd tree-sitter-preproc && taskboot cargo-publish --ignore-published && cd .. &&
+                   cd tree-sitter-mozjs && taskboot cargo-publish --ignore-published && cd .. &&
+                   cd tree-sitter-mozcpp && taskboot cargo-publish --ignore-published && cd .. &&
+                   taskboot cargo-publish &&
+                   cd rust-code-analysis-cli && taskboot cargo-publish && cd .. &&
+                   cd rust-code-analysis-web && taskboot cargo-publish"
+            metadata:
+              name: "rust-code-analysis crates publishing on crates.io ${head_branch[10:]}"
+              description: rust-code-analysis crates publishing on crates.io
+              owner: cdenizet@mozilla.com
+              source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+        then:
           taskId: {$eval: as_slugid("build_linux_release")}
           dependencies:
-            - {$eval: as_slugid("lint_test_task")}
-            - {$eval: as_slugid("windows_test_task")}
+            - {$eval: as_slugid("publish_crates")}
           created: {$fromNow: ''}
           deadline: {$fromNow: '2 hour'}
           provisionerId: proj-relman
@@ -345,19 +383,12 @@ tasks:
                    git config --global user.name moz.tools Bot &&
                    git clone --quiet ${repository} &&
                    cd rust-code-analysis &&
-                   cd tree-sitter-ccomment && taskboot cargo-publish --ignore-published && cd .. &&
-                   cd tree-sitter-preproc && taskboot cargo-publish --ignore-published && cd .. &&
-                   cd tree-sitter-mozjs && taskboot cargo-publish --ignore-published && cd .. &&
-                   cd tree-sitter-mozcpp && taskboot cargo-publish --ignore-published && cd .. &&
                    taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz &&
                    tar xfz book.tar.gz -C rust-code-analysis-book &&
                    ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
                    taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages &&
                    taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset ${linux_cli}:public/${linux_cli} ${linux_web}:public/${linux_web} ${win_cli}:public/${win_cli} ${win_web}:public/${win_web} &&
-                   rm -rf book.tar.gz &&
-                   taskboot cargo-publish &&
-                   cd rust-code-analysis-cli && taskboot cargo-publish && cd .. &&
-                   cd rust-code-analysis-web && taskboot cargo-publish"
+                   rm -rf book.tar.gz"
             metadata:
               name: "rust-code-analysis release publication ${head_branch[10:]}"
               description: rust-code-analysis release publication on Github
