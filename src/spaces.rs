@@ -296,6 +296,8 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
         if cursor.goto_first_child() {
             loop {
                 // FIX ME: This code fixes the python parser error for comments , when the tree-sitter-python parser will be fixed revert the changes
+                // Issue on the tree-sitter-python github: https://github.com/nvim-treesitter/nvim-treesitter-textobjects/issues/25
+                // Link to PR resolving this issue : https://github.com/tree-sitter/tree-sitter-python/pull/143
                 if lang == LANG::Python && cursor.node().kind() == "function_definition" {
                     let func = cursor.node();
                     children.push((Node::new(cursor.node()), new_level));
