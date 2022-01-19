@@ -1,6 +1,3 @@
-extern crate askama;
-extern crate tree_sitter;
-
 #[macro_use]
 mod macros;
 pub use crate::macros::*;

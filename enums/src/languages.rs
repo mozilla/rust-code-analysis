@@ -1,7 +1,5 @@
 use tree_sitter::Language;
 
-use crate::*;
-
 mk_langs!(
     // 1) Name for enum
     // 2) tree-sitter function to call to get a Language
