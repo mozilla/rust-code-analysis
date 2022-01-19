@@ -1,9 +1,3 @@
-extern crate num_cpus;
-#[macro_use]
-extern crate serde;
-#[cfg_attr(test, macro_use)]
-extern crate serde_json;
-
 mod web;
 
 use clap::{crate_version, App, Arg};
