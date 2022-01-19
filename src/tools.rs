@@ -232,13 +232,17 @@ pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, Str
     }
 }
 
+/// Replaces \n and \r ending characters with a single generic \n
 pub(crate) fn remove_blank_lines(data: &mut Vec<u8>) {
-    let count_trailing = data.iter().rev().take_while(|&c| *c == b'\n').count();
+    let count_trailing = data
+        .iter()
+        .rev()
+        .take_while(|&c| (*c == b'\n' || *c == b'\r'))
+        .count();
     if count_trailing > 0 {
-        data.truncate(data.len() - count_trailing + 1);
-    } else {
-        data.push(b'\n');
+        data.truncate(data.len() - count_trailing);
     }
+    data.push(b'\n');
 }
 
 pub(crate) fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
