@@ -1,5 +1,7 @@
 // Code generated; DO NOT EDIT.
 
+use num_derive::FromPrimitive;
+
 #[derive(Clone, Debug, PartialEq, FromPrimitive)]
 pub enum Cpp {
     End = 0,

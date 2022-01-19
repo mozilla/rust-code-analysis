@@ -48,9 +48,6 @@
 
 #[macro_use]
 extern crate lazy_static;
-extern crate num;
-#[macro_use]
-extern crate num_derive;
 #[macro_use]
 extern crate serde;
 
