@@ -1,4 +1,5 @@
 use aho_corasick::AhoCorasick;
+use lazy_static::lazy_static;
 use regex::bytes::Regex;
 
 use crate::*;

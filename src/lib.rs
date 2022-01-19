@@ -47,11 +47,6 @@
 #![allow(clippy::upper_case_acronyms)]
 
 #[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate serde;
-
-#[macro_use]
 mod asttools;
 mod c_langs_macros;
 mod c_macro;
