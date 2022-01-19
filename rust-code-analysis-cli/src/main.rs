@@ -1,10 +1,3 @@
-extern crate num_cpus;
-extern crate serde;
-extern crate serde_cbor;
-extern crate serde_json;
-extern crate serde_yaml;
-extern crate toml;
-
 mod formats;
 
 use clap::{crate_version, App, Arg};
