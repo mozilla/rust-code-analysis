@@ -1,5 +1,7 @@
 // Code generated; DO NOT EDIT.
 
+use num_derive::FromPrimitive;
+
 #[derive(Clone, Debug, PartialEq, FromPrimitive)]
 pub enum Java {
     End = 0,
