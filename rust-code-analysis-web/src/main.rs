@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate clap;
 extern crate num_cpus;
 #[macro_use]
 extern crate serde;
@@ -8,7 +6,7 @@ extern crate serde_json;
 
 mod web;
 
-use clap::{App, Arg};
+use clap::{crate_version, App, Arg};
 
 use web::server;
 
@@ -18,22 +16,22 @@ fn main() {
         .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
         .about("Run a web server")
         .arg(
-            Arg::with_name("num_jobs")
+            Arg::new("num_jobs")
                 .help("Number of jobs")
-                .short("j")
+                .short('j')
                 .value_name("NUMBER")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("host")
+            Arg::new("host")
                 .help("Host for the web server")
                 .long("host")
                 .default_value("127.0.0.1")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("port")
+            Arg::new("port")
                 .help("Port for the web server")
                 .long("port")
                 .default_value("8080")

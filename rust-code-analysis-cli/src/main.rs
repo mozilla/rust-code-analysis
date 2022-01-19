@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate clap;
 extern crate num_cpus;
 extern crate serde;
 extern crate serde_cbor;
@@ -9,7 +7,7 @@ extern crate toml;
 
 mod formats;
 
-use clap::{App, Arg};
+use clap::{crate_version, App, Arg};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use std::collections::{hash_map, HashMap};
 use std::fmt;
@@ -195,145 +193,141 @@ fn main() {
         .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
         .about("Analyze source code")
         .arg(
-            Arg::with_name("paths")
+            Arg::new("paths")
                 .help("Sets the input files to analyze")
-                .short("p")
+                .short('p')
                 .long("paths")
                 .default_value(".")
-                .multiple(true)
+                .multiple_values(true)
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("dump")
+            Arg::new("dump")
                 .help("Outputs the AST to stdout")
-                .short("d")
+                .short('d')
                 .long("dump"),
         )
         .arg(
-            Arg::with_name("remove_comments")
+            Arg::new("remove_comments")
                 .help("Remove comment in the specified files")
-                .short("c")
+                .short('c')
                 .long("comments"),
         )
         .arg(
-            Arg::with_name("find")
+            Arg::new("find")
                 .help("Find nodes of the given type: comma separated list")
-                .short("f")
+                .short('f')
                 .long("find")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("function")
+            Arg::new("function")
                 .help("Get functions and their spans")
-                .short("F")
+                .short('F')
                 .long("function"),
         )
         .arg(
-            Arg::with_name("count")
+            Arg::new("count")
                 .help("Count nodes of the given type: comma separated list")
-                .short("C")
+                .short('C')
                 .long("count")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("metrics")
+            Arg::new("metrics")
                 .help("Compute different metrics")
                 .long("metrics")
-                .short("m"),
+                .short('m'),
         )
         .arg(
-            Arg::with_name("ops")
+            Arg::new("ops")
                 .help("Retrieves all operands and operators in a code")
                 .long("ops")
                 .conflicts_with("metrics"),
         )
+        .arg(Arg::new("in_place").help("Do action in place").short('i'))
         .arg(
-            Arg::with_name("in_place")
-                .help("Do action in place")
-                .short("i"),
-        )
-        .arg(
-            Arg::with_name("include")
+            Arg::new("include")
                 .help("Glob to include files")
-                .short("I")
+                .short('I')
                 .long("include")
                 .default_value("")
-                .multiple(true)
+                .multiple_values(true)
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("exclude")
+            Arg::new("exclude")
                 .help("Glob to exclude files")
-                .short("X")
+                .short('X')
                 .long("exclude")
                 .default_value("")
-                .multiple(true)
+                .multiple_values(true)
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("num_jobs")
+            Arg::new("num_jobs")
                 .help("Number of jobs")
-                .short("j")
+                .short('j')
                 .value_name("NUMBER")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("language_type")
+            Arg::new("language_type")
                 .help("Language type")
-                .short("l")
+                .short('l')
                 .long("language-type")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("output_format")
+            Arg::new("output_format")
                 .help("Output metrics as different formats")
-                .short("O")
+                .short('O')
                 .long("output-format")
                 .possible_values(Format::all())
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("pretty")
+            Arg::new("pretty")
                 .help("Dump a pretty json file")
                 .long("pr"),
         )
         .arg(
-            Arg::with_name("output")
+            Arg::new("output")
                 .help("Output file/directory")
-                .short("o")
+                .short('o')
                 .long("output")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("preproc")
+            Arg::new("preproc")
                 .help("Get preprocessor declaration for C/C++")
                 .long("preproc")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("line_start")
+            Arg::new("line_start")
                 .help("Line start")
                 .long("ls")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("line_end")
+            Arg::new("line_end")
                 .help("Line end")
                 .long("le")
                 .default_value("")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("warning")
+            Arg::new("warning")
                 .help("Print the warnings")
                 .long("warning")
-                .short("w"),
+                .short('w'),
         )
         .get_matches();
 
