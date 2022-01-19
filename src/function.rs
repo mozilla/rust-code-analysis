@@ -1,5 +1,7 @@
 use std::io::Write;
 use std::path::PathBuf;
+
+use serde::Serialize;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
 
 use crate::traits::*;

@@ -1,8 +1,10 @@
+use std::collections::{hash_map, HashMap, HashSet};
+use std::path::{Path, PathBuf};
+
 use petgraph::{
     algo::kosaraju_scc, graph::NodeIndex, stable_graph::StableGraph, visit::Dfs, Direction,
 };
-use std::collections::{hash_map, HashMap, HashSet};
-use std::path::{Path, PathBuf};
+use serde::{Deserialize, Serialize};
 
 use crate::c_langs_macros::is_specials;
 use crate::node::Node;

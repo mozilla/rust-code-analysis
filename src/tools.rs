@@ -1,11 +1,14 @@
-use crate::langs::fake;
-use crate::langs::*;
-use regex::bytes::Regex;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
+
+use lazy_static::lazy_static;
+use regex::bytes::Regex;
+
+use crate::langs::fake;
+use crate::langs::*;
 
 /// Reads a file.
 ///
