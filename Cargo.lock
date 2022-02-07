@@ -1448,9 +1448,9 @@ checksum = "ed0cfbc8191465bed66e1718596ee0b0b35d5ee1f41c5df2189d0fe8bde535ba"
 
 [[package]]
 name = "pretty_assertions"
-version = "1.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec0cfe1b2403f172ba0f234e500906ee0a3e493fb81092dac23ebefe129301cc"
+checksum = "76d5b548b725018ab5496482b45cb8bef21e9fed1858a6d674e3a8a0f0bb5d50"
 dependencies = [
  "ansi_term",
  "ctor",
@@ -1584,7 +1584,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termcolor",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-javascript",
@@ -2141,7 +2141,7 @@ name = "tree-sitter-mozcpp"
 version = "0.20.1"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-cpp",
 ]
 
@@ -2189,7 +2189,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8935efd97c92067c9b2b6d7acb647607590996ba80f3a7be09a197f9c1fdab73"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
 ]
 
 [[package]]
