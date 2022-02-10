@@ -203,7 +203,19 @@ impl Cyclomatic for CppCode {
 
 impl Cyclomatic for PreprocCode {}
 impl Cyclomatic for CcommentCode {}
-impl Cyclomatic for JavaCode {}
+
+impl Cyclomatic for JavaCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Java::*;
+
+        match node.object().kind_id().into() {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+                stats.cyclomatic += 1.;
+            }
+            _ => {}
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -403,6 +415,87 @@ mod tests {
                 (cyclomatic_average, 3.5), // nspace = 2 (func and unit)
                 (cyclomatic_max, 4.0),
                 (cyclomatic_min, 3.0)
+            ]
+        );
+    }
+
+    #[test]
+    fn java_simple_class() {
+        check_metrics!(
+            "
+            public class Example { // +2 (+1 unit space)
+                int a = 10;
+                boolean b = (a > 5) ? true : false; // +1
+                boolean c = b && true; // +1
+            
+                public void m1() { // +1
+                    if (a % 2 == 0) { // +1
+                        b = b || c; // +1
+                    }
+                }
+                public void m2() { // +1
+                    while (a > 3) { // +1
+                        m1();
+                        a--;
+                    }
+                }
+            }",
+            "foo.java",
+            JavaParser,
+            cyclomatic,
+            [(cyclomatic_sum, 9, usize)],
+            [
+                (cyclomatic_average, 2.25), // nspace = 4 (unit, class and 2 methods)
+                (cyclomatic_max, 3.0),
+                (cyclomatic_min, 1.0)
+            ]
+        );
+    }
+
+    #[test]
+    fn java_real_class() {
+        check_metrics!(
+            "
+            public class Matrix { // +2 (+1 unit space)
+                private int[][] m = new int[5][5];
+
+                public void init() { // +1
+                    for (int i = 0; i < m.length; i++) { // +1
+                        for (int j = 0; j < m[i].length; j++) { // +1
+                            m[i][j] = i * j;
+                        }
+                    }
+                }
+                public int compute(int i, int j) { // +1
+                    try {
+                        return m[i][j] / m[j][i];
+                    } catch (ArithmeticException e) { // +1
+                        return -1;
+                    } catch (ArrayIndexOutOfBoundsException e) { // +1
+                        return -2;
+                    }
+                }
+                public void print(int result) { // +1
+                    switch (result) {
+                        case -1: // +1
+                            System.out.println(\"Division by zero\");
+                            break;
+                        case -2: // +1
+                            System.out.println(\"Wrong index number\");
+                            break;
+                        default:
+                            System.out.println(\"The result is \" + result);
+                    }
+                }
+            }",
+            "foo.java",
+            JavaParser,
+            cyclomatic,
+            [(cyclomatic_sum, 11, usize)],
+            [
+                (cyclomatic_average, 2.2), // nspace = 5 (unit, class and 3 methods)
+                (cyclomatic_max, 3.0),
+                (cyclomatic_min, 1.0)
             ]
         );
     }
