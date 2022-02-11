@@ -822,7 +822,6 @@ impl Loc for JavaCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
         let kind_id : Java = node.object().kind_id().into();
-        println!("KINDID {}", kind_id.to_string());
         match kind_id {
             Program => {}
             Comment => {
@@ -845,7 +844,6 @@ impl Loc for JavaCode {
             | ThrowStatement
             | TryStatement
             | UpdateExpression => {
-                println!("  lloc increased by {}", kind_id.to_string());
                 stats.logical_lines += 1;
             }
             For => {
@@ -856,7 +854,6 @@ impl Loc for JavaCode {
                 {
                     // handle for(int i:arr)
                     // otherwise the statements in the for are counted elsewhere
-                    println!("  lloc increased by {}", kind_id.to_string());
                     stats.logical_lines += 1;
                 }
             }
@@ -2228,7 +2225,7 @@ mod tests {
             loc,
             [
                 (sloc, 11, usize), // The number of lines is 11
-                (ploc, 6, usize),  // The number of code lines is 5
+                (ploc, 6, usize),  // The number of code lines is 6
                 (lloc, 1, usize),  // The number of statements is 1
                 (cloc, 5, usize),  // The number of comments is 5
                 (blank, 1, usize)  // The number of blank lines is 1
