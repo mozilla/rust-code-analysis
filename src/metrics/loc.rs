@@ -812,7 +812,7 @@ impl Loc for CppCode {
 
 impl fmt::Display for Java {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       write!(f, "{:?}", self)
+        write!(f, "{:?}", self)
     }
 }
 
@@ -821,7 +821,7 @@ impl Loc for JavaCode {
         use Java::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
-        let kind_id : Java = node.object().kind_id().into();
+        let kind_id: Java = node.object().kind_id().into();
         match kind_id {
             Program => {}
             Comment => {
@@ -847,11 +847,7 @@ impl Loc for JavaCode {
                 stats.logical_lines += 1;
             }
             For => {
-                if count_specific_ancestors!(
-                    node,
-                    ForStatement, Block 
-                ) == 0
-                {
+                if count_specific_ancestors!(node, ForStatement, Block) == 0 {
                     // handle for(int i:arr)
                     // otherwise the statements in the for are counted elsewhere
                     stats.logical_lines += 1;
