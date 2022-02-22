@@ -840,7 +840,6 @@ impl Loc for JavaCode {
             | ReturnStatement
             | Statement
             | SwitchStatement
-            | TernaryExpression
             | ThrowStatement
             | TryStatement
             | UpdateExpression => {
@@ -2015,6 +2014,21 @@ mod tests {
     }
 
     #[test]
+    fn java_module_sloc() {
+        check_metrics!(
+            "module helloworld{
+              exports com.test;
+            }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (sloc, 3, usize), // The number of lines is 3
+            ]
+        );
+    }
+
+    #[test]
     fn java_single_ploc() {
         check_metrics!(
             "int x = 1;",
@@ -2213,17 +2227,18 @@ mod tests {
             
             class HelloWorldApp {
               public void main(String[] args) {
-                System.out.println(\"Hello World!\"); // Display the string. Only statement. +1 lloc
+                String message = args.length == 0 ? \"Hello empty world\" : \"Hello world\"; // +2 lloc : 1 var assignment + binary exp
+                System.out.println(message); // Display the string. +1 lloc
               }
             }",
             "foo.java",
             JavaParser,
             loc,
             [
-                (sloc, 11, usize), // The number of lines is 11
-                (ploc, 6, usize),  // The number of code lines is 6
-                (lloc, 1, usize),  // The number of statements is 1
-                (cloc, 5, usize),  // The number of comments is 5
+                (sloc, 12, usize), // The number of lines is 11
+                (ploc, 7, usize),  // The number of code lines is 7
+                (lloc, 3, usize),  // The number of statements is 3
+                (cloc, 6, usize),  // The number of comments is 6
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
         );
