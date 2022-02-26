@@ -67,7 +67,7 @@ fn compare_structs(funcspace: &FuncSpace, value: &serde_json::Value) {
         .name
         .as_deref()
         .unwrap_or_default()
-        .replace("\r", "");
+        .replace('\r', "");
     let name1 = Path::new(&fsname);
     let name2 = Path::new(value["name"].as_str().unwrap_or_default());
     assert_eq!(name1, name2);
