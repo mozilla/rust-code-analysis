@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 mod web;
 
 use clap::{crate_version, App, Arg};
