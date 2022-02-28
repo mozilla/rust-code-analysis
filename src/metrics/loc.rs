@@ -822,6 +822,7 @@ impl Loc for JavaCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
         let kind_id: Java = node.object().kind_id().into();
+        println!("{}", kind_id);
         match kind_id {
             Program => {}
             Comment => {
@@ -831,26 +832,27 @@ impl Loc for JavaCode {
             | AssignmentExpression
             | BreakStatement
             | BinaryExpression
+            | CastExpression
             | ContinueStatement
             | DoStatement
             | Declaration
+            | EnhancedForStatement
             | IfStatement
+            | InstanceofExpression
+            | LambdaExpression
             | LocalVariableDeclaration
             | MethodInvocation
+            | ParenthesizedExpression
+            | PrimaryExpression
             | ReturnStatement
             | Statement
             | SwitchStatement
+            | TernaryExpression
             | ThrowStatement
             | TryStatement
-            | UpdateExpression => {
+            | UpdateExpression
+            | UnaryExpression => {
                 stats.logical_lines += 1;
-            }
-            For => {
-                if count_specific_ancestors!(node, ForStatement, Block) == 0 {
-                    // handle for(int i:arr)
-                    // otherwise the statements in the for are counted elsewhere
-                    stats.logical_lines += 1;
-                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -2122,7 +2124,7 @@ mod tests {
         check_metrics!(
             "
             int i=0; // +1
-            while(i < 10) { // +1
+            while(i < 10) { // +2 paren exp + binary
                 i++; // +1
                 System.out.println(i); // +1
              }",
@@ -2130,7 +2132,7 @@ mod tests {
             JavaParser,
             loc,
             [
-                (lloc, 4, usize), // The number of statements is 4
+                (lloc, 5, usize), // The number of statements is 5
             ]
         );
     }
@@ -2170,6 +2172,41 @@ mod tests {
             loc,
             [
                 (lloc, 2, usize), // The number of statements is 2
+            ]
+        );
+    }
+
+    // copy in 1 line at a time
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    #[test]
+    fn java_expressions_lloc() {
+        check_metrics!(
+            "int x = 10;                                                            // +1
+            x=+90;                                                                  // +2 var + unary
+            int y = x * 2;                                                          // +2 var + binary
+            IntFunction double = (n) -> n*2;                                        // +3 var + lambda + binary
+            int y2 = double(x);                                                     // +2 var + paren expression
+            System.out.println(\"double \" + x + \" = \" + y2);                     // +4 method + binary x 3
+            String message = (x % 2) == 0 ? \"Evenly done.\" : \"Oddly done.\";     // +5 lloc : 1 var assignment + ternary + binary + param exp + binary
+            Object done = (Runnable) () -> { System.out.println(\"Done!\"); };      // +4 var + cast + lamda + method invoc
+            String s = \"string\";                                                  // +1
+            boolean isS = (s instanceof String);                                    // +3 var assignment + paren exp + instanceof
+            done.run();                                                             // +1 method invoc
+            ",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 28, usize), // The number of statements is 28
             ]
         );
     }
@@ -2227,7 +2264,7 @@ mod tests {
             
             class HelloWorldApp {
               public void main(String[] args) {
-                String message = args.length == 0 ? \"Hello empty world\" : \"Hello world\"; // +2 lloc : 1 var assignment + binary exp
+                String message = args.length == 0 ? \"Hello empty world\" : \"Hello world\"; // +3 lloc : 1 var assignment + ternary + binary exp
                 System.out.println(message); // Display the string. +1 lloc
               }
             }",
@@ -2235,9 +2272,9 @@ mod tests {
             JavaParser,
             loc,
             [
-                (sloc, 12, usize), // The number of lines is 11
+                (sloc, 12, usize), // The number of lines is 12
                 (ploc, 7, usize),  // The number of code lines is 7
-                (lloc, 3, usize),  // The number of statements is 3
+                (lloc, 4, usize),  // The number of statements is 4
                 (cloc, 6, usize),  // The number of comments is 6
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
