@@ -823,31 +823,27 @@ impl Loc for JavaCode {
         let (start, end) = init(node, stats, is_func_space, is_unit);
         let kind_id: Java = node.object().kind_id().into();
         println!("{}", kind_id);
+        // LLOC in Java is counted for statements only
+        // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/expressions.html
         match kind_id {
             Program => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
             }
-            AssertStatement
-            | BreakStatement
-            | ContinueStatement
-            | DoStatement
-            | EnhancedForStatement
-            | ExpressionStatement
-            | IfStatement
-            | LocalVariableDeclaration
-            | ReturnStatement
-            | SwitchStatement
-            | ThrowStatement
-            | TryStatement
+            AssertStatement | BreakStatement | ContinueStatement | DoStatement
+            | EnhancedForStatement | ExpressionStatement | ForStatement | IfStatement
+            | ReturnStatement | SwitchStatement | ThrowStatement | TryStatement
             | WhileStatement => {
                 stats.logical_lines += 1;
                 println!("+1");
             }
-            ForStatement => {
-                // handle binary check + increment
-                stats.logical_lines += 2;
-                println!("+2");
+            LocalVariableDeclaration => {
+                if count_specific_ancestors!(node, ForStatement, Block) == 0 {
+                    // The initializer, condition, and increment in a for loop are expressions.
+                    // Don't count the variable declaration if in a ForStatement.
+                    // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/for.html
+                    stats.logical_lines += 1;
+                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -2083,30 +2079,16 @@ mod tests {
     }
 
     #[test]
-    fn java_update_expression_lloc() {
-        check_metrics!(
-            "int i = 10;
-            i++;",
-            "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 2, usize), // The number of statements is 2
-            ]
-        );
-    }
-
-    #[test]
     fn java_for_lloc() {
         check_metrics!(
-            "for (int i = 0; i < 100; i++) { // + 3
+            "for (int i = 0; i < 100; i++) { // + 1
                System.out.println(i); // + 1
              }",
             "foo.java",
             JavaParser,
             loc,
             [
-                (lloc, 4, usize), // The number of statements is 4
+                (lloc, 2, usize), // The number of statements is 2
             ]
         );
     }
@@ -2197,7 +2179,7 @@ mod tests {
         check_metrics!(
             "int max = 10; // +1
 
-            for (int i = 0; i < max; i++) { // +3
+            for (int i = 0; i < max; i++) { // +1
                 if(i % 2 == 0) { continue;} + 2
                 System.out.println(i); // +1
              }",
@@ -2205,7 +2187,7 @@ mod tests {
             JavaParser,
             loc,
             [
-                (lloc, 7, usize), // The number of statements is 7
+                (lloc, 5, usize), // The number of statements is 5
             ]
         );
     }
@@ -2255,7 +2237,7 @@ mod tests {
     fn java_expressions_lloc() {
         check_metrics!(
             "int x = 10;                                                            // +1 local var declaration
-            x=+90;                                                                  // +1 expression statement
+            x=+89;                                                                  // +1 expression statement
             int y = x * 2;                                                          // +1 local var declaration
             IntFunction double = (n) -> n*2;                                        // +1 local var declaration
             int y2 = double(x);                                                     // +1 local var declaration
@@ -2284,7 +2266,7 @@ mod tests {
             loc,
             [
                 (ploc, 1, usize), // The number of code lines is 1
-                (lloc, 4, usize), // The number of statements is 4
+                (lloc, 2, usize), // The number of statements is 2
                 (cloc, 0, usize), // The number of comments is 0
             ]
         );
@@ -2310,7 +2292,7 @@ mod tests {
             [
                 (sloc, 11, usize), // The number of lines is 11
                 (ploc, 4, usize),  // The number of code lines is 4
-                (lloc, 5, usize),  // The number of statements is 5
+                (lloc, 3, usize),  // The number of statements is 3
                 (cloc, 6, usize),  // The number of comments is 6
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
