@@ -829,30 +829,25 @@ impl Loc for JavaCode {
                 add_cloc_lines(stats, start, end);
             }
             AssertStatement
-            | AssignmentExpression
             | BreakStatement
-            | BinaryExpression
-            | CastExpression
             | ContinueStatement
             | DoStatement
-            | Declaration
             | EnhancedForStatement
+            | ExpressionStatement
             | IfStatement
-            | InstanceofExpression
-            | LambdaExpression
             | LocalVariableDeclaration
-            | MethodInvocation
-            | ParenthesizedExpression
-            | PrimaryExpression
             | ReturnStatement
-            | Statement
             | SwitchStatement
-            | TernaryExpression
             | ThrowStatement
             | TryStatement
-            | UpdateExpression
-            | UnaryExpression => {
+            | WhileStatement => {
                 stats.logical_lines += 1;
+                println!("+1");
+            }
+            ForStatement => {
+                // handle binary check + increment
+                stats.logical_lines += 2;
+                println!("+2");
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -2088,6 +2083,20 @@ mod tests {
     }
 
     #[test]
+    fn java_update_expression_lloc() {
+        check_metrics!(
+            "int i = 10;
+            i++;",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 2, usize), // The number of statements is 2
+            ]
+        );
+    }
+
+    #[test]
     fn java_for_lloc() {
         check_metrics!(
             "for (int i = 0; i < 100; i++) { // + 3
@@ -2124,7 +2133,7 @@ mod tests {
         check_metrics!(
             "
             int i=0; // +1
-            while(i < 10) { // +2 paren exp + binary
+            while(i < 10) { // +1 
                 i++; // +1
                 System.out.println(i); // +1
              }",
@@ -2132,19 +2141,85 @@ mod tests {
             JavaParser,
             loc,
             [
-                (lloc, 5, usize), // The number of statements is 5
+                (lloc, 4, usize), // The number of statements is 4
             ]
         );
     }
 
     #[test]
-    fn java_multi_lloc() {
+    fn java_do_while_lloc() {
+        check_metrics!(
+            "
+            int i=0; // +1
+            do { // +1 
+                i++; // +1
+                System.out.println(i); // +1
+             } while(i < 10)",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 4, usize), // The number of statements is 4
+            ]
+        );
+    }
+
+    #[test]
+    fn java_switch_lloc() {
+        check_metrics!(
+            "switch(grade) { // +1
+                case 'A' :
+                   System.out.println(\"Pass with distinction\"); // +1
+                   break; // +1
+                case 'B' :
+                case 'C' :
+                   System.out.println(\"Pass\"); // +1
+                   break; // +1
+                case 'D' :
+                   System.out.println(\"At risk\"); // +1
+                case 'F' :
+                   System.out.println(\"Fail\"); // +1
+                   break; // +1
+                default :
+                   System.out.println(\"Invalid grade\"); // +1
+             }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 9, usize), // The number of statements is 6
+            ]
+        );
+    }
+
+    #[test]
+    fn java_continue_lloc() {
         check_metrics!(
             "int max = 10; // +1
 
             for (int i = 0; i < max; i++) { // +3
-               System.out.println(i); // +1
+                if(i % 2 == 0) { continue;} + 2
+                System.out.println(i); // +1
              }",
+            "foo.java",
+            JavaParser,
+            loc,
+            [
+                (lloc, 7, usize), // The number of statements is 7
+            ]
+        );
+    }
+
+    #[test]
+    fn java_try_lloc() {
+        check_metrics!(
+            "try { // +1
+                int[] myNumbers = {1, 2, 3}; // +1
+                System.out.println(myNumbers[10]); // +1
+              } catch (Exception e) {
+                System.out.println(e.getMessage()); // +1
+                throw e; // +1
+              }",
             "foo.java",
             JavaParser,
             loc,
@@ -2176,37 +2251,26 @@ mod tests {
         );
     }
 
-    // copy in 1 line at a time
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
     #[test]
     fn java_expressions_lloc() {
         check_metrics!(
-            "int x = 10;                                                            // +1
-            x=+90;                                                                  // +2 var + unary
-            int y = x * 2;                                                          // +2 var + binary
-            IntFunction double = (n) -> n*2;                                        // +3 var + lambda + binary
-            int y2 = double(x);                                                     // +2 var + paren expression
-            System.out.println(\"double \" + x + \" = \" + y2);                     // +4 method + binary x 3
-            String message = (x % 2) == 0 ? \"Evenly done.\" : \"Oddly done.\";     // +5 lloc : 1 var assignment + ternary + binary + param exp + binary
-            Object done = (Runnable) () -> { System.out.println(\"Done!\"); };      // +4 var + cast + lamda + method invoc
-            String s = \"string\";                                                  // +1
-            boolean isS = (s instanceof String);                                    // +3 var assignment + paren exp + instanceof
-            done.run();                                                             // +1 method invoc
+            "int x = 10;                                                            // +1 local var declaration
+            x=+90;                                                                  // +1 expression statement
+            int y = x * 2;                                                          // +1 local var declaration
+            IntFunction double = (n) -> n*2;                                        // +1 local var declaration
+            int y2 = double(x);                                                     // +1 local var declaration
+            System.out.println(\"double \" + x + \" = \" + y2);                     // +1 expression statement
+            String message = (x % 2) == 0 ? \"Evenly done.\" : \"Oddly done.\";     // +1 local var declaration
+            Object done = (Runnable) () -> { System.out.println(\"Done!\"); };      // +2 local var declaration + expression statement
+            String s = \"string\";                                                  // +1 local var declaration
+            boolean isS = (s instanceof String);                                    // +1 local var declaration
+            done.run();                                                             // +1 expression statement
             ",
             "foo.java",
             JavaParser,
             loc,
             [
-                (lloc, 28, usize), // The number of statements is 28
+                (lloc, 12, usize), // The number of statements is 12
             ]
         );
     }
@@ -2264,7 +2328,7 @@ mod tests {
             
             class HelloWorldApp {
               public void main(String[] args) {
-                String message = args.length == 0 ? \"Hello empty world\" : \"Hello world\"; // +3 lloc : 1 var assignment + ternary + binary exp
+                String message = args.length == 0 ? \"Hello empty world\" : \"Hello world\"; // +1 lloc : 1 var assignment
                 System.out.println(message); // Display the string. +1 lloc
               }
             }",
@@ -2274,7 +2338,7 @@ mod tests {
             [
                 (sloc, 12, usize), // The number of lines is 12
                 (ploc, 7, usize),  // The number of code lines is 7
-                (lloc, 4, usize),  // The number of statements is 4
+                (lloc, 2, usize),  // The number of statements is 2
                 (cloc, 6, usize),  // The number of comments is 6
                 (blank, 1, usize)  // The number of blank lines is 1
             ]
