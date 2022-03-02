@@ -810,19 +810,12 @@ impl Loc for CppCode {
     }
 }
 
-impl fmt::Display for Java {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 impl Loc for JavaCode {
     fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) {
         use Java::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
         let kind_id: Java = node.object().kind_id().into();
-        println!("{}", kind_id);
         // LLOC in Java is counted for statements only
         // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/expressions.html
         match kind_id {
@@ -835,7 +828,6 @@ impl Loc for JavaCode {
             | ReturnStatement | SwitchStatement | ThrowStatement | TryStatement
             | WhileStatement => {
                 stats.logical_lines += 1;
-                println!("+1");
             }
             LocalVariableDeclaration => {
                 if count_specific_ancestors!(node, ForStatement, Block) == 0 {
