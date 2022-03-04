@@ -161,14 +161,17 @@ impl Stats {
     pub fn closure_args_max(&self) -> f64 {
         self.closure_nargs_max as f64
     }
-
+    #[inline(always)]
+    pub(crate) fn compute_sum(&mut self) {
+        self.closure_nargs_sum += self.closure_nargs;
+        self.fn_nargs_sum += self.fn_nargs;
+    }
     pub(crate) fn compute_minmax(&mut self) {
         self.closure_nargs_min = self.closure_nargs_min.min(self.closure_nargs);
         self.closure_nargs_max = self.closure_nargs_max.max(self.closure_nargs);
         self.fn_nargs_min = self.fn_nargs_min.min(self.fn_nargs);
         self.fn_nargs_max = self.fn_nargs_max.max(self.fn_nargs);
-        self.closure_nargs_sum += self.closure_nargs;
-        self.fn_nargs_sum += self.fn_nargs;
+        self.compute_sum();
     }
     pub(crate) fn finalize(&mut self, total_functions: usize, total_closures: usize) {
         self.total_functions = total_functions;
