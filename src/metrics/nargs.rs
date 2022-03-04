@@ -166,6 +166,7 @@ impl Stats {
         self.closure_nargs_sum += self.closure_nargs;
         self.fn_nargs_sum += self.fn_nargs;
     }
+    #[inline(always)]
     pub(crate) fn compute_minmax(&mut self) {
         self.closure_nargs_min = self.closure_nargs_min.min(self.closure_nargs);
         self.closure_nargs_max = self.closure_nargs_max.max(self.closure_nargs);

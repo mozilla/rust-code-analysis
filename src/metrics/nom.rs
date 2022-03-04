@@ -173,6 +173,7 @@ impl Stats {
         self.functions_sum += self.functions;
         self.closures_sum += self.closures;
     }
+    #[inline(always)]
     pub(crate) fn compute_minmax(&mut self) {
         self.functions_min = self.functions_min.min(self.functions);
         self.functions_max = self.functions_max.max(self.functions);
