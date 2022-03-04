@@ -168,7 +168,7 @@ impl Stats {
     pub fn total(&self) -> f64 {
         self.functions_sum() + self.closures_sum()
     }
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         self.functions_min = self.functions_min.min(self.functions);
         self.functions_max = self.functions_max.max(self.functions);
         self.closures_min = self.closures_min.min(self.closures);

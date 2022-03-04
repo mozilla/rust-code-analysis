@@ -162,7 +162,7 @@ impl Stats {
         self.closure_nargs_max as f64
     }
 
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         self.closure_nargs_min = self.closure_nargs_min.min(self.closure_nargs);
         self.closure_nargs_max = self.closure_nargs_max.max(self.closure_nargs);
         self.fn_nargs_min = self.fn_nargs_min.min(self.fn_nargs);
