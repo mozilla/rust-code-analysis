@@ -102,7 +102,7 @@ impl Stats {
     pub fn cognitive_average(&self) -> f64 {
         self.cognitive_sum() / self.total_space_functions as f64
     }
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         self.structural_min = self.structural_min.min(self.structural);
         self.structural_max = self.structural_max.max(self.structural);
         self.structural_sum += self.structural;

@@ -89,8 +89,7 @@ impl Stats {
     pub fn cyclomatic_min(&self) -> f64 {
         self.cyclomatic_min
     }
-    /// Last step for computing minimum and maximum value and update cyclomatic_sum
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         self.cyclomatic_max = self.cyclomatic_max.max(self.cyclomatic);
         self.cyclomatic_min = self.cyclomatic_min.min(self.cyclomatic);
         self.cyclomatic_sum += self.cyclomatic;
