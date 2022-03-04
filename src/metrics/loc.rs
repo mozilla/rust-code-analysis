@@ -61,7 +61,7 @@ impl Sloc {
     }
 
     #[inline(always)]
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         if self.sloc_min == usize::MAX {
             self.sloc_min = self.sloc_min.min(self.sloc() as usize);
             self.sloc_max = self.sloc_max.max(self.sloc() as usize);
@@ -119,7 +119,7 @@ impl Ploc {
     }
 
     #[inline(always)]
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         if self.ploc_min == usize::MAX {
             self.ploc_min = self.ploc_min.min(self.ploc() as usize);
             self.ploc_max = self.ploc_max.max(self.ploc() as usize);
@@ -180,7 +180,7 @@ impl Cloc {
     }
 
     #[inline(always)]
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         if self.cloc_min == usize::MAX {
             self.cloc_min = self.cloc_min.min(self.cloc() as usize);
             self.cloc_max = self.cloc_max.max(self.cloc() as usize);
@@ -235,7 +235,7 @@ impl Lloc {
     }
 
     #[inline(always)]
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         if self.lloc_min == usize::MAX {
             self.lloc_min = self.lloc_min.min(self.lloc() as usize);
             self.lloc_max = self.lloc_max.max(self.lloc() as usize);
@@ -486,7 +486,7 @@ impl Stats {
     }
 
     #[inline(always)]
-    pub fn compute_minmax(&mut self) {
+    pub(crate) fn compute_minmax(&mut self) {
         self.sloc.compute_minmax();
         self.ploc.compute_minmax();
         self.cloc.compute_minmax();
