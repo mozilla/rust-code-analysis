@@ -95,6 +95,7 @@ impl Stats {
     pub(crate) fn compute_sum(&mut self) {
         self.exit_sum += self.exit;
     }
+    #[inline(always)]
     pub(crate) fn compute_minmax(&mut self) {
         self.exit_max = self.exit_max.max(self.exit);
         self.exit_min = self.exit_min.min(self.exit);
