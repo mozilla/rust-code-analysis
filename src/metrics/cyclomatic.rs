@@ -503,4 +503,47 @@ mod tests {
             ]
         );
     }
+
+    // As reported here:
+    // https://github.com/sebastianbergmann/php-code-coverage/issues/607
+    // An anonymous class declaration is not considered when computing the Cyclomatic Complexity metric for Java
+    // Only the complexity of the anonymous class content is considered for the computation
+    #[test]
+    fn java_anonymous_class() {
+        check_metrics!(
+            "
+            abstract class A { // +2 (+1 unit space)
+                public abstract boolean m1(int n); // +1
+                public abstract boolean m2(int n); // +1
+            }
+            public class B { // +1
+            
+                public void test() { // +1
+                    A a = new A() {
+                        public boolean m1(int n) { // +1
+                            if (n % 2 == 0) { // +1
+                                return true;
+                            }
+                            return false;
+                        }
+                        public boolean m2(int n) { // +1
+                            if (n % 5 == 0) { // +1
+                                return true;
+                            }
+                            return false;
+                        }
+                    };
+                }
+            }",
+            "foo.java",
+            JavaParser,
+            cyclomatic,
+            [(cyclomatic_sum, 10, usize)],
+            [
+                (cyclomatic_average, 1.25), // nspace = 8 (unit, 2 classes and 5 methods)
+                (cyclomatic_max, 2.0),
+                (cyclomatic_min, 1.0)
+            ]
+        );
+    }
 }
