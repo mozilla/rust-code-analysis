@@ -6,97 +6,29 @@ use std::fmt;
 
 use crate::*;
 
-/// The `Loc` metric suite.
+/// The `SLoc` metric suite.
 #[derive(Debug, Clone)]
-pub struct Stats {
+pub struct Sloc {
     start: usize,
     end: usize,
     unit: bool,
-    lines: FxHashSet<usize>,
-    logical_lines: usize,
-    only_comment_lines: usize,
-    code_comment_lines: usize,
-    comment_line_end: Option<usize>,
-    space_count: usize,
+    sloc_min: usize,
+    sloc_max: usize,
 }
 
-impl Default for Stats {
+impl Default for Sloc {
     fn default() -> Self {
         Self {
             start: 0,
             end: 0,
             unit: false,
-            lines: FxHashSet::default(),
-            logical_lines: 0,
-            only_comment_lines: 0,
-            code_comment_lines: 0,
-            comment_line_end: Option::default(),
-            space_count: 1,
+            sloc_min: usize::MAX,
+            sloc_max: 0,
         }
     }
 }
 
-impl Serialize for Stats {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("loc", 10)?;
-        st.serialize_field("sloc", &self.sloc())?;
-        st.serialize_field("ploc", &self.ploc())?;
-        st.serialize_field("lloc", &self.lloc())?;
-        st.serialize_field("cloc", &self.cloc())?;
-        st.serialize_field("blank", &self.blank())?;
-        st.serialize_field("sloc_average", &self.sloc_average())?;
-        st.serialize_field("ploc_average", &self.ploc_average())?;
-        st.serialize_field("lloc_average", &self.lloc_average())?;
-        st.serialize_field("cloc_average", &self.cloc_average())?;
-        st.serialize_field("blank_average", &self.blank_average())?;
-        st.end()
-    }
-}
-
-impl fmt::Display for Stats {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "sloc: {}, ploc: {}, lloc: {}, cloc: {}, blank: {}, sloc_average: {}, ploc_average: {}, lloc_average: {}, cloc_average: {}, blank_average: {}",
-            self.sloc(),
-            self.ploc(),
-            self.lloc(),
-            self.cloc(),
-            self.blank(),
-            self.sloc_average(),
-            self.ploc_average(),
-            self.lloc_average(),
-            self.cloc_average(),
-            self.blank_average(),
-        )
-    }
-}
-
-impl Stats {
-    /// Merges a second `Loc` metric suite into the first one
-    pub fn merge(&mut self, other: &Stats) {
-        // Merge ploc lines
-        for l in other.lines.iter() {
-            self.lines.insert(*l);
-        }
-
-        // Merge lloc lines
-        self.logical_lines += other.logical_lines;
-
-        // Merge cloc lines
-        self.only_comment_lines += other.only_comment_lines;
-        self.code_comment_lines += other.code_comment_lines;
-
-        // Count spaces
-        self.space_count += other.space_count;
-    }
-
-    /// The `Sloc` metric.
-    ///
-    /// Counts the number of lines in a scope
+impl Sloc {
     #[inline(always)]
     pub fn sloc(&self) -> f64 {
         // This metric counts the number of lines in a file
@@ -110,9 +42,52 @@ impl Stats {
         sloc as f64
     }
 
-    /// The `Ploc` metric.
-    ///
-    /// Counts the number of instruction lines in a scope
+    /// The `Sloc` metric minimum value.
+    #[inline(always)]
+    pub fn sloc_min(&self) -> f64 {
+        self.sloc_min as f64
+    }
+
+    /// The `Sloc` metric maximum value.
+    #[inline(always)]
+    pub fn sloc_max(&self) -> f64 {
+        self.sloc_max as f64
+    }
+
+    #[inline(always)]
+    pub fn merge(&mut self, other: &Sloc) {
+        self.sloc_min = self.sloc_min.min(other.sloc() as usize);
+        self.sloc_max = self.sloc_max.max(other.sloc() as usize);
+    }
+
+    #[inline(always)]
+    pub(crate) fn compute_minmax(&mut self) {
+        if self.sloc_min == usize::MAX {
+            self.sloc_min = self.sloc_min.min(self.sloc() as usize);
+            self.sloc_max = self.sloc_max.max(self.sloc() as usize);
+        }
+    }
+}
+
+/// The `PLoc` metric suite.
+#[derive(Debug, Clone)]
+pub struct Ploc {
+    lines: FxHashSet<usize>,
+    ploc_min: usize,
+    ploc_max: usize,
+}
+
+impl Default for Ploc {
+    fn default() -> Self {
+        Self {
+            lines: FxHashSet::default(),
+            ploc_min: usize::MAX,
+            ploc_max: 0,
+        }
+    }
+}
+
+impl Ploc {
     #[inline(always)]
     pub fn ploc(&self) -> f64 {
         // This metric counts the number of instruction lines in a code
@@ -120,19 +95,61 @@ impl Stats {
         self.lines.len() as f64
     }
 
-    /// The `Lloc` metric.
-    ///
-    /// Counts the number of statements in a scope
+    /// The `Ploc` metric minimum value.
     #[inline(always)]
-    pub fn lloc(&self) -> f64 {
-        // This metric counts the number of statements in a code
-        // https://en.wikipedia.org/wiki/Source_lines_of_code
-        self.logical_lines as f64
+    pub fn ploc_min(&self) -> f64 {
+        self.ploc_min as f64
     }
 
-    /// The `Cloc` metric.
-    ///
-    /// Counts the number of comments in a scope
+    /// The `Ploc` metric maximum value.
+    #[inline(always)]
+    pub fn ploc_max(&self) -> f64 {
+        self.ploc_max as f64
+    }
+
+    #[inline(always)]
+    pub fn merge(&mut self, other: &Ploc) {
+        // Merge ploc lines
+        for l in other.lines.iter() {
+            self.lines.insert(*l);
+        }
+
+        self.ploc_min = self.ploc_min.min(other.ploc() as usize);
+        self.ploc_max = self.ploc_max.max(other.ploc() as usize);
+    }
+
+    #[inline(always)]
+    pub(crate) fn compute_minmax(&mut self) {
+        if self.ploc_min == usize::MAX {
+            self.ploc_min = self.ploc_min.min(self.ploc() as usize);
+            self.ploc_max = self.ploc_max.max(self.ploc() as usize);
+        }
+    }
+}
+
+/// The `CLoc` metric suite.
+#[derive(Debug, Clone)]
+pub struct Cloc {
+    only_comment_lines: usize,
+    code_comment_lines: usize,
+    comment_line_end: Option<usize>,
+    cloc_min: usize,
+    cloc_max: usize,
+}
+
+impl Default for Cloc {
+    fn default() -> Self {
+        Self {
+            only_comment_lines: 0,
+            code_comment_lines: 0,
+            comment_line_end: Option::default(),
+            cloc_min: usize::MAX,
+            cloc_max: 0,
+        }
+    }
+}
+
+impl Cloc {
     #[inline(always)]
     pub fn cloc(&self) -> f64 {
         // Comments are counted regardless of their placement
@@ -140,12 +157,232 @@ impl Stats {
         (self.only_comment_lines + self.code_comment_lines) as f64
     }
 
+    /// The `Ploc` metric minimum value.
+    #[inline(always)]
+    pub fn cloc_min(&self) -> f64 {
+        self.cloc_min as f64
+    }
+
+    /// The `Ploc` metric maximum value.
+    #[inline(always)]
+    pub fn cloc_max(&self) -> f64 {
+        self.cloc_max as f64
+    }
+
+    #[inline(always)]
+    pub fn merge(&mut self, other: &Cloc) {
+        // Merge cloc lines
+        self.only_comment_lines += other.only_comment_lines;
+        self.code_comment_lines += other.code_comment_lines;
+
+        self.cloc_min = self.cloc_min.min(other.cloc() as usize);
+        self.cloc_max = self.cloc_max.max(other.cloc() as usize);
+    }
+
+    #[inline(always)]
+    pub(crate) fn compute_minmax(&mut self) {
+        if self.cloc_min == usize::MAX {
+            self.cloc_min = self.cloc_min.min(self.cloc() as usize);
+            self.cloc_max = self.cloc_max.max(self.cloc() as usize);
+        }
+    }
+}
+
+/// The `LLoc` metric suite.
+#[derive(Debug, Clone)]
+pub struct Lloc {
+    logical_lines: usize,
+    lloc_min: usize,
+    lloc_max: usize,
+}
+
+impl Default for Lloc {
+    fn default() -> Self {
+        Self {
+            logical_lines: 0,
+            lloc_min: usize::MAX,
+            lloc_max: 0,
+        }
+    }
+}
+
+impl Lloc {
+    #[inline(always)]
+    pub fn lloc(&self) -> f64 {
+        // This metric counts the number of statements in a code
+        // https://en.wikipedia.org/wiki/Source_lines_of_code
+        self.logical_lines as f64
+    }
+
+    /// The `Lloc` metric minimum value.
+    #[inline(always)]
+    pub fn lloc_min(&self) -> f64 {
+        self.lloc_min as f64
+    }
+
+    /// The `Lloc` metric maximum value.
+    #[inline(always)]
+    pub fn lloc_max(&self) -> f64 {
+        self.lloc_max as f64
+    }
+
+    #[inline(always)]
+    pub fn merge(&mut self, other: &Lloc) {
+        // Merge lloc lines
+        self.logical_lines += other.logical_lines;
+        self.lloc_min = self.lloc_min.min(other.lloc() as usize);
+        self.lloc_max = self.lloc_max.max(other.lloc() as usize);
+    }
+
+    #[inline(always)]
+    pub(crate) fn compute_minmax(&mut self) {
+        if self.lloc_min == usize::MAX {
+            self.lloc_min = self.lloc_min.min(self.lloc() as usize);
+            self.lloc_max = self.lloc_max.max(self.lloc() as usize);
+        }
+    }
+}
+
+/// The `Loc` metric suite.
+#[derive(Debug, Clone)]
+pub struct Stats {
+    sloc: Sloc,
+    ploc: Ploc,
+    cloc: Cloc,
+    lloc: Lloc,
+    space_count: usize,
+    blank_min: usize,
+    blank_max: usize,
+}
+
+impl Default for Stats {
+    fn default() -> Self {
+        Self {
+            sloc: Sloc::default(),
+            ploc: Ploc::default(),
+            cloc: Cloc::default(),
+            lloc: Lloc::default(),
+            space_count: 1,
+            blank_min: usize::MAX,
+            blank_max: 0,
+        }
+    }
+}
+
+impl Serialize for Stats {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut st = serializer.serialize_struct("loc", 20)?;
+        st.serialize_field("sloc", &self.sloc())?;
+        st.serialize_field("ploc", &self.ploc())?;
+        st.serialize_field("lloc", &self.lloc())?;
+        st.serialize_field("cloc", &self.cloc())?;
+        st.serialize_field("blank", &self.blank())?;
+        st.serialize_field("sloc_average", &self.sloc_average())?;
+        st.serialize_field("ploc_average", &self.ploc_average())?;
+        st.serialize_field("lloc_average", &self.lloc_average())?;
+        st.serialize_field("cloc_average", &self.cloc_average())?;
+        st.serialize_field("blank_average", &self.blank_average())?;
+        st.serialize_field("sloc_min", &self.sloc_min())?;
+        st.serialize_field("sloc_max", &self.sloc_max())?;
+        st.serialize_field("cloc_min", &self.cloc_min())?;
+        st.serialize_field("cloc_max", &self.cloc_max())?;
+        st.serialize_field("ploc_min", &self.ploc_min())?;
+        st.serialize_field("ploc_max", &self.ploc_max())?;
+        st.serialize_field("lloc_min", &self.lloc_min())?;
+        st.serialize_field("lloc_max", &self.lloc_max())?;
+        st.serialize_field("blank_min", &self.blank_min())?;
+        st.serialize_field("blank_max", &self.blank_max())?;
+        st.end()
+    }
+}
+
+impl fmt::Display for Stats {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "sloc: {}, ploc: {}, lloc: {}, cloc: {}, blank: {}, sloc_average: {}, ploc_average: {}, lloc_average: {}, cloc_average: {}, blank_average: {}, sloc_min: {}, sloc_max: {}, cloc_min: {}, cloc_max: {}, ploc_min: {}, ploc_max: {}, lloc_min: {}, lloc_max: {}, blank_min: {}, blank_max: {}",
+            self.sloc(),
+            self.ploc(),
+            self.lloc(),
+            self.cloc(),
+            self.blank(),
+            self.sloc_average(),
+            self.ploc_average(),
+            self.lloc_average(),
+            self.cloc_average(),
+            self.blank_average(),
+            self.sloc_min(),
+            self.sloc_max(),
+            self.cloc_min(),
+            self.cloc_max(),
+            self.ploc_min(),
+            self.ploc_max(),
+            self.lloc_min(),
+            self.lloc_max(),
+            self.blank_min(),
+            self.blank_max(),
+        )
+    }
+}
+
+impl Stats {
+    /// Merges a second `Loc` metric suite into the first one
+    pub fn merge(&mut self, other: &Stats) {
+        self.sloc.merge(&other.sloc);
+        self.ploc.merge(&other.ploc);
+        self.cloc.merge(&other.cloc);
+        self.lloc.merge(&other.lloc);
+
+        // Count spaces
+        self.space_count += other.space_count;
+
+        // min and max
+
+        self.blank_min = self.blank_min.min(other.blank() as usize);
+        self.blank_max = self.blank_max.max(other.blank() as usize);
+    }
+
+    /// The `Sloc` metric.
+    ///
+    /// Counts the number of lines in a scope
+    #[inline(always)]
+    pub fn sloc(&self) -> f64 {
+        self.sloc.sloc()
+    }
+
+    /// The `Ploc` metric.
+    ///
+    /// Counts the number of instruction lines in a scope
+    #[inline(always)]
+    pub fn ploc(&self) -> f64 {
+        self.ploc.ploc()
+    }
+
+    /// The `Lloc` metric.
+    ///
+    /// Counts the number of statements in a scope
+    #[inline(always)]
+    pub fn lloc(&self) -> f64 {
+        self.lloc.lloc()
+    }
+
+    /// The `Cloc` metric.
+    ///
+    /// Counts the number of comments in a scope
+    #[inline(always)]
+    pub fn cloc(&self) -> f64 {
+        self.cloc.cloc()
+    }
+
     /// The `Blank` metric.
     ///
     /// Counts the number of blank lines in a scope
     #[inline(always)]
     pub fn blank(&self) -> f64 {
-        self.sloc() - self.ploc() - self.only_comment_lines as f64
+        self.sloc() - self.ploc() - self.cloc.only_comment_lines as f64
     }
 
     /// The `Sloc` metric average value.
@@ -187,6 +424,79 @@ impl Stats {
     pub fn blank_average(&self) -> f64 {
         self.blank() / self.space_count as f64
     }
+
+    /// The `Sloc` metric minimum value.
+    #[inline(always)]
+    pub fn sloc_min(&self) -> f64 {
+        self.sloc.sloc_min()
+    }
+
+    /// The `Sloc` metric maximum value.
+    #[inline(always)]
+    pub fn sloc_max(&self) -> f64 {
+        self.sloc.sloc_max()
+    }
+
+    /// The `Cloc` metric minimum value.
+    #[inline(always)]
+    pub fn cloc_min(&self) -> f64 {
+        self.cloc.cloc_min() as f64
+    }
+
+    /// The `Cloc` metric maximum value.
+    #[inline(always)]
+    pub fn cloc_max(&self) -> f64 {
+        self.cloc.cloc_max() as f64
+    }
+
+    /// The `Ploc` metric minimum value.
+    #[inline(always)]
+    pub fn ploc_min(&self) -> f64 {
+        self.ploc.ploc_min()
+    }
+
+    /// The `Ploc` metric maximum value.
+    #[inline(always)]
+    pub fn ploc_max(&self) -> f64 {
+        self.ploc.ploc_max()
+    }
+
+    /// The `Lloc` metric minimum value.
+    #[inline(always)]
+    pub fn lloc_min(&self) -> f64 {
+        self.lloc.lloc_min()
+    }
+
+    /// The `Lloc` metric maximum value.
+    #[inline(always)]
+    pub fn lloc_max(&self) -> f64 {
+        self.lloc.lloc_max()
+    }
+
+    /// The `Blank` metric minimum value.
+    #[inline(always)]
+    pub fn blank_min(&self) -> f64 {
+        self.blank_min as f64
+    }
+
+    /// The `Blank` metric maximum value.
+    #[inline(always)]
+    pub fn blank_max(&self) -> f64 {
+        self.blank_max as f64
+    }
+
+    #[inline(always)]
+    pub(crate) fn compute_minmax(&mut self) {
+        self.sloc.compute_minmax();
+        self.ploc.compute_minmax();
+        self.cloc.compute_minmax();
+        self.lloc.compute_minmax();
+
+        if self.blank_min == usize::MAX {
+            self.blank_min = self.blank_min.min(self.blank() as usize);
+            self.blank_max = self.blank_max.max(self.blank() as usize);
+        }
+    }
 }
 
 #[doc(hidden)]
@@ -203,9 +513,9 @@ fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (
     let end = node.object().end_position().row;
 
     if is_func_space {
-        stats.start = start;
-        stats.end = end;
-        stats.unit = is_unit;
+        stats.sloc.start = start;
+        stats.sloc.end = end;
+        stats.sloc.unit = is_unit;
     }
     (start, end)
 }
@@ -217,23 +527,23 @@ fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (
 // a wrong count for the blank metric.
 fn add_cloc_lines(stats: &mut Stats, start: usize, end: usize) {
     let comment_diff = end - start;
-    let is_comment_after_code_line = stats.lines.contains(&start);
+    let is_comment_after_code_line = stats.ploc.lines.contains(&start);
     if is_comment_after_code_line && comment_diff == 0 {
         // A comment is *entirely* next to a code line
-        stats.code_comment_lines += 1;
+        stats.cloc.code_comment_lines += 1;
     } else if is_comment_after_code_line && comment_diff > 0 {
         // A block comment that starts next to a code line and ends on
         // independent lines.
-        stats.code_comment_lines += 1;
-        stats.only_comment_lines += comment_diff;
+        stats.cloc.code_comment_lines += 1;
+        stats.cloc.only_comment_lines += comment_diff;
     } else {
         // A comment on an independent line AND
         // a block comment on independent lines OR
         // a comment *before* a code line
-        stats.only_comment_lines += (end - start) + 1;
+        stats.cloc.only_comment_lines += (end - start) + 1;
         // Save line end of a comment to check whether
         // a comment *before* a code line is considered
-        stats.comment_line_end = Some(end);
+        stats.cloc.comment_line_end = Some(end);
     }
 }
 
@@ -242,11 +552,11 @@ fn add_cloc_lines(stats: &mut Stats, start: usize, end: usize) {
 // This difference is necessary in order to avoid having
 // a wrong count for the blank metric.
 fn check_comment_ends_on_code_line(stats: &mut Stats, start_code_line: usize) {
-    if let Some(end) = stats.comment_line_end {
-        if end == start_code_line && !stats.lines.contains(&start_code_line) {
+    if let Some(end) = stats.cloc.comment_line_end {
+        if end == start_code_line && !stats.ploc.lines.contains(&start_code_line) {
             // Comment entirely *before* a code line
-            stats.only_comment_lines -= 1;
-            stats.code_comment_lines += 1;
+            stats.cloc.only_comment_lines -= 1;
+            stats.cloc.code_comment_lines += 1;
         }
     }
 }
@@ -268,7 +578,7 @@ impl Loc for PythonCode {
                     add_cloc_lines(stats, start, end);
                 } else if parent.start_position().row != start {
                     check_comment_ends_on_code_line(stats, start);
-                    stats.lines.insert(start);
+                    stats.ploc.lines.insert(start);
                 }
             }
             Statement
@@ -293,11 +603,11 @@ impl Loc for PythonCode {
             | NonlocalStatement
             | ExecStatement
             | ExpressionStatement => {
-                stats.logical_lines += 1;
+                stats.lloc.logical_lines += 1;
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
-                stats.lines.insert(start);
+                stats.ploc.lines.insert(start);
             }
         }
     }
@@ -319,11 +629,11 @@ impl Loc for MozjsCode {
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
             | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
             | StatementIdentifier => {
-                stats.logical_lines += 1;
+                stats.lloc.logical_lines += 1;
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
-                stats.lines.insert(start);
+                stats.ploc.lines.insert(start);
             }
         }
     }
@@ -345,11 +655,11 @@ impl Loc for JavascriptCode {
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
             | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
             | StatementIdentifier => {
-                stats.logical_lines += 1;
+                stats.lloc.logical_lines += 1;
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
-                stats.lines.insert(start);
+                stats.ploc.lines.insert(start);
             }
         }
     }
@@ -371,11 +681,11 @@ impl Loc for TypescriptCode {
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
             | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
             | StatementIdentifier => {
-                stats.logical_lines += 1;
+                stats.lloc.logical_lines += 1;
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
-                stats.lines.insert(start);
+                stats.ploc.lines.insert(start);
             }
         }
     }
@@ -397,11 +707,11 @@ impl Loc for TsxCode {
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
             | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
             | StatementIdentifier => {
-                stats.logical_lines += 1;
+                stats.lloc.logical_lines += 1;
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
-                stats.lines.insert(start);
+                stats.ploc.lines.insert(start);
             }
         }
     }
@@ -434,7 +744,7 @@ impl Loc for RustCode {
             | BreakExpression
             | ContinueExpression
             | AwaitExpression => {
-                stats.logical_lines += 1;
+                stats.lloc.logical_lines += 1;
             }
             CallExpression | MacroInvocation | ClosureExpression => {
                 if count_specific_ancestors!(
@@ -453,12 +763,12 @@ impl Loc for RustCode {
                     Block
                 ) == 0
                 {
-                    stats.logical_lines += 1;
+                    stats.lloc.logical_lines += 1;
                 }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
-                stats.lines.insert(start);
+                stats.ploc.lines.insert(start);
             }
         }
     }
@@ -480,7 +790,7 @@ impl Loc for CppCode {
             | ReturnStatement | BreakStatement | ContinueStatement | GotoStatement
             | ThrowStatement | TryStatement | ExpressionStatement | LabeledStatement
             | StatementIdentifier => {
-                stats.logical_lines += 1;
+                stats.lloc.logical_lines += 1;
             }
             Declaration => {
                 if count_specific_ancestors!(
@@ -489,12 +799,12 @@ impl Loc for CppCode {
                     CompoundStatement
                 ) == 0
                 {
-                    stats.logical_lines += 1;
+                    stats.lloc.logical_lines += 1;
                 }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
-                stats.lines.insert(start);
+                stats.ploc.lines.insert(start);
             }
         }
     }
@@ -521,7 +831,7 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(sloc, 1, usize)],
+            [(sloc, 1, usize), (sloc_min, 1, usize), (sloc_max, 1, usize)],
             [(sloc_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -538,7 +848,11 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(blank, 1, usize)],
+            [
+                (blank, 1, usize),
+                (blank_min, 1, usize),
+                (blank_max, 1, usize)
+            ],
             [(blank_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -556,7 +870,11 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(blank, 1, usize)],
+            [
+                (blank, 1, usize),
+                (blank_min, 1, usize),
+                (blank_max, 1, usize)
+            ],
             [(blank_average, 1.0)] // The number of spaces is 1
         );
 
@@ -565,7 +883,11 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(blank, 0, usize)],
+            [
+                (blank, 0, usize),
+                (blank_min, 0, usize),
+                (blank_max, 0, usize)
+            ],
             [(blank_average, 0.0)] // The number of spaces is 2
         );
     }
@@ -583,7 +905,11 @@ mod tests {
             "foo.c",
             CppParser,
             loc,
-            [(blank, 1, usize)],
+            [
+                (blank, 1, usize),
+                (blank_min, 1, usize),
+                (blank_max, 1, usize)
+            ],
             [(blank_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -612,6 +938,16 @@ mod tests {
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
                 (blank, 1, usize)  // The number of blank lines is 1
+                (sloc_min, 9, usize),
+                (ploc_min, 7, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 2, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 9, usize),
+                (ploc_max, 7, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 2, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 5.0), // The number of spaces is 2
@@ -645,7 +981,17 @@ mod tests {
                 (ploc, 7, usize),  // The number of code lines is 7
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
-                (blank, 0, usize)  // The number of blank lines is 0
+                (blank, 0, usize), // The number of blank lines is 0
+                (sloc_min, 8, usize),
+                (ploc_min, 7, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 2, usize),
+                (blank_min, 0, usize),
+                (sloc_max, 8, usize),
+                (ploc_max, 7, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 2, usize),
+                (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 4.5), // The number of spaces is 2
@@ -680,7 +1026,17 @@ mod tests {
                 (ploc, 7, usize),  // The number of code lines is 7
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 9, usize),
+                (ploc_min, 7, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 3, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 9, usize),
+                (ploc_max, 7, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 3, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 5.0), // The number of spaces is 2
@@ -716,7 +1072,17 @@ mod tests {
                 (ploc, 8, usize),  // The number of code lines is 8
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 11, usize),
+                (ploc_min, 8, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 4, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 11, usize),
+                (ploc_max, 8, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 4, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 5.5), // The number of spaces is 2
@@ -752,14 +1118,24 @@ mod tests {
                 (ploc, 8, usize),  // The number of code lines is 8
                 (lloc, 1, usize),  // The number of statements is 1
                 (cloc, 4, usize),  // The number of comments is 4
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 11, usize),
+                (ploc_min, 8, usize),
+                (lloc_min, 1, usize),
+                (cloc_min, 4, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 11, usize),
+                (ploc_max, 8, usize),
+                (lloc_max, 1, usize),
+                (cloc_max, 4, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 5.5), // The number of spaces is 2
                 (ploc_average, 4.0),
                 (lloc_average, 0.5),
                 (cloc_average, 2.0),
-                (blank_average, 0.5)
+                (blank_average, 0.5),
             ]
         );
     }
@@ -788,7 +1164,17 @@ mod tests {
                 (ploc, 8, usize),  // The number of code lines is 8
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 4, usize),  // The number of comments is 4
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 11, usize),
+                (ploc_min, 8, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 4, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 11, usize),
+                (ploc_max, 8, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 4, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 5.5), // The number of spaces is 2
@@ -825,7 +1211,17 @@ mod tests {
                 (ploc, 8, usize),  // The number of code lines is 8
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 12, usize),
+                (ploc_min, 8, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 5, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 12, usize),
+                (ploc_max, 8, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 5, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 6.0), // The number of spaces is 2
@@ -863,7 +1259,17 @@ mod tests {
                 (ploc, 8, usize),  // The number of code lines is 8
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 13, usize),
+                (ploc_min, 8, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 5, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 13, usize),
+                (ploc_max, 8, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 5, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 6.5), // The number of spaces is 2
@@ -898,7 +1304,17 @@ mod tests {
                 (ploc, 8, usize),  // The number of code lines is 8
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 3, usize),  // The number of comments is 3
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 10, usize),
+                (ploc_min, 8, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 3, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 10, usize),
+                (ploc_max, 8, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 3, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 5.0), // The number of spaces is 2
@@ -935,7 +1351,17 @@ mod tests {
                 (ploc, 8, usize),  // The number of code lines is 8
                 (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize)  // The number of blank lines is 1
+                (blank, 1, usize), // The number of blank lines is 1
+                (sloc_min, 12, usize),
+                (ploc_min, 8, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 5, usize),
+                (blank_min, 1, usize),
+                (sloc_max, 12, usize),
+                (ploc_max, 8, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 5, usize),
+                (blank_max, 1, usize)
             ],
             [
                 (sloc_average, 6.0), // The number of spaces is 2
@@ -958,7 +1384,7 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(cloc, 5, usize)],
+            [(cloc, 5, usize), (cloc_min, 5, usize), (cloc_max, 5, usize)],
             [(cloc_average, 5.0)] // The number of spaces is 1
         );
     }
@@ -973,7 +1399,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(cloc, 5, usize)],
+            [(cloc, 5, usize), (cloc_min, 5, usize), (cloc_max, 5, usize)],
             [(cloc_average, 5.0)] // The number of spaces is 1
         );
     }
@@ -988,7 +1414,7 @@ mod tests {
             "foo.c",
             CppParser,
             loc,
-            [(cloc, 5, usize)],
+            [(cloc, 5, usize), (cloc_min, 5, usize), (cloc_max, 5, usize)],
             [(cloc_average, 5.0)] // The number of spaces is 1
         );
     }
@@ -1002,7 +1428,7 @@ mod tests {
             "foo.py",
             PythonParser,
             loc,
-            [(lloc, 3, usize)],
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
             [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
@@ -1018,7 +1444,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)],
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
             [(lloc_average, 3.0)] // The number of spaces is 1
         );
 
@@ -1033,7 +1459,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)],
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
             [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
@@ -1046,7 +1472,7 @@ mod tests {
             "foo.c",
             CppParser,
             loc,
-            [(lloc, 2, usize)],
+            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
             [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
@@ -1061,8 +1487,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 3, usize)],    // nsTArray, for, callbacks
-            [(lloc_average, 3.0)]  // The number of spaces is 1
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)], // nsTArray, for, callbacks
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
 
@@ -1074,8 +1500,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 2, usize)],    // pixel_data, return
-            [(lloc_average, 2.0)]  // The number of spaces is 1
+            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)], // pixel_data, return
+            [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
 
@@ -1089,8 +1515,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 4, usize)],    // for, idx, if, return
-            [(lloc_average, 4.0)]  // The number of spaces is 1
+            [(lloc, 4, usize), (lloc_min, 4, usize), (lloc_max, 4, usize)], // for, idx, if, return
+            [(lloc_average, 4.0)] // The number of spaces is 1
         );
     }
 
@@ -1104,8 +1530,8 @@ mod tests {
             "foo.cpp",
             CppParser,
             loc,
-            [(lloc, 3, usize)],    // while, next, free,
-            [(lloc_average, 3.0)]  // The number of spaces is 1
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)], // while, next, free,
+            [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
 
@@ -1123,7 +1549,17 @@ mod tests {
                 (ploc, 2, usize),
                 (lloc, 1, usize),
                 (cloc, 0, usize),
-                (blank, 0, usize)
+                (blank, 0, usize),
+                (sloc_min, 2, usize),
+                (ploc_min, 2, usize),
+                (lloc_min, 1, usize),
+                (cloc_min, 0, usize),
+                (blank_min, 0, usize),
+                (sloc_max, 2, usize),
+                (ploc_max, 2, usize),
+                (lloc_max, 1, usize),
+                (cloc_max, 0, usize),
+                (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 2.0), // The number of spaces is 1
@@ -1146,7 +1582,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)],
+            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
             [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -1158,7 +1594,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)],
+            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
             [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -1170,7 +1606,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)],
+            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
             [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -1182,7 +1618,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)],
+            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
             [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -1194,7 +1630,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize)],
+            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
             [(lloc_average, 1.0)] // The number of spaces is 1
         );
     }
@@ -1208,7 +1644,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)],
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
             [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
@@ -1222,7 +1658,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)],
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
             [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
@@ -1236,7 +1672,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)],
+            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
             [(lloc_average, 3.0)] // The number of spaces is 1
         );
     }
@@ -1249,7 +1685,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 2, usize)],
+            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
             [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
@@ -1262,7 +1698,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 2, usize)],
+            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
             [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
@@ -1276,7 +1712,7 @@ mod tests {
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 3, usize)],
+            [(lloc, 3, usize), (lloc_min, 0, usize), (lloc_max, 0, usize)],
             [(lloc_average, 1.0)] // The number of spaces is 3
         );
     }
@@ -1298,7 +1734,17 @@ mod tests {
                 (ploc, 6, usize),  // The number of code lines is 6
                 (lloc, 3, usize),  // The number of statements is 3 (print)
                 (cloc, 0, usize),  // The number of comments is 0
-                (blank, 0, usize)  // The number of blank lines is 0
+                (blank, 0, usize), // The number of blank lines is 0
+                (sloc_min, 6, usize),
+                (ploc_min, 6, usize),
+                (lloc_min, 3, usize),
+                (cloc_min, 0, usize),
+                (blank_min, 0, usize),
+                (sloc_max, 6, usize),
+                (ploc_max, 6, usize),
+                (lloc_max, 3, usize),
+                (cloc_max, 0, usize),
+                (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 3.0), // The number of spaces is 2
@@ -1337,7 +1783,17 @@ mod tests {
                 (ploc, 9, usize),  // The number of code lines is 9
                 (lloc, 8, usize),  // The number of statements is 8
                 (cloc, 7, usize),  // The number of comments is 7
-                (blank, 0, usize)  // The number of blank lines is 0
+                (blank, 0, usize), // The number of blank lines is 0
+                (sloc_min, 16, usize),
+                (ploc_min, 9, usize),
+                (lloc_min, 8, usize),
+                (cloc_min, 7, usize),
+                (blank_min, 0, usize),
+                (sloc_max, 16, usize),
+                (ploc_max, 9, usize),
+                (lloc_max, 8, usize),
+                (cloc_max, 7, usize),
+                (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 8.0), // The number of spaces is 2
@@ -1365,7 +1821,17 @@ mod tests {
                 (ploc, 5, usize),  // The number of code lines is 5
                 (lloc, 7, usize),  // The number of statements is 7
                 (cloc, 0, usize),  // The number of comments is 0
-                (blank, 0, usize)  // The number of blank lines is 0
+                (blank, 0, usize), // The number of blank lines is 0
+                (sloc_min, 5, usize),
+                (ploc_min, 5, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 0, usize),
+                (blank_min, 0, usize),
+                (sloc_max, 5, usize),
+                (ploc_max, 5, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 0, usize),
+                (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 2.5), // The number of spaces is 2
@@ -1393,7 +1859,17 @@ mod tests {
                 (ploc, 5, usize),  // The number of code lines is 5
                 (lloc, 7, usize),  // The number of statements is 7
                 (cloc, 0, usize),  // The number of comments is 0
-                (blank, 0, usize)  // The number of blank lines is 0
+                (blank, 0, usize), // The number of blank lines is 0
+                (sloc_min, 5, usize),
+                (ploc_min, 5, usize),
+                (lloc_min, 6, usize),
+                (cloc_min, 0, usize),
+                (blank_min, 0, usize),
+                (sloc_max, 5, usize),
+                (ploc_max, 5, usize),
+                (lloc_max, 6, usize),
+                (cloc_max, 0, usize),
+                (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 2.5), // The number of spaces is 2
@@ -1417,7 +1893,17 @@ mod tests {
                 (ploc, 1, usize),  // The number of code lines is 1
                 (lloc, 0, usize),  // The number of statements is 0
                 (cloc, 1, usize),  // The number of comments is 1
-                (blank, 0, usize)  // The number of blank lines is 0
+                (blank, 0, usize), // The number of blank lines is 0
+                (sloc_min, 1, usize),
+                (ploc_min, 1, usize),
+                (lloc_min, 0, usize),
+                (cloc_min, 0, usize),
+                (blank_min, 0, usize),
+                (sloc_max, 1, usize),
+                (ploc_max, 1, usize),
+                (lloc_max, 0, usize),
+                (cloc_max, 0, usize),
+                (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 0.5), // The number of spaces is 2
