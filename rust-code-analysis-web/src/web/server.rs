@@ -1,4 +1,3 @@
-use actix_rt::Runtime;
 use actix_web::{
     dev::Body,
     guard, http,
@@ -220,71 +219,67 @@ fn ping() -> HttpResponse {
     HttpResponse::Ok().body(Body::Empty)
 }
 
-pub fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
-    actix_rt::System::new().run()?;
-    let rt = Runtime::new()?;
+pub async fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
     let max_size = 1024 * 1024 * 4;
 
-    rt.block_on(async move {
-        HttpServer::new(move || {
-            App::new()
-                .service(
-                    web::resource("/ast")
-                        .guard(guard::Header("content-type", "application/json"))
-                        .app_data(web::Json::<AstPayload>::configure(|cfg| {
-                            cfg.limit(max_size)
-                        }))
-                        .route(web::post().to(ast_parser)),
-                )
-                .service(
-                    web::resource("/comment")
-                        .guard(guard::Header("content-type", "application/json"))
-                        .app_data(web::Json::<WebCommentPayload>::configure(|cfg| {
-                            cfg.limit(max_size)
-                        }))
-                        .route(web::post().to(comment_removal_json)),
-                )
-                .service(
-                    web::resource("/comment")
-                        .guard(guard::Header("content-type", "application/octet-stream"))
-                        .data(web::PayloadConfig::default().limit(max_size))
-                        .route(web::post().to(comment_removal_plain)),
-                )
-                .service(
-                    web::resource("/metrics")
-                        .guard(guard::Header("content-type", "application/json"))
-                        .app_data(web::Json::<WebMetricsPayload>::configure(|cfg| {
-                            cfg.limit(max_size)
-                        }))
-                        .route(web::post().to(metrics_json)),
-                )
-                .service(
-                    web::resource("/metrics")
-                        .guard(guard::Header("content-type", "application/octet-stream"))
-                        .data(web::PayloadConfig::default().limit(max_size))
-                        .route(web::post().to(metrics_plain)),
-                )
-                .service(
-                    web::resource("/function")
-                        .guard(guard::Header("content-type", "application/json"))
-                        .app_data(web::Json::<WebFunctionPayload>::configure(|cfg| {
-                            cfg.limit(max_size)
-                        }))
-                        .route(web::post().to(function_json)),
-                )
-                .service(
-                    web::resource("/function")
-                        .guard(guard::Header("content-type", "application/octet-stream"))
-                        .data(web::PayloadConfig::default().limit(max_size))
-                        .route(web::post().to(function_plain)),
-                )
-                .service(web::resource("/ping").route(web::get().to(ping)))
-        })
-        .workers(n_threads)
-        .bind((host.as_str(), port))?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .service(
+                web::resource("/ast")
+                    .guard(guard::Header("content-type", "application/json"))
+                    .app_data(web::Json::<AstPayload>::configure(|cfg| {
+                        cfg.limit(max_size)
+                    }))
+                    .route(web::post().to(ast_parser)),
+            )
+            .service(
+                web::resource("/comment")
+                    .guard(guard::Header("content-type", "application/json"))
+                    .app_data(web::Json::<WebCommentPayload>::configure(|cfg| {
+                        cfg.limit(max_size)
+                    }))
+                    .route(web::post().to(comment_removal_json)),
+            )
+            .service(
+                web::resource("/comment")
+                    .guard(guard::Header("content-type", "application/octet-stream"))
+                    .data(web::PayloadConfig::default().limit(max_size))
+                    .route(web::post().to(comment_removal_plain)),
+            )
+            .service(
+                web::resource("/metrics")
+                    .guard(guard::Header("content-type", "application/json"))
+                    .app_data(web::Json::<WebMetricsPayload>::configure(|cfg| {
+                        cfg.limit(max_size)
+                    }))
+                    .route(web::post().to(metrics_json)),
+            )
+            .service(
+                web::resource("/metrics")
+                    .guard(guard::Header("content-type", "application/octet-stream"))
+                    .data(web::PayloadConfig::default().limit(max_size))
+                    .route(web::post().to(metrics_plain)),
+            )
+            .service(
+                web::resource("/function")
+                    .guard(guard::Header("content-type", "application/json"))
+                    .app_data(web::Json::<WebFunctionPayload>::configure(|cfg| {
+                        cfg.limit(max_size)
+                    }))
+                    .route(web::post().to(function_json)),
+            )
+            .service(
+                web::resource("/function")
+                    .guard(guard::Header("content-type", "application/octet-stream"))
+                    .data(web::PayloadConfig::default().limit(max_size))
+                    .route(web::post().to(function_plain)),
+            )
+            .service(web::resource("/ping").route(web::get().to(ping)))
     })
+    .workers(n_threads)
+    .bind((host.as_str(), port))?
+    .run()
+    .await
 }
 
 // curl --header "Content-Type: application/json" --request POST --data '{"id": "1234", "file_name": "prova.cpp", "code": "int x = 1;", "comment": true, "span": true}' http://127.0.0.1:8081/ast
