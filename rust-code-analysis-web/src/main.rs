@@ -9,7 +9,8 @@ use clap::{crate_version, App, Arg};
 
 use web::server;
 
-fn main() {
+#[actix_web::main]
+async fn main() {
     let matches = App::new("rust-code-analysis-web")
         .version(crate_version!())
         .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
@@ -51,7 +52,7 @@ fn main() {
         eprintln!("Invalid port number");
         return;
     };
-    if let Err(e) = server::run(host.to_string(), port, num_jobs) {
+    if let Err(e) = server::run(host.to_string(), port, num_jobs).await {
         eprintln!("Cannot run the server at {}:{}: {}", host, port, e);
     }
 }
