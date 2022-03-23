@@ -509,4 +509,16 @@ impl Getter for CppCode {
 
 impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
-impl Getter for JavaCode {}
+impl Getter for JavaCode {
+    fn get_space_kind(node: &Node) -> SpaceKind {
+        use Java::*;
+
+        let typ = node.object().kind_id();
+        match typ.into() {
+            InterfaceDeclaration | ClassDeclaration => SpaceKind::Class,
+            MethodDeclaration | LambdaExpression => SpaceKind::Function,
+            Program => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
+        }
+    }
+}
