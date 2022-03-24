@@ -288,6 +288,7 @@ impl Checker for TypescriptCode {
         MethodDefinition,
         GeneratorFunctionDeclaration,
         ClassDeclaration,
+        InterfaceDeclaration,
         ArrowFunction
     );
 
@@ -325,6 +326,7 @@ impl Checker for TsxCode {
         GeneratorFunction,
         GeneratorFunctionDeclaration,
         ClassDeclaration,
+        InterfaceDeclaration,
         ArrowFunction
     );
 
