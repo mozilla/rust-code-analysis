@@ -209,7 +209,12 @@ impl Checker for JavaCode {
     mk_checker!(is_call, MethodInvocation);
     mk_checker!(is_func, MethodDeclaration);
     mk_checker!(is_closure,);
-    mk_checker!(is_func_space, Program, ClassDeclaration);
+    mk_checker!(
+        is_func_space,
+        Program,
+        ClassDeclaration,
+        InterfaceDeclaration
+    );
     mk_checker!(is_non_arg,);
 }
 
