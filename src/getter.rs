@@ -503,9 +503,18 @@ impl Getter for JavaCode {
         }
     }
 
+    // fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+    //     if let Some(name) = node.object().child_by_field_name("name") {
+    //         let code = &code[name.start_byte()..name.end_byte()];
+    //         std::str::from_utf8(code).ok()
+    //     } else {
+    //         Some("<anonymous>")
+    //     }
+    // }
+
     fn get_op_type(node: &Node) -> HalsteadType {
         use Java::*;
-        // Some guides that informed grammar choice for Halstead
+
         // keywords, operators, literals: https://docs.oracle.com/javase/specs/jls/se18/html/jls-3.html#jls-3.12
         // https://www.geeksforgeeks.org/software-engineering-halsteads-software-metrics/?msclkid=5e181114abef11ecbb03527e95a34828
         match node.kind_id().into() {
@@ -514,7 +523,7 @@ impl Getter for JavaCode {
             // Operator: control flow
             | If | Else | Switch | Case | Try | Catch | Throw | Throws | Throws2 | For | While | Continue | Break | Do | Finally
             // Operator: keywords
-            | New | Return | Default | Abstract | Assert | Instanceof | Extends | Final | Implements | Transient | Synchronized | Super | This | VoidType
+            | New | Return | Default | Abstract | Assert | Instanceof | Extends | Final | Implements | Transient | Synchronized | Super | This
             // Operator: brackets and comma and terminators (separators)
             | SEMI | COMMA | COLONCOLON | LBRACE | LBRACK | LPAREN | RBRACE | RBRACK | RPAREN | DOTDOTDOT | DOT
             // Operator: operators
@@ -522,19 +531,10 @@ impl Getter for JavaCode {
             | EQEQ | LTEQ | GTEQ | BANGEQ | AMPAMP | PIPEPIPE | PLUSPLUS | DASHDASH
             | PLUS | DASH | STAR | SLASH | AMP | PIPE | CARET | PERCENT| LTLT | GTGT | GTGTGT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | AMPEQ | PIPEEQ | CARETEQ | PERCENTEQ | LTLTEQ | GTGTEQ | GTGTGTEQ
-            // type identifier
-            | TypeIdentifier | IntegralType | FloatingPointType | BooleanType
-            => {
-                HalsteadType::Operator
-            },
-            // Operands: variables, constants, literals
-            Identifier | NullLiteral | ClassLiteral | StringLiteral | CharacterLiteral | HexIntegerLiteral | OctalIntegerLiteral
-            | BinaryIntegerLiteral | DecimalIntegerLiteral | HexFloatingPointLiteral | DecimalFloatingPointLiteral  => {
-                HalsteadType::Operand
-            },
-            _ => {
-                HalsteadType::Unknown
-            },
+            => HalsteadType::Operator,
+            // variables, constants
+            Identifier | Literal  => HalsteadType::Operand,
+            _ => HalsteadType::Unknown,
         }
     }
 
