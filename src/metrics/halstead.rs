@@ -325,9 +325,14 @@ impl Halstead for CppCode {
     }
 }
 
+impl Halstead for JavaCode {
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>) {
+        compute_halstead::<Self>(node, code, halstead_maps);
+    }
+}
+
 impl Halstead for PreprocCode {}
 impl Halstead for CcommentCode {}
-impl Halstead for JavaCode {}
 
 #[cfg(test)]
 mod tests {
@@ -518,6 +523,27 @@ mod tests {
                 (level, 1.0),
                 (time, 0.264_160_416_786_859_36),
                 (bugs, 0.000_942_552_557_372_941_4)
+            ]
+        );
+    }
+
+    #[test]
+    fn java_operators_and_operands() {
+        check_metrics!(
+            "public static void main(String args[]) {
+              int a, b, c, avg;
+              a = 5; b = 5; c = 5;
+              avg = (a + b + c) / 3;
+              MessageFormat.format(\"{0}\", avg);
+            }",
+            "foo.java",
+            JavaParser,
+            halstead,
+            [
+                (u_operators, 10, usize), // function, (), {}, var, =, +, /, ,, ., ;
+                                          // (operators, 24, usize),
+                                          // (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
+                                          // (operands, 21, usize)
             ]
         );
     }

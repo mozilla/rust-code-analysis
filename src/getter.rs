@@ -524,4 +524,59 @@ impl Getter for JavaCode {
             _ => SpaceKind::Unknown,
         }
     }
+
+    // fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
+    //     if let Some(name) = node.object().child_by_field_name("name") {
+    //         let code = &code[name.start_byte()..name.end_byte()];
+    //         std::str::from_utf8(code).ok()
+    //     } else {
+    //         Some("<anonymous>")
+    //     }
+    // }
+
+    fn get_op_type(node: &Node) -> HalsteadType {
+        use Java::*;
+
+        // keywords, operators, literals: https://docs.oracle.com/javase/specs/jls/se18/html/jls-3.html#jls-3.12
+        // https://www.geeksforgeeks.org/software-engineering-halsteads-software-metrics/?msclkid=5e181114abef11ecbb03527e95a34828
+        //
+        // comments not considered
+        // Operator: function calls?
+        // Operator: control flow
+        // Operator: keywords
+        // Operator: brackets and comma and terminators
+        // Operator: operators
+        // Operator: InstanceOf
+        // Operator: .
+        // Operand: struct name
+        // Operand: vars and const
+
+        let typ = node.object().kind_id();
+        match typ.into() {
+            // LPAREN | COMMA | STAR | GTGT | COLON | SEMI | Return | Break | Continue | If | Else
+            // | Switch | Case | Default | For | While | New | Try | Catch | Throw | Throws
+            // | Throws2 | EQ | EQEQ | AMP | AMPAMP | AMPEQ | LT | LTLT | LTEQ | LTLTEQ | BANGEQ
+            // | GTEQ | GTGTEQ | GTGTGT | GTGTGTEQ | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ
+            // | CARET | CARETEQ | LBRACE | RBRACE | QMARK | Instanceof 
+            // Operator: function calls?
+            MethodInvocation
+            // Operator: control flow
+            | If | Else | Switch | Case | Try | Catch | Throw | Throws | Throws2 | For | While | Continue | Break | Do | Finally
+            // Operator: keywords
+            | New | Return | Default | Abstract | Assert | Instanceof | Extends | Final | Implements | Transient | Synchronized | Super | This
+            // Operator: brackets and comma and terminators (separators)
+            | SEMI | COMMA | COLONCOLON | LBRACE | LBRACK | LPAREN | RBRACE | RBRACK | RPAREN | DOTDOTDOT | DOT
+            // Operator: operators
+            | EQ | LT | GT | BANG | TILDE | QMARK | COLON // no grammar for lambda operator ->
+            | EQEQ | LTEQ | GTEQ | BANGEQ | AMPAMP | PIPEPIPE | PLUSPLUS | DASHDASH
+            | PLUS | DASH | STAR | SLASH | AMP | PIPE | CARET | PERCENT| LTLT | GTGT | GTGTGT
+            | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | AMPEQ | PIPEEQ | CARETEQ | PERCENTEQ | LTLTEQ | GTGTEQ | GTGTGTEQ
+            => HalsteadType::Operator,
+            // variables, constants
+            Identifier | Literal  => HalsteadType::Operand,
+            _ => HalsteadType::Unknown,
+        }
+    }
+
+    get_operator!(Java);
 }
