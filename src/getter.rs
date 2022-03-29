@@ -251,6 +251,7 @@ impl Getter for TypescriptCode {
             | GeneratorFunctionDeclaration
             | ArrowFunction => SpaceKind::Function,
             Class | ClassDeclaration => SpaceKind::Class,
+            InterfaceDeclaration => SpaceKind::Interface,
             Program => SpaceKind::Unit,
             _ => SpaceKind::Unknown,
         }
@@ -321,6 +322,7 @@ impl Getter for TsxCode {
             | GeneratorFunctionDeclaration
             | ArrowFunction => SpaceKind::Function,
             Class | ClassDeclaration => SpaceKind::Class,
+            InterfaceDeclaration => SpaceKind::Interface,
             Program => SpaceKind::Unit,
             _ => SpaceKind::Unknown,
         }
@@ -515,8 +517,9 @@ impl Getter for JavaCode {
 
         let typ = node.object().kind_id();
         match typ.into() {
-            InterfaceDeclaration | ClassDeclaration => SpaceKind::Class,
+            ClassDeclaration => SpaceKind::Class,
             MethodDeclaration | LambdaExpression => SpaceKind::Function,
+            InterfaceDeclaration => SpaceKind::Interface,
             Program => SpaceKind::Unit,
             _ => SpaceKind::Unknown,
         }

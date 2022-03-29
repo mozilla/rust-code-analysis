@@ -38,6 +38,8 @@ pub enum SpaceKind {
     Unit,
     /// A `C/C++` namespace
     Namespace,
+    /// An interface
+    Interface,
 }
 
 impl fmt::Display for SpaceKind {
@@ -51,6 +53,7 @@ impl fmt::Display for SpaceKind {
             SpaceKind::Impl => "impl",
             SpaceKind::Unit => "unit",
             SpaceKind::Namespace => "namespace",
+            SpaceKind::Interface => "interface",
         };
         write!(f, "{}", s)
     }
