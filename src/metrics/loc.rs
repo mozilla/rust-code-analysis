@@ -820,12 +820,15 @@ impl Loc for JavaCode {
         // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/expressions.html
         match kind_id {
             Program => {}
-            Comment => {
+            LineComment => {
+                add_cloc_lines(stats, start, end);
+            }
+            BlockComment => {
                 add_cloc_lines(stats, start, end);
             }
             AssertStatement | BreakStatement | ContinueStatement | DoStatement
             | EnhancedForStatement | ExpressionStatement | ForStatement | IfStatement
-            | ReturnStatement | SwitchStatement | ThrowStatement | TryStatement
+            | ReturnStatement | SwitchExpression | ThrowStatement | TryStatement
             | WhileStatement => {
                 stats.lloc.logical_lines += 1;
             }

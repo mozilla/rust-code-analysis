@@ -204,7 +204,7 @@ impl Checker for PythonCode {
 }
 
 impl Checker for JavaCode {
-    mk_checker!(is_comment, Comment);
+    mk_checker!(is_comment, LineComment, BlockComment);
     mk_checker!(is_string, StringLiteral);
     mk_checker!(is_call, MethodInvocation);
     mk_checker!(is_func, MethodDeclaration);
