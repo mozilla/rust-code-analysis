@@ -730,7 +730,6 @@ impl Loc for RustCode {
             }
             Statement
             | EmptyStatement
-            | ExpressionStatement
             | LetDeclaration
             | AssignmentExpression
             | CompoundAssignmentExpr

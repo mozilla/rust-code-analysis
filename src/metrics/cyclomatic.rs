@@ -185,6 +185,7 @@ impl Cyclomatic for RustCode {
 
         match node.object().kind_id().into() {
             If | For | While | Loop | MatchArm | MatchArm2 | QMARK | AMPAMP | PIPEPIPE => {
+                println!("Found the if case at position: {} {}", node.object().start_position(), node.object().end_position());
                 stats.cyclomatic += 1.;
             }
             _ => {}
