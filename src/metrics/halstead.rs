@@ -540,10 +540,10 @@ mod tests {
             JavaParser,
             halstead,
             [
-                (u_operators, 10, usize), // function, (), {}, var, =, +, /, ,, ., ;
-                                          // (operators, 24, usize),
-                                          // (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
-                                          // (operands, 21, usize)
+                (u_operators, 16, usize), // void ; ( String [ ] ) { , int = + / format . }
+                (operators, 33, usize),
+                (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, MessageFormat.format, format, "{}"
+                (operands, 21, usize)
             ]
         );
     }

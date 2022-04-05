@@ -552,6 +552,7 @@ impl Getter for JavaCode {
         // Operand: vars and const
 
         let typ = node.object().kind_id();
+
         match typ.into() {
             // LPAREN | COMMA | STAR | GTGT | COLON | SEMI | Return | Break | Continue | If | Else
             // | Switch | Case | Default | For | While | New | Try | Catch | Throw | Throws
@@ -563,7 +564,7 @@ impl Getter for JavaCode {
             // Operator: control flow
             | If | Else | Switch | Case | Try | Catch | Throw | Throws | Throws2 | For | While | Continue | Break | Do | Finally
             // Operator: keywords
-            | New | Return | Default | Abstract | Assert | Instanceof | Extends | Final | Implements | Transient | Synchronized | Super | This
+            | New | Return | Default | Abstract | Assert | Instanceof | Extends | Final | Implements | Transient | Synchronized | Super | This | VoidType
             // Operator: brackets and comma and terminators (separators)
             | SEMI | COMMA | COLONCOLON | LBRACE | LBRACK | LPAREN | RBRACE | RBRACK | RPAREN | DOTDOTDOT | DOT
             // Operator: operators
@@ -571,10 +572,24 @@ impl Getter for JavaCode {
             | EQEQ | LTEQ | GTEQ | BANGEQ | AMPAMP | PIPEPIPE | PLUSPLUS | DASHDASH
             | PLUS | DASH | STAR | SLASH | AMP | PIPE | CARET | PERCENT| LTLT | GTGT | GTGTGT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | AMPEQ | PIPEEQ | CARETEQ | PERCENTEQ | LTLTEQ | GTGTEQ | GTGTGTEQ
-            => HalsteadType::Operator,
+            // type identifier
+            | TypeIdentifier 
+            // Literals
+            | IntegralType | FloatingPointType | BooleanType | NullLiteral
+            => {
+                println!("operator: {}", node.object().kind().to_string());
+                HalsteadType::Operator
+            },
+
             // variables, constants
-            Identifier | Literal  => HalsteadType::Operand,
-            _ => HalsteadType::Unknown,
+            Identifier | Literal  => {
+                println!("operand: {} ", node.object().kind().to_string());
+                HalsteadType::Operand
+            },
+            _ => {
+                println!("unknown: {} ", node.object().kind().to_string());
+                HalsteadType::Unknown
+            },
         }
     }
 
