@@ -530,20 +530,22 @@ mod tests {
     #[test]
     fn java_operators_and_operands() {
         check_metrics!(
-            "public static void main(String args[]) {
-              int a, b, c, avg;
-              a = 5; b = 5; c = 5;
-              avg = (a + b + c) / 3;
-              MessageFormat.format(\"{0}\", avg);
+            "public class Main {
+            public static void main(String args[]) {
+                  int a, b, c, avg;
+                  a = 5; b = 5; c = 5;
+                  avg = (a + b + c) / 3;
+                  MessageFormat.format(\"{0}\", avg);
+                }
             }",
             "foo.java",
             JavaParser,
             halstead,
             [
-                (u_operators, 16, usize), // void ; ( String [ ] ) { , int = + / format . }
-                (operators, 33, usize),
-                (u_operands, 11, usize), // main args a b c avg 5 3 MessageFormat format "{0}"
-                (operands, 21, usize)
+                (u_operators, 16, usize), // { void ; ( String [ ] ) , int = + / format . }
+                (operators, 34, usize),
+                (u_operands, 12, usize), // Main main args a b c avg 5 3 MessageFormat format "{0}"
+                (operands, 22, usize)
             ]
         );
     }
