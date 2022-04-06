@@ -542,7 +542,7 @@ mod tests {
             [
                 (u_operators, 16, usize), // void ; ( String [ ] ) { , int = + / format . }
                 (operators, 33, usize),
-                (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, MessageFormat.format, format, "{}"
+                (u_operands, 11, usize), // main args a b c avg 5 3 MessageFormat format "{0}"
                 (operands, 21, usize)
             ]
         );

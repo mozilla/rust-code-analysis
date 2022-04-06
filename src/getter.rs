@@ -559,7 +559,7 @@ impl Getter for JavaCode {
             // | Throws2 | EQ | EQEQ | AMP | AMPAMP | AMPEQ | LT | LTLT | LTEQ | LTLTEQ | BANGEQ
             // | GTEQ | GTGTEQ | GTGTGT | GTGTGTEQ | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ
             // | CARET | CARETEQ | LBRACE | RBRACE | QMARK | Instanceof 
-            // Operator: function calls?
+            // Operator: function calls
             MethodInvocation
             // Operator: control flow
             | If | Else | Switch | Case | Try | Catch | Throw | Throws | Throws2 | For | While | Continue | Break | Do | Finally
@@ -573,16 +573,14 @@ impl Getter for JavaCode {
             | PLUS | DASH | STAR | SLASH | AMP | PIPE | CARET | PERCENT| LTLT | GTGT | GTGTGT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | AMPEQ | PIPEEQ | CARETEQ | PERCENTEQ | LTLTEQ | GTGTEQ | GTGTGTEQ
             // type identifier
-            | TypeIdentifier 
-            // Literals
-            | IntegralType | FloatingPointType | BooleanType | NullLiteral
+            | TypeIdentifier | IntegralType | FloatingPointType | BooleanType
             => {
                 println!("operator: {}", node.object().kind().to_string());
                 HalsteadType::Operator
             },
 
-            // variables, constants
-            Identifier | Literal  => {
+            // Operands: variables, constants, literals
+            Identifier | NullLiteral | ClassLiteral | StringLiteral | CharacterLiteral | HexIntegerLiteral | OctalIntegerLiteral | BinaryIntegerLiteral | DecimalIntegerLiteral | HexFloatingPointLiteral | DecimalFloatingPointLiteral  => {
                 println!("operand: {} ", node.object().kind().to_string());
                 HalsteadType::Operand
             },
