@@ -525,15 +525,6 @@ impl Getter for JavaCode {
         }
     }
 
-    // fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-    //     if let Some(name) = node.object().child_by_field_name("name") {
-    //         let code = &code[name.start_byte()..name.end_byte()];
-    //         std::str::from_utf8(code).ok()
-    //     } else {
-    //         Some("<anonymous>")
-    //     }
-    // }
-
     fn get_op_type(node: &Node) -> HalsteadType {
         use Java::*;
 
@@ -554,11 +545,6 @@ impl Getter for JavaCode {
         let typ = node.object().kind_id();
 
         match typ.into() {
-            // LPAREN | COMMA | STAR | GTGT | COLON | SEMI | Return | Break | Continue | If | Else
-            // | Switch | Case | Default | For | While | New | Try | Catch | Throw | Throws
-            // | Throws2 | EQ | EQEQ | AMP | AMPAMP | AMPEQ | LT | LTLT | LTEQ | LTLTEQ | BANGEQ
-            // | GTEQ | GTGTEQ | GTGTGT | GTGTGTEQ | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ
-            // | CARET | CARETEQ | LBRACE | RBRACE | QMARK | Instanceof 
             // Operator: function calls
             MethodInvocation
             // Operator: control flow
@@ -575,17 +561,17 @@ impl Getter for JavaCode {
             // type identifier
             | TypeIdentifier | IntegralType | FloatingPointType | BooleanType
             => {
-                println!("operator: {}", node.object().kind().to_string());
+                println!("operator: {}", node.object().kind());
                 HalsteadType::Operator
             },
 
             // Operands: variables, constants, literals
             Identifier | NullLiteral | ClassLiteral | StringLiteral | CharacterLiteral | HexIntegerLiteral | OctalIntegerLiteral | BinaryIntegerLiteral | DecimalIntegerLiteral | HexFloatingPointLiteral | DecimalFloatingPointLiteral  => {
-                println!("operand: {} ", node.object().kind().to_string());
+                println!("operand: {} ", node.object().kind());
                 HalsteadType::Operand
             },
             _ => {
-                println!("unknown: {} ", node.object().kind().to_string());
+                println!("unknown: {} ", node.object().kind());
                 HalsteadType::Unknown
             },
         }
