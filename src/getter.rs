@@ -527,21 +527,9 @@ impl Getter for JavaCode {
 
     fn get_op_type(node: &Node) -> HalsteadType {
         use Java::*;
-
+        // Some guides that informed grammar choice for Halstead
         // keywords, operators, literals: https://docs.oracle.com/javase/specs/jls/se18/html/jls-3.html#jls-3.12
         // https://www.geeksforgeeks.org/software-engineering-halsteads-software-metrics/?msclkid=5e181114abef11ecbb03527e95a34828
-        //
-        // comments not considered
-        // Operator: function calls?
-        // Operator: control flow
-        // Operator: keywords
-        // Operator: brackets and comma and terminators
-        // Operator: operators
-        // Operator: InstanceOf
-        // Operator: .
-        // Operand: struct name
-        // Operand: vars and const
-
         let typ = node.object().kind_id();
 
         match typ.into() {
@@ -561,17 +549,13 @@ impl Getter for JavaCode {
             // type identifier
             | TypeIdentifier | IntegralType | FloatingPointType | BooleanType
             => {
-                println!("operator: {}", node.object().kind());
                 HalsteadType::Operator
             },
-
             // Operands: variables, constants, literals
             Identifier | NullLiteral | ClassLiteral | StringLiteral | CharacterLiteral | HexIntegerLiteral | OctalIntegerLiteral | BinaryIntegerLiteral | DecimalIntegerLiteral | HexFloatingPointLiteral | DecimalFloatingPointLiteral  => {
-                println!("operand: {} ", node.object().kind());
                 HalsteadType::Operand
             },
             _ => {
-                println!("unknown: {} ", node.object().kind());
                 HalsteadType::Unknown
             },
         }
