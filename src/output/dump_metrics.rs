@@ -9,8 +9,9 @@ use crate::loc;
 use crate::mi;
 use crate::nargs;
 use crate::nom;
+use crate::wmc;
 
-use crate::spaces::{CodeMetrics, FuncSpace};
+use crate::spaces::{CodeMetrics, FuncSpace, SpaceKind};
 
 /// Dumps the metrics of a code.
 ///
@@ -104,7 +105,8 @@ fn dump_metrics(
     dump_halstead(&metrics.halstead, &prefix, false, stdout)?;
     dump_loc(&metrics.loc, &prefix, false, stdout)?;
     dump_nom(&metrics.nom, &prefix, false, stdout)?;
-    dump_mi(&metrics.mi, &prefix, true, stdout)
+    dump_mi(&metrics.mi, &prefix, false, stdout)?;
+    dump_wmc(&metrics.wmc, &prefix, true, stdout)
 }
 
 fn dump_cognitive(
@@ -291,6 +293,38 @@ fn dump_nexits(
 
     color!(stdout, White);
     writeln!(stdout, "{}", stats.exit())
+}
+
+fn dump_wmc(
+    stats: &wmc::Stats,
+    prefix: &str,
+    last: bool,
+    stdout: &mut StandardStreamLock,
+) -> std::io::Result<()> {
+    if !stats.is_not_class_or_unit() {
+        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
+
+        color!(stdout, Blue);
+        write!(stdout, "{}{}", prefix, pref)?;
+
+        color!(stdout, Green, true);
+        writeln!(stdout, "wmc")?;
+
+        let prefix = format!("{}{}", prefix, pref_child);
+        dump_value(
+            if stats.space_kind() == SpaceKind::Unit {
+                "wmc_total"
+            } else {
+                "wmc"
+            },
+            stats.wmc(),
+            &prefix,
+            true,
+            stdout,
+        )
+    } else {
+        Ok(())
+    }
 }
 
 fn dump_value(
