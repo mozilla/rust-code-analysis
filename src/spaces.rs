@@ -14,6 +14,7 @@ use crate::loc::{self, Loc};
 use crate::mi::{self, Mi};
 use crate::nargs::{self, NArgs};
 use crate::nom::{self, Nom};
+use crate::wmc::{self, Wmc};
 
 use crate::dump_metrics::*;
 use crate::traits::*;
@@ -77,6 +78,9 @@ pub struct CodeMetrics {
     pub nom: nom::Stats,
     /// `Mi` data
     pub mi: mi::Stats,
+    /// `Wmc` data
+    #[serde(skip_serializing_if = "wmc::Stats::is_not_class_or_unit")]
+    pub wmc: wmc::Stats,
 }
 
 impl fmt::Display for CodeMetrics {
@@ -213,6 +217,8 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
             let last_state = state_stack.last_mut().unwrap();
             last_state.halstead_maps.merge(&state.halstead_maps);
             compute_halstead_and_mi::<T>(last_state);
+
+            T::Wmc::compute(&state.space, &mut last_state.space);
 
             // Merge function spaces
             last_state.space.metrics.merge(&state.space.metrics);
