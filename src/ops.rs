@@ -262,8 +262,8 @@ mod tests {
         lang: LANG,
         source: &str,
         file: &str,
-        correct_operators: &mut Vec<&str>,
-        correct_operands: &mut Vec<&str>,
+        correct_operators: &mut [&str],
+        correct_operands: &mut [&str],
     ) {
         let path = PathBuf::from(file);
         let mut trimmed_bytes = source.trim_end().trim_matches('\n').as_bytes().to_vec();
@@ -293,8 +293,8 @@ mod tests {
             "if True:
                  a = 1 + 2",
             "foo.py",
-            &mut vec!["if", "=", "+"],
-            &mut vec!["True", "a", "1", "2"],
+            &mut ["if", "=", "+"],
+            &mut ["True", "a", "1", "2"],
         );
     }
 
@@ -309,8 +309,8 @@ mod tests {
                      b = 2 + a
                  c = 3 + 3",
             "foo.py",
-            &mut vec!["def", "=", "+"],
-            &mut vec!["foo", "bar", "toto", "a", "b", "c", "1", "2", "3"],
+            &mut ["def", "=", "+"],
+            &mut ["foo", "bar", "toto", "a", "b", "c", "1", "2", "3"],
         );
     }
 
@@ -322,8 +322,8 @@ mod tests {
              float avg;
              avg = (a + b + c) / 3;",
             "foo.c",
-            &mut vec!["int", "float", "()", "=", "+", "/", ",", ";"],
-            &mut vec!["a", "b", "c", "avg", "3"],
+            &mut ["int", "float", "()", "=", "+", "/", ",", ";"],
+            &mut ["a", "b", "c", "avg", "3"],
         );
     }
 
@@ -339,8 +339,8 @@ mod tests {
               printf(\"avg = %d\", avg);
             }",
             "foo.c",
-            &mut vec!["()", "{}", "int", "&", "=", "+", "/", ",", ";"],
-            &mut vec![
+            &mut ["()", "{}", "int", "&", "=", "+", "/", ",", ";"],
+            &mut [
                 "main",
                 "a",
                 "b",
@@ -362,8 +362,8 @@ mod tests {
             "let: usize a = 5; let b: f32 = 7.0; let c: i32 = 3;",
             "foo.rs",
             // FIXME tree-sitter-rust does not parse the comma inside the println! macro
-            &mut vec!["let", "usize", "=", ";", "f32", "i32"],
-            &mut vec!["a", "b", "c", "5", "7.0", "3"],
+            &mut ["let", "usize", "=", ";", "f32", "i32"],
+            &mut ["a", "b", "c", "5", "7.0", "3"],
         );
     }
 
@@ -378,8 +378,8 @@ mod tests {
             }",
             "foo.rs",
             // FIXME tree-sitter-rust does not parse the comma inside the println! macro
-            &mut vec!["fn", "()", "{}", "let", "=", "+", "/", ";", "!"],
-            &mut vec!["main", "a", "b", "c", "avg", "5", "3", "println", "\"{}\""],
+            &mut ["fn", "()", "{}", "let", "=", "+", "/", ";", "!"],
+            &mut ["main", "a", "b", "c", "avg", "5", "3", "println", "\"{}\""],
         );
     }
 
@@ -393,8 +393,8 @@ mod tests {
              avg = (a + b + c) / 3;
              console.log(\"{}\", avg);",
             "foo.js",
-            &mut vec!["()", "var", "let", "=", "+", "/", ",", ".", ";"],
-            &mut vec![
+            &mut ["()", "var", "let", "=", "+", "/", ",", ".", ";"],
+            &mut [
                 "a",
                 "b",
                 "c",
@@ -423,10 +423,10 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.js",
-            &mut vec![
+            &mut [
                 "function", "()", "{}", "var", "let", "=", "+", "/", ",", ".", ";",
             ],
-            &mut vec![
+            &mut [
                 "main",
                 "a",
                 "b",
@@ -454,8 +454,8 @@ mod tests {
              avg = (a + b + c) / 3;
              console.log(\"{}\", avg);",
             "foo.js",
-            &mut vec!["()", "var", "let", "=", "+", "/", ",", ".", ";"],
-            &mut vec![
+            &mut ["()", "var", "let", "=", "+", "/", ",", ".", ";"],
+            &mut [
                 "a",
                 "b",
                 "c",
@@ -484,10 +484,10 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.js",
-            &mut vec![
+            &mut [
                 "function", "()", "{}", "var", "let", "=", "+", "/", ",", ".", ";",
             ],
-            &mut vec![
+            &mut [
                 "main",
                 "a",
                 "b",
@@ -516,11 +516,11 @@ mod tests {
              avg = (a + b + c) / 3;
              console.log(\"{}\", avg);",
             "foo.ts",
-            &mut vec![
+            &mut [
                 "()", "var", "let", "string", "number", "boolean", ":", "=", "+", "/", ",", ".",
                 ";",
             ],
-            &mut vec![
+            &mut [
                 "a",
                 "b",
                 "c",
@@ -554,11 +554,11 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.ts",
-            &mut vec![
+            &mut [
                 "function", "()", "{}", "var", "let", "string", "number", "boolean", ":", "=", "+",
                 "/", ",", ".", ";",
             ],
-            &mut vec![
+            &mut [
                 "main",
                 "a",
                 "b",
@@ -591,11 +591,11 @@ mod tests {
              avg = (a + b + c) / 3;
              console.log(\"{}\", avg);",
             "foo.ts",
-            &mut vec![
+            &mut [
                 "()", "var", "let", "string", "number", "boolean", ":", "=", "+", "/", ",", ".",
                 ";",
             ],
-            &mut vec![
+            &mut [
                 "a",
                 "b",
                 "c",
@@ -629,11 +629,11 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.ts",
-            &mut vec![
+            &mut [
                 "function", "()", "{}", "var", "let", "string", "number", "boolean", ":", "=", "+",
                 "/", ",", ".", ";",
             ],
-            &mut vec![
+            &mut [
                 "main",
                 "a",
                 "b",
