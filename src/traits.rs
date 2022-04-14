@@ -17,6 +17,7 @@ use crate::node::Node;
 use crate::nom::Nom;
 use crate::parser::Filter;
 use crate::preproc::PreprocResults;
+use crate::wmc::Wmc;
 
 /// A trait for callback functions.
 ///
@@ -33,7 +34,10 @@ pub trait Callback {
 }
 
 #[doc(hidden)]
-pub trait CodeMetricsT: Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi {}
+pub trait CodeMetricsT:
+    Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi + Wmc
+{
+}
 
 #[doc(hidden)]
 pub trait TSLanguage {
@@ -56,6 +60,7 @@ pub trait ParserTrait {
     type Mi: Mi;
     type NArgs: NArgs;
     type Exit: Exit;
+    type Wmc: Wmc;
 
     fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self;
     fn get_language(&self) -> LANG;
