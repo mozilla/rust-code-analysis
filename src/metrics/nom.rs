@@ -621,4 +621,76 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn java_nom() {
+        check_metrics!(
+            "class A {
+                public void foo(){
+                    return;
+                }
+                public void bar(){
+                    return;
+                }  
+            }",
+            "foo.java",
+            JavaParser,
+            nom,
+            [
+                (functions_sum, 2, usize),
+                (closures_sum, 0, usize),
+                (total, 2, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_max, 0, usize),
+                (closures_min, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 4
+                (closures_average, 0.0),
+                (average, 0.5)
+            ]
+        );
+    }
+
+    #[test]
+    fn java_closure_nom() {
+        check_metrics!(
+            "interface printable{  
+                void print();  
+              }
+              
+              interface IntFunc {
+                int func(int n);
+              }
+              
+              class Printer implements printable{  
+                public void print(){System.out.println(\"Hello\");}
+                  
+                public static void main(String args[]){  
+                  Printer  obj = new Printer();  
+                  obj.print();
+                  IntFunc meaning = (i) -> i + 42;
+                  int i = meaning.func(1);
+                }
+              }",
+            "foo.java",
+            JavaParser,
+            nom,
+            [
+                (functions_sum, 4, usize),
+                (closures_sum, 1, usize),
+                (total, 5, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_max, 1, usize),
+                (closures_min, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 8
+                (closures_average, 0.125),
+                (average, 0.625)
+            ]
+        );
+    }
 }
