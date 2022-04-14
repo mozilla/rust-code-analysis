@@ -123,6 +123,7 @@ impl Stats {
     /// Returns the average number of function definitions over all spaces
     #[inline(always)]
     pub fn functions_average(&self) -> f64 {
+        println!("SPACE {}", self.space_count);
         self.functions_sum() / self.space_count as f64
     }
 
@@ -624,6 +625,37 @@ mod tests {
 
     #[test]
     fn java_nom() {
+        check_metrics!(
+            "class A {
+                public void foo(){
+                    return;
+                }
+                public void bar(){
+                    return;
+                }  
+            }",
+            "foo.java",
+            JavaParser,
+            nom,
+            [
+                (functions_sum, 2, usize),
+                (closures_sum, 0, usize),
+                (total, 2, usize),
+                (functions_max, 1, usize),
+                (functions_min, 0, usize),
+                (closures_max, 0, usize),
+                (closures_min, 0, usize),
+            ],
+            [
+                (functions_average, 0.5), // number of spaces = 4
+                (closures_average, 0.0),
+                (average, 0.5)
+            ]
+        );
+    }
+
+    #[test]
+    fn java_closure_nom() {
         check_metrics!(
             "interface printable{  
                 void print();  
