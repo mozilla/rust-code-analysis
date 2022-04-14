@@ -518,7 +518,7 @@ impl Getter for JavaCode {
         let typ = node.object().kind_id();
         match typ.into() {
             ClassDeclaration => SpaceKind::Class,
-            MethodDeclaration | LambdaExpression => SpaceKind::Function,
+            MethodDeclaration | ConstructorDeclaration | LambdaExpression => SpaceKind::Function,
             InterfaceDeclaration => SpaceKind::Interface,
             Program => SpaceKind::Unit,
             _ => SpaceKind::Unknown,

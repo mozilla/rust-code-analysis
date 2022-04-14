@@ -207,7 +207,7 @@ impl Checker for JavaCode {
     mk_checker!(is_comment, Comment);
     mk_checker!(is_string, StringLiteral);
     mk_checker!(is_call, MethodInvocation);
-    mk_checker!(is_func, MethodDeclaration);
+    mk_checker!(is_func, MethodDeclaration, ConstructorDeclaration);
     mk_checker!(is_closure, LambdaExpression);
     mk_checker!(
         is_func_space,
