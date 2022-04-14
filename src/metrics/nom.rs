@@ -123,7 +123,6 @@ impl Stats {
     /// Returns the average number of function definitions over all spaces
     #[inline(always)]
     pub fn functions_average(&self) -> f64 {
-        println!("SPACE {}", self.space_count);
         self.functions_sum() / self.space_count as f64
     }
 
