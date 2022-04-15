@@ -175,7 +175,6 @@ impl Exit for CppCode {
 impl Exit for JavaCode {
     fn compute(node: &Node, stats: &mut Stats) {
         if matches!(node.object().kind_id().into(), Java::ReturnStatement) {
-            println!("{}", node.object().kind());
             stats.exit += 1;
         }
     }
@@ -333,8 +332,10 @@ mod tests {
     #[test]
     fn java_simple_function() {
         check_metrics!(
-            "public int sum(int x, int y) {
+            "class A {
+              public int sum(int x, int y) {
                 return x + y;
+              }
             }",
             "foo.java",
             JavaParser,
@@ -344,18 +345,20 @@ mod tests {
                 (exit_min, 0, usize),
                 (exit_max, 1, usize)
             ],
-            [(exit_average, f64::NAN)] // 1 function
+            [(exit_average, 1.0)] // 1 exit / 1 space
         );
     }
 
     #[test]
     fn java_split_function() {
         check_metrics!(
-            "public int multiply(int x, int y) {
+            "class A {
+              public int multiply(int x, int y) {
                 if(x == 0 || y == 0){
                     return 0;
                 }
                 return x * y;
+              }
             }",
             "foo.java",
             JavaParser,
@@ -363,9 +366,9 @@ mod tests {
             [
                 (exit_sum, 2, usize),
                 (exit_min, 0, usize),
-                (exit_max, 1, usize)
+                (exit_max, 2, usize)
             ],
-            [(exit_average, 1.0)] // 1 function
+            [(exit_average, 2.0)] // 2 exit / space 1
         );
     }
 }
