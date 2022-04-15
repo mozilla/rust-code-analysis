@@ -478,9 +478,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "3.0.10"
+version = "3.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a30c3bf9ff12dfe5dae53f0a96e0febcd18420d1c0e7fad77796d9d5c4b5375"
+checksum = "71c47df61d9e16dc010b55dba1952a57d8c215dbb533fd13cdd13369aac73b1c"
 dependencies = [
  "atty",
  "bitflags",
@@ -1584,7 +1584,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termcolor",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-javascript",
@@ -1902,9 +1902,9 @@ dependencies = [
 
 [[package]]
 name = "textwrap"
-version = "0.14.2"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0066c8d12af8b5acd21e00547c3797fde4e8677254a7ee429176ccebbe93dd80"
+checksum = "b1141d4d61095b28419e22cb0bbf02755f5e54e0526f97f1e3d1d160e60885fb"
 
 [[package]]
 name = "thiserror"
@@ -2141,7 +2141,7 @@ name = "tree-sitter-mozcpp"
 version = "0.20.1"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-cpp",
 ]
 
@@ -2189,7 +2189,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8935efd97c92067c9b2b6d7acb647607590996ba80f3a7be09a197f9c1fdab73"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
 ]
 
 [[package]]
