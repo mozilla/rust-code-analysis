@@ -172,9 +172,16 @@ impl Exit for CppCode {
     }
 }
 
+impl Exit for JavaCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        if matches!(node.object().kind_id().into(), Java::ReturnStatement) {
+            stats.exit += 1;
+        }
+    }
+}
+
 impl Exit for PreprocCode {}
 impl Exit for CcommentCode {}
-impl Exit for JavaCode {}
 
 #[cfg(test)]
 mod tests {
@@ -303,6 +310,65 @@ mod tests {
                 (exit_max, 1, usize)
             ],
             [(exit_average, 0.5)] // 2 functions + 2 lambdas = 4
+        );
+    }
+
+    #[test]
+    fn java_no_exit() {
+        check_metrics!(
+            "int a = 42;",
+            "foo.java",
+            JavaParser,
+            nexits,
+            [
+                (exit_sum, 0, usize),
+                (exit_min, 0, usize),
+                (exit_max, 0, usize)
+            ],
+            [(exit_average, f64::NAN)] // 0 functions
+        );
+    }
+
+    #[test]
+    fn java_simple_function() {
+        check_metrics!(
+            "class A {
+              public int sum(int x, int y) {
+                return x + y;
+              }
+            }",
+            "foo.java",
+            JavaParser,
+            nexits,
+            [
+                (exit_sum, 1, usize),
+                (exit_min, 0, usize),
+                (exit_max, 1, usize)
+            ],
+            [(exit_average, 1.0)] // 1 exit / 1 space
+        );
+    }
+
+    #[test]
+    fn java_split_function() {
+        check_metrics!(
+            "class A {
+              public int multiply(int x, int y) {
+                if(x == 0 || y == 0){
+                    return 0;
+                }
+                return x * y;
+              }
+            }",
+            "foo.java",
+            JavaParser,
+            nexits,
+            [
+                (exit_sum, 2, usize),
+                (exit_min, 0, usize),
+                (exit_max, 2, usize)
+            ],
+            [(exit_average, 2.0)] // 2 exit / space 1
         );
     }
 }
