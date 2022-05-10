@@ -96,24 +96,25 @@ tasks:
         workerType: ci
         payload:
           maxRunTime: 3600
-          image: "rustlang/rust:nightly"
+          image: "rust:buster"
           env:
             CODECOV_TOKEN: 4df01912-087e-489a-be28-25aa911cb9d2
             CARGO_INCREMENTAL: 0
-            RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort
-            RUSTDOCFLAGS: -Cpanic=abort
+            RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off
+            RUSTDOCFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off
+            LLVM_PROFILE_FILE: rust-code-analysis-%p-%m.profraw
           command:
             - "/bin/bash"
             - "-cx"
             - "apt-get -qq update &&
                apt-get -qq install -y zip &&
                curl -L https://github.com/mozilla/grcov/releases/download/v0.8.6/grcov-v0.8.6-x86_64-unknown-linux-gnu.tar.gz | tar xz &&
+               rustup component add llvm-tools-preview &&
                git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
-               cargo test --workspace --verbose --all-features &&
-               zip -0 ccov.zip `find . -name 'rust_code_analysis*.gc*' -print` &&
-               ../grcov ccov.zip -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
+               cargo test --workspace --verbose --all-features --target x86_64-unknown-linux-gnu &&
+               ../grcov . --binary-path ./target/ -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
                bash <(curl -s https://codecov.io/bash) -f lcov.info"
         metadata:
           name: rust-code-analysis grcov test
