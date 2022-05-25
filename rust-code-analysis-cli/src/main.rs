@@ -1,6 +1,6 @@
 mod formats;
 
-use clap::{crate_version, App, Arg};
+use clap::{crate_version, Arg, Command};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use std::collections::{hash_map, HashMap};
 use std::fmt;
@@ -181,7 +181,7 @@ where
 }
 
 fn main() {
-    let matches = App::new("rust-code-analysis-cli")
+    let matches = Command::new("rust-code-analysis-cli")
         .version(crate_version!())
         .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
         .about("Analyze source code")
