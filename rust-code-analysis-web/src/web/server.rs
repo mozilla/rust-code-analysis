@@ -219,7 +219,7 @@ fn ping() -> HttpResponse {
     HttpResponse::Ok().body(Body::Empty)
 }
 
-pub async fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
+pub async fn run(host: &str, port: u16, n_threads: usize) -> std::io::Result<()> {
     let max_size = 1024 * 1024 * 4;
 
     HttpServer::new(move || {
@@ -277,7 +277,7 @@ pub async fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<(
             .service(web::resource("/ping").route(web::get().to(ping)))
     })
     .workers(n_threads)
-    .bind((host.as_str(), port))?
+    .bind((host, port))?
     .run()
     .await
 }
