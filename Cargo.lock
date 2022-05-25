@@ -1653,7 +1653,6 @@ version = "0.0.24"
 dependencies = [
  "clap",
  "globset",
- "num_cpus",
  "regex",
  "rust-code-analysis",
  "serde",
