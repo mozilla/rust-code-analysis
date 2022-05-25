@@ -34,7 +34,7 @@ async fn main() {
 
     let num_jobs = opts.num_jobs.unwrap_or_else(num_cpus::get);
 
-    if let Err(e) = server::run(opts.host.clone(), opts.port, num_jobs).await {
+    if let Err(e) = server::run(&opts.host, opts.port, num_jobs).await {
         eprintln!(
             "Cannot run the server at {}:{}: {}",
             opts.host, opts.port, e
