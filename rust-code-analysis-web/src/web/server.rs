@@ -650,7 +650,8 @@ mod tests {
                                    "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 0.5, "closures_average": 0.0, "total": 1.0, "average": 0.5, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 0.0, "functions_max": 1.0},
                                    "mi": {"mi_original": 139.974_331_558_152_1,
                                           "mi_sei": 161.414_455_240_662_22,
-                                          "mi_visual_studio": 81.856_334_244_533_39}},
+                                          "mi_visual_studio": 81.856_334_244_533_39},
+                                   "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
                                    "start_line": 3,
@@ -677,7 +678,8 @@ mod tests {
                                                "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 1.0, "closures_average": 0.0, "total": 1.0, "average": 1.0, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 1.0, "functions_max": 1.0},
                                                "mi": {"mi_original": 151.433_315_883_223_23,
                                                       "mi_sei": 142.873_061_717_489_78,
-                                                      "mi_visual_studio": 88.557_494_668_551_6}},
+                                                      "mi_visual_studio": 88.557_494_668_551_6},
+                                               "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                                    "name": "foo",
                                    "spaces": []}]}
         });
@@ -730,7 +732,8 @@ mod tests {
                                    "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 0.5, "closures_average": 0.0, "total": 1.0, "average": 0.5, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 0.0, "functions_max": 1.0},
                                    "mi": {"mi_original": 151.203_315_883_223_2,
                                           "mi_sei": 142.643_061_717_489_76,
-                                          "mi_visual_studio": 88.422_991_744_574_97}},
+                                          "mi_visual_studio": 88.422_991_744_574_97},
+                                   "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                        "name": "test.py",
                        "spaces": []}
         });
@@ -779,7 +782,8 @@ mod tests {
                                    "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 0.5, "closures_average": 0.0, "total": 1.0, "average": 0.5, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 0.0, "functions_max": 1.0},
                                    "mi": {"mi_original": 151.203_315_883_223_2,
                                           "mi_sei": 142.643_061_717_489_76,
-                                          "mi_visual_studio": 88.422_991_744_574_97}},
+                                          "mi_visual_studio": 88.422_991_744_574_97},
+                                   "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
                                    "start_line": 1,
@@ -806,7 +810,8 @@ mod tests {
                                                "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 1.0, "closures_average": 0.0, "total": 1.0, "average": 1.0, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 1.0, "functions_max": 1.0},
                                                "mi": {"mi_original": 151.433_315_883_223_23,
                                                       "mi_sei": 142.873_061_717_489_78,
-                                                      "mi_visual_studio": 88.557_494_668_551_6}},
+                                                      "mi_visual_studio": 88.557_494_668_551_6},
+                                               "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                                    "name": "foo",
                                    "spaces": []}]}
         });
