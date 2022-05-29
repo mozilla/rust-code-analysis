@@ -2,6 +2,7 @@ use std::path::Path;
 use std::sync::Arc;
 use tree_sitter::Language;
 
+use crate::abc::Abc;
 use crate::alterator::Alterator;
 use crate::checker::Checker;
 use crate::cognitive::Cognitive;
@@ -35,7 +36,7 @@ pub trait Callback {
 
 #[doc(hidden)]
 pub trait CodeMetricsT:
-    Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi + Wmc
+    Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi + Wmc + Abc
 {
 }
 
@@ -61,6 +62,7 @@ pub trait ParserTrait {
     type NArgs: NArgs;
     type Exit: Exit;
     type Wmc: Wmc;
+    type Abc: Abc;
 
     fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self;
     fn get_language(&self) -> LANG;
