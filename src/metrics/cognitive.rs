@@ -1696,4 +1696,43 @@ mod tests {
             },
         );
     }
+
+    #[test]
+    fn java_no_cognitive() {
+        check_metrics!(
+            "int a = 42;",
+            "foo.java",
+            JavaParser,
+            cognitive,
+            [
+                (cognitive_sum, 0, usize),
+                (cognitive_min, 0, usize),
+                (cognitive_max, 0, usize)
+            ],
+            [(cognitive_average, f64::NAN)]
+        );
+    }
+
+    #[test]
+    fn java_simple_function() {
+        check_metrics!(
+            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
+                if(a && b){ // +2
+                  System.out.println(\"test1\");
+                }
+                if(c && d){ // +2
+                  System.out.println(\"test2\");
+                }
+              }",
+            "foo.java",
+            JavaParser,
+            cognitive,
+            [
+                (cognitive_sum, 4, usize),
+                (cognitive_min, 0, usize),
+                (cognitive_max, 4, usize)
+            ],
+            [(cognitive_average, 4.0)]
+        );
+    }
 }
