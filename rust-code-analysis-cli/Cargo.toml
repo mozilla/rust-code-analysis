@@ -12,7 +12,7 @@ license = "MPL-2.0"
 name = "rust-code-analysis-cli"
 
 [dependencies]
-clap = { version = "^3.0", features = ["cargo"] }
+clap = { version = "^3.2", features = ["cargo"] }
 globset = "^0.4"
 num_cpus = "^1.13"
 regex = "^1.5"
