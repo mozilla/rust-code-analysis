@@ -5,6 +5,8 @@
 #![recursion_limit = "256"]
 mod web;
 
+use std::thread::available_parallelism;
+
 use clap::Parser;
 
 use web::server;
@@ -32,7 +34,11 @@ struct Opts {
 async fn main() {
     let opts = Opts::parse();
 
-    let num_jobs = opts.num_jobs.unwrap_or_else(num_cpus::get);
+    let num_jobs = opts.num_jobs.unwrap_or_else(|| {
+        available_parallelism()
+            .expect("Unrecoverable: Failed to get thread count")
+            .get()
+    });
 
     if let Err(e) = server::run(&opts.host, opts.port, num_jobs).await {
         eprintln!(
