@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use std::thread::available_parallelism;
 
 use formats::Format;
 
@@ -394,7 +395,12 @@ fn main() {
     let num_jobs = if let Ok(num_jobs) = matches.value_of("num_jobs").unwrap().parse::<usize>() {
         std::cmp::max(2, num_jobs) - 1
     } else {
-        std::cmp::max(2, num_cpus::get()) - 1
+        std::cmp::max(
+            2,
+            available_parallelism()
+                .expect("Unrecoverable: Failed to get thread count")
+                .get(),
+        ) - 1
     };
 
     let line_start = if let Ok(n) = matches.value_of("line_start").unwrap().parse::<usize>() {
