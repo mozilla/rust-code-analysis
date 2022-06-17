@@ -15,6 +15,7 @@ use crate::loc::{self, Loc};
 use crate::mi::{self, Mi};
 use crate::nargs::{self, NArgs};
 use crate::nom::{self, Nom};
+use crate::npm::{self, Npm};
 use crate::wmc::{self, Wmc};
 
 use crate::dump_metrics::*;
@@ -84,6 +85,9 @@ pub struct CodeMetrics {
     /// `Wmc` data
     #[serde(skip_serializing_if = "wmc::Stats::is_not_class_or_unit")]
     pub wmc: wmc::Stats,
+    /// `Npm` data
+    #[serde(skip_serializing_if = "npm::Stats::is_disabled")]
+    pub npm: npm::Stats,
 }
 
 impl fmt::Display for CodeMetrics {
@@ -110,6 +114,7 @@ impl CodeMetrics {
         self.nargs.merge(&other.nargs);
         self.nexits.merge(&other.nexits);
         self.abc.merge(&other.abc);
+        self.npm.merge(&other.npm);
     }
 }
 
@@ -200,6 +205,7 @@ fn compute_minmax(state: &mut State) {
     state.space.metrics.nom.compute_minmax();
     state.space.metrics.loc.compute_minmax();
     state.space.metrics.abc.compute_minmax();
+    state.space.metrics.npm.compute_sum();
 }
 
 fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
@@ -304,6 +310,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
             T::NArgs::compute(&node, &mut last.metrics.nargs);
             T::Exit::compute(&node, &mut last.metrics.nexits);
             T::Abc::compute(&node, &mut last.metrics.abc);
+            T::Npm::compute(&node, &mut last.metrics.npm);
         }
 
         cursor.reset(node.object());

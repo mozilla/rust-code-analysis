@@ -78,6 +78,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
     type Exit = T;
     type Wmc = T;
     type Abc = T;
+    type Npm = T;
 
     fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self {
         let mut parser = TSParser::new();
