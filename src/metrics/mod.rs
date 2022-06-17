@@ -7,4 +7,5 @@ pub mod loc;
 pub mod mi;
 pub mod nargs;
 pub mod nom;
+pub mod npm;
 pub mod wmc;
