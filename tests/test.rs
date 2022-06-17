@@ -218,7 +218,7 @@ fn compare_rca_output_with_files(
     let files_data = FilesData {
         include: gsbi.build().unwrap(),
         exclude: GlobSet::empty(),
-        paths: vec![repo_folder.to_owned()],
+        paths: vec![Path::new(repo_folder).to_path_buf()],
     };
 
     if let Err(e) = ConcurrentRunner::new(num_jobs, act_on_file).run(cfg, files_data) {
