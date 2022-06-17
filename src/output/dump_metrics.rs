@@ -10,6 +10,7 @@ use crate::loc;
 use crate::mi;
 use crate::nargs;
 use crate::nom;
+use crate::npm;
 use crate::wmc;
 
 use crate::spaces::{CodeMetrics, FuncSpace, SpaceKind};
@@ -108,7 +109,8 @@ fn dump_metrics(
     dump_nom(&metrics.nom, &prefix, false, stdout)?;
     dump_mi(&metrics.mi, &prefix, false, stdout)?;
     dump_abc(&metrics.abc, &prefix, false, stdout)?;
-    dump_wmc(&metrics.wmc, &prefix, true, stdout)
+    dump_wmc(&metrics.wmc, &prefix, false, stdout)?;
+    dump_npm(&metrics.npm, &prefix, true, stdout)
 }
 
 fn dump_cognitive(
@@ -355,6 +357,37 @@ fn dump_wmc(
     } else {
         Ok(())
     }
+}
+
+fn dump_npm(
+    stats: &npm::Stats,
+    prefix: &str,
+    last: bool,
+    stdout: &mut StandardStreamLock,
+) -> std::io::Result<()> {
+    if stats.is_disabled() {
+        return Ok(());
+    }
+
+    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
+
+    color!(stdout, Blue);
+    write!(stdout, "{}{}", prefix, pref)?;
+
+    color!(stdout, Green, true);
+    writeln!(stdout, "npm")?;
+
+    let prefix = format!("{}{}", prefix, pref_child);
+    dump_value("classes", stats.class_npm_sum(), &prefix, false, stdout)?;
+    dump_value(
+        "interfaces",
+        stats.interface_npm_sum(),
+        &prefix,
+        false,
+        stdout,
+    )?;
+    dump_value("total", stats.total_npm(), &prefix, false, stdout)?;
+    dump_value("average", stats.total_coa(), &prefix, true, stdout)
 }
 
 fn dump_value(
