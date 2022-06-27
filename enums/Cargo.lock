@@ -116,7 +116,7 @@ version = "0.0.1"
 dependencies = [
  "askama",
  "clap",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.7",
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-javascript",
@@ -289,9 +289,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter"
-version = "0.20.2"
+version = "0.20.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c36be3222512d85a112491ae0cc280a38076022414f00b64582da1b7565ffd82"
+checksum = "549a9faf45679ad50b7f603253635598cf5e007d8ceb806a23f95355938f76a0"
 dependencies = [
  "cc",
  "regex",
@@ -312,7 +312,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a869e3c5cef4e5db4e9ab16a8dc84d73010e60ada14cdc60d2f6d8aed17779d"
 dependencies = [
  "cc",
- "tree-sitter 0.20.2",
+ "tree-sitter 0.20.7",
 ]
 
 [[package]]
