@@ -318,9 +318,8 @@ macro_rules! check_metrics {
 
             $(
                 $(
-                    let value: f64 = $true_float_value;
-                    if !value.is_nan() {
-                        assert!((func_space.metrics.$metric.$func_float() - value).abs() < f64::EPSILON);
+                    if !($true_float_value as f64).is_nan() {
+                        assert!(func_space.metrics.$metric.$func_float().total_cmp(&$true_float_value) == std::cmp::Ordering::Equal);
                     } else {
                         assert!(func_space.metrics.$metric.$func_float().is_nan());
                     }
