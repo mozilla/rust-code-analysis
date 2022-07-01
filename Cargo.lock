@@ -872,9 +872,9 @@ dependencies = [
 
 [[package]]
 name = "globset"
-version = "0.4.8"
+version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10463d9ff00a2a068db14231982f5132edebad0d7660cd956a1c30292dbcbfbd"
+checksum = "0a1e17342619edbc21a964c2afbeb6c820c6a2560032872f397bb97ea127bd0a"
 dependencies = [
  "aho-corasick",
  "bstr",
@@ -1634,7 +1634,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termcolor",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-javascript",
@@ -2189,7 +2189,7 @@ name = "tree-sitter-mozcpp"
 version = "0.20.1"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-cpp",
 ]
 
@@ -2237,7 +2237,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8935efd97c92067c9b2b6d7acb647607590996ba80f3a7be09a197f9c1fdab73"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
 ]
 
 [[package]]
