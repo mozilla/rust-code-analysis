@@ -84,7 +84,7 @@ pub struct CodeMetrics {
     /// `Abc` data
     pub abc: abc::Stats,
     /// `Wmc` data
-    #[serde(skip_serializing_if = "wmc::Stats::is_not_class_or_unit")]
+    #[serde(skip_serializing_if = "wmc::Stats::is_disabled")]
     pub wmc: wmc::Stats,
     /// `Npm` data
     #[serde(skip_serializing_if = "npm::Stats::is_disabled")]
@@ -235,7 +235,7 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
             last_state.halstead_maps.merge(&state.halstead_maps);
             compute_halstead_and_mi::<T>(last_state);
 
-            T::Wmc::compute(&state.space, &mut last_state.space);
+            T::Wmc::compute(&mut last_state.space, &mut state.space);
 
             // Merge function spaces
             last_state.space.metrics.merge(&state.space.metrics);
