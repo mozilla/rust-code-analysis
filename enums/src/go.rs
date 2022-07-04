@@ -19,7 +19,7 @@ pub fn generate_go(output: &Path, file_template: &str) -> std::io::Result<()> {
         let name = get_language_name(&lang);
         let c_name = camel_case(name.to_string());
 
-        let file_name = format!("{}.go", file_template.replace("$", &c_name.to_lowercase()));
+        let file_name = format!("{}.go", file_template.replace('$', &c_name.to_lowercase()));
         let path = output.join(file_name);
         let mut file = File::create(path)?;
 

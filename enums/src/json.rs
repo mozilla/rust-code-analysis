@@ -20,7 +20,7 @@ pub fn generate_json(output: &Path, file_template: &str) -> std::io::Result<()> 
 
         let file_name = format!(
             "{}.json",
-            file_template.replace("$", &c_name.to_lowercase())
+            file_template.replace('$', &c_name.to_lowercase())
         );
         let path = output.join(file_name);
         let mut file = File::create(path)?;
