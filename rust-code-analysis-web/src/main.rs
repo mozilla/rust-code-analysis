@@ -12,7 +12,7 @@ use clap::Parser;
 use web::server;
 
 #[derive(Parser, Debug)]
-#[structopt(
+#[clap(
     name = "rust-code-analysis-web",
     version,
     author,
@@ -20,13 +20,13 @@ use web::server;
 )]
 struct Opts {
     /// Number of jobs.
-    #[structopt(long, short = 'j')]
+    #[clap(long, short = 'j')]
     num_jobs: Option<usize>,
     /// Host for the web server.
-    #[structopt(long, short, default_value = "127.0.0.1")]
+    #[clap(long, short, default_value = "127.0.0.1")]
     host: String,
     /// Port for the web server.
-    #[structopt(long, short, default_value = "8080")]
+    #[clap(long, short, default_value = "8080")]
     port: u16,
 }
 
