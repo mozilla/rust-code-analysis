@@ -7,7 +7,7 @@ use std::process;
 use std::sync::{Arc, Mutex};
 use std::thread::available_parallelism;
 
-use clap::StructOpt;
+use clap::Parser;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
 use formats::Format;
@@ -168,8 +168,8 @@ fn process_dir_path(all_files: &mut HashMap<String, Vec<PathBuf>>, path: &Path, 
     }
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(
+#[derive(Parser, Debug)]
+#[clap(
     name = "rust-code-analysis-cli",
     version,
     author,
@@ -177,64 +177,64 @@ fn process_dir_path(all_files: &mut HashMap<String, Vec<PathBuf>>, path: &Path, 
 )]
 struct Opts {
     /// Input files to analyze.
-    #[structopt(long, parse(from_os_str), short)]
+    #[clap(long, short, value_parser)]
     paths: Vec<PathBuf>,
     /// Output AST to stdout.
-    #[structopt(long, short)]
+    #[clap(long, short)]
     dump: bool,
     /// Remove comments in the specified files.
-    #[structopt(long, short)]
+    #[clap(long, short)]
     comments: bool,
     /// Find nodes of the given type.
-    #[structopt(long, short, default_value = "Vec::new()", number_of_values = 1)]
+    #[clap(long, short, default_value = "Vec::new()", number_of_values = 1)]
     find: Vec<String>,
     /// Get functions and their spans.
-    #[structopt(long, short = 'F')]
+    #[clap(long, short = 'F')]
     function: bool,
     /// Count nodes of the given type: comma separated list.
-    #[structopt(long, short = 'C', default_value = "Vec::new()", number_of_values = 1)]
+    #[clap(long, short = 'C', default_value = "Vec::new()", number_of_values = 1)]
     count: Vec<String>,
     /// Compute different metrics.
-    #[structopt(long, short)]
+    #[clap(long, short)]
     metrics: bool,
     /// Retrieve all operands and operators in a code.
-    #[structopt(long, conflicts_with = "metrics")]
+    #[clap(long, conflicts_with = "metrics")]
     ops: bool,
     /// Do action in place.
-    #[structopt(long, short)]
+    #[clap(long, short)]
     in_place: bool,
     /// Glob to include files.
-    #[structopt(long, short = 'I')]
+    #[clap(long, short = 'I')]
     include: Vec<String>,
     /// Glob to exclude files.
-    #[structopt(long, short = 'X')]
+    #[clap(long, short = 'X')]
     exclude: Vec<String>,
     /// Number of jobs.
-    #[structopt(long, short = 'j')]
+    #[clap(long, short = 'j')]
     num_jobs: Option<usize>,
     /// Language type.
-    #[structopt(long, short)]
+    #[clap(long, short)]
     language_type: Option<String>,
     /// Output metrics as different formats.
-    #[structopt(long, short = 'O', possible_values = Format::all())]
+    #[clap(long, short = 'O', possible_values = Format::all())]
     output_format: Option<Format>,
     /// Dump a pretty json file.
-    #[structopt(long = "pr")]
+    #[clap(long = "pr")]
     pretty: bool,
     /// Output file/directory.
-    #[structopt(long, short, parse(from_os_str))]
+    #[clap(long, short, value_parser)]
     output: Option<PathBuf>,
     /// Get preprocessor declaration for C/C++.
-    #[structopt(long, parse(from_os_str), number_of_values = 1)]
+    #[clap(long, value_parser, number_of_values = 1)]
     preproc: Vec<PathBuf>,
     /// Line start.
-    #[structopt(long = "ls")]
+    #[clap(long = "ls")]
     line_start: Option<usize>,
     /// Line end.
-    #[structopt(long = "le")]
+    #[clap(long = "le")]
     line_end: Option<usize>,
     /// Print the warnings.
-    #[structopt(long, short)]
+    #[clap(long, short)]
     warning: bool,
 }
 
