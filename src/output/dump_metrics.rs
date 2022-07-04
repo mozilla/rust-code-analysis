@@ -14,7 +14,7 @@ use crate::npa;
 use crate::npm;
 use crate::wmc;
 
-use crate::spaces::{CodeMetrics, FuncSpace, SpaceKind};
+use crate::spaces::{CodeMetrics, FuncSpace};
 
 /// Dumps the metrics of a code.
 ///
@@ -335,30 +335,20 @@ fn dump_wmc(
     last: bool,
     stdout: &mut StandardStreamLock,
 ) -> std::io::Result<()> {
-    if !stats.is_not_class_or_unit() {
-        let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
-
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
-
-        color!(stdout, Green, true);
-        writeln!(stdout, "wmc")?;
-
-        let prefix = format!("{}{}", prefix, pref_child);
-        dump_value(
-            if stats.space_kind() == SpaceKind::Unit {
-                "wmc_total"
-            } else {
-                "wmc"
-            },
-            stats.wmc(),
-            &prefix,
-            true,
-            stdout,
-        )
-    } else {
-        Ok(())
+    if stats.is_disabled() {
+        return Ok(());
     }
+
+    let pref = if last { "`- " } else { "|- " };
+
+    color!(stdout, Blue);
+    write!(stdout, "{}{}", prefix, pref)?;
+
+    color!(stdout, Green, true);
+    write!(stdout, "wmc: ")?;
+
+    color!(stdout, White);
+    writeln!(stdout, "{}", stats.wmc())
 }
 
 fn dump_npm(
