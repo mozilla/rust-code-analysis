@@ -374,4 +374,119 @@ mod tests {
             [(wmc, 2.0)] // 1 top level class
         );
     }
+
+    #[test]
+    fn java_single_interface() {
+        check_metrics!(
+            "interface Example { // wmc = 6
+                default boolean m1(boolean a, boolean b) { // +1
+                    return (a && b == a || b); // +2
+                }
+                default int m2(int n) { // +1
+                    return (n != 0) ? 1/n : n; // +1
+                };
+                void m3(); // +1
+            }",
+            "foo.java",
+            JavaParser,
+            wmc,
+            [(wmc, 6.0)] // 1 top level interface
+        );
+    }
+
+    #[test]
+    fn java_multiple_interfaces() {
+        check_metrics!(
+            "interface FirstInterface { // wmc = 1
+                int a = 0;
+                default int getA() { // +1
+                    return a;
+                }
+            }
+            
+            interface SecondInterface { // wmc = 2
+                void setB(int n); // +1
+                int getB(); // +1
+            }",
+            "foo.java",
+            JavaParser,
+            wmc,
+            [(wmc, 3.0)] // 2 top level interfaces (wmc total = 1 + 2)
+        );
+    }
+
+    #[test]
+    fn java_nested_inner_interfaces() {
+        check_metrics!(
+            "interface TopLevelInterface { // wmc = 1
+                interface InnerInterfaceBefore { // wmc = 1
+                    void m1(); // +1
+                }
+                
+                void m2(); // +1
+                
+                interface InnerInterfaceAfter { // wmc = 2
+                    void m3(); // +1
+                    interface InnerInterface { // wmc = 1
+                        void m4(); // +1
+                    }
+                    void m5(); // +1
+                }
+            }",
+            "foo.java",
+            JavaParser,
+            wmc,
+            [(wmc, 1.0)] // 1 top level interface
+        );
+    }
+
+    #[test]
+    fn java_class_in_interface() {
+        check_metrics!(
+            "interface TopLevelInterface { // wmc = 2
+                int getA(); // +1
+                boolean getB(); // +1
+                
+                class InnerClass { // wmc = 2
+                    float c;
+                    double d;
+                    float getC() { // +1
+                        return c;
+                    }
+                    double getD() { // +1
+                        return d;
+                    }
+                }
+            }",
+            "foo.java",
+            JavaParser,
+            wmc,
+            [(wmc, 2.0)] // 1 top level interface
+        );
+    }
+
+    #[test]
+    fn java_interface_in_class() {
+        check_metrics!(
+            "class TopLevelClass { // wmc = 2
+                int a;
+                boolean b;
+                int getA() { // +1
+                    return a;
+                }
+                boolean getB() { // +1
+                    return b;
+                }
+                
+                interface InnerInterface { // wmc = 2
+                    float getC(); // +1
+                    double getD(); // +1
+                }
+            }",
+            "foo.java",
+            JavaParser,
+            wmc,
+            [(wmc, 2.0)] // 1 top level class
+        );
+    }
 }
