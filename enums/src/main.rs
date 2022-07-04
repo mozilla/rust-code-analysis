@@ -33,7 +33,7 @@ impl OutputLanguage {
 }
 
 #[derive(Parser, Debug)]
-#[structopt(
+#[clap(
     name = "enums",
     version,
     author,
