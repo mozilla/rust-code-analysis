@@ -12,7 +12,7 @@ license = "MPL-2.0"
 name = "rust-code-analysis-web"
 
 [dependencies]
-actix-rt = "^2.6"
+actix-rt = "^2.7"
 actix-web = "^4.1"
 clap = { version = "^3.1", features = ["derive"] }
 futures = "^0.3"
