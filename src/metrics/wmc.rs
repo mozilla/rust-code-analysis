@@ -14,21 +14,13 @@ use crate::*;
 ///
 /// This metric sums the cyclomatic complexities of all the methods defined in a class.
 /// The `Wmc` (Weighted Methods per Class) is an object-oriented metric for classes.
+///
 /// Original paper and definition:
-/// https://www.researchgate.net/publication/3187649_Kemerer_CF_A_metric_suite_for_object_oriented_design_IEEE_Trans_Softw_Eng_206_476-493
-#[derive(Debug, Clone)]
+/// <https://www.researchgate.net/publication/3187649_Kemerer_CF_A_metric_suite_for_object_oriented_design_IEEE_Trans_Softw_Eng_206_476-493>
+#[derive(Debug, Clone, Default)]
 pub struct Stats {
     wmc: f64,
-    space_kind: SpaceKind,
-}
-
-impl Default for Stats {
-    fn default() -> Self {
-        Self {
-            wmc: 0.,
-            space_kind: SpaceKind::Unknown,
-        }
-    }
+    is_class_space: bool,
 }
 
 impl Serialize for Stats {
@@ -37,14 +29,7 @@ impl Serialize for Stats {
         S: Serializer,
     {
         let mut st = serializer.serialize_struct("wmc", 1)?;
-        st.serialize_field(
-            if self.space_kind == SpaceKind::Unit {
-                "wmc_total"
-            } else {
-                "wmc"
-            },
-            &self.wmc(),
-        )?;
+        st.serialize_field("wmc", &self.wmc())?;
         st.end()
     }
 }
@@ -56,19 +41,16 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
-    /// Returns the `Wmc` metric value
+    /// Returns the `Wmc` metric value.
+    #[inline(always)]
     pub fn wmc(&self) -> f64 {
         self.wmc
     }
 
-    /// Returns the space kind associated to the `Wmc` metric value
-    pub fn space_kind(&self) -> SpaceKind {
-        self.space_kind
-    }
-
-    // Returns true if the `Wmc` metric value should not be visible
-    pub fn is_not_class_or_unit(&self) -> bool {
-        self.space_kind != SpaceKind::Class && self.space_kind != SpaceKind::Unit
+    // Checks if the `Wmc` metric is disabled
+    #[inline(always)]
+    pub(crate) fn is_disabled(&self) -> bool {
+        !self.is_class_space
     }
 }
 
@@ -77,7 +59,7 @@ pub trait Wmc
 where
     Self: Checker,
 {
-    fn compute(_child: &FuncSpace, _parent: &mut FuncSpace) {}
+    fn compute(_parent: &mut FuncSpace, _child: &mut FuncSpace) {}
 }
 
 impl Wmc for PythonCode {}
@@ -91,13 +73,20 @@ impl Wmc for PreprocCode {}
 impl Wmc for CcommentCode {}
 
 impl Wmc for JavaCode {
-    fn compute(child: &FuncSpace, parent: &mut FuncSpace) {
-        if child.kind == SpaceKind::Function && parent.kind == SpaceKind::Class {
-            parent.metrics.wmc.space_kind = SpaceKind::Class;
-            parent.metrics.wmc.wmc += child.metrics.cyclomatic.cyclomatic_sum()
-        } else if child.kind == SpaceKind::Class && parent.kind == SpaceKind::Unit {
-            parent.metrics.wmc.space_kind = SpaceKind::Unit;
-            parent.metrics.wmc.wmc += child.metrics.wmc.wmc
+    fn compute(parent: &mut FuncSpace, child: &mut FuncSpace) {
+        use SpaceKind::*;
+
+        match (parent.kind, child.kind) {
+            (Class | Interface, Function) => {
+                parent.metrics.wmc.is_class_space = true;
+                parent.metrics.wmc.wmc += child.metrics.cyclomatic.cyclomatic_sum();
+            }
+            (Unit, Class | Interface) => {
+                child.metrics.wmc.is_class_space = true;
+                parent.metrics.wmc.is_class_space = true;
+                parent.metrics.wmc.wmc += child.metrics.wmc.wmc
+            }
+            _ => {}
         }
     }
 }
