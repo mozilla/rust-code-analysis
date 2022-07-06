@@ -119,6 +119,7 @@ impl CodeMetrics {
         self.nargs.merge(&other.nargs);
         self.nexits.merge(&other.nexits);
         self.abc.merge(&other.abc);
+        self.wmc.merge(&other.wmc);
         self.npm.merge(&other.npm);
         self.npa.merge(&other.npa);
     }
@@ -174,7 +175,7 @@ impl FuncSpace {
 }
 
 #[inline(always)]
-fn compute_halstead_and_mi<T: ParserTrait>(state: &mut State) {
+fn compute_halstead_mi_and_wmc<T: ParserTrait>(state: &mut State) {
     state
         .halstead_maps
         .finalize(&mut state.space.metrics.halstead);
@@ -183,6 +184,11 @@ fn compute_halstead_and_mi<T: ParserTrait>(state: &mut State) {
         &state.space.metrics.cyclomatic,
         &state.space.metrics.halstead,
         &mut state.space.metrics.mi,
+    );
+    T::Wmc::compute(
+        state.space.kind,
+        &state.space.metrics.cyclomatic,
+        &mut state.space.metrics.wmc,
     );
 }
 
@@ -223,20 +229,18 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
         if state_stack.len() == 1 {
             let last_state = state_stack.last_mut().unwrap();
             compute_minmax(last_state);
-            compute_halstead_and_mi::<T>(last_state);
+            compute_halstead_mi_and_wmc::<T>(last_state);
             compute_averages(last_state);
             break;
         } else {
             let mut state = state_stack.pop().unwrap();
             compute_minmax(&mut state);
-            compute_halstead_and_mi::<T>(&mut state);
+            compute_halstead_mi_and_wmc::<T>(&mut state);
             compute_averages(&mut state);
 
             let last_state = state_stack.last_mut().unwrap();
             last_state.halstead_maps.merge(&state.halstead_maps);
-            compute_halstead_and_mi::<T>(last_state);
-
-            T::Wmc::compute(&mut last_state.space, &mut state.space);
+            compute_halstead_mi_and_wmc::<T>(last_state);
 
             // Merge function spaces
             last_state.space.metrics.merge(&state.space.metrics);
