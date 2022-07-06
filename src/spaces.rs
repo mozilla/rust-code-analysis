@@ -23,10 +23,11 @@ use crate::dump_metrics::*;
 use crate::traits::*;
 
 /// The list of supported space kinds.
-#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum SpaceKind {
     /// An unknown space
+    #[default]
     Unknown,
     /// A function space
     Function,
