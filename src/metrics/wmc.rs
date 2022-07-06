@@ -20,7 +20,8 @@ use crate::*;
 #[derive(Debug, Clone, Default)]
 pub struct Stats {
     wmc: f64,
-    is_class_space: bool,
+    cc: f64,
+    space_kind: SpaceKind,
 }
 
 impl Serialize for Stats {
@@ -41,6 +42,23 @@ impl fmt::Display for Stats {
 }
 
 impl Stats {
+    /// Merges a second `Wmc` metric into the first one
+    pub fn merge(&mut self, other: &Stats) {
+        use SpaceKind::*;
+
+        match (self.space_kind, other.space_kind) {
+            (Unit, Class | Interface) => {
+                self.wmc += other.wmc;
+            }
+            (Class | Interface, Function) => {
+                // Merges the cyclomatic complexity of the method
+                // into the `Wmc` metric of the class or interface
+                self.wmc += other.cc;
+            }
+            _ => {}
+        }
+    }
+
     /// Returns the `Wmc` metric value.
     #[inline(always)]
     pub fn wmc(&self) -> f64 {
@@ -50,7 +68,7 @@ impl Stats {
     // Checks if the `Wmc` metric is disabled
     #[inline(always)]
     pub(crate) fn is_disabled(&self) -> bool {
-        !self.is_class_space
+        matches!(self.space_kind, SpaceKind::Function | SpaceKind::Unknown)
     }
 }
 
@@ -59,7 +77,7 @@ pub trait Wmc
 where
     Self: Checker,
 {
-    fn compute(_parent: &mut FuncSpace, _child: &mut FuncSpace) {}
+    fn compute(_space_kind: SpaceKind, _cyclomatic: &cyclomatic::Stats, _stats: &mut Stats) {}
 }
 
 impl Wmc for PythonCode {}
@@ -73,18 +91,17 @@ impl Wmc for PreprocCode {}
 impl Wmc for CcommentCode {}
 
 impl Wmc for JavaCode {
-    fn compute(parent: &mut FuncSpace, child: &mut FuncSpace) {
+    fn compute(space_kind: SpaceKind, cyclomatic: &cyclomatic::Stats, stats: &mut Stats) {
         use SpaceKind::*;
 
-        match (parent.kind, child.kind) {
-            (Class | Interface, Function) => {
-                parent.metrics.wmc.is_class_space = true;
-                parent.metrics.wmc.wmc += child.metrics.cyclomatic.cyclomatic_sum();
+        match space_kind {
+            Function => {
+                stats.space_kind = space_kind;
+                // Saves the cyclomatic complexity of the method
+                stats.cc = cyclomatic.cyclomatic_sum();
             }
-            (Unit, Class | Interface) => {
-                child.metrics.wmc.is_class_space = true;
-                parent.metrics.wmc.is_class_space = true;
-                parent.metrics.wmc.wmc += child.metrics.wmc.wmc
+            Class | Interface | Unit => {
+                stats.space_kind = space_kind;
             }
             _ => {}
         }
