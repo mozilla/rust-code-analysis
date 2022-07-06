@@ -208,6 +208,7 @@ fn compute_averages(state: &mut State) {
         .nargs
         .finalize(nom_functions, nom_closures);
 }
+
 #[inline(always)]
 fn compute_minmax(state: &mut State) {
     state.space.metrics.cyclomatic.compute_minmax();
@@ -217,6 +218,10 @@ fn compute_minmax(state: &mut State) {
     state.space.metrics.nom.compute_minmax();
     state.space.metrics.loc.compute_minmax();
     state.space.metrics.abc.compute_minmax();
+}
+
+#[inline(always)]
+fn compute_sum(state: &mut State) {
     state.space.metrics.npm.compute_sum();
     state.space.metrics.npa.compute_sum();
 }
@@ -229,12 +234,14 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
         if state_stack.len() == 1 {
             let last_state = state_stack.last_mut().unwrap();
             compute_minmax(last_state);
+            compute_sum(last_state);
             compute_halstead_mi_and_wmc::<T>(last_state);
             compute_averages(last_state);
             break;
         } else {
             let mut state = state_stack.pop().unwrap();
             compute_minmax(&mut state);
+            compute_sum(&mut state);
             compute_halstead_mi_and_wmc::<T>(&mut state);
             compute_averages(&mut state);
 
