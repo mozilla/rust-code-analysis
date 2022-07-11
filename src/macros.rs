@@ -318,11 +318,11 @@ macro_rules! check_metrics {
 
             $(
                 $(
-                    if !($true_float_value as f64).is_nan() {
-                        assert!(func_space.metrics.$metric.$func_float().total_cmp(&$true_float_value) == std::cmp::Ordering::Equal);
+                    assert!(if ($true_float_value as f64).is_nan() {
+                        func_space.metrics.$metric.$func_float().is_nan()
                     } else {
-                        assert!(func_space.metrics.$metric.$func_float().is_nan());
-                    }
+                        func_space.metrics.$metric.$func_float().total_cmp(&$true_float_value) == std::cmp::Ordering::Equal
+                    });
                 )*
             )?
         }
