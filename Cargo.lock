@@ -1281,7 +1281,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termcolor",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-ccomment",
  "tree-sitter-java",
  "tree-sitter-javascript",
@@ -1426,9 +1426,9 @@ dependencies = [
 
 [[package]]
 name = "serde_yaml"
-version = "0.8.24"
+version = "0.8.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "707d15895415db6628332b737c838b88c598522e4dc70647e59b72312924aebc"
+checksum = "1ec0091e1f5aa338283ce049bd9dfefd55e1f168ac233e85c1ffe0038fb48cbe"
 dependencies = [
  "indexmap",
  "ryu",
@@ -1668,7 +1668,7 @@ name = "tree-sitter-mozcpp"
 version = "0.20.1"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
  "tree-sitter-cpp",
 ]
 
@@ -1716,7 +1716,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8935efd97c92067c9b2b6d7acb647607590996ba80f3a7be09a197f9c1fdab73"
 dependencies = [
  "cc",
- "tree-sitter 0.19.3",
+ "tree-sitter 0.20.2",
 ]
 
 [[package]]
