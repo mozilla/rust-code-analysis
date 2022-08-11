@@ -1,6 +1,7 @@
 use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
 
+use crate::abc;
 use crate::cognitive;
 use crate::cyclomatic;
 use crate::exit;
@@ -9,6 +10,9 @@ use crate::loc;
 use crate::mi;
 use crate::nargs;
 use crate::nom;
+use crate::npa;
+use crate::npm;
+use crate::wmc;
 
 use crate::spaces::{CodeMetrics, FuncSpace};
 
@@ -104,7 +108,11 @@ fn dump_metrics(
     dump_halstead(&metrics.halstead, &prefix, false, stdout)?;
     dump_loc(&metrics.loc, &prefix, false, stdout)?;
     dump_nom(&metrics.nom, &prefix, false, stdout)?;
-    dump_mi(&metrics.mi, &prefix, true, stdout)
+    dump_mi(&metrics.mi, &prefix, false, stdout)?;
+    dump_abc(&metrics.abc, &prefix, false, stdout)?;
+    dump_wmc(&metrics.wmc, &prefix, false, stdout)?;
+    dump_npm(&metrics.npm, &prefix, false, stdout)?;
+    dump_npa(&metrics.npa, &prefix, true, stdout)
 }
 
 fn dump_cognitive(
@@ -291,6 +299,118 @@ fn dump_nexits(
 
     color!(stdout, White);
     writeln!(stdout, "{}", stats.exit())
+}
+
+fn dump_abc(
+    stats: &abc::Stats,
+    prefix: &str,
+    last: bool,
+    stdout: &mut StandardStreamLock,
+) -> std::io::Result<()> {
+    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
+
+    color!(stdout, Blue);
+    write!(stdout, "{}{}", prefix, pref)?;
+
+    color!(stdout, Green, true);
+    writeln!(stdout, "abc")?;
+
+    let prefix = format!("{}{}", prefix, pref_child);
+
+    dump_value(
+        "assignments",
+        stats.assignments_sum(),
+        &prefix,
+        false,
+        stdout,
+    )?;
+    dump_value("branches", stats.branches_sum(), &prefix, false, stdout)?;
+    dump_value("conditions", stats.conditions_sum(), &prefix, false, stdout)?;
+    dump_value("magnitude", stats.magnitude_sum(), &prefix, true, stdout)
+}
+
+fn dump_wmc(
+    stats: &wmc::Stats,
+    prefix: &str,
+    last: bool,
+    stdout: &mut StandardStreamLock,
+) -> std::io::Result<()> {
+    if stats.is_disabled() {
+        return Ok(());
+    }
+
+    let pref = if last { "`- " } else { "|- " };
+
+    color!(stdout, Blue);
+    write!(stdout, "{}{}", prefix, pref)?;
+
+    color!(stdout, Green, true);
+    write!(stdout, "wmc: ")?;
+
+    color!(stdout, White);
+    writeln!(stdout, "{}", stats.wmc())
+}
+
+fn dump_npm(
+    stats: &npm::Stats,
+    prefix: &str,
+    last: bool,
+    stdout: &mut StandardStreamLock,
+) -> std::io::Result<()> {
+    if stats.is_disabled() {
+        return Ok(());
+    }
+
+    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
+
+    color!(stdout, Blue);
+    write!(stdout, "{}{}", prefix, pref)?;
+
+    color!(stdout, Green, true);
+    writeln!(stdout, "npm")?;
+
+    let prefix = format!("{}{}", prefix, pref_child);
+    dump_value("classes", stats.class_npm_sum(), &prefix, false, stdout)?;
+    dump_value(
+        "interfaces",
+        stats.interface_npm_sum(),
+        &prefix,
+        false,
+        stdout,
+    )?;
+    dump_value("total", stats.total_npm(), &prefix, false, stdout)?;
+    dump_value("average", stats.total_coa(), &prefix, true, stdout)
+}
+
+fn dump_npa(
+    stats: &npa::Stats,
+    prefix: &str,
+    last: bool,
+    stdout: &mut StandardStreamLock,
+) -> std::io::Result<()> {
+    if stats.is_disabled() {
+        return Ok(());
+    }
+
+    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
+
+    color!(stdout, Blue);
+    write!(stdout, "{}{}", prefix, pref)?;
+
+    color!(stdout, Green, true);
+    writeln!(stdout, "npa")?;
+
+    let prefix = format!("{}{}", prefix, pref_child);
+    dump_value("classes", stats.class_npa_sum(), &prefix, false, stdout)?;
+    dump_value(
+        "interfaces",
+        stats.interface_npa_sum(),
+        &prefix,
+        false,
+        stdout,
+    )?;
+    dump_value("total", stats.total_npa(), &prefix, false, stdout)?;
+    dump_value("average", stats.total_cda(), &prefix, true, stdout)
 }
 
 fn dump_value(

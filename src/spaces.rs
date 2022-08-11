@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use crate::checker::Checker;
 use crate::node::Node;
 
+use crate::abc::{self, Abc};
 use crate::cognitive::{self, Cognitive};
 use crate::cyclomatic::{self, Cyclomatic};
 use crate::exit::{self, Exit};
@@ -14,15 +15,19 @@ use crate::loc::{self, Loc};
 use crate::mi::{self, Mi};
 use crate::nargs::{self, NArgs};
 use crate::nom::{self, Nom};
+use crate::npa::{self, Npa};
+use crate::npm::{self, Npm};
+use crate::wmc::{self, Wmc};
 
 use crate::dump_metrics::*;
 use crate::traits::*;
 
 /// The list of supported space kinds.
-#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum SpaceKind {
     /// An unknown space
+    #[default]
     Unknown,
     /// A function space
     Function,
@@ -77,6 +82,17 @@ pub struct CodeMetrics {
     pub nom: nom::Stats,
     /// `Mi` data
     pub mi: mi::Stats,
+    /// `Abc` data
+    pub abc: abc::Stats,
+    /// `Wmc` data
+    #[serde(skip_serializing_if = "wmc::Stats::is_disabled")]
+    pub wmc: wmc::Stats,
+    /// `Npm` data
+    #[serde(skip_serializing_if = "npm::Stats::is_disabled")]
+    pub npm: npm::Stats,
+    /// `Npa` data
+    #[serde(skip_serializing_if = "npa::Stats::is_disabled")]
+    pub npa: npa::Stats,
 }
 
 impl fmt::Display for CodeMetrics {
@@ -102,6 +118,10 @@ impl CodeMetrics {
         self.mi.merge(&other.mi);
         self.nargs.merge(&other.nargs);
         self.nexits.merge(&other.nexits);
+        self.abc.merge(&other.abc);
+        self.wmc.merge(&other.wmc);
+        self.npm.merge(&other.npm);
+        self.npa.merge(&other.npa);
     }
 }
 
@@ -155,7 +175,7 @@ impl FuncSpace {
 }
 
 #[inline(always)]
-fn compute_halstead_and_mi<T: ParserTrait>(state: &mut State) {
+fn compute_halstead_mi_and_wmc<T: ParserTrait>(state: &mut State) {
     state
         .halstead_maps
         .finalize(&mut state.space.metrics.halstead);
@@ -164,6 +184,11 @@ fn compute_halstead_and_mi<T: ParserTrait>(state: &mut State) {
         &state.space.metrics.cyclomatic,
         &state.space.metrics.halstead,
         &mut state.space.metrics.mi,
+    );
+    T::Wmc::compute(
+        state.space.kind,
+        &state.space.metrics.cyclomatic,
+        &mut state.space.metrics.wmc,
     );
 }
 
@@ -183,6 +208,7 @@ fn compute_averages(state: &mut State) {
         .nargs
         .finalize(nom_functions, nom_closures);
 }
+
 #[inline(always)]
 fn compute_minmax(state: &mut State) {
     state.space.metrics.cyclomatic.compute_minmax();
@@ -191,6 +217,13 @@ fn compute_minmax(state: &mut State) {
     state.space.metrics.nargs.compute_minmax();
     state.space.metrics.nom.compute_minmax();
     state.space.metrics.loc.compute_minmax();
+    state.space.metrics.abc.compute_minmax();
+}
+
+#[inline(always)]
+fn compute_sum(state: &mut State) {
+    state.space.metrics.npm.compute_sum();
+    state.space.metrics.npa.compute_sum();
 }
 
 fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
@@ -201,18 +234,20 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
         if state_stack.len() == 1 {
             let last_state = state_stack.last_mut().unwrap();
             compute_minmax(last_state);
-            compute_halstead_and_mi::<T>(last_state);
+            compute_sum(last_state);
+            compute_halstead_mi_and_wmc::<T>(last_state);
             compute_averages(last_state);
             break;
         } else {
             let mut state = state_stack.pop().unwrap();
             compute_minmax(&mut state);
-            compute_halstead_and_mi::<T>(&mut state);
+            compute_sum(&mut state);
+            compute_halstead_mi_and_wmc::<T>(&mut state);
             compute_averages(&mut state);
 
             let last_state = state_stack.last_mut().unwrap();
             last_state.halstead_maps.merge(&state.halstead_maps);
-            compute_halstead_and_mi::<T>(last_state);
+            compute_halstead_mi_and_wmc::<T>(last_state);
 
             // Merge function spaces
             last_state.space.metrics.merge(&state.space.metrics);
@@ -292,6 +327,9 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
             T::Nom::compute(&node, &mut last.metrics.nom);
             T::NArgs::compute(&node, &mut last.metrics.nargs);
             T::Exit::compute(&node, &mut last.metrics.nexits);
+            T::Abc::compute(&node, &mut last.metrics.abc);
+            T::Npm::compute(&node, &mut last.metrics.npm);
+            T::Npa::compute(&node, &mut last.metrics.npa);
         }
 
         cursor.reset(node.object());

@@ -1,8 +1,7 @@
 use actix_web::{
-    dev::Body,
     guard, http,
     web::{self, BytesMut, Query},
-    App, FromRequest, HttpRequest, HttpResponse, HttpServer,
+    App, HttpRequest, HttpResponse, HttpServer,
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -31,7 +30,7 @@ async fn get_code(mut body: web::Payload) -> Result<Vec<u8>, actix_web::Error> {
     Ok(code.to_vec())
 }
 
-fn ast_parser(item: web::Json<AstPayload>) -> HttpResponse {
+async fn ast_parser(item: web::Json<AstPayload>) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
@@ -59,7 +58,7 @@ fn ast_parser(item: web::Json<AstPayload>) -> HttpResponse {
     }
 }
 
-fn comment_removal_json(item: web::Json<WebCommentPayload>) -> HttpResponse {
+async fn comment_removal_json(item: web::Json<WebCommentPayload>) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
@@ -98,21 +97,21 @@ async fn comment_removal_plain(
         let res = action::<WebCommentCallback>(&language, buf, &PathBuf::from(""), None, cfg);
         if let Some(res_code) = res.code {
             Ok(HttpResponse::Ok()
-                .header(http::header::CONTENT_TYPE, "application/octet-stream")
+                .append_header((http::header::CONTENT_TYPE, "application/octet-stream"))
                 .body(res_code))
         } else {
             Ok(HttpResponse::NoContent()
-                .header(http::header::CONTENT_TYPE, "application/octet-stream")
-                .body(Body::Empty))
+                .append_header((http::header::CONTENT_TYPE, "application/octet-stream"))
+                .body(()))
         }
     } else {
         Ok(HttpResponse::NotFound()
-            .header(http::header::CONTENT_TYPE, "text/plain")
+            .append_header((http::header::CONTENT_TYPE, "text/plain"))
             .body(format!("error: {}", INVALID_LANGUAGE)))
     }
 }
 
-fn metrics_json(item: web::Json<WebMetricsPayload>) -> HttpResponse {
+async fn metrics_json(item: web::Json<WebMetricsPayload>) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
@@ -165,12 +164,12 @@ async fn metrics_plain(
         )))
     } else {
         Ok(HttpResponse::NotFound()
-            .header(http::header::CONTENT_TYPE, "text/plain")
+            .append_header((http::header::CONTENT_TYPE, "text/plain"))
             .body(format!("error: {}", INVALID_LANGUAGE)))
     }
 }
 
-fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -> HttpResponse {
+async fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
@@ -210,74 +209,67 @@ async fn function_plain(
         )))
     } else {
         Ok(HttpResponse::NotFound()
-            .header(http::header::CONTENT_TYPE, "text/plain")
+            .append_header((http::header::CONTENT_TYPE, "text/plain"))
             .body(format!("error: {}", INVALID_LANGUAGE)))
     }
 }
 
-fn ping() -> HttpResponse {
-    HttpResponse::Ok().body(Body::Empty)
+async fn ping() -> HttpResponse {
+    HttpResponse::Ok().body(())
 }
 
-pub async fn run(host: String, port: u16, n_threads: usize) -> std::io::Result<()> {
+pub async fn run(host: &str, port: u16, n_threads: usize) -> std::io::Result<()> {
     let max_size = 1024 * 1024 * 4;
 
     HttpServer::new(move || {
         App::new()
+            .app_data(web::JsonConfig::default().limit(max_size))
             .service(
                 web::resource("/ast")
                     .guard(guard::Header("content-type", "application/json"))
-                    .app_data(web::Json::<AstPayload>::configure(|cfg| {
-                        cfg.limit(max_size)
-                    }))
+                    .app_data(web::Json::<AstPayload>)
                     .route(web::post().to(ast_parser)),
             )
             .service(
                 web::resource("/comment")
                     .guard(guard::Header("content-type", "application/json"))
-                    .app_data(web::Json::<WebCommentPayload>::configure(|cfg| {
-                        cfg.limit(max_size)
-                    }))
+                    .app_data(web::Json::<WebCommentPayload>)
                     .route(web::post().to(comment_removal_json)),
             )
             .service(
                 web::resource("/comment")
                     .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(web::PayloadConfig::default().limit(max_size))
+                    .app_data(web::PayloadConfig::default().limit(max_size))
                     .route(web::post().to(comment_removal_plain)),
             )
             .service(
                 web::resource("/metrics")
                     .guard(guard::Header("content-type", "application/json"))
-                    .app_data(web::Json::<WebMetricsPayload>::configure(|cfg| {
-                        cfg.limit(max_size)
-                    }))
+                    .app_data(web::Json::<WebMetricsPayload>)
                     .route(web::post().to(metrics_json)),
             )
             .service(
                 web::resource("/metrics")
                     .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(web::PayloadConfig::default().limit(max_size))
+                    .app_data(web::PayloadConfig::default().limit(max_size))
                     .route(web::post().to(metrics_plain)),
             )
             .service(
                 web::resource("/function")
                     .guard(guard::Header("content-type", "application/json"))
-                    .app_data(web::Json::<WebFunctionPayload>::configure(|cfg| {
-                        cfg.limit(max_size)
-                    }))
+                    .app_data(web::Json::<WebFunctionPayload>)
                     .route(web::post().to(function_json)),
             )
             .service(
                 web::resource("/function")
                     .guard(guard::Header("content-type", "application/octet-stream"))
-                    .data(web::PayloadConfig::default().limit(max_size))
+                    .app_data(web::PayloadConfig::default().limit(max_size))
                     .route(web::post().to(function_plain)),
             )
             .service(web::resource("/ping").route(web::get().to(ping)))
     })
     .workers(n_threads)
-    .bind((host.as_str(), port))?
+    .bind((host, port))?
     .run()
     .await
 }
@@ -296,19 +288,19 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_ping() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/ping").route(web::get().to(ping))),
         )
         .await;
         let req = test::TestRequest::with_uri("/ping").to_request();
-        let resp = test::call_service(&mut app, req).await;
+        let resp = test::call_service(&app, req).await;
 
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
     #[actix_rt::test]
     async fn test_web_ast() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/ast").route(web::post().to(ast_parser))),
         )
         .await;
@@ -323,7 +315,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "1234",
             "root": {
@@ -383,7 +375,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_ast_string() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/ast").route(web::post().to(ast_parser))),
         )
         .await;
@@ -398,7 +390,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "1234",
             "root": {"Children": [{"Children": [{"Children": [],
@@ -436,7 +428,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_comment_json() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
         )
@@ -450,7 +442,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "1234",
             "code": b"int x = 1; ",
@@ -461,7 +453,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_comment_json_invalid() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
         )
@@ -475,7 +467,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "1234",
             "error": INVALID_LANGUAGE,
@@ -486,7 +478,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_comment_json_no_comment() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_json))),
         )
@@ -500,7 +492,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
 
         // No comment in the code so the code is null
         let expected = json!({
@@ -513,18 +505,18 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_comment_plain() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
         )
         .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.c")
-            .set(ContentType::plaintext())
+            .insert_header(ContentType::plaintext())
             .set_payload("int x = 1; // hello")
             .to_request();
 
-        let resp = test::call_service(&mut app, req).await;
+        let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), StatusCode::OK);
 
         let res = test::read_body(resp).await;
@@ -535,18 +527,18 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_comment_plain_invalid() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
         )
         .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.unexisting_extension")
-            .set(ContentType::plaintext())
+            .insert_header(ContentType::plaintext())
             .set_payload("int x = 1; // hello")
             .to_request();
 
-        let resp = test::call_service(&mut app, req).await;
+        let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), StatusCode::NOT_FOUND);
 
         let res = test::read_body(resp).await;
@@ -557,18 +549,18 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_comment_plain_no_comment() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
         )
         .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.c")
-            .set(ContentType::plaintext())
+            .insert_header(ContentType::plaintext())
             .set_payload("int x = 1;")
             .to_request();
 
-        let resp = test::call_service(&mut app, req).await;
+        let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
         let res = test::read_body(resp).await;
@@ -586,18 +578,18 @@ mod tests {
         let input_vec = [b"/*char*/s: ", bad_bytes].concat();
         let output_vec = [b"s: ", bad_bytes].concat();
 
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new()
                 .service(web::resource("/comment").route(web::post().to(comment_removal_plain))),
         )
         .await;
         let req = test::TestRequest::post()
             .uri("/comment?file_name=foo.java")
-            .set(ContentType::plaintext())
+            .insert_header(ContentType::plaintext())
             .set_payload(input_vec)
             .to_request();
 
-        let resp = test::call_service(&mut app, req).await;
+        let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), StatusCode::OK);
 
         let res = test::read_body(resp).await;
@@ -607,7 +599,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_metrics_json() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/metrics").route(web::post().to(metrics_json))),
         )
         .await;
@@ -621,7 +613,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "1234",
             "language": "python",
@@ -650,7 +642,8 @@ mod tests {
                                    "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 0.5, "closures_average": 0.0, "total": 1.0, "average": 0.5, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 0.0, "functions_max": 1.0},
                                    "mi": {"mi_original": 139.974_331_558_152_1,
                                           "mi_sei": 161.414_455_240_662_22,
-                                          "mi_visual_studio": 81.856_334_244_533_39}},
+                                          "mi_visual_studio": 81.856_334_244_533_39},
+                                   "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
                                    "start_line": 3,
@@ -677,7 +670,8 @@ mod tests {
                                                "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 1.0, "closures_average": 0.0, "total": 1.0, "average": 1.0, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 1.0, "functions_max": 1.0},
                                                "mi": {"mi_original": 151.433_315_883_223_23,
                                                       "mi_sei": 142.873_061_717_489_78,
-                                                      "mi_visual_studio": 88.557_494_668_551_6}},
+                                                      "mi_visual_studio": 88.557_494_668_551_6},
+                                               "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                                    "name": "foo",
                                    "spaces": []}]}
         });
@@ -687,7 +681,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_metrics_json_unit() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/metrics").route(web::post().to(metrics_json))),
         )
         .await;
@@ -701,7 +695,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "1234",
             "language": "python",
@@ -730,7 +724,8 @@ mod tests {
                                    "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 0.5, "closures_average": 0.0, "total": 1.0, "average": 0.5, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 0.0, "functions_max": 1.0},
                                    "mi": {"mi_original": 151.203_315_883_223_2,
                                           "mi_sei": 142.643_061_717_489_76,
-                                          "mi_visual_studio": 88.422_991_744_574_97}},
+                                          "mi_visual_studio": 88.422_991_744_574_97},
+                                   "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                        "name": "test.py",
                        "spaces": []}
         });
@@ -740,17 +735,17 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_metrics_plain() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/metrics").route(web::post().to(metrics_plain))),
         )
         .await;
         let req = test::TestRequest::post()
             .uri("/metrics?file_name=test.py")
-            .set(ContentType::plaintext())
+            .insert_header(ContentType::plaintext())
             .set_payload("def foo():\n    pass\n")
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "",
             "language": "python",
@@ -779,7 +774,8 @@ mod tests {
                                    "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 0.5, "closures_average": 0.0, "total": 1.0, "average": 0.5, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 0.0, "functions_max": 1.0},
                                    "mi": {"mi_original": 151.203_315_883_223_2,
                                           "mi_sei": 142.643_061_717_489_76,
-                                          "mi_visual_studio": 88.422_991_744_574_97}},
+                                          "mi_visual_studio": 88.422_991_744_574_97},
+                                   "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                        "name": "test.py",
                        "spaces": [{"kind": "function",
                                    "start_line": 1,
@@ -806,7 +802,8 @@ mod tests {
                                                "nom": {"functions": 1.0, "closures": 0.0, "functions_average": 1.0, "closures_average": 0.0, "total": 1.0, "average": 1.0, "closures_min": 0.0, "closures_max": 0.0, "functions_min": 1.0, "functions_max": 1.0},
                                                "mi": {"mi_original": 151.433_315_883_223_23,
                                                       "mi_sei": 142.873_061_717_489_78,
-                                                      "mi_visual_studio": 88.557_494_668_551_6}},
+                                                      "mi_visual_studio": 88.557_494_668_551_6},
+                                               "abc": {"assignments": 0.0, "branches": 0.0, "conditions": 0.0, "magnitude": 0.0, "assignments_average": 0.0, "branches_average": 0.0, "conditions_average": 0.0, "assignments_min": 0.0, "assignments_max": 0.0, "branches_min": 0.0, "branches_max": 0.0, "conditions_min": 0.0, "conditions_max": 0.0}},
                                    "name": "foo",
                                    "spaces": []}]}
         });
@@ -816,7 +813,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_function_json() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/function").route(web::post().to(function_json))),
         )
         .await;
@@ -829,7 +826,7 @@ mod tests {
             })
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "1234",
             "spans": [
@@ -853,17 +850,17 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_web_function_plain() {
-        let mut app = test::init_service(
+        let app = test::init_service(
             App::new().service(web::resource("/function").route(web::post().to(function_plain))),
         )
         .await;
         let req = test::TestRequest::post()
             .uri("/function?file_name=test.py")
-            .set(ContentType::plaintext())
+            .insert_header(ContentType::plaintext())
             .set_payload("def foo():\n    pass\n\ndef bar():\n    pass")
             .to_request();
 
-        let res: Value = test::read_response_json(&mut app, req).await;
+        let res: Value = test::call_and_read_body_json(&app, req).await;
         let expected = json!({
             "id": "",
             "spans": [

@@ -277,13 +277,13 @@ mod tests {
         operators_str.sort_unstable();
         correct_operators.sort_unstable();
 
-        assert_eq!(&operators_str[..], &correct_operators[..]);
+        assert_eq!(&operators_str[..], correct_operators);
 
         // Sorting out operands because they are returned in arbitrary order
         operands_str.sort_unstable();
         correct_operands.sort_unstable();
 
-        assert_eq!(&operands_str[..], &correct_operands[..]);
+        assert_eq!(&operands_str[..], correct_operands);
     }
 
     #[test]

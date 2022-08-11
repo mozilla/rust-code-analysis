@@ -85,7 +85,6 @@ where
     let mut all_files: HashMap<String, Vec<PathBuf>> = HashMap::new();
 
     for path in paths.drain(..) {
-        let path = PathBuf::from(path);
         if !path.exists() {
             eprintln!("Warning: File doesn't exist: {:?}", path);
             continue;
@@ -148,7 +147,7 @@ pub struct FilesData {
     /// Kind of files excluded from a search.
     pub exclude: GlobSet,
     /// List of file paths.
-    pub paths: Vec<String>,
+    pub paths: Vec<PathBuf>,
 }
 
 /// A runner to process files concurrently.

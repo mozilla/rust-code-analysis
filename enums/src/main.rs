@@ -1,71 +1,79 @@
-#[macro_use]
-extern crate clap;
+use std::path::PathBuf;
 
-use clap::{App, Arg};
+use clap::Parser;
 
 use enums::*;
 
+#[derive(Debug)]
+enum OutputLanguage {
+    Rust,
+    Go,
+    Json,
+    CMacros,
+}
+
+impl std::str::FromStr for OutputLanguage {
+    type Err = &'static str;
+
+    fn from_str(env: &str) -> std::result::Result<Self, Self::Err> {
+        match env {
+            "rust" => Ok(Self::Rust),
+            "go" => Ok(Self::Go),
+            "json" => Ok(Self::Json),
+            "c_macros" => Ok(Self::CMacros),
+            _ => Err("Not a valid value, run `--help` to know valid values"),
+        }
+    }
+}
+
+impl OutputLanguage {
+    const fn variants() -> [&'static str; 4] {
+        ["rust", "go", "json", "c_macros"]
+    }
+}
+
+#[derive(Parser, Debug)]
+#[clap(
+    name = "enums",
+    version,
+    author,
+    about = "Generate enums for a target language to use with tree-sitter."
+)]
+struct Opts {
+    /// Output directory.
+    #[clap(long, short, default_value = ".", value_parser)]
+    output: PathBuf,
+    /// Target language.
+    #[clap(long, short, default_value = "rust", possible_values = OutputLanguage::variants())]
+    language: OutputLanguage,
+    /// File name template.
+    #[clap(long, short, default_value = "language_$")]
+    file_template: String,
+}
+
 fn main() {
-    let matches = App::new("enums")
-        .version(crate_version!())
-        .author(crate_authors!("\n"))
-        .about("Generate enums for a target language to use with tree-sitter")
-        .arg(
-            Arg::with_name("output")
-                .help("Sets the output directory")
-                .short("o")
-                .long("output")
-                .value_name("OUTPUT DIR")
-                .default_value(".")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("language")
-                .help("Target language")
-                .short("l")
-                .long("language")
-                .value_name("LANGUAGE")
-                .default_value("rust")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("file template")
-                .help("File name template")
-                .short("f")
-                .long("file-template")
-                .value_name("FILE TEMPLATE")
-                .default_value("language_$")
-                .takes_value(true),
-        )
-        .get_matches();
+    let opts = Opts::parse();
 
-    let output = matches.value_of("output").unwrap();
-    let language = matches.value_of("language").unwrap();
-    let file_template = matches.value_of("file template").unwrap();
-
-    match language {
-        "rust" => {
-            if let Some(err) = generate_rust(output, file_template).err() {
+    match opts.language {
+        OutputLanguage::Rust => {
+            if let Some(err) = generate_rust(&opts.output, &opts.file_template).err() {
                 eprintln!("{:?}", err);
             }
         }
-        "go" => {
-            if let Some(err) = generate_go(output, file_template).err() {
+        OutputLanguage::Go => {
+            if let Some(err) = generate_go(&opts.output, &opts.file_template).err() {
                 eprintln!("{:?}", err);
             }
         }
-        "json" => {
-            if let Some(err) = generate_json(output, file_template).err() {
+        OutputLanguage::Json => {
+            if let Some(err) = generate_json(&opts.output, &opts.file_template).err() {
                 eprintln!("{:?}", err);
             }
         }
-        "c_macros" => {
-            if let Some(err) = generate_macros(output).err() {
+        OutputLanguage::CMacros => {
+            if let Some(err) = generate_macros(&opts.output).err() {
                 eprintln!("{:?}", err);
             }
-        }
-        _ => {
-            eprintln!("Invalid target language: {}", language);
         }
     }
 }

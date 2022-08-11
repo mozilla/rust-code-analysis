@@ -1,13 +1,14 @@
 mod formats;
 
-use clap::{crate_version, App, Arg};
-use globset::{Glob, GlobSet, GlobSetBuilder};
+use std::cmp::Ordering;
 use std::collections::{hash_map, HashMap};
-use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process;
-use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use std::thread::available_parallelism;
+
+use clap::Parser;
+use globset::{Glob, GlobSet, GlobSetBuilder};
 
 use formats::Format;
 
@@ -51,20 +52,18 @@ struct Config {
     count_lock: Option<Arc<Mutex<Count>>>,
 }
 
-fn mk_globset(elems: clap::Values) -> GlobSet {
+fn mk_globset(elems: Vec<String>) -> GlobSet {
+    if elems.is_empty() {
+        return GlobSet::empty();
+    }
+
     let mut globset = GlobSetBuilder::new();
-    for e in elems {
-        if !e.is_empty() {
-            if let Ok(glob) = Glob::new(e) {
-                globset.add(glob);
-            }
+    elems.iter().filter(|e| !e.is_empty()).for_each(|e| {
+        if let Ok(glob) = Glob::new(e) {
+            globset.add(glob);
         }
-    }
-    if let Ok(globset) = globset.build() {
-        globset
-    } else {
-        GlobSet::empty()
-    }
+    });
+    globset.build().map_or(GlobSet::empty(), |globset| globset)
 }
 
 fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
@@ -169,216 +168,109 @@ fn process_dir_path(all_files: &mut HashMap<String, Vec<PathBuf>>, path: &Path, 
     }
 }
 
-fn parse_or_exit<T>(s: &str) -> T
-where
-    T: FromStr,
-    T::Err: fmt::Display,
-{
-    T::from_str(s).unwrap_or_else(|e| {
-        eprintln!("Error:\n{}", e);
-        process::exit(1);
-    })
+#[derive(Parser, Debug)]
+#[clap(
+    name = "rust-code-analysis-cli",
+    version,
+    author,
+    about = "Analyze source code."
+)]
+struct Opts {
+    /// Input files to analyze.
+    #[clap(long, short, value_parser)]
+    paths: Vec<PathBuf>,
+    /// Output AST to stdout.
+    #[clap(long, short)]
+    dump: bool,
+    /// Remove comments in the specified files.
+    #[clap(long, short)]
+    comments: bool,
+    /// Find nodes of the given type.
+    #[clap(long, short, default_value = "Vec::new()", number_of_values = 1)]
+    find: Vec<String>,
+    /// Get functions and their spans.
+    #[clap(long, short = 'F')]
+    function: bool,
+    /// Count nodes of the given type: comma separated list.
+    #[clap(long, short = 'C', default_value = "Vec::new()", number_of_values = 1)]
+    count: Vec<String>,
+    /// Compute different metrics.
+    #[clap(long, short)]
+    metrics: bool,
+    /// Retrieve all operands and operators in a code.
+    #[clap(long, conflicts_with = "metrics")]
+    ops: bool,
+    /// Do action in place.
+    #[clap(long, short)]
+    in_place: bool,
+    /// Glob to include files.
+    #[clap(long, short = 'I')]
+    include: Vec<String>,
+    /// Glob to exclude files.
+    #[clap(long, short = 'X')]
+    exclude: Vec<String>,
+    /// Number of jobs.
+    #[clap(long, short = 'j')]
+    num_jobs: Option<usize>,
+    /// Language type.
+    #[clap(long, short)]
+    language_type: Option<String>,
+    /// Output metrics as different formats.
+    #[clap(long, short = 'O', possible_values = Format::all())]
+    output_format: Option<Format>,
+    /// Dump a pretty json file.
+    #[clap(long = "pr")]
+    pretty: bool,
+    /// Output file/directory.
+    #[clap(long, short, value_parser)]
+    output: Option<PathBuf>,
+    /// Get preprocessor declaration for C/C++.
+    #[clap(long, value_parser, number_of_values = 1)]
+    preproc: Vec<PathBuf>,
+    /// Line start.
+    #[clap(long = "ls")]
+    line_start: Option<usize>,
+    /// Line end.
+    #[clap(long = "le")]
+    line_end: Option<usize>,
+    /// Print the warnings.
+    #[clap(long, short)]
+    warning: bool,
 }
 
 fn main() {
-    let matches = App::new("rust-code-analysis-cli")
-        .version(crate_version!())
-        .author(&*env!("CARGO_PKG_AUTHORS").replace(':', "\n"))
-        .about("Analyze source code")
-        .arg(
-            Arg::new("paths")
-                .help("Sets the input files to analyze")
-                .short('p')
-                .long("paths")
-                .default_value(".")
-                .multiple_values(true)
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("dump")
-                .help("Outputs the AST to stdout")
-                .short('d')
-                .long("dump"),
-        )
-        .arg(
-            Arg::new("remove_comments")
-                .help("Remove comment in the specified files")
-                .short('c')
-                .long("comments"),
-        )
-        .arg(
-            Arg::new("find")
-                .help("Find nodes of the given type: comma separated list")
-                .short('f')
-                .long("find")
-                .default_value("")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("function")
-                .help("Get functions and their spans")
-                .short('F')
-                .long("function"),
-        )
-        .arg(
-            Arg::new("count")
-                .help("Count nodes of the given type: comma separated list")
-                .short('C')
-                .long("count")
-                .default_value("")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("metrics")
-                .help("Compute different metrics")
-                .long("metrics")
-                .short('m'),
-        )
-        .arg(
-            Arg::new("ops")
-                .help("Retrieves all operands and operators in a code")
-                .long("ops")
-                .conflicts_with("metrics"),
-        )
-        .arg(Arg::new("in_place").help("Do action in place").short('i'))
-        .arg(
-            Arg::new("include")
-                .help("Glob to include files")
-                .short('I')
-                .long("include")
-                .default_value("")
-                .multiple_values(true)
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("exclude")
-                .help("Glob to exclude files")
-                .short('X')
-                .long("exclude")
-                .default_value("")
-                .multiple_values(true)
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("num_jobs")
-                .help("Number of jobs")
-                .short('j')
-                .value_name("NUMBER")
-                .default_value("")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("language_type")
-                .help("Language type")
-                .short('l')
-                .long("language-type")
-                .default_value("")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("output_format")
-                .help("Output metrics as different formats")
-                .short('O')
-                .long("output-format")
-                .possible_values(Format::all())
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("pretty")
-                .help("Dump a pretty json file")
-                .long("pr"),
-        )
-        .arg(
-            Arg::new("output")
-                .help("Output file/directory")
-                .short('o')
-                .long("output")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("preproc")
-                .help("Get preprocessor declaration for C/C++")
-                .long("preproc")
-                .default_value("")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("line_start")
-                .help("Line start")
-                .long("ls")
-                .default_value("")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("line_end")
-                .help("Line end")
-                .long("le")
-                .default_value("")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::new("warning")
-                .help("Print the warnings")
-                .long("warning")
-                .short('w'),
-        )
-        .get_matches();
+    let opts = Opts::parse();
 
-    let paths: Vec<_> = matches.values_of("paths").unwrap().collect();
-    let paths: Vec<String> = paths.iter().map(|x| (*x).to_string()).collect();
-    let dump = matches.is_present("dump");
-    let function = matches.is_present("function");
-    let in_place = matches.is_present("in_place");
-    let comments = matches.is_present("remove_comments");
-    let find = matches.value_of("find").unwrap();
-    let find_filter: Vec<_> = find
-        .split(|c| c == ',')
-        .filter(|k| !k.is_empty())
-        .map(|s| s.to_string())
-        .collect();
-    let count = matches.value_of("count").unwrap();
-    let count_filter: Vec<_> = count
-        .split(|c| c == ',')
-        .filter(|k| !k.is_empty())
-        .map(|s| s.to_string())
-        .collect();
-    let count_lock = if matches.occurrences_of("count") != 0 {
+    let count_lock = if !opts.count.is_empty() {
         Some(Arc::new(Mutex::new(Count::default())))
     } else {
         None
     };
-    let metrics = matches.is_present("metrics");
-    let ops = matches.is_present("ops");
-    let typ = matches.value_of("language_type").unwrap();
-    let preproc_value = matches.value_of("preproc").unwrap();
-    let (preproc_lock, preproc) = if !preproc_value.is_empty() {
-        let path = PathBuf::from(preproc_value);
-        let data = read_file(&path).unwrap();
-        eprintln!("Load preproc data");
-        let x = (
-            None,
-            Some(Arc::new(
-                serde_json::from_slice::<PreprocResults>(&data).unwrap(),
-            )),
-        );
-        eprintln!("Load preproc data: finished");
-        x
-    } else if matches.occurrences_of("preproc") != 0 {
-        (Some(Arc::new(Mutex::new(PreprocResults::default()))), None)
-    } else {
-        (None, None)
+
+    let (preproc_lock, preproc) = match opts.preproc.len().cmp(&1) {
+        Ordering::Equal => {
+            let data = read_file(&opts.preproc[0]).unwrap();
+            eprintln!("Load preproc data");
+            let x = (
+                None,
+                Some(Arc::new(
+                    serde_json::from_slice::<PreprocResults>(&data).unwrap(),
+                )),
+            );
+            eprintln!("Load preproc data: finished");
+            x
+        }
+        Ordering::Greater => (Some(Arc::new(Mutex::new(PreprocResults::default()))), None),
+        Ordering::Less => (None, None),
     };
 
-    let output_format = matches
-        .value_of("output_format")
-        .map(parse_or_exit::<Format>);
-    let pretty = matches.is_present("pretty");
-    let output = matches.value_of("output").map(PathBuf::from);
-    let output_is_dir = output.as_ref().map(|p| p.is_dir()).unwrap_or(false);
-    if (metrics || ops) && output.is_some() && !output_is_dir {
+    let output_is_dir = opts.output.as_ref().map(|p| p.is_dir()).unwrap_or(false);
+    if (opts.metrics || opts.ops) && opts.output.is_some() && !output_is_dir {
         eprintln!("Error: The output parameter must be a directory");
         process::exit(1);
     }
+
+    let typ = opts.language_type.unwrap_or_default();
     let language = if preproc_lock.is_some() {
         Some(LANG::Preproc)
     } else if typ.is_empty() {
@@ -388,44 +280,39 @@ fn main() {
     } else if typ == "preproc" {
         Some(LANG::Preproc)
     } else {
-        get_from_ext(typ)
+        get_from_ext(&typ)
     };
 
-    let num_jobs = if let Ok(num_jobs) = matches.value_of("num_jobs").unwrap().parse::<usize>() {
-        std::cmp::max(2, num_jobs) - 1
-    } else {
-        std::cmp::max(2, num_cpus::get()) - 1
-    };
+    let num_jobs = opts
+        .num_jobs
+        .map(|num_jobs| std::cmp::max(2, num_jobs) - 1)
+        .unwrap_or_else(|| {
+            std::cmp::max(
+                2,
+                available_parallelism()
+                    .expect("Unrecoverable: Failed to get thread count")
+                    .get(),
+            ) - 1
+        });
 
-    let line_start = if let Ok(n) = matches.value_of("line_start").unwrap().parse::<usize>() {
-        Some(n)
-    } else {
-        None
-    };
-    let line_end = if let Ok(n) = matches.value_of("line_end").unwrap().parse::<usize>() {
-        Some(n)
-    } else {
-        None
-    };
-
-    let include = mk_globset(matches.values_of("include").unwrap());
-    let exclude = mk_globset(matches.values_of("exclude").unwrap());
+    let include = mk_globset(opts.include);
+    let exclude = mk_globset(opts.exclude);
 
     let cfg = Config {
-        dump,
-        in_place,
-        comments,
-        find_filter,
-        count_filter,
+        dump: opts.dump,
+        in_place: opts.in_place,
+        comments: opts.comments,
+        find_filter: opts.find,
+        count_filter: opts.count,
         language,
-        function,
-        metrics,
-        ops,
-        output_format,
-        pretty,
-        output: output.clone(),
-        line_start,
-        line_end,
+        function: opts.function,
+        metrics: opts.metrics,
+        ops: opts.ops,
+        output_format: opts.output_format,
+        pretty: opts.pretty,
+        output: opts.output.clone(),
+        line_start: opts.line_start,
+        line_end: opts.line_end,
         preproc_lock: preproc_lock.clone(),
         preproc,
         count_lock: count_lock.clone(),
@@ -434,7 +321,7 @@ fn main() {
     let files_data = FilesData {
         include,
         exclude,
-        paths,
+        paths: opts.paths,
     };
 
     let all_files = match ConcurrentRunner::new(num_jobs, act_on_file)
@@ -458,7 +345,7 @@ fn main() {
         fix_includes(&mut data.files, &all_files);
 
         let data = serde_json::to_string(&data).unwrap();
-        if let Some(output_path) = output {
+        if let Some(output_path) = opts.output {
             write_file(&output_path, data.as_bytes()).unwrap();
         } else {
             println!("{}", data);

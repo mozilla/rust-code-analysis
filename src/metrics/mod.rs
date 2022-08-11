@@ -1,3 +1,4 @@
+pub mod abc;
 pub mod cognitive;
 pub mod cyclomatic;
 pub mod exit;
@@ -6,3 +7,6 @@ pub mod loc;
 pub mod mi;
 pub mod nargs;
 pub mod nom;
+pub mod npa;
+pub mod npm;
+pub mod wmc;

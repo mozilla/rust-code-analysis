@@ -20,6 +20,16 @@ impl<'a> Node<'a> {
     pub(crate) fn object(&self) -> OtherNode<'a> {
         self.0
     }
+
+    pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
+        let mut cursor = self.0.walk();
+        cursor.goto_first_child();
+        (0..self.object().child_count()).into_iter().map(move |_| {
+            let result = Node::new(cursor.node());
+            cursor.goto_next_sibling();
+            result
+        })
+    }
 }
 
 impl<'a> Search<'a> for Node<'a> {

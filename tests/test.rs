@@ -178,7 +178,7 @@ fn compare_f64(f1: f64, f2: &serde_json::Value) {
     } else {
         let ft1 = f64::trunc(f1 * 1000.0) / 1000.0;
         let ft2 = f64::trunc(f2.as_f64().unwrap() * 1000.0) / 1000.0;
-        assert!((ft1 - ft2).abs() < f64::EPSILON);
+        assert!(ft1.total_cmp(&ft2) == std::cmp::Ordering::Equal);
     }
 }
 
@@ -218,7 +218,7 @@ fn compare_rca_output_with_files(
     let files_data = FilesData {
         include: gsbi.build().unwrap(),
         exclude: GlobSet::empty(),
-        paths: vec![repo_folder.to_owned()],
+        paths: vec![Path::new(repo_folder).to_path_buf()],
     };
 
     if let Err(e) = ConcurrentRunner::new(num_jobs, act_on_file).run(cfg, files_data) {
