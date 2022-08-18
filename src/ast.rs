@@ -32,11 +32,11 @@ pub struct AstPayload {
 #[derive(Debug, Serialize)]
 pub struct AstResponse {
     /// The id associated to a request for an `AST`
-    id: String,
+    pub id: String,
     /// The root node of an `AST`
     ///
     /// If `None`, an error has occurred
-    root: Option<AstNode>,
+    pub root: Option<AstNode>,
 }
 
 /// Information on an `AST` node.
