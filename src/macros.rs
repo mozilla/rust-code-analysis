@@ -46,7 +46,7 @@ macro_rules! get_language {
 macro_rules! mk_enum {
     ( $( $camel:ident, $description:expr ),* ) => {
         /// The list of supported languages.
-        #[derive(Clone, Copy, Debug, PartialEq)]
+        #[derive(Clone, Copy, Debug, PartialEq, Eq)]
         pub enum LANG {
             $(
                 #[doc = $description]
