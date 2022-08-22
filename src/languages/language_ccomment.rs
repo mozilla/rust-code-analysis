@@ -2,7 +2,7 @@
 
 use num_derive::FromPrimitive;
 
-#[derive(Clone, Debug, PartialEq, FromPrimitive)]
+#[derive(Clone, Debug, PartialEq, Eq, FromPrimitive)]
 pub enum Ccomment {
     End = 0,
     Nothing = 1,

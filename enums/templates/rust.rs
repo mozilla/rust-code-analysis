@@ -2,7 +2,7 @@
 
 use num_derive::FromPrimitive;
 
-#[derive(Clone, Debug, PartialEq, FromPrimitive)]
+#[derive(Clone, Debug, PartialEq, Eq, FromPrimitive)]
 pub enum {{ c_name }} {
     {% for (name, _, _) in names -%}
     {{ name }} = {{ loop.index0 }},
