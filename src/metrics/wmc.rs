@@ -19,7 +19,7 @@ use crate::*;
 /// <https://www.researchgate.net/publication/3187649_Kemerer_CF_A_metric_suite_for_object_oriented_design_IEEE_Trans_Softw_Eng_206_476-493>
 #[derive(Debug, Clone, Default)]
 pub struct Stats {
-    cc: f64,
+    cyclomatic: f64,
     class_wmc: f64,
     interface_wmc: f64,
     class_wmc_sum: f64,
@@ -61,8 +61,8 @@ impl Stats {
         // into the `Wmc` metric value of a class or interface
         if let Function = other.space_kind {
             match self.space_kind {
-                Class => self.class_wmc += other.cc,
-                Interface => self.interface_wmc += other.cc,
+                Class => self.class_wmc += other.cyclomatic,
+                Interface => self.interface_wmc += other.cyclomatic,
                 _ => {}
             }
         }
@@ -142,7 +142,7 @@ impl Wmc for JavaCode {
             Function => {
                 stats.space_kind = space_kind;
                 // Saves the cyclomatic complexity of the method
-                stats.cc = cyclomatic.cyclomatic_sum();
+                stats.cyclomatic = cyclomatic.cyclomatic_sum();
             }
             Class | Interface | Unit => {
                 stats.space_kind = space_kind;
