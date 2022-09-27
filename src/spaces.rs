@@ -222,6 +222,7 @@ fn compute_minmax(state: &mut State) {
 
 #[inline(always)]
 fn compute_sum(state: &mut State) {
+    state.space.metrics.wmc.compute_sum();
     state.space.metrics.npm.compute_sum();
     state.space.metrics.npa.compute_sum();
 }
