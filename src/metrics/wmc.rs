@@ -138,16 +138,14 @@ impl Wmc for JavaCode {
     fn compute(space_kind: SpaceKind, cyclomatic: &cyclomatic::Stats, stats: &mut Stats) {
         use SpaceKind::*;
 
-        match space_kind {
-            Function => {
+        if let Unit | Class | Interface | Function = space_kind {
+            if stats.space_kind == Unknown {
                 stats.space_kind = space_kind;
+            }
+            if space_kind == Function {
                 // Saves the cyclomatic complexity of the method
                 stats.cyclomatic = cyclomatic.cyclomatic_sum();
             }
-            Class | Interface | Unit => {
-                stats.space_kind = space_kind;
-            }
-            _ => {}
         }
     }
 }
