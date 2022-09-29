@@ -339,16 +339,24 @@ fn dump_wmc(
         return Ok(());
     }
 
-    let pref = if last { "`- " } else { "|- " };
+    let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
     write!(stdout, "{}{}", prefix, pref)?;
 
     color!(stdout, Green, true);
-    write!(stdout, "wmc: ")?;
+    writeln!(stdout, "wmc")?;
 
-    color!(stdout, White);
-    writeln!(stdout, "{}", stats.wmc())
+    let prefix = format!("{}{}", prefix, pref_child);
+    dump_value("classes", stats.class_wmc_sum(), &prefix, false, stdout)?;
+    dump_value(
+        "interfaces",
+        stats.interface_wmc_sum(),
+        &prefix,
+        false,
+        stdout,
+    )?;
+    dump_value("total", stats.total_wmc(), &prefix, true, stdout)
 }
 
 fn dump_npm(

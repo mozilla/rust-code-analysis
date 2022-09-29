@@ -19,8 +19,11 @@ use crate::*;
 /// <https://www.researchgate.net/publication/3187649_Kemerer_CF_A_metric_suite_for_object_oriented_design_IEEE_Trans_Softw_Eng_206_476-493>
 #[derive(Debug, Clone, Default)]
 pub struct Stats {
-    wmc: f64,
-    cc: f64,
+    cyclomatic: f64,
+    class_wmc: f64,
+    interface_wmc: f64,
+    class_wmc_sum: f64,
+    interface_wmc_sum: f64,
     space_kind: SpaceKind,
 }
 
@@ -29,15 +32,23 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("wmc", 1)?;
-        st.serialize_field("wmc", &self.wmc())?;
+        let mut st = serializer.serialize_struct("wmc", 3)?;
+        st.serialize_field("classes", &self.class_wmc_sum())?;
+        st.serialize_field("interfaces", &self.interface_wmc_sum())?;
+        st.serialize_field("total", &self.total_wmc())?;
         st.end()
     }
 }
 
 impl fmt::Display for Stats {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "wmc: {}", self.wmc(),)
+        write!(
+            f,
+            "classes: {}, interfaces: {}, total: {}",
+            self.class_wmc_sum(),
+            self.interface_wmc_sum(),
+            self.total_wmc()
+        )
     }
 }
 
@@ -46,23 +57,56 @@ impl Stats {
     pub fn merge(&mut self, other: &Stats) {
         use SpaceKind::*;
 
-        match (self.space_kind, other.space_kind) {
-            (Unit, Class | Interface) => {
-                self.wmc += other.wmc;
+        // Merges the cyclomatic complexity of a method
+        // into the `Wmc` metric value of a class or interface
+        if let Function = other.space_kind {
+            match self.space_kind {
+                Class => self.class_wmc += other.cyclomatic,
+                Interface => self.interface_wmc += other.cyclomatic,
+                _ => {}
             }
-            (Class | Interface, Function) => {
-                // Merges the cyclomatic complexity of the method
-                // into the `Wmc` metric of the class or interface
-                self.wmc += other.cc;
-            }
-            _ => {}
         }
+
+        self.class_wmc_sum += other.class_wmc_sum;
+        self.interface_wmc_sum += other.interface_wmc_sum;
     }
 
-    /// Returns the `Wmc` metric value.
+    /// Returns the `Wmc` metric value of the classes in a space.
     #[inline(always)]
-    pub fn wmc(&self) -> f64 {
-        self.wmc
+    pub fn class_wmc(&self) -> f64 {
+        self.class_wmc
+    }
+
+    /// Returns the `Wmc` metric value of the interfaces in a space.
+    #[inline(always)]
+    pub fn interface_wmc(&self) -> f64 {
+        self.interface_wmc
+    }
+
+    /// Returns the sum of the `Wmc` metric values of the classes in a space.
+    #[inline(always)]
+    pub fn class_wmc_sum(&self) -> f64 {
+        self.class_wmc_sum
+    }
+
+    /// Returns the sum of the `Wmc` metric values of the interfaces in a space.
+    #[inline(always)]
+    pub fn interface_wmc_sum(&self) -> f64 {
+        self.interface_wmc_sum
+    }
+
+    /// Returns the total `Wmc` metric value in a space.
+    #[inline(always)]
+    pub fn total_wmc(&self) -> f64 {
+        self.class_wmc_sum() + self.interface_wmc_sum()
+    }
+
+    // Accumulates the `Wmc` metric values
+    // of classes and interfaces into the sums
+    #[inline(always)]
+    pub(crate) fn compute_sum(&mut self) {
+        self.class_wmc_sum += self.class_wmc;
+        self.interface_wmc_sum += self.interface_wmc;
     }
 
     // Checks if the `Wmc` metric is disabled
@@ -94,16 +138,14 @@ impl Wmc for JavaCode {
     fn compute(space_kind: SpaceKind, cyclomatic: &cyclomatic::Stats, stats: &mut Stats) {
         use SpaceKind::*;
 
-        match space_kind {
-            Function => {
+        if let Unit | Class | Interface | Function = space_kind {
+            if stats.space_kind == Unknown {
                 stats.space_kind = space_kind;
+            }
+            if space_kind == Function {
                 // Saves the cyclomatic complexity of the method
-                stats.cc = cyclomatic.cyclomatic_sum();
+                stats.cyclomatic = cyclomatic.cyclomatic_sum();
             }
-            Class | Interface | Unit => {
-                stats.space_kind = space_kind;
-            }
-            _ => {}
         }
     }
 }
@@ -160,7 +202,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 13.0)] // 1 top level class
+            [
+                (class_wmc_sum, 13.0), // 1 class
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 13.0)
+            ]
         );
     }
 
@@ -194,7 +240,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 5.0)] // 2 top level classes (wmc total = 3 + 2)
+            [
+                (class_wmc_sum, 5.0), // 2 classes (3 + 2)
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 5.0)
+            ]
         );
     }
 
@@ -211,7 +261,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 0.0)] // 1 top level class
+            [
+                (class_wmc_sum, 1.0), // 2 classes (0 + 1)
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 1.0)
+            ]
         );
     }
 
@@ -270,7 +324,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 2.0)] // 1 top level class
+            [
+                (class_wmc_sum, 9.0), // 6 classes (2 + 1 + 2 + 1 + 1 + 2)
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 9.0)
+            ]
         );
     }
 
@@ -298,7 +356,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 5.0)] // 1 top level class
+            [
+                (class_wmc_sum, 7.0), // 2 classes (5 + 2)
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 7.0)
+            ]
         );
     }
 
@@ -323,7 +385,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 4.0)] // 2 top level classes (wmc total = 1 + 3)
+            [
+                (class_wmc_sum, 4.0), // 2 classes (1 + 3)
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 4.0)
+            ]
         );
     }
 
@@ -362,7 +428,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 8.0)] // 2 top level classes (wmc total = 2 + 6)
+            [
+                (class_wmc_sum, 8.0), // 2 classes (2 + 6)
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 8.0)
+            ]
         );
     }
 
@@ -388,7 +458,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 2.0)] // 1 top level class
+            [
+                (class_wmc_sum, 2.0), // 1 class
+                (interface_wmc_sum, 0.0),
+                (total_wmc, 2.0)
+            ]
         );
     }
 
@@ -407,7 +481,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 6.0)] // 1 top level interface
+            [
+                (class_wmc_sum, 0.0),
+                (interface_wmc_sum, 6.0), // 1 interface
+                (total_wmc, 6.0)
+            ]
         );
     }
 
@@ -428,7 +506,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 3.0)] // 2 top level interfaces (wmc total = 1 + 2)
+            [
+                (class_wmc_sum, 0.0),
+                (interface_wmc_sum, 3.0), // 2 interfaces (1 + 2)
+                (total_wmc, 3.0)
+            ]
         );
     }
 
@@ -453,7 +535,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 1.0)] // 1 top level interface
+            [
+                (class_wmc_sum, 0.0),
+                (interface_wmc_sum, 5.0), // 4 interfaces (1 + 1 + 2 + 1)
+                (total_wmc, 5.0)
+            ]
         );
     }
 
@@ -478,7 +564,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 2.0)] // 1 top level interface
+            [
+                (class_wmc_sum, 2.0),     // 1 class
+                (interface_wmc_sum, 2.0), // 1 interface
+                (total_wmc, 4.0)
+            ]
         );
     }
 
@@ -503,7 +593,11 @@ mod tests {
             "foo.java",
             JavaParser,
             wmc,
-            [(wmc, 2.0)] // 1 top level class
+            [
+                (class_wmc_sum, 2.0),     // 1 class
+                (interface_wmc_sum, 2.0), // 1 interface
+                (total_wmc, 4.0)
+            ]
         );
     }
 }
