@@ -1714,7 +1714,53 @@ mod tests {
     }
 
     #[test]
-    fn java_simple_function() {
+    fn java_single_branch_function() {
+        check_metrics!(
+            "public static void print(Boolean a){  
+                if(a){ // +1
+                  System.out.println(\"test1\");
+                }
+              }",
+            "foo.java",
+            JavaParser,
+            cognitive,
+            [
+                (cognitive_sum, 1, usize),
+                (cognitive_min, 1, usize),
+                (cognitive_max, 1, usize)
+            ],
+            []
+        );
+    }
+
+    #[test]
+    fn java_multiple_branch_function() {
+        check_metrics!(
+            "public static void print(Boolean a, Boolean b){  
+                if(a){ // +1
+                  System.out.println(\"test1\");
+                }
+                if(b){ // +1
+                  System.out.println(\"test2\");
+                }
+                else { // +1
+                    System.out.println(\"test3\");
+                }
+              }",
+            "foo.java",
+            JavaParser,
+            cognitive,
+            [
+                (cognitive_sum, 3, usize),
+                (cognitive_min, 3, usize),
+                (cognitive_max, 3, usize)
+            ],
+            []
+        );
+    }
+
+    #[test]
+    fn java_compound_conditions() {
         check_metrics!(
             "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
                 if(a && b){ // +2
@@ -1729,7 +1775,7 @@ mod tests {
             cognitive,
             [
                 (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
+                (cognitive_min, 4, usize),
                 (cognitive_max, 4, usize)
             ],
             [(cognitive_average, 4.0)]
