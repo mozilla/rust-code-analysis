@@ -14,7 +14,7 @@ name = "rust-code-analysis-web"
 [dependencies]
 actix-rt = "^2.6"
 actix-web = "^4.1"
-clap = { version = "^3.2.8", features = ["derive"] }
+clap = { version = "^3.2.22", features = ["derive"] }
 futures = "^0.3"
 rust-code-analysis = { path = "..", version = "=0.0.24" }
 serde = "^1.0"
