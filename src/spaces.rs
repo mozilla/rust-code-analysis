@@ -1,3 +1,4 @@
+use fxhash::FxHashMap;
 use serde::Serialize;
 use std::fmt;
 use std::path::{Path, PathBuf};
@@ -293,7 +294,10 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
     let mut children = Vec::new();
     let mut state_stack: Vec<State> = Vec::new();
     let mut last_level = 0;
-
+    // Initialize nesting_map used for storing nesting information for cognitive
+    // Three type of nesting info: conditionals, functions and lambdas
+    let mut nesting_map = FxHashMap::<usize, (usize, usize, usize)>::default();
+    nesting_map.insert(node.object().id(), (0, 0, 0));
     stack.push((node, 0));
 
     while let Some((node, level)) = stack.pop() {
@@ -321,7 +325,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
 
         if let Some(state) = state_stack.last_mut() {
             let last = &mut state.space;
-            T::Cognitive::compute(&node, &mut last.metrics.cognitive);
+            T::Cognitive::compute(&node, &mut last.metrics.cognitive, &mut nesting_map);
             T::Cyclomatic::compute(&node, &mut last.metrics.cyclomatic);
             T::Halstead::compute(&node, code, &mut state.halstead_maps);
             T::Loc::compute(&node, &mut last.metrics.loc, func_space, unit);
