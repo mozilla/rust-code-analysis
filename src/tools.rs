@@ -45,7 +45,7 @@ pub fn read_file(path: &Path) -> std::io::Result<Vec<u8>> {
 /// read_file_with_eol(&path).unwrap();
 /// ```
 pub fn read_file_with_eol(path: &Path) -> std::io::Result<Option<Vec<u8>>> {
-    let file_size = fs::metadata(&path).map_or(1024 * 1024, |m| m.len() as usize);
+    let file_size = fs::metadata(path).map_or(1024 * 1024, |m| m.len() as usize);
     if file_size <= 3 {
         // this file is very likely almost empty... so nothing to do on it
         return Ok(None);
@@ -198,7 +198,7 @@ pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, Str
         .unwrap_or_else(|| "".to_string());
     let from_ext = get_from_ext(&ext);
 
-    let mode = get_emacs_mode(buf).unwrap_or_else(|| "".to_string());
+    let mode = get_emacs_mode(buf).unwrap_or_default();
 
     let from_mode = get_from_emacs_mode(&mode);
 
@@ -225,10 +225,7 @@ pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, Str
             fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name().to_string()),
         )
     } else {
-        (
-            None,
-            fake::get_true(&ext, &mode).unwrap_or_else(|| "".to_string()),
-        )
+        (None, fake::get_true(&ext, &mode).unwrap_or_default())
     }
 }
 
@@ -317,7 +314,7 @@ pub(crate) fn guess_file<S: ::std::hash::BuildHasher>(
 
         if let Some(parent) = current_path.parent() {
             for p in possibilities.iter() {
-                if p.starts_with(&parent) && current_path != p {
+                if p.starts_with(parent) && current_path != p {
                     new_possibilities.push(p.clone());
                 }
             }

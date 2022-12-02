@@ -87,7 +87,7 @@ impl Format {
             let format_path = output_path.as_ref().unwrap().join(filename);
 
             // Create directories
-            create_dir_all(&format_path.parent().unwrap()).unwrap();
+            create_dir_all(format_path.parent().unwrap()).unwrap();
 
             let mut format_file = File::create(format_path)?;
             match self {
