@@ -19,6 +19,7 @@ macro_rules! mk_get_language {
     ( $( ($camel:ident, $name:ident) ),* ) => {
         pub fn get_language(lang: &Lang) -> Language {
             match lang {
+                Lang::Kotlin => tree_sitter_kotlin::language(),
                 Lang::Java => tree_sitter_java::language(),
                 Lang::Typescript => tree_sitter_typescript::language_typescript(),
                 Lang::Tsx => tree_sitter_typescript::language_tsx(),
