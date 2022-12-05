@@ -258,6 +258,8 @@ impl Npm for JavaCode {
     }
 }
 
+impl Npm for KotlinCode {}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;

@@ -209,6 +209,7 @@ impl Nom for CppCode {}
 impl Nom for PreprocCode {}
 impl Nom for CcommentCode {}
 impl Nom for JavaCode {}
+impl Nom for KotlinCode {}
 
 #[cfg(test)]
 mod tests {

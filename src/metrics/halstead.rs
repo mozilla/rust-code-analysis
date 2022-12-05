@@ -331,6 +331,8 @@ impl Halstead for JavaCode {
     }
 }
 
+impl Halstead for KotlinCode {}
+
 impl Halstead for PreprocCode {}
 impl Halstead for CcommentCode {}
 

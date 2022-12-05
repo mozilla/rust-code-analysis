@@ -180,6 +180,8 @@ impl Exit for JavaCode {
     }
 }
 
+impl Exit for KotlinCode {}
+
 impl Exit for PreprocCode {}
 impl Exit for CcommentCode {}
 

@@ -238,6 +238,7 @@ impl NArgs for CcommentCode {}
 impl NArgs for RustCode {}
 impl NArgs for PythonCode {}
 impl NArgs for JavaCode {}
+impl NArgs for KotlinCode {}
 
 #[cfg(test)]
 mod tests {

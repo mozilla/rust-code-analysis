@@ -449,6 +449,7 @@ impl Cognitive for TsxCode {
 impl Cognitive for PreprocCode {}
 impl Cognitive for CcommentCode {}
 impl Cognitive for JavaCode {}
+impl Cognitive for KotlinCode {}
 
 #[cfg(test)]
 mod tests {

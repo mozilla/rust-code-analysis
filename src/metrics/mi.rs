@@ -112,6 +112,7 @@ impl Mi for TsxCode {}
 impl Mi for PreprocCode {}
 impl Mi for CcommentCode {}
 impl Mi for JavaCode {}
+impl Mi for KotlinCode {}
 
 #[cfg(test)]
 mod tests {

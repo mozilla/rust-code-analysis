@@ -11,6 +11,9 @@ pub use language_cpp::*;
 pub mod language_java;
 pub use language_java::*;
 
+pub mod language_kotlin;
+pub use language_kotlin::*;
+
 pub mod language_mozjs;
 pub use language_mozjs::*;
 
