@@ -564,3 +564,5 @@ impl Getter for JavaCode {
 
     get_operator!(Java);
 }
+
+impl Getter for KotlinCode {}

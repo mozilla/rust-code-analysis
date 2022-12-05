@@ -150,6 +150,8 @@ impl Wmc for JavaCode {
     }
 }
 
+impl Wmc for KotlinCode {}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;

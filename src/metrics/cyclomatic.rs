@@ -221,6 +221,8 @@ impl Cyclomatic for JavaCode {
     }
 }
 
+impl Cyclomatic for KotlinCode {}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;

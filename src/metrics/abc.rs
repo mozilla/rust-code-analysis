@@ -350,6 +350,7 @@ impl Abc for RustCode {}
 impl Abc for CppCode {}
 impl Abc for PreprocCode {}
 impl Abc for CcommentCode {}
+impl Abc for KotlinCode {}
 
 // Fitzpatrick, Jerry (1997). "Applying the ABC metric to C, C++ and Java". C++ Report.
 // Source: https://www.softwarerenovation.com/Articles.aspx

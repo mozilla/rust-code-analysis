@@ -45,6 +45,16 @@ mk_langs!(
         ["java"]
     ),
     (
+        Kotlin,
+        "The `Kotlin` language",
+        "kotlin",
+        KotlinCode,
+        KotlinParser,
+        tree_sitter_kotlin,
+        [kt, kts],
+        ["kotlin"]
+    ),
+    (
         Rust,
         "The `Rust` language",
         "rust",

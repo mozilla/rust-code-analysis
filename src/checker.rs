@@ -218,6 +218,16 @@ impl Checker for JavaCode {
     mk_checker!(is_non_arg,);
 }
 
+impl Checker for KotlinCode {
+    mk_checker!(is_comment,);
+    mk_checker!(is_string,);
+    mk_checker!(is_call,);
+    mk_checker!(is_func,);
+    mk_checker!(is_closure,);
+    mk_checker!(is_func_space,);
+    mk_checker!(is_non_arg,);
+}
+
 impl Checker for MozjsCode {
     mk_checker!(is_comment, Comment);
     mk_checker!(is_string, String, TemplateString);

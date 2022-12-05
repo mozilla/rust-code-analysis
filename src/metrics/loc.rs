@@ -815,6 +815,8 @@ impl Loc for JavaCode {
     }
 }
 
+impl Loc for KotlinCode {}
+
 impl Loc for PreprocCode {}
 impl Loc for CcommentCode {}
 

@@ -267,6 +267,8 @@ impl Npa for JavaCode {
     }
 }
 
+impl Npa for KotlinCode {}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
