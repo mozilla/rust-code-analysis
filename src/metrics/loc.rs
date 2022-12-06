@@ -820,12 +820,12 @@ impl Loc for JavaCode {
         // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/expressions.html
         match kind_id {
             Program => {}
-            Comment => {
+            LineComment | BlockComment => {
                 add_cloc_lines(stats, start, end);
             }
             AssertStatement | BreakStatement | ContinueStatement | DoStatement
             | EnhancedForStatement | ExpressionStatement | ForStatement | IfStatement
-            | ReturnStatement | SwitchStatement | ThrowStatement | TryStatement
+            | ReturnStatement | SwitchExpression | ThrowStatement | TryStatement
             | WhileStatement => {
                 stats.lloc.logical_lines += 1;
             }
@@ -1971,7 +1971,7 @@ mod tests {
     fn java_blank() {
         check_metrics!(
             "int x = 1;
-            
+
 
             int y = 2;",
             "foo.java",
@@ -2107,7 +2107,7 @@ mod tests {
         check_metrics!(
             "
             int i=0; // +1
-            while(i < 10) { // +1 
+            while(i < 10) { // +1
                 i++; // +1
                 System.out.println(i); // +1
              }",
@@ -2125,7 +2125,7 @@ mod tests {
         check_metrics!(
             "
             int i=0; // +1
-            do { // +1 
+            do { // +1
                 i++; // +1
                 System.out.println(i); // +1
              } while(i < 10)",
@@ -2268,7 +2268,7 @@ mod tests {
     fn java_general_loc() {
         check_metrics!(
             "int max = 100;
-            
+
             /*
               Loop through and print
                 from: 0
@@ -2299,7 +2299,7 @@ mod tests {
              * The HelloWorldApp class implements an application that
              * simply prints \"Hello World!\" to standard output.
              */
-            
+
             class HelloWorldApp {
               public void main(String[] args) {
                 String message = args.length == 0 ? \"Hello empty world\" : \"Hello world\"; // +1 lloc : 1 var assignment
