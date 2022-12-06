@@ -39,8 +39,15 @@ tree-sitter-mozcpp = { path = "./tree-sitter-mozcpp", version = "=0.20.1" }
 tree-sitter-mozjs = { path = "./tree-sitter-mozjs", version = "=0.20.0" }
 
 [dev-dependencies]
+insta = { version = "1.22.0", features = ["yaml"] }
 pretty_assertions = "^1.0"
 serde_json = { version = "^1.0", features = ["arbitrary_precision"] }
+
+[profile.dev.package.insta]
+opt-level = 3
+
+[profile.dev.package.similar]
+opt-level = 3
 
 [workspace]
 members = ["rust-code-analysis-cli", "rust-code-analysis-web"]
