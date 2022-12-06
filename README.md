@@ -71,6 +71,15 @@ To verify whether all tests pass, run the `cargo test` command.
 cargo test --workspace --all-features --verbose
 ```
 
+### Updating insta tests
+We use [insta](https://insta.rs), to update the snapshot tests you should install [cargo insta](https://crates.io/crates/cargo-insta)
+
+``` console
+cargo insta test --review
+```
+
+Will run the tests, generate the new snapshot references and let you review them.
+
 # Contributing
 
 If you want to contribute to the development of this software, have a look at the
