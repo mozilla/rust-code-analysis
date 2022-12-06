@@ -1853,24 +1853,24 @@ mod tests {
             [
                 (sloc, 5, usize),  // The number of lines is 5
                 (ploc, 5, usize),  // The number of code lines is 5
-                (lloc, 7, usize),  // The number of statements is 7
+                (lloc, 6, usize),  // The number of statements is 6
                 (cloc, 0, usize),  // The number of comments is 0
                 (blank, 0, usize), // The number of blank lines is 0
                 (sloc_min, 5, usize),
                 (ploc_min, 5, usize),
-                (lloc_min, 6, usize),
+                (lloc_min, 5, usize),
                 (cloc_min, 0, usize),
                 (blank_min, 0, usize),
                 (sloc_max, 5, usize),
                 (ploc_max, 5, usize),
-                (lloc_max, 6, usize),
+                (lloc_max, 5, usize),
                 (cloc_max, 0, usize),
                 (blank_max, 0, usize)
             ],
             [
                 (sloc_average, 2.5), // The number of spaces is 2
                 (ploc_average, 2.5),
-                (lloc_average, 3.5),
+                (lloc_average, 3.0),
                 (cloc_average, 0.0),
                 (blank_average, 0.0)
             ]
