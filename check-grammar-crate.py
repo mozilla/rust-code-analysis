@@ -89,7 +89,7 @@ def run_rca(
         "--output-format=json",
         "--pr",
         "-I",
-        *include_grammars,
+        ",".join(include_grammars),
         "-p",
         repo_dir,
         "-o",
