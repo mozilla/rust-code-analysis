@@ -16,6 +16,7 @@ crossbeam = { version = "^0.8", features = ["crossbeam-channel"] }
 fxhash = "0.2"
 globset = "^0.4"
 lazy_static = "^1.3"
+once_cell = "1.12.1"
 num = "^0.4"
 num-derive = "^0.3"
 num-format = "^0.4"

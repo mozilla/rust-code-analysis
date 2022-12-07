@@ -1,5 +1,6 @@
 use globset::GlobSet;
 use globset::{Glob, GlobSetBuilder};
+use once_cell::sync::Lazy;
 use rust_code_analysis::LANG;
 use rust_code_analysis::*;
 use std::fs::*;
@@ -7,16 +8,11 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
-use std::process::Command;
-use std::sync::Once;
-
-// Synchronization primitive
-static INIT: Once = Once::new();
 
 #[derive(Debug)]
 struct Config {
     language: Option<LANG>,
-    output_folder: String,
+    output_folder: PathBuf,
 }
 
 fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
@@ -37,15 +33,11 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     };
 
     // Build json file path
-    let file_path = Path::new(&cfg.output_folder)
-        .join(path.strip_prefix("./").unwrap())
-        .into_os_string()
-        .into_string()
-        .unwrap()
-        + ".json";
+    let mut file_path = cfg.output_folder.join(path.strip_prefix("./").unwrap());
+    file_path.set_extension("json");
 
     // Produce and compare metrics only if json file exists
-    if Path::new(&file_path).exists() {
+    if file_path.exists() {
         // Get FuncSpace struct
         let funcspace_struct = get_function_spaces(&language, source, &path, None).unwrap();
 
@@ -182,32 +174,15 @@ fn compare_f64(f1: f64, f2: &serde_json::Value) {
     }
 }
 
-const OUTPUT_FOLDER: &str = "./tests/repositories/rca-output";
+static REPO: Lazy<&Path> = Lazy::new(|| Path::new("./tests/repositories"));
 
 /// Produces metrics runtime and compares them with previously generated json files
-fn compare_rca_output_with_files(
-    repo_branch: &str,
-    repo_url: &str,
-    repo_folder: &str,
-    include: &[&str],
-) {
-    // The first test clones the repository
-    // Next tests wait here until the repository is cloned
-    INIT.call_once(|| {
-        clone_repository(
-            "main",
-            "https://github.com/SoftengPoliTo/rca-output.git",
-            OUTPUT_FOLDER,
-        );
-    });
-
-    clone_repository(repo_branch, repo_url, repo_folder);
-
+fn compare_rca_output_with_files(repo_name: &str, include: &[&str]) {
     let num_jobs = 4;
 
     let cfg = Config {
         language: None,
-        output_folder: OUTPUT_FOLDER.to_owned(),
+        output_folder: REPO.join("rca-output"),
     };
 
     let mut gsbi = GlobSetBuilder::new();
@@ -218,7 +193,7 @@ fn compare_rca_output_with_files(
     let files_data = FilesData {
         include: gsbi.build().unwrap(),
         exclude: GlobSet::empty(),
-        paths: vec![Path::new(repo_folder).to_path_buf()],
+        paths: vec![REPO.join(repo_name)],
     };
 
     if let Err(e) = ConcurrentRunner::new(num_jobs, act_on_file).run(cfg, files_data) {
@@ -227,50 +202,17 @@ fn compare_rca_output_with_files(
     }
 }
 
-/// Runs a git clone command
-fn clone_repository(branch: &str, url: &str, destination: &str) {
-    if !Path::new(destination).exists() {
-        Command::new("git")
-            .args([
-                "clone",
-                "--depth",
-                "1",
-                "--branch",
-                branch,
-                url,
-                destination,
-            ])
-            .output()
-            .expect("Git clone failed");
-    }
-}
-
 #[test]
 fn test_deepspeech() {
-    compare_rca_output_with_files(
-        "v0.9.3",
-        "https://github.com/mozilla/DeepSpeech.git",
-        "./tests/repositories/DeepSpeech",
-        &["*.cc", "*.cpp", "*.h", "*.hh"],
-    );
+    compare_rca_output_with_files("DeepSpeech", &["*.cc", "*.cpp", "*.h", "*.hh"]);
 }
 
 #[test]
 fn test_pdfjs() {
-    compare_rca_output_with_files(
-        "v2.12.313",
-        "https://github.com/mozilla/pdf.js.git",
-        "./tests/repositories/pdf.js",
-        &["*.js"],
-    );
+    compare_rca_output_with_files("pdf.js", &["*.js"]);
 }
 
 #[test]
 fn test_rust_library() {
-    compare_rca_output_with_files(
-        "1.57.0",
-        "https://github.com/rust-lang/rust.git",
-        "./tests/repositories/rust",
-        &["*/library/*.rs"],
-    );
+    compare_rca_output_with_files("rust", &["*/library/*.rs"]);
 }
