@@ -186,13 +186,13 @@ struct Opts {
     #[clap(long, short)]
     comments: bool,
     /// Find nodes of the given type.
-    #[clap(long, short, default_value = "Vec::new()", number_of_values = 1)]
+    #[clap(long, short, number_of_values = 1)]
     find: Vec<String>,
     /// Get functions and their spans.
     #[clap(long, short = 'F')]
     function: bool,
     /// Count nodes of the given type: comma separated list.
-    #[clap(long, short = 'C', default_value = "Vec::new()", number_of_values = 1)]
+    #[clap(long, short = 'C', number_of_values = 1)]
     count: Vec<String>,
     /// Compute different metrics.
     #[clap(long, short)]
