@@ -205,10 +205,10 @@ struct Opts {
     #[clap(long, short)]
     in_place: bool,
     /// Glob to include files.
-    #[clap(long, short = 'I')]
+    #[clap(long, short = 'I', num_args(0..))]
     include: Vec<String>,
     /// Glob to exclude files.
-    #[clap(long, short = 'X')]
+    #[clap(long, short = 'X', num_args(0..))]
     exclude: Vec<String>,
     /// Number of jobs.
     #[clap(long, short = 'j')]
