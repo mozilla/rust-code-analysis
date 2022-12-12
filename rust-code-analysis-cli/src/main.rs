@@ -7,7 +7,7 @@ use std::process;
 use std::sync::{Arc, Mutex};
 use std::thread::available_parallelism;
 
-use clap::builder::PossibleValuesParser;
+use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Parser;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
@@ -217,7 +217,8 @@ struct Opts {
     #[clap(long, short)]
     language_type: Option<String>,
     /// Output metrics as different formats.
-    #[clap(long, short = 'O', value_parser = PossibleValuesParser::new(Format::all()))]
+    #[clap(long, short = 'O', value_parser = PossibleValuesParser::new(Format::all())
+        .map(|s| s.parse::<Format>().unwrap()))]
     output_format: Option<Format>,
     /// Dump a pretty json file.
     #[clap(long = "pr")]
