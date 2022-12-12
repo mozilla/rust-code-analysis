@@ -1273,6 +1273,7 @@ dependencies = [
  "num-derive",
  "num-format",
  "num-traits",
+ "once_cell",
  "petgraph",
  "pretty_assertions",
  "regex",

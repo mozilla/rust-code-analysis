@@ -1,0 +1,12 @@
+[submodule "tests/repositories/rca-output"]
+	path = tests/repositories/rca-output
+	url = https://github.com/SoftengPoliTo/rca-output
+[submodule "tests/repositories/DeepSpeech"]
+	path = tests/repositories/DeepSpeech
+	url = https://github.com/mozilla/DeepSpeech
+[submodule "tests/repositories/rust"]
+	path = tests/repositories/rust
+	url = https://github.com/rust-lang/rust.git
+[submodule "tests/repositories/pdf.js"]
+	path = tests/repositories/pdf.js
+	url = https://github.com/mozilla/pdf.js
