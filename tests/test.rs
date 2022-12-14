@@ -79,3 +79,8 @@ fn test_deepspeech() {
 fn test_pdfjs() {
     compare_rca_output_with_files("pdf.js", &["*.js"]);
 }
+
+#[test]
+fn test_serde() {
+    compare_rca_output_with_files("serde", &["*.rs"]);
+}
