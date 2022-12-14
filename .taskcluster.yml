@@ -47,6 +47,7 @@ tasks:
                git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
+               git submodule update --init &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
                pre-commit run --show-diff-on-failure -c .pre-commit-audit-config.yaml &&
@@ -113,6 +114,7 @@ tasks:
                git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
+               git submodule update --init &&
                cargo test --workspace --verbose --all-features --target x86_64-unknown-linux-gnu &&
                ../grcov . --binary-path ./target/ -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
                bash <(curl -s https://codecov.io/bash) -f lcov.info"
@@ -143,6 +145,7 @@ tasks:
             - git clone --quiet ${repository}
             - cd rust-code-analysis
             - git -c advice.detachedHead=false checkout ${head_rev}
+            - git submodule update --init
             - cargo test --workspace --verbose --all-features
           mounts:
             - content:
