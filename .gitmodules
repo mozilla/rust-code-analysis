@@ -7,3 +7,6 @@
 [submodule "tests/repositories/pdf.js"]
 	path = tests/repositories/pdf.js
 	url = https://github.com/mozilla/pdf.js
+[submodule "tests/repositories/serde"]
+	path = tests/repositories/serde
+	url = https://github.com/serde-rs/serde
