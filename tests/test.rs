@@ -34,6 +34,13 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
 
     let mut settings = insta::Settings::new();
 
+    println!("act_on_file1: {:?}", path);
+    println!("act_on_file2: {:?}", path.strip_prefix(*REPO));
+    println!("act_on_file3: {:?}", Path::new("./repositories/rca-output/snapshots"));
+    println!("act_on_file4: {:?}", Path::new("./repositories/rca-output/snapshots").join(path.strip_prefix(*REPO).unwrap()));
+    println!("act_on_file5: {:?}", Path::new("./repositories/rca-output/snapshots").join(path.strip_prefix(*REPO).unwrap()).parent());
+    println!("act_on_file6: {:?}", path.file_name().unwrap().to_string_lossy().as_ref());
+
     settings.set_snapshot_path(
         Path::new("./repositories/rca-output/snapshots")
             .join(path.strip_prefix(*REPO).unwrap())
