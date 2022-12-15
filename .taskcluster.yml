@@ -39,7 +39,7 @@ tasks:
           command:
             - "/bin/bash"
             - "-cx"
-            - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
+            - "cd ~ && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
                rustup component add clippy rustfmt &&
                rustup toolchain install nightly &&
                curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.35/cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2 &&
@@ -71,7 +71,7 @@ tasks:
           command:
             - "/bin/bash"
             - "-cx"
-            - "git clone --quiet ${repository} &&
+            - "cd ~ && git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
                cargo install mdbook --no-default-features --features output --vers \"^0.1.0\" &&
@@ -107,7 +107,7 @@ tasks:
           command:
             - "/bin/bash"
             - "-cx"
-            - "apt-get -qq update &&
+            - "cd ~ && apt-get -qq update &&
                apt-get -qq install -y zip &&
                curl -L https://github.com/mozilla/grcov/releases/download/v0.8.6/grcov-v0.8.6-x86_64-unknown-linux-gnu.tar.gz | tar xz &&
                rustup component add llvm-tools-preview &&
@@ -171,7 +171,7 @@ tasks:
           command:
             - "/bin/bash"
             - "-cx"
-            - "git clone --quiet ${repository} &&
+            - "cd ~ && git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
                ./check-grammars-crates.sh"
@@ -206,7 +206,7 @@ tasks:
             command:
               - "/bin/bash"
               - "-cx"
-              - "git clone --quiet ${repository} &&
+              - "cd ~ && git clone --quiet ${repository} &&
                  [ ! -d \"/cache/gecko-dev\" ] &&
                  git clone --quiet https://github.com/mozilla/gecko-dev.git /cache/gecko-dev || true &&
                  pushd /cache/gecko-dev && git pull origin master && popd &&
@@ -248,7 +248,7 @@ tasks:
               command:
                 - "/bin/sh"
                 - "-cx"
-                - "git config --global user.email moz-tools-bot@moz.tools &&
+                - "cd ~ && git config --global user.email moz-tools-bot@moz.tools &&
                    git config --global user.name moz.tools Bot &&
                    git clone --quiet ${repository} &&
                    cd rust-code-analysis &&
@@ -280,7 +280,7 @@ tasks:
             command:
               - "/bin/bash"
               - "-cx"
-              - "git clone --quiet ${repository} &&
+              - "cd ~ && git clone --quiet ${repository} &&
                  cd rust-code-analysis &&
                  git -c advice.detachedHead=false checkout ${head_rev} &&
                  cargo build --workspace --release &&
@@ -383,7 +383,7 @@ tasks:
               command:
                 - "/bin/sh"
                 - "-cx"
-                - "git config --global user.email moz-tools-bot@moz.tools &&
+                - "cd ~ && git config --global user.email moz-tools-bot@moz.tools &&
                    git config --global user.name moz.tools Bot &&
                    git clone --quiet ${repository} &&
                    cd rust-code-analysis &&
