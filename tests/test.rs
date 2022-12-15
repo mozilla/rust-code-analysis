@@ -35,11 +35,16 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     let mut settings = insta::Settings::new();
 
     settings.set_snapshot_path(
-        Path::new("./repositories/rca-output/snapshots").join(path.strip_prefix(*REPO).unwrap()),
+        Path::new("./repositories/rca-output/snapshots")
+            .join(path.strip_prefix(*REPO).unwrap())
+            .parent()
+            .unwrap(),
     );
-    settings.set_snapshot_suffix(path.to_string_lossy());
     settings.bind(|| {
-        insta::assert_debug_snapshot!(funcspace_struct);
+        insta::assert_debug_snapshot!(
+            path.file_name().unwrap().to_string_lossy().as_ref(),
+            funcspace_struct
+        );
     });
 
     Ok(())
