@@ -148,7 +148,7 @@ impl Stats {
         if self.interface_npa_sum == self.interface_na_sum && self.interface_npa_sum != 0 {
             1.0
         } else {
-            self.interface_npa_sum() / self.interface_na_sum() as f64
+            self.interface_npa_sum() / self.interface_na_sum()
         }
     }
 
@@ -163,7 +163,7 @@ impl Stats {
     /// Paper: <https://ieeexplore.ieee.org/abstract/document/5381538>
     #[inline(always)]
     pub fn total_cda(&self) -> f64 {
-        self.total_npa() / self.total_na() as f64
+        self.total_npa() / self.total_na()
     }
 
     /// Returns the total number of public attributes in a space.
@@ -660,7 +660,7 @@ mod tests {
                     Y y1 = new Y() {
                         long e;
                     };
-                }  
+                }
             }",
             "foo.java",
             JavaParser,
