@@ -34,7 +34,7 @@ async fn ast_parser(item: web::Json<AstPayload>) -> HttpResponse {
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
-    let (language, _) = guess_language(&buf, &path);
+    let (language, _) = guess_language(&buf, path);
     if let Some(language) = language {
         let cfg = AstCfg {
             id: payload.id,
@@ -62,7 +62,7 @@ async fn comment_removal_json(item: web::Json<WebCommentPayload>) -> HttpRespons
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
-    let (language, _) = guess_language(&buf, &path);
+    let (language, _) = guess_language(&buf, path);
     if let Some(language) = language {
         let cfg = WebCommentCfg { id: payload.id };
         let language = if language == LANG::Cpp {
@@ -91,7 +91,7 @@ async fn comment_removal_plain(
 ) -> Result<HttpResponse, actix_web::Error> {
     let buf = get_code(body).await?;
     let path = PathBuf::from(&info.file_name);
-    let (language, _) = guess_language(&buf, &path);
+    let (language, _) = guess_language(&buf, path);
     if let Some(language) = language {
         let cfg = WebCommentCfg { id: "".to_string() };
         let res = action::<WebCommentCallback>(&language, buf, &PathBuf::from(""), None, cfg);
@@ -173,7 +173,7 @@ async fn function_json(item: web::Json<WebFunctionPayload>, _req: HttpRequest) -
     let path = PathBuf::from(&item.file_name);
     let payload = item.into_inner();
     let buf = payload.code.into_bytes();
-    let (language, _) = guess_language(&buf, &path);
+    let (language, _) = guess_language(&buf, path);
     if let Some(language) = language {
         let cfg = WebFunctionCfg { id: payload.id };
         HttpResponse::Ok().json(action::<WebFunctionCallback>(
@@ -197,7 +197,7 @@ async fn function_plain(
 ) -> Result<HttpResponse, actix_web::Error> {
     let buf = get_code(body).await?;
     let path = PathBuf::from(&info.file_name);
-    let (language, _) = guess_language(&buf, &path);
+    let (language, _) = guess_language(&buf, path);
     if let Some(language) = language {
         let cfg = WebFunctionCfg { id: "".to_string() };
         Ok(HttpResponse::Ok().json(action::<WebFunctionCallback>(

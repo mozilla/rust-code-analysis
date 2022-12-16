@@ -129,7 +129,7 @@ impl Stats {
     /// Paper: <https://ieeexplore.ieee.org/abstract/document/5381538>
     #[inline(always)]
     pub fn class_coa(&self) -> f64 {
-        self.class_npm_sum() / self.class_nm_sum() as f64
+        self.class_npm_sum() / self.class_nm_sum()
     }
 
     /// Returns the interface `Coa` metric value
@@ -148,7 +148,7 @@ impl Stats {
         if self.interface_npm_sum == self.interface_nm_sum && self.interface_npm_sum != 0 {
             1.0
         } else {
-            self.interface_npm_sum() / self.interface_nm_sum() as f64
+            self.interface_npm_sum() / self.interface_nm_sum()
         }
     }
 
@@ -163,7 +163,7 @@ impl Stats {
     /// Paper: <https://ieeexplore.ieee.org/abstract/document/5381538>
     #[inline(always)]
     pub fn total_coa(&self) -> f64 {
-        self.total_npm() / self.total_nm() as f64
+        self.total_npm() / self.total_nm()
     }
 
     /// Returns the total number of public methods in a space.
@@ -593,7 +593,7 @@ mod tests {
                         @Override
                         void b() {}
                     };
-                }  
+                }
             }",
             "foo.java",
             JavaParser,
@@ -651,7 +651,7 @@ mod tests {
                 void b();           // +1
                 void c();           // +1
             }
-            class Z implements Y {   
+            class Z implements Y {
                 @Override
                 public void a() {}  // +1
                 @Override

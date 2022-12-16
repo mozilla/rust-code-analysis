@@ -440,13 +440,13 @@ impl Stats {
     /// The `Cloc` metric minimum value.
     #[inline(always)]
     pub fn cloc_min(&self) -> f64 {
-        self.cloc.cloc_min() as f64
+        self.cloc.cloc_min()
     }
 
     /// The `Cloc` metric maximum value.
     #[inline(always)]
     pub fn cloc_max(&self) -> f64 {
-        self.cloc.cloc_max() as f64
+        self.cloc.cloc_max()
     }
 
     /// The `Ploc` metric minimum value.
@@ -1971,7 +1971,7 @@ mod tests {
     fn java_blank() {
         check_metrics!(
             "int x = 1;
-            
+
 
             int y = 2;",
             "foo.java",
@@ -2107,7 +2107,7 @@ mod tests {
         check_metrics!(
             "
             int i=0; // +1
-            while(i < 10) { // +1 
+            while(i < 10) { // +1
                 i++; // +1
                 System.out.println(i); // +1
              }",
@@ -2125,7 +2125,7 @@ mod tests {
         check_metrics!(
             "
             int i=0; // +1
-            do { // +1 
+            do { // +1
                 i++; // +1
                 System.out.println(i); // +1
              } while(i < 10)",
@@ -2268,7 +2268,7 @@ mod tests {
     fn java_general_loc() {
         check_metrics!(
             "int max = 100;
-            
+
             /*
               Loop through and print
                 from: 0
@@ -2299,7 +2299,7 @@ mod tests {
              * The HelloWorldApp class implements an application that
              * simply prints \"Hello World!\" to standard output.
              */
-            
+
             class HelloWorldApp {
               public void main(String[] args) {
                 String message = args.length == 0 ? \"Hello empty world\" : \"Hello world\"; // +1 lloc : 1 var assignment
