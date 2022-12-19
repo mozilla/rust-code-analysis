@@ -164,8 +164,10 @@ impl FuncSpace {
                 node.object().end_position().row + 1,
             ),
         };
+
         Self {
-            name: T::get_func_space_name(node, code).map(|name| name.to_string()),
+            name: T::get_func_space_name(node, code)
+                .map(|name| name.split_whitespace().collect::<Vec<_>>().join(" ")),
             spaces: Vec::new(),
             metrics: CodeMetrics::default(),
             kind,
