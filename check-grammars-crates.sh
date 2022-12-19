@@ -3,8 +3,8 @@
 # Stop at the first error
 set -e
 
-# Get all tree-sitter crates from the analyzed branch Cargo.toml
-TS_CRATES=`grep "tree-sitter-*" Cargo.toml | tr -d ' '`
+# Get tree-sitter-grammar
+TS_CRATE=$1
 
 # Disable/Enable CI flag
 RUN_CI="no"
@@ -15,34 +15,29 @@ MASTER_CARGO_TOML="master-cargo.toml"
 # Download master branch Cargo.toml and save it in a temporary file
 wget -LqO - https://raw.githubusercontent.com/mozilla/rust-code-analysis/master/Cargo.toml | tr -d ' ' > $MASTER_CARGO_TOML
 
-# For each tree-sitter crate from the analyzed branch Cargo.toml
-for TS_CRATE in $TS_CRATES
-do
-    # Get the name of the current crate
-    TS_CRATE_NAME=`echo $TS_CRATE | cut -f1 -d "="`
+# Get the name of the current crate
+TS_CRATE_NAME=`echo $TS_CRATE | cut -f1 -d "="`
 
-    # Get the crate name from the master branch Cargo.toml
-    MASTER_TS_CRATE_NAME=`grep $TS_CRATE_NAME $MASTER_CARGO_TOML | head -n 1 | cut -f1 -d "="`
+# Get the crate name from the master branch Cargo.toml
+MASTER_TS_CRATE_NAME=`grep $TS_CRATE_NAME $MASTER_CARGO_TOML | head -n 1 | cut -f1 -d "="`
 
-    # If the current crate name is not present in master branch, skip to the next crate
-    if [ -z "$MASTER_TS_CRATE_NAME" ]
-    then
-        continue
-    fi
+# If the current crate name is not present in master branch, exit the script
+if [ -z "$MASTER_TS_CRATE_NAME" ]
+then
+    exit 0
+fi
 
-    # Get the same crate from the master branch Cargo.toml
-    MASTER_TS_CRATE=`grep $TS_CRATE $MASTER_CARGO_TOML | head -n 1`
+# Get the same crate from the master branch Cargo.toml
+MASTER_TS_CRATE=`grep $TS_CRATE $MASTER_CARGO_TOML | head -n 1`
 
-    # If the current crate has been updated, save the crate name and break the loop
-    if [ -z "$MASTER_TS_CRATE" ]
-    then
-        # Enable CI flag
-        RUN_CI="yes"
-        # Name of tree-sitter crate
-        TREE_SITTER_CRATE=$TS_CRATE_NAME
-        break
-    fi
-done
+# If the current crate has been updated, save the crate name
+if [ -z "$MASTER_TS_CRATE" ]
+then
+    # Enable CI flag
+    RUN_CI="yes"
+    # Name of tree-sitter crate
+    TREE_SITTER_CRATE=$TS_CRATE_NAME
+fi
 
 # Remove temporary master branch Cargo.toml file
 rm -rf $MASTER_CARGO_TOML
@@ -95,9 +90,12 @@ if [ "$(ls -A $COMPARE)" ]; then
     # Output directory path
     OUTPUT_DIR=/tmp/output-$TREE_SITTER_CRATE
 
+    # Grammar name (removes tree-sitter- prefix)
+    GRAMMAR_NAME=`echo $TREE_SITTER_CRATE | cut -c 13-`
+
     # Split files into distinct directories depending on
     # their metric differences
     ./split-minimal-tests.py -i $COMPARE -o $OUTPUT_DIR -t $MT_THRESHOLD
 
-    tar -czvf /tmp/json-diffs-and-minimal-tests.tar.gz $COMPARE $OUTPUT_DIR
+    tar -czvf /tmp/json-diffs-and-minimal-tests-$GRAMMAR_NAME.tar.gz $COMPARE $OUTPUT_DIR
 fi

@@ -41,7 +41,6 @@ NEW_SUFFIX = "-new"
 
 # Extensions parsed by each tree-sitter-grammar
 EXTENSIONS = {
-    "tree-sitter-javascript": ["*.js", "*.js2"],
     "tree-sitter-tsx": ["*.tsx"],
     "tree-sitter-typescript": ["*.ts", "*.jsw", "*.jsmw"],
     "tree-sitter-java": ["*.java"],

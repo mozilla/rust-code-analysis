@@ -157,7 +157,7 @@ tasks:
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
-      - taskId: {$eval: as_slugid("check_tree_sitter_crates")}
+      - taskId: {$eval: as_slugid("check_tree_sitter_mozcpp")}
         dependencies:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
@@ -174,19 +174,184 @@ tasks:
             - "git clone --quiet ${repository} &&
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh"
+               ./check-grammars-crates.sh tree-sitter-mozcpp"
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
-            public/json-diffs-and-minimal-tests.tar.gz:
+            public/json-diffs-and-minimal-tests-mozcpp.tar.gz:
               expires: {$fromNow: '2 weeks'}
-              path: /tmp/json-diffs-and-minimal-tests.tar.gz
+              path: /tmp/json-diffs-and-minimal-tests-mozcpp.tar.gz
               type: file
         scopes:
           - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
-          name: rust-code-analysis check tree-sitter crates
-          description: rust-code-analysis check tree-sitter crates
+          name: rust-code-analysis check tree-sitter-mozcpp
+          description: rust-code-analysis check tree-sitter-mozcpp grammar
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - taskId: {$eval: as_slugid("check_tree_sitter_mozjs")}
+        dependencies:
+           - {$eval: as_slugid("lint_test_task")}
+           - {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               ./check-grammars-crates.sh tree-sitter-mozjs"
+          cache:
+            rust-code-analysis-mozilla-central-repository: /cache
+          artifacts:
+            public/json-diffs-and-minimal-tests-mozjs.tar.gz:
+              expires: {$fromNow: '2 weeks'}
+              path: /tmp/json-diffs-and-minimal-tests-mozjs.tar.gz
+              type: file
+        scopes:
+          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+        metadata:
+          name: rust-code-analysis check tree-sitter-mozjs
+          description: rust-code-analysis check tree-sitter-mozjs grammar
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - taskId: {$eval: as_slugid("check_tree_sitter_rust")}
+        dependencies:
+           - {$eval: as_slugid("lint_test_task")}
+           - {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               ./check-grammars-crates.sh tree-sitter-rust"
+          cache:
+            rust-code-analysis-mozilla-central-repository: /cache
+          artifacts:
+            public/json-diffs-and-minimal-tests-rust.tar.gz:
+              expires: {$fromNow: '2 weeks'}
+              path: /tmp/json-diffs-and-minimal-tests-rust.tar.gz
+              type: file
+        scopes:
+          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+        metadata:
+          name: rust-code-analysis check tree-sitter-rust
+          description: rust-code-analysis check tree-sitter-rust grammar
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - taskId: {$eval: as_slugid("check_tree_sitter_java")}
+        dependencies:
+           - {$eval: as_slugid("lint_test_task")}
+           - {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               ./check-grammars-crates.sh tree-sitter-java"
+          cache:
+            rust-code-analysis-mozilla-central-repository: /cache
+          artifacts:
+            public/json-diffs-and-minimal-tests-java.tar.gz:
+              expires: {$fromNow: '2 weeks'}
+              path: /tmp/json-diffs-and-minimal-tests-java.tar.gz
+              type: file
+        scopes:
+          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+        metadata:
+          name: rust-code-analysis check tree-sitter-java
+          description: rust-code-analysis check tree-sitter-java grammar
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - taskId: {$eval: as_slugid("check_tree_sitter_python")}
+        dependencies:
+           - {$eval: as_slugid("lint_test_task")}
+           - {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               ./check-grammars-crates.sh tree-sitter-python"
+          cache:
+            rust-code-analysis-mozilla-central-repository: /cache
+          artifacts:
+            public/json-diffs-and-minimal-tests-python.tar.gz:
+              expires: {$fromNow: '2 weeks'}
+              path: /tmp/json-diffs-and-minimal-tests-python.tar.gz
+              type: file
+        scopes:
+          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+        metadata:
+          name: rust-code-analysis check tree-sitter-python
+          description: rust-code-analysis check tree-sitter-python grammar
+          owner: cdenizet@mozilla.com
+          source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
+      - taskId: {$eval: as_slugid("check_tree_sitter_typescript")}
+        dependencies:
+           - {$eval: as_slugid("lint_test_task")}
+           - {$eval: as_slugid("windows_test_task")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: proj-relman
+        workerType: ci
+        payload:
+          maxRunTime: 3600
+          image: "rust:buster"
+          command:
+            - "/bin/bash"
+            - "-cx"
+            - "git clone --quiet ${repository} &&
+               cd rust-code-analysis &&
+               git -c advice.detachedHead=false checkout ${head_rev} &&
+               ./check-grammars-crates.sh tree-sitter-typescript"
+          cache:
+            rust-code-analysis-mozilla-central-repository: /cache
+          artifacts:
+            public/json-diffs-and-minimal-tests-typescript.tar.gz:
+              expires: {$fromNow: '2 weeks'}
+              path: /tmp/json-diffs-and-minimal-tests-typescript.tar.gz
+              type: file
+        scopes:
+          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+        metadata:
+          name: rust-code-analysis check tree-sitter-typescript
+          description: rust-code-analysis check tree-sitter-typescript grammar
           owner: cdenizet@mozilla.com
           source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
