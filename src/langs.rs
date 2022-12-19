@@ -21,7 +21,7 @@ mk_langs!(
         MozjsCode,
         MozjsParser,
         tree_sitter_mozjs,
-        [js, jsm],
+        [js, jsm, mjs, jsx],
         ["js", "js2"]
     ),
     (
