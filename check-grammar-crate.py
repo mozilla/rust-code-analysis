@@ -46,7 +46,7 @@ EXTENSIONS = {
     "tree-sitter-java": ["*.java"],
     "tree-sitter-rust": ["*.rs"],
     "tree-sitter-python": ["*.py"],
-    "tree-sitter-mozjs": ["*.js", "*.js2", "*.jsm"],
+    "tree-sitter-mozjs": ["*.js", "*.js2", "*.jsm", "*.mjs", "*.jsx"],
     "tree-sitter-mozcpp": [
         "*.cpp",
         "*.cx",
