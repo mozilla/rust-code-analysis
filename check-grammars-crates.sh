@@ -4,7 +4,7 @@
 set -e
 
 # Get tree-sitter-grammar
-TS_CRATE=$1
+TS_CRATE=`grep $1 Cargo.toml | tr -d ' '`
 
 # Disable/Enable CI flag
 RUN_CI="no"
