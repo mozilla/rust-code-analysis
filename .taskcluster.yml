@@ -448,6 +448,7 @@ tasks:
               - "git clone --quiet ${repository} &&
                  cd rust-code-analysis &&
                  git -c advice.detachedHead=false checkout ${head_rev} &&
+                 cargo update &&
                  cargo build --workspace --release &&
                  cargo package --all-features &&
                  pushd rust-code-analysis-cli && cargo package --all-features && popd &&
@@ -463,6 +464,10 @@ tasks:
               public/rust-code-analysis-linux-web-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
                 path: /rust-code-analysis-linux-web-x86_64.tar.gz
+                type: file
+              public/Cargo.lock:
+                expires: {$fromNow: '2 weeks'}
+                path: Cargo.lock
                 type: file
           metadata:
             name: rust-code-analysis linux release build
@@ -556,7 +561,7 @@ tasks:
                    tar xfz book.tar.gz -C rust-code-analysis-book &&
                    ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
                    taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages &&
-                   taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset ${linux_cli}:public/${linux_cli} ${linux_web}:public/${linux_web} ${win_cli}:public/${win_cli} ${win_web}:public/${win_web} &&
+                   taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset Cargo.lock:public/Cargo.lock ${linux_cli}:public/${linux_cli} ${linux_web}:public/${linux_web} ${win_cli}:public/${win_cli} ${win_web}:public/${win_web} &&
                    rm -rf book.tar.gz"
             metadata:
               name: "rust-code-analysis release publication ${head_branch[10:]}"
