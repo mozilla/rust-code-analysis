@@ -308,7 +308,7 @@ impl Cognitive for RustCode {
         let (mut nesting, mut depth, mut lambda) = get_nesting_from_map(node, nesting_map);
 
         match node.object().kind_id().into() {
-            IfExpression | IfLetExpression => {
+            IfExpression => {
                 // Check if a node is not an else-if
                 if !Self::is_else_if(node) {
                     increase_nesting(stats,&mut nesting, depth, lambda);
