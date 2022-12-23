@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
+use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Parser;
 
 use enums::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum OutputLanguage {
     Rust,
     Go,
@@ -44,7 +45,8 @@ struct Opts {
     #[clap(long, short, default_value = ".", value_parser)]
     output: PathBuf,
     /// Target language.
-    #[clap(long, short, default_value = "rust", possible_values = OutputLanguage::variants())]
+    #[clap(long, short, default_value = "rust", value_parser = PossibleValuesParser::new(OutputLanguage::variants())
+        .map(|s| s.parse::<OutputLanguage>().unwrap()))]
     language: OutputLanguage,
     /// File name template.
     #[clap(long, short, default_value = "language_$")]
