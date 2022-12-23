@@ -733,38 +733,8 @@ impl Loc for RustCode {
             | ExpressionStatement
             | LetDeclaration
             | AssignmentExpression
-            | CompoundAssignmentExpr
-            | ReturnExpression
-            | IfExpression
-            | IfLetExpression
-            | WhileExpression
-            | WhileLetExpression
-            | LoopExpression
-            | ForExpression
-            | BreakExpression
-            | ContinueExpression
-            | AwaitExpression => {
+            | CompoundAssignmentExpr => {
                 stats.lloc.logical_lines += 1;
-            }
-            CallExpression | MacroInvocation | ClosureExpression => {
-                if count_specific_ancestors!(
-                    node,
-                    CallExpression
-                        | MacroInvocation
-                        | ClosureExpression
-                        | LetDeclaration
-                        | WhileExpression
-                        | WhileLetExpression
-                        | ForExpression
-                        | IfExpression
-                        | IfLetExpression
-                        | ReturnExpression
-                        | AwaitExpression,
-                    Block
-                ) == 0
-                {
-                    stats.lloc.logical_lines += 1;
-                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -1612,12 +1582,12 @@ mod tests {
                 field: usize,
              }
              let foo = Foo { 42 };
-             foo.field",
+             foo.field;",
             "foo.rs",
             RustParser,
             loc,
-            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
-            [(lloc_average, 1.0)] // The number of spaces is 1
+            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
+            [(lloc_average, 2.0)] // The number of spaces is 1
         );
     }
 
