@@ -260,6 +260,10 @@
     "named": true,
     "subtypes": [
       {
+        "type": "attributed_statement",
+        "named": true
+      },
+      {
         "type": "break_statement",
         "named": true
       },
@@ -1535,10 +1539,6 @@
           "named": true
         },
         {
-          "type": "attributed_statement",
-          "named": true
-        },
-        {
           "type": "declaration",
           "named": true
         },
@@ -1821,10 +1821,6 @@
         },
         {
           "type": "alone_macro_call",
-          "named": true
-        },
-        {
-          "type": "attributed_statement",
           "named": true
         },
         {
@@ -2482,12 +2478,26 @@
     "type": "for_statement",
     "named": true,
     "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "_statement",
+            "named": true
+          }
+        ]
+      },
       "condition": {
         "multiple": false,
         "required": false,
         "types": [
           {
             "type": "_expression",
+            "named": true
+          },
+          {
+            "type": "comma_expression",
             "named": true
           }
         ]
@@ -2524,16 +2534,6 @@
           }
         ]
       }
-    },
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "_statement",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -3750,10 +3750,6 @@
           "named": true
         },
         {
-          "type": "attributed_statement",
-          "named": true
-        },
-        {
           "type": "declaration",
           "named": true
         },
@@ -3858,10 +3854,6 @@
         },
         {
           "type": "alone_macro_call",
-          "named": true
-        },
-        {
-          "type": "attributed_statement",
           "named": true
         },
         {
@@ -4061,10 +4053,6 @@
           "named": true
         },
         {
-          "type": "attributed_statement",
-          "named": true
-        },
-        {
           "type": "declaration",
           "named": true
         },
@@ -4194,10 +4182,6 @@
         },
         {
           "type": "alone_macro_call",
-          "named": true
-        },
-        {
-          "type": "attributed_statement",
           "named": true
         },
         {
@@ -5038,10 +5022,6 @@
         },
         {
           "type": "alone_macro_call",
-          "named": true
-        },
-        {
-          "type": "attributed_statement",
           "named": true
         },
         {
