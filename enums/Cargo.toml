@@ -5,7 +5,7 @@ authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 edition = "2021"
 
 [dependencies]
-clap = { version = "^3.2", features = ["derive"] }
+clap = { version = "^4.0", features = ["derive"] }
 askama = "^0.11"
 
 tree-sitter = "0.20.9"
