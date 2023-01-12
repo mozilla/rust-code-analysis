@@ -1,8 +1,8 @@
 {
   "name": "tree-sitter-preproc",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "Preproc grammar for node-tree-sitter",
-  "main": "index.js",
+  "main": "bindings/node",
   "keywords": [
     "parser",
     "lexer"
@@ -13,7 +13,7 @@
     "nan": "^2.14.2"
   },
   "devDependencies": {
-    "tree-sitter-cli": "^0.19.3"
+    "tree-sitter-cli": "^0.20.7"
   },
   "scripts": {
     "build": "tree-sitter generate && node-gyp build",
