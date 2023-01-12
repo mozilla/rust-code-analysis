@@ -142,6 +142,7 @@ tasks:
             - set PATH=%LIB_PATH%;%PATH%
             - rustup-init -yv --default-toolchain stable ^
                               --default-host x86_64-pc-windows-msvc
+            - git config --global core.autocrlf input
             - git clone --quiet ${repository}
             - cd rust-code-analysis
             - git -c advice.detachedHead=false checkout ${head_rev}
