@@ -25,6 +25,8 @@ tasks:
       $if: 'tasks_for == "github-pull-request"'
       then: ${event.pull_request.head.repo.html_url}
       else: ${event.repository.html_url}
+
+    taskboot_image: "mozilla/taskboot:0.3.6"
   in:
     $if: 'tasks_for == "github-push" || (tasks_for == "github-pull-request" && event["action"] in ["opened", "reopened", "synchronize"])'
     then:
@@ -408,7 +410,7 @@ tasks:
               features:
                 taskclusterProxy: true
               maxRunTime: 3600
-              image: "mozilla/taskboot:0.3.3"
+              image: "${taskboot_image}"
               env:
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
@@ -548,7 +550,7 @@ tasks:
               features:
                 taskclusterProxy: true
               maxRunTime: 3600
-              image: "mozilla/taskboot:0.3.3"
+              image: "${taskboot_image}"
               env:
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
