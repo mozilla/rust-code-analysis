@@ -1,0 +1,576 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust-Code-Analysis Documentation</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="This book documents rust-code-analysis">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+
+    </head>
+    <body class="light">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> rust-code-analysis</a></li><li><ol class="section"><li><a href="languages.html"><strong aria-hidden="true">1.1.</strong> Supported Languages</a></li><li><a href="metrics.html"><strong aria-hidden="true">1.2.</strong> Supported Metrics</a></li></ol></li><li><a href="commands/index.html"><strong aria-hidden="true">2.</strong> Commands</a></li><li><ol class="section"><li><a href="commands/metrics.html"><strong aria-hidden="true">2.1.</strong> Metrics</a></li><li><a href="commands/nodes.html"><strong aria-hidden="true">2.2.</strong> Nodes</a></li><li><a href="commands/rest.html"><strong aria-hidden="true">2.3.</strong> Rest API</a></li></ol></li><li><a href="developers/index.html"><strong aria-hidden="true">3.</strong> Developers Guide</a></li><li><ol class="section"><li><a href="developers/new-language.html"><strong aria-hidden="true">3.1.</strong> How-to: Add a new language</a></li><li><a href="developers/loc.html"><strong aria-hidden="true">3.2.</strong> How-to: Implement LoC</a></li></ol></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Rust-Code-Analysis Documentation</h1> 
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="print.html#rust-code-analysis" id="rust-code-analysis"><h1>rust-code-analysis</h1></a>
+<p><strong>rust-code-analysis</strong> is a Rust library to analyze and extract information
+from source codes written in many different programming languages.
+It is based on a parser generator tool and an incremental parsing library
+called
+<a href="https://tree-sitter.github.io/tree-sitter/" target="_blank">Tree Sitter</a>.</p>
+<p>You can find the source code of this software on
+<a href="https://github.com/mozilla/rust-code-analysis/" target="_blank">GitHub</a>,
+while issues and feature requests can be posted on the respective
+<a href="https://github.com/mozilla/rust-code-analysis/issues/" target="_blank">GitHub Issue Tracker</a>.</p>
+<a class="header" href="print.html#supported-platforms" id="supported-platforms"><h2>Supported platforms</h2></a>
+<p><strong>rust-code-analysis</strong> can run on the most common platforms: Linux, macOS,
+and Windows.</p>
+<p>On our
+<a href="https://github.com/mozilla/rust-code-analysis/releases" target="_blank">GitHub Release Page</a>
+you can find the <code>Linux</code> and <code>Windows</code> binaries already compiled and
+packed for you.</p>
+<a class="header" href="print.html#api-docs" id="api-docs"><h2>API docs</h2></a>
+<p>If you prefer to use <strong>rust-code-analysis</strong> as a crate, you can find the
+<code>API docs</code> generated by <code>Rustdoc</code>
+<a href="https://docs.rs/rust-code-analysis/*/rust_code_analysis/" target="_blank">here</a>.</p>
+<a class="header" href="print.html#how-to-cite-rust-code-analysis" id="how-to-cite-rust-code-analysis"><h2>How to cite rust-code-analysis</h2></a>
+<pre><code>@article{ARDITO2020100635,
+    title = {rust-code-analysis: A Rust library to analyze and extract maintainability information from source codes},
+    journal = {SoftwareX},
+    volume = {12},
+    pages = {100635},
+    year = {2020},
+    issn = {2352-7110},
+    doi = {https://doi.org/10.1016/j.softx.2020.100635},
+    url = {https://www.sciencedirect.com/science/article/pii/S2352711020303484},
+    author = {Luca Ardito and Luca Barbato and Marco Castelluccio and Riccardo Coppola and Calixte Denizet and Sylvestre Ledru and Michele Valsesia},
+    keywords = {Algorithm, Software metrics, Software maintainability, Software quality},
+    abstract = {The literature proposes many software metrics for evaluating the source code non-functional properties, such as its complexity and maintainability. The literature also proposes several tools to compute those properties on source codes developed with many different software languages. However, the Rust language emergence has not been paired by the community’s effort in developing parsers and tools able to compute metrics for the Rust source code. Also, metrics tools often fall short in providing immediate means of comparing maintainability metrics between different algorithms or coding languages. We hence introduce rust-code-analysis, a Rust library that allows the extraction of a set of eleven maintainability metrics for ten different languages, including Rust. rust-code-analysis, through the Abstract Syntax Tree (AST) of a source file, allows the inspection of the code structure, analyzing source code metrics at different levels of granularity, and finding code syntax errors before compiling time. The tool also offers a command-line interface that allows exporting the results in different formats. The possibility of analyzing source codes written in different programming languages enables simple and systematic comparisons between the metrics produced from different empirical and large-scale analysis sources.}
+}
+</code></pre>
+<a class="header" href="print.html#license" id="license"><h2>License</h2></a>
+<ul>
+<li>
+<p>Mozilla-defined grammars are released under the MIT license.</p>
+</li>
+<li>
+<p><strong>rust-code-analysis</strong>, <strong>rust-code-analysis-cli</strong> and <strong>rust-code-analysis-web</strong>
+are released under the
+<a href="https://www.mozilla.org/MPL/2.0/" target="_blank">Mozilla Public License v2.0</a>.</p>
+</li>
+</ul>
+<a class="header" href="print.html#supported-languages" id="supported-languages"><h1>Supported Languages</h1></a>
+<p>This is the list of programming languages parsed by
+<strong>rust-code-analysis</strong>.</p>
+<ul>
+<li>[x] C++</li>
+<li>[ ] C#</li>
+<li>[ ] CSS</li>
+<li>[ ] Go</li>
+<li>[ ] HTML</li>
+<li>[ ] Java</li>
+<li>[x] JavaScript</li>
+<li>[x] The JavaScript used in Firefox internal</li>
+<li>[x] Python</li>
+<li>[x] Rust</li>
+<li>[x] Typescript</li>
+</ul>
+<p>A check indicates which languages have metrics implemented.</p>
+<a class="header" href="print.html#supported-metrics" id="supported-metrics"><h1>Supported Metrics</h1></a>
+<p><strong>rust-code-analysis</strong> implements a series of metrics</p>
+<ul>
+<li><strong>CC</strong>: it calculates the code complexity examining the
+control flow of a program.</li>
+<li><strong>SLOC</strong>: it counts the number of lines in a source file.</li>
+<li><strong>PLOC</strong>: it counts the number of physical lines (instructions) contained in
+a source file.</li>
+<li><strong>LLOC</strong>: it counts the number of logical lines (statements) contained in
+a source file.</li>
+<li><strong>CLOC</strong>: it counts the number of comments in a source file.</li>
+<li><strong>BLANK</strong>: it counts the number of blank lines in a source file.</li>
+<li><strong>HALSTEAD</strong>: it is a suite that provides a series of information, such as the
+effort required to maintain the analyzed code, the size in bits to store the
+program, the difficulty to understand the code, an estimate of the number of
+bugs present in the codebase, and an estimate of the time needed to
+implement the software.</li>
+<li><strong>MI</strong>: it is a suite that allows to evaluate the maintainability of a software.</li>
+<li><strong>NOM</strong>: it counts the number of functions and closures in a file/trait/class.</li>
+<li><strong>NEXITS</strong>: it counts the number of possible exit points from a method/function.</li>
+<li><strong>NARGS</strong>: it counts the number of arguments of a function/method.</li>
+</ul>
+<p>The metrics above are still <strong>NOT</strong> implemented for C#, CSS, Go, HTML, and Java
+languages.</p>
+<a class="header" href="print.html#commands" id="commands"><h1>Commands</h1></a>
+<p>With the term <strong>command</strong>, we define any procedure used by
+<strong>rust-code-analysis-cli</strong> to extract information from source codes.
+At each command <strong>may</strong> be associated parameters depending on the task
+it needs to carry out.
+In this page we have grouped the principal <strong>types</strong> of commands implemented in
+<strong>rust-code-analysis-cli</strong>.</p>
+<a class="header" href="print.html#metrics" id="metrics"><h2>Metrics</h2></a>
+<p>Metrics are a series of measures that can be used to:</p>
+<ul>
+<li>Compare different programming languages</li>
+<li>Provide information on the quality of a code</li>
+<li>Tell developers where their code is more tough to handle</li>
+<li>Discover errors earlier</li>
+</ul>
+<p><strong>rust-code-analysis</strong> calculates the metrics starting from the
+source code of a program. These kind of metrics are called <em>static metrics</em>.</p>
+<a class="header" href="print.html#nodes" id="nodes"><h2>Nodes</h2></a>
+<p>To represent the structure of program code, <strong>rust-code-analysis-cli</strong> builds
+an
+<a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank">Abstract Syntax Tree (AST)</a>.
+A <strong>node</strong> is an element of this tree and denotes any syntactic construct
+present in a language.</p>
+<p>Nodes can be used to:</p>
+<ul>
+<li>Create the syntactic structure of a source file</li>
+<li>Discover if a construct of a language is present in the analyzed
+code</li>
+<li>Count the number of constructs of a certain kind</li>
+<li>Detect errors i the source code</li>
+</ul>
+<a class="header" href="print.html#rest-api" id="rest-api"><h2>REST API</h2></a>
+<p><strong>rust-code-analysis-cli</strong> can be run as a server which accepts requests sent
+through <code>REST API</code>.
+The server receives in input the filename of a source code file and returns the
+relative metrics formatted as a <code>json</code> file.</p>
+<a class="header" href="print.html#metrics-1" id="metrics-1"><h1>Metrics</h1></a>
+<p>Metrics can be printed on screen or exported as different output formats
+through <strong>rust-code-analysis-cli</strong>.</p>
+<a class="header" href="print.html#print-metrics" id="print-metrics"><h2>Print metrics</h2></a>
+<p>For each function space, <strong>rust-code-analysis</strong> computes the list of metrics
+described above. At the end of this process, <strong>rust-code-analysis-cli</strong>
+dumps the result formatted in a certain way on the screen.
+The command used to print the metrics is the following one:</p>
+<pre><code class="language-console">rust-code-analysis-cli -m -p /path/to/your/file/or/directory
+</code></pre>
+<p>The <code>-p</code> option represents the path to a file or a directory. If a directory is
+passed as input, <strong>rust-code-analysis-cli</strong> computes the metrics for each file
+contained in it.</p>
+<a class="header" href="print.html#export-formats" id="export-formats"><h2>Export formats</h2></a>
+<p>Different output formats can be used to export metrics:</p>
+<ul>
+<li>Cbor</li>
+<li>Json</li>
+<li>Toml</li>
+<li>Yaml</li>
+</ul>
+<p><code>Json</code> and <code>Toml</code> can also be exported pretty-printed.</p>
+<a class="header" href="print.html#export-command" id="export-command"><h3>Export command</h3></a>
+<p>For example, if you want to export metrics as a <code>json</code> file, run:</p>
+<pre><code class="language-console">rust-code-analysis-cli -m -O json -o /output/path -p /path/to/your/file/or/directory
+</code></pre>
+<p>The <code>-O</code> option allows you to choose the output format. It supports
+<strong>only</strong> these values: <em>cbor</em>, <em>json</em>, <em>toml</em>, <em>yaml</em>.</p>
+<p>The <code>-o</code> option is used to specify the path where your file will be saved.
+It accepts <strong>only</strong> paths. The filename of your output file is the same as
+your input file plus the extension associated to the format. When this option
+is not given, the output is printed on shell.</p>
+<p>As we said before, <code>Json</code> and <code>Toml</code> can be exported as pretty-printed. To do
+so, the <code>--pr</code> option is used.
+In the case below, the pretty-printed <code>json</code> output will be printed on shell:</p>
+<pre><code class="language-console">rust-code-analysis-cli -m -O json --pr -p /path/to/your/file/or/directory
+</code></pre>
+<a class="header" href="print.html#nodes-1" id="nodes-1"><h1>Nodes</h1></a>
+<p><strong>rust-code-analysis-cli</strong> allows to extract some information from the nodes
+which compose the <em>Abstract Syntax Tree (AST)</em> of a source code.</p>
+<a class="header" href="print.html#find-errors" id="find-errors"><h2>Find Errors</h2></a>
+<p>To know if there are some syntactic errors in your code, run:</p>
+<pre><code class="language-console">rust-code-analysis-cli -p /path/to/your/file/or/directory -I &quot;*.ext&quot; -f -error
+</code></pre>
+<p>The <code>-p</code> option represents the path to a file or a directory. If a directory is
+passed as input, <strong>rust-code-analysis-cli</strong> computes the metrics for each file
+contained in it.
+The <code>-I</code> option is a glob filter used to consider only the files written in
+the language defined by the extension of the file.
+The <code>-f</code> option instead searches all nodes of a certain type.
+In the case above, we are looking for all the erroneous nodes present in the
+code.</p>
+<a class="header" href="print.html#count-errors" id="count-errors"><h2>Count Errors</h2></a>
+<p>It is also possible to count the number of nodes of a certain type using the
+<code>--count</code> option:</p>
+<pre><code class="language-console">rust-code-analysis-cli -p /path/to/your/file/or/directory -I &quot;*.ext&quot; --count -error
+</code></pre>
+<a class="header" href="print.html#print-ast" id="print-ast"><h2>Print AST</h2></a>
+<p>If you want to print the AST of a source code, run the following command:</p>
+<pre><code class="language-console">rust-code-analysis-cli -p /path/to/your/file/or/directory -d
+</code></pre>
+<p>The <code>-d</code> option prints the entire AST on the shell.</p>
+<a class="header" href="print.html#code-splitting" id="code-splitting"><h2>Code Splitting</h2></a>
+<p>Commands can be run on a single portion of the code using the <code>--ls</code>
+and <code>--le</code> options. The former represents the starting line of the code to be
+considered, while the latter its ending line.
+For example, if we want to print the AST of a single function which starts at
+line 5 and ends at line 10, we need to launch this command:</p>
+<pre><code class="language-console">rust-code-analysis-cli -p /path/to/your/file/or/directory -d --ls 5 --le 10
+</code></pre>
+<a class="header" href="print.html#rest-api-1" id="rest-api-1"><h1>Rest API</h1></a>
+<p>It is possible to run <strong>rust-code-analysis-cli</strong> as a <code>HTTP</code> service using
+<code>REST API</code> to share data between client and server.
+We will use the port <code>9090</code> to show you the possible ways to
+interact with the server.</p>
+<a class="header" href="print.html#server" id="server"><h2>Server</h2></a>
+<p><strong>rust-code-analysis-cli</strong> can act as a server running on your <code>localhost</code>
+at a specific port.</p>
+<pre><code>rust-code-analysis-cli --serve --port 9090
+</code></pre>
+<p>The <code>--port</code> option sets the port used by the server. One possible value
+could be <code>9090</code>.</p>
+<a class="header" href="print.html#ping" id="ping"><h2>Ping</h2></a>
+<p>If you want to ping the server, make a <code>GET</code> request at this <code>URL</code>:</p>
+<pre><code>http://127.0.0.1:9090/ping
+</code></pre>
+<a class="header" href="print.html#metrics-2" id="metrics-2"><h2>Metrics</h2></a>
+<p>To get metrics formatted as a <code>json</code> file, make a <code>POST</code> request at this <code>URL</code>:</p>
+<pre><code>http://127.0.0.1:9090/metrics?file_name={filename}&amp;unit={unit}
+</code></pre>
+<p>The <code>filename</code> parameter represents the path to the source file to be analyzed,
+while <code>unit</code> is a boolean value that can assume only <code>0</code> or <code>1</code>. The latter
+tells <strong>rust-code-analysis-cli</strong> to consider only top-level metrics, while the
+former returns detailed metrics for all classes, functions, nested functions,
+and other sub-spaces.</p>
+<a class="header" href="print.html#developers-guide" id="developers-guide"><h1>Developers Guide</h1></a>
+<p>If you want to contribute to the development of <code>rust-code-analysis</code> we have
+summarized here a series of guidelines that are supposed to help you in your
+building process.</p>
+<p>As prerequisite, you need to install the last available version of <code>Rust</code>.
+You can learn how to do that
+<a href="https://www.rust-lang.org/tools/install" target="_blank">here</a>.</p>
+<a class="header" href="print.html#clone-repository" id="clone-repository"><h2>Clone Repository</h2></a>
+<p>First of all, you need to clone the repository.
+You can do that:</p>
+<p>through <strong>HTTPS</strong></p>
+<pre><code>git clone -j8 https://github.com/mozilla/rust-code-analysis.git
+</code></pre>
+<p>or through <strong>SSH</strong></p>
+<pre><code>git clone -j8 git@github.com:mozilla/rust-code-analysis.git
+</code></pre>
+<a class="header" href="print.html#building" id="building"><h2>Building</h2></a>
+<p>To build the <code>rust-code-analysis</code> library, you need to run the following
+command:</p>
+<pre><code class="language-console">cargo build
+</code></pre>
+<p>If you want to build the <code>cli</code>:</p>
+<pre><code class="language-console">cargo build -p rust-code-analysis-cli
+</code></pre>
+<p>If you want to build the <code>web</code> server:</p>
+<pre><code class="language-console">cargo build -p rust-code-analysis-web
+</code></pre>
+<p>If you want to build everything in one fell swoop:</p>
+<pre><code class="language-console">cargo build --workspace
+</code></pre>
+<a class="header" href="print.html#testing" id="testing"><h2>Testing</h2></a>
+<p>After you have finished changing the code, you should <strong>always</strong> verify whether
+all tests pass with the <code>cargo test</code> command.</p>
+<pre><code class="language-console">cargo test --workspace --all-features --verbose
+</code></pre>
+<a class="header" href="print.html#code-formatting" id="code-formatting"><h2>Code Formatting</h2></a>
+<p>If all previous steps went well, and you want to make a pull request
+to integrate your invaluable help in the codebase, the last step left is
+code formatting.</p>
+<a class="header" href="print.html#rustfmt" id="rustfmt"><h3>Rustfmt</h3></a>
+<p>This tool formats your code according to Rust style guidelines.</p>
+<p>To install:</p>
+<pre><code class="language-console">rustup component add rustfmt
+</code></pre>
+<p>To format the code:</p>
+<pre><code class="language-console">cargo fmt
+</code></pre>
+<a class="header" href="print.html#clippy" id="clippy"><h3>Clippy</h3></a>
+<p>This tool helps developers to write better code catching automatically lots of
+common mistakes for them. It detects in your code a series of errors and
+warnings that <strong>must</strong> be fixed before making a pull request.</p>
+<p>To install:</p>
+<pre><code class="language-console">rustup component add clippy
+</code></pre>
+<p>To detect errors and warnings:</p>
+<pre><code class="language-console">cargo clippy --workspace --all-targets --
+</code></pre>
+<a class="header" href="print.html#code-documentation" id="code-documentation"><h2>Code Documentation</h2></a>
+<p>If you have documented your code, to generate the final documentation,
+run this command:</p>
+<pre><code class="language-console">cargo doc --open --no-deps
+</code></pre>
+<p>Remove the <code>--no-deps</code> option if you also want to build the documentation of
+each dependency used by <strong>rust-code-analysis</strong>.</p>
+<a class="header" href="print.html#run-your-code" id="run-your-code"><h2>Run your code</h2></a>
+<p>You can run <strong>rust-code-analysis-cli</strong> using:</p>
+<pre><code class="language-console">cargo run -p rust-code-analysis-cli -- [rust-code-analysis-cli-parameters]
+</code></pre>
+<p>To know the list of <strong>rust-code-analysis-cli</strong> parameters, run:</p>
+<pre><code class="language-console">cargo run -p rust-code-analysis-cli -- --help
+</code></pre>
+<p>You can run <strong>rust-code-analysis-web</strong> using:</p>
+<pre><code class="language-console">cargo run -p rust-code-analysis-web -- [rust-code-analysis-web-parameters]
+</code></pre>
+<p>To know the list of <strong>rust-code-analysis-web</strong> parameters, run:</p>
+<pre><code class="language-console">cargo run -p rust-code-analysis-web -- --help
+</code></pre>
+<a class="header" href="print.html#practical-advice" id="practical-advice"><h2>Practical advice</h2></a>
+<ul>
+<li>When you add a new feature, add at least one unit or integration test to
+verify that everything works correctly</li>
+<li>Document public API</li>
+<li>Do not add dead code</li>
+<li>Comment intricate code such that others can comprehend what you have
+accomplished</li>
+</ul>
+<a class="header" href="print.html#supporting-a-new-language" id="supporting-a-new-language"><h1>Supporting a new language</h1></a>
+<p>This section is to help developers implement support for a new language in <code>rust-code-analysis</code>.</p>
+<p>To implement a new language, two steps are required:</p>
+<ol>
+<li>Generate the grammar</li>
+<li>Add the grammar to <code>rust-code-analysis</code></li>
+</ol>
+<p>A number of <a href="https://mozilla.github.io/rust-code-analysis/metrics.html">metrics are supported</a> and help to implement those are covered elsewhere in the documentation.</p>
+<a class="header" href="print.html#generating-the-grammar" id="generating-the-grammar"><h2>Generating the grammar</h2></a>
+<p>As a <strong>prerequisite</strong> for adding a new grammar, there needs to exist a <a href="https://github.com/tree-sitter">tree-sitter</a> version for the desired language that matches the <a href="https://github.com/mozilla/rust-code-analysis/blob/master/Cargo.toml">version used in this project</a>.</p>
+<p>The grammars are generated by a project in this repository called <a href="https://github.com/mozilla/rust-code-analysis/tree/master/enums">enums</a>. The following steps add the language support from the language crate and generate an enum file that is then used as the grammar in this project to evaluate metrics.</p>
+<ol>
+<li>Add the language specific <code>tree-sitter</code> crate to the <code>enum</code> crate, making sure to tie it to the <code>tree-sitter</code> version used in the <code>ruse-code-analysis</code> crate. For example, for the Rust support at time of writing the following line exists in the <a href="https://github.com/mozilla/rust-code-analysis/blob/master/enums/Cargo.toml">/enums/Cargo.toml</a>: <code>tree-sitter-rust = &quot;version number&quot;</code>.</li>
+<li>Append the language to the <code>enum</code> crate in <a href="https://github.com/mozilla/rust-code-analysis/blob/master/enums/src/languages.rs">/enums/src/languages.rs</a>. Keeping with Rust as the example, the line would be <code>(Rust, tree_sitter_rust)</code>. The first parameter is the name of the Rust enum that will be generated, the second is the <code>tree-sitter</code> function to call to get the language's grammar.</li>
+<li>Add a case to the end of the match in <code>mk_get_language</code> macro rule in <a href="https://github.com/mozilla/rust-code-analysis/blob/master/enums/src/macros.rs">/enums/src/macros.rs</a> eg. for Rust <code>Lang::Rust =&gt; tree_sitter_rust::language()</code>.</li>
+<li>Lastly, we execute the <a href="https://github.com/mozilla/rust-code-analysis/blob/master/recreate-grammars.sh">/recreate-grammars.sh</a> script that runs the <code>enums</code> crate to generate the grammar for the new language.</li>
+</ol>
+<p>At this point we should have a new grammar file for the new language in <a href="https://github.com/mozilla/rust-code-analysis/tree/master/src/languages">/src/languages/</a>. See <a href="https://github.com/mozilla/rust-code-analysis/blob/master/src/languages/language_rust.rs">/src/languages/language_rust.rs</a> as an example of the generated enum.</p>
+<a class="header" href="print.html#adding-the-new-grammar-to-rust-code-analysis" id="adding-the-new-grammar-to-rust-code-analysis"><h2>Adding the new grammar to rust-code-analysis</h2></a>
+<ol>
+<li>Add the language specific <code>tree-sitter</code> crate to the <code>rust-code-analysis</code> project, making sure to tie it to the <code>tree-sitter</code> version used in this project. For example, for the Rust support at time of writing the following line exists in the <a href="https://github.com/mozilla/rust-code-analysis/blob/master/Cargo.toml">Cargo.toml</a>: <code>tree-sitter-rust = &quot;0.19.0&quot;</code>.</li>
+<li>Next we add the new <code>tree-sitter</code> language namespace to <a href="https://github.com/mozilla/rust-code-analysis/blob/master/src/languages/mod.rs">/src/languages/mod.rs</a> eg.</li>
+</ol>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub mod language_rust;
+pub use language_rust::*;
+#}</code></pre></pre>
+<ol start="3">
+<li>Lastly, we add a definition of the language to the arguments of <code>mk_langs!</code> macro in <a href="https://github.com/mozilla/rust-code-analysis/blob/master/src/langs.rs">/src/langs.rs</a>.</li>
+</ol>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+// 1) Name for enum
+// 2) Language description
+// 3) Display name
+// 4) Empty struct name to implement
+// 5) Parser name
+// 6) tree-sitter function to call to get a Language
+// 7) file extensions
+// 8) emacs modes
+(
+    Rust,
+    &quot;The `Rust` language&quot;,
+    &quot;rust&quot;,
+    RustCode,
+    RustParser,
+    tree_sitter_rust,
+    [rs],
+    [&quot;rust&quot;]
+)
+#}</code></pre></pre>
+<a class="header" href="print.html#lines-of-code-loc" id="lines-of-code-loc"><h1>Lines of Code (LoC)</h1></a>
+<p>In this document we give some guidance on how to implement the LoC metrics available in this crate.
+<a href="https://en.wikipedia.org/wiki/Source_lines_of_code">Lines of code</a> is a software metric that gives an indication of the size of some source code by counting the lines of the source code.
+There are many types of LoC so we will first explain those by way of an example.</p>
+<a class="header" href="print.html#types-of-loc" id="types-of-loc"><h2>Types of LoC</h2></a>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+/*
+Instruction: Implement factorial function
+For extra credits, do not use mutable state or a imperative loop like `for` or `while`.
+ */
+
+/// Factorial: n! = n*(n-1)*(n-2)*(n-3)...3*2*1
+fn factorial(num: u64) -&gt; u64 {
+    
+    // use `product` on `Iterator`
+    (1..=num).product()
+}
+#}</code></pre></pre>
+<p>The example above will be used to illustrate each of the <strong>LoC</strong> metrics described below.</p>
+<a class="header" href="print.html#sloc" id="sloc"><h3>SLOC</h3></a>
+<p>A straight count of all lines in the file including code, comments, and blank lines.<br />
+METRIC VALUE: 11</p>
+<a class="header" href="print.html#ploc" id="ploc"><h3>PLOC</h3></a>
+<p>A count of the instruction lines of code contained in the source code. This would include any brackets or similar syntax on a new line.
+Note that comments and blank lines are not counted in this.<br />
+METRIC VALUE: 3</p>
+<a class="header" href="print.html#lloc" id="lloc"><h3>LLOC</h3></a>
+<p>The &quot;logical&quot; lines is a count of the number of statements in the code. Note that what a statement is depends on the language.<br />
+In the above example there is only a single statement which id the function call of <code>product</code> with the <code>Iterator</code> as its argument.<br />
+METRIC VALUE: 1</p>
+<a class="header" href="print.html#cloc" id="cloc"><h3>CLOC</h3></a>
+<p>A count of the comments in the code. The type of comment does not matter ie single line, block, or doc.<br />
+METRIC VALUE: 6</p>
+<a class="header" href="print.html#blank" id="blank"><h3>BLANK</h3></a>
+<p>Last but not least, this metric counts the blank lines present in a code.
+METRIC VALUE: 2</p>
+<a class="header" href="print.html#implementation" id="implementation"><h2>Implementation</h2></a>
+<p>To implement the LoC related metrics described above you need to implement the <code>Loc</code> trait for the language you want to support.</p>
+<p>This requires implementing the <code>compute</code> function.
+See <a href="https://github.com/mozilla/rust-code-analysis/blob/master/src/metrics/loc.rs">/src/metrics/loc.rs</a> for where to implement, as well as examples from other languages.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            MathJax.Hub.Register.StartupHook('End', function() {
+                window.setTimeout(window.print, 100);
+            });
+        });
+        </script>
+        
+        
+
+    </body>
+</html>

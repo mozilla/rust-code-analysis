@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>rust-code-analysis - Rust-Code-Analysis Documentation</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="This book documents rust-code-analysis">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+
+    </head>
+    <body class="light">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="index.html" class="active"><strong aria-hidden="true">1.</strong> rust-code-analysis</a></li><li><ol class="section"><li><a href="languages.html"><strong aria-hidden="true">1.1.</strong> Supported Languages</a></li><li><a href="metrics.html"><strong aria-hidden="true">1.2.</strong> Supported Metrics</a></li></ol></li><li><a href="commands/index.html"><strong aria-hidden="true">2.</strong> Commands</a></li><li><ol class="section"><li><a href="commands/metrics.html"><strong aria-hidden="true">2.1.</strong> Metrics</a></li><li><a href="commands/nodes.html"><strong aria-hidden="true">2.2.</strong> Nodes</a></li><li><a href="commands/rest.html"><strong aria-hidden="true">2.3.</strong> Rest API</a></li></ol></li><li><a href="developers/index.html"><strong aria-hidden="true">3.</strong> Developers Guide</a></li><li><ol class="section"><li><a href="developers/new-language.html"><strong aria-hidden="true">3.1.</strong> How-to: Add a new language</a></li><li><a href="developers/loc.html"><strong aria-hidden="true">3.2.</strong> How-to: Implement LoC</a></li></ol></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Rust-Code-Analysis Documentation</h1> 
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="index.html#rust-code-analysis" id="rust-code-analysis"><h1>rust-code-analysis</h1></a>
+<p><strong>rust-code-analysis</strong> is a Rust library to analyze and extract information
+from source codes written in many different programming languages.
+It is based on a parser generator tool and an incremental parsing library
+called
+<a href="https://tree-sitter.github.io/tree-sitter/" target="_blank">Tree Sitter</a>.</p>
+<p>You can find the source code of this software on
+<a href="https://github.com/mozilla/rust-code-analysis/" target="_blank">GitHub</a>,
+while issues and feature requests can be posted on the respective
+<a href="https://github.com/mozilla/rust-code-analysis/issues/" target="_blank">GitHub Issue Tracker</a>.</p>
+<a class="header" href="index.html#supported-platforms" id="supported-platforms"><h2>Supported platforms</h2></a>
+<p><strong>rust-code-analysis</strong> can run on the most common platforms: Linux, macOS,
+and Windows.</p>
+<p>On our
+<a href="https://github.com/mozilla/rust-code-analysis/releases" target="_blank">GitHub Release Page</a>
+you can find the <code>Linux</code> and <code>Windows</code> binaries already compiled and
+packed for you.</p>
+<a class="header" href="index.html#api-docs" id="api-docs"><h2>API docs</h2></a>
+<p>If you prefer to use <strong>rust-code-analysis</strong> as a crate, you can find the
+<code>API docs</code> generated by <code>Rustdoc</code>
+<a href="https://docs.rs/rust-code-analysis/*/rust_code_analysis/" target="_blank">here</a>.</p>
+<a class="header" href="index.html#how-to-cite-rust-code-analysis" id="how-to-cite-rust-code-analysis"><h2>How to cite rust-code-analysis</h2></a>
+<pre><code>@article{ARDITO2020100635,
+    title = {rust-code-analysis: A Rust library to analyze and extract maintainability information from source codes},
+    journal = {SoftwareX},
+    volume = {12},
+    pages = {100635},
+    year = {2020},
+    issn = {2352-7110},
+    doi = {https://doi.org/10.1016/j.softx.2020.100635},
+    url = {https://www.sciencedirect.com/science/article/pii/S2352711020303484},
+    author = {Luca Ardito and Luca Barbato and Marco Castelluccio and Riccardo Coppola and Calixte Denizet and Sylvestre Ledru and Michele Valsesia},
+    keywords = {Algorithm, Software metrics, Software maintainability, Software quality},
+    abstract = {The literature proposes many software metrics for evaluating the source code non-functional properties, such as its complexity and maintainability. The literature also proposes several tools to compute those properties on source codes developed with many different software languages. However, the Rust language emergence has not been paired by the community’s effort in developing parsers and tools able to compute metrics for the Rust source code. Also, metrics tools often fall short in providing immediate means of comparing maintainability metrics between different algorithms or coding languages. We hence introduce rust-code-analysis, a Rust library that allows the extraction of a set of eleven maintainability metrics for ten different languages, including Rust. rust-code-analysis, through the Abstract Syntax Tree (AST) of a source file, allows the inspection of the code structure, analyzing source code metrics at different levels of granularity, and finding code syntax errors before compiling time. The tool also offers a command-line interface that allows exporting the results in different formats. The possibility of analyzing source codes written in different programming languages enables simple and systematic comparisons between the metrics produced from different empirical and large-scale analysis sources.}
+}
+</code></pre>
+<a class="header" href="index.html#license" id="license"><h2>License</h2></a>
+<ul>
+<li>
+<p>Mozilla-defined grammars are released under the MIT license.</p>
+</li>
+<li>
+<p><strong>rust-code-analysis</strong>, <strong>rust-code-analysis-cli</strong> and <strong>rust-code-analysis-web</strong>
+are released under the
+<a href="https://www.mozilla.org/MPL/2.0/" target="_blank">Mozilla Public License v2.0</a>.</p>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+                            <a rel="next" href="languages.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+                    <a href="languages.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

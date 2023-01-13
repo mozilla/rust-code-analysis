@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>How-to: Implement LoC - Rust-Code-Analysis Documentation</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="This book documents rust-code-analysis">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+        <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+
+    </head>
+    <body class="light">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> rust-code-analysis</a></li><li><ol class="section"><li><a href="languages.html"><strong aria-hidden="true">1.1.</strong> Supported Languages</a></li><li><a href="metrics.html"><strong aria-hidden="true">1.2.</strong> Supported Metrics</a></li></ol></li><li><a href="commands/index.html"><strong aria-hidden="true">2.</strong> Commands</a></li><li><ol class="section"><li><a href="commands/metrics.html"><strong aria-hidden="true">2.1.</strong> Metrics</a></li><li><a href="commands/nodes.html"><strong aria-hidden="true">2.2.</strong> Nodes</a></li><li><a href="commands/rest.html"><strong aria-hidden="true">2.3.</strong> Rest API</a></li></ol></li><li><a href="developers/index.html"><strong aria-hidden="true">3.</strong> Developers Guide</a></li><li><ol class="section"><li><a href="developers/new-language.html"><strong aria-hidden="true">3.1.</strong> How-to: Add a new language</a></li><li><a href="developers/loc.html" class="active"><strong aria-hidden="true">3.2.</strong> How-to: Implement LoC</a></li></ol></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                        </div>
+
+                        <h1 class="menu-title">Rust-Code-Analysis Documentation</h1> 
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="developers/loc.html#lines-of-code-loc" id="lines-of-code-loc"><h1>Lines of Code (LoC)</h1></a>
+<p>In this document we give some guidance on how to implement the LoC metrics available in this crate.
+<a href="https://en.wikipedia.org/wiki/Source_lines_of_code">Lines of code</a> is a software metric that gives an indication of the size of some source code by counting the lines of the source code.
+There are many types of LoC so we will first explain those by way of an example.</p>
+<a class="header" href="developers/loc.html#types-of-loc" id="types-of-loc"><h2>Types of LoC</h2></a>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+/*
+Instruction: Implement factorial function
+For extra credits, do not use mutable state or a imperative loop like `for` or `while`.
+ */
+
+/// Factorial: n! = n*(n-1)*(n-2)*(n-3)...3*2*1
+fn factorial(num: u64) -&gt; u64 {
+    
+    // use `product` on `Iterator`
+    (1..=num).product()
+}
+#}</code></pre></pre>
+<p>The example above will be used to illustrate each of the <strong>LoC</strong> metrics described below.</p>
+<a class="header" href="developers/loc.html#sloc" id="sloc"><h3>SLOC</h3></a>
+<p>A straight count of all lines in the file including code, comments, and blank lines.<br />
+METRIC VALUE: 11</p>
+<a class="header" href="developers/loc.html#ploc" id="ploc"><h3>PLOC</h3></a>
+<p>A count of the instruction lines of code contained in the source code. This would include any brackets or similar syntax on a new line.
+Note that comments and blank lines are not counted in this.<br />
+METRIC VALUE: 3</p>
+<a class="header" href="developers/loc.html#lloc" id="lloc"><h3>LLOC</h3></a>
+<p>The &quot;logical&quot; lines is a count of the number of statements in the code. Note that what a statement is depends on the language.<br />
+In the above example there is only a single statement which id the function call of <code>product</code> with the <code>Iterator</code> as its argument.<br />
+METRIC VALUE: 1</p>
+<a class="header" href="developers/loc.html#cloc" id="cloc"><h3>CLOC</h3></a>
+<p>A count of the comments in the code. The type of comment does not matter ie single line, block, or doc.<br />
+METRIC VALUE: 6</p>
+<a class="header" href="developers/loc.html#blank" id="blank"><h3>BLANK</h3></a>
+<p>Last but not least, this metric counts the blank lines present in a code.
+METRIC VALUE: 2</p>
+<a class="header" href="developers/loc.html#implementation" id="implementation"><h2>Implementation</h2></a>
+<p>To implement the LoC related metrics described above you need to implement the <code>Loc</code> trait for the language you want to support.</p>
+<p>This requires implementing the <code>compute</code> function.
+See <a href="https://github.com/mozilla/rust-code-analysis/blob/master/src/metrics/loc.rs">/src/metrics/loc.rs</a> for where to implement, as well as examples from other languages.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="developers/new-language.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="developers/new-language.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
