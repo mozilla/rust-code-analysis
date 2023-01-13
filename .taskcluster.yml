@@ -424,9 +424,9 @@ tasks:
                    cd tree-sitter-preproc && taskboot cargo-publish --ignore-published && cd .. &&
                    cd tree-sitter-mozjs && taskboot cargo-publish --ignore-published && cd .. &&
                    cd tree-sitter-mozcpp && taskboot cargo-publish --ignore-published && cd .. &&
-                   taskboot cargo-publish &&
-                   cd rust-code-analysis-cli && taskboot cargo-publish && cd .. &&
-                   cd rust-code-analysis-web && taskboot cargo-publish"
+                   taskboot cargo-publish --ignore-published &&
+                   cd rust-code-analysis-cli && taskboot cargo-publish --ignore-published && cd .. &&
+                   cd rust-code-analysis-web && taskboot cargo-publish --ignore-published"
             metadata:
               name: "rust-code-analysis crates publishing on crates.io ${head_branch[10:]}"
               description: rust-code-analysis crates publishing on crates.io
