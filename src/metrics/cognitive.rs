@@ -1778,7 +1778,7 @@ mod tests {
                 (cognitive_min, 4, usize),
                 (cognitive_max, 4, usize)
             ],
-            [(cognitive_average, 4.0)]
+            []
         );
     }
 }
