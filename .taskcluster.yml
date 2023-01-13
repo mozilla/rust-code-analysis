@@ -470,7 +470,7 @@ tasks:
                 type: file
               public/Cargo.lock:
                 expires: {$fromNow: '2 weeks'}
-                path: Cargo.lock
+                path: /rust-code-analysis/Cargo.lock
                 type: file
           metadata:
             name: rust-code-analysis linux release build
