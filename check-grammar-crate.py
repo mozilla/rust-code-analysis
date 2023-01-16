@@ -44,6 +44,7 @@ EXTENSIONS = {
     "tree-sitter-tsx": ["*.tsx"],
     "tree-sitter-typescript": ["*.ts", "*.jsw", "*.jsmw"],
     "tree-sitter-java": ["*.java"],
+    "tree-sitter-kotlin": ["*.kt", "*.kts"],
     "tree-sitter-rust": ["*.rs"],
     "tree-sitter-python": ["*.py"],
     "tree-sitter-mozjs": ["*.js", "*.js2", "*.jsm", "*.mjs", "*.jsx"],
