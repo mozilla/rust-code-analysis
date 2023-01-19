@@ -23,7 +23,7 @@ struct Opts {
     #[clap(long, short = 'j')]
     num_jobs: Option<usize>,
     /// Host for the web server.
-    #[clap(long, short, default_value = "127.0.0.1")]
+    #[clap(long, default_value = "127.0.0.1")]
     host: String,
     /// Port for the web server.
     #[clap(long, short, default_value = "8080")]
