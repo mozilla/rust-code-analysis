@@ -102,7 +102,7 @@ tasks:
           image: "rust:buster"
           env:
             CODECOV_TOKEN: 4df01912-087e-489a-be28-25aa911cb9d2
-            CARGO_INCREMENTAL: 0
+            CARGO_INCREMENTAL: "0"
             RUSTFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off
             RUSTDOCFLAGS: -Cinstrument-coverage -Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off
             LLVM_PROFILE_FILE: rust-code-analysis-%p-%m.profraw
