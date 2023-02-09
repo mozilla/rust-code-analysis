@@ -41,7 +41,7 @@ impl Format {
                     } else {
                         serde_json::to_string(&space).unwrap()
                     };
-                    writeln!(stdout, "{}", json_data)
+                    writeln!(stdout, "{json_data}")
                 }
                 Format::Toml => {
                     let toml_data = if pretty {
@@ -49,7 +49,7 @@ impl Format {
                     } else {
                         toml::to_string(&space).unwrap()
                     };
-                    writeln!(stdout, "{}", toml_data)
+                    writeln!(stdout, "{toml_data}")
                 }
                 Format::Yaml => writeln!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
             }
@@ -126,7 +126,7 @@ impl FromStr for Format {
             "json" => Ok(Format::Json),
             "toml" => Ok(Format::Toml),
             "yaml" => Ok(Format::Yaml),
-            format => Err(format!("{:?} is not a supported format", format)),
+            format => Err(format!("{format:?} is not a supported format")),
         }
     }
 }

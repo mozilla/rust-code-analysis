@@ -97,7 +97,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
                     g.add_edge(node, i, 0);
                 } else {
                     // TODO: add an option to display warning
-                    eprintln!("Warning: possible self inclusion {:?}", file);
+                    eprintln!("Warning: possible self inclusion {file:?}");
                 }
             }
         }
@@ -146,7 +146,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
 
             eprintln!("Warning: possible include cycle:");
             for p in paths.iter() {
-                eprintln!("  - {:?}", p);
+                eprintln!("  - {p:?}");
             }
             eprintln!();
 
@@ -167,7 +167,7 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
                             x_inc.insert(p.to_string());
                         }
                     } else {
-                        eprintln!("DEBUG: {:?} {:?}", path, node);
+                        eprintln!("DEBUG: {path:?} {node:?}");
                     }
                 } else {
                     x_inc.insert(w.to_str().unwrap().to_string());

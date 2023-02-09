@@ -61,7 +61,7 @@ impl fmt::Display for SpaceKind {
             SpaceKind::Namespace => "namespace",
             SpaceKind::Interface => "interface",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 

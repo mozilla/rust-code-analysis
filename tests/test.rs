@@ -79,7 +79,7 @@ fn compare_rca_output_with_files(repo_name: &str, include: &[&str]) {
     };
 
     if let Err(e) = ConcurrentRunner::new(num_jobs, act_on_file).run(cfg, files_data) {
-        eprintln!("{:?}", e);
+        eprintln!("{e:?}");
         process::exit(1);
     }
 }
