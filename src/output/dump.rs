@@ -92,7 +92,7 @@ fn dump_tree_helper(
 
     if display {
         color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
+        write!(stdout, "{prefix}{pref}")?;
 
         color!(stdout, Yellow, true);
         write!(
@@ -123,7 +123,7 @@ fn dump_tree_helper(
             color!(stdout, Red, true);
             let code = &code[node.object().start_byte()..node.object().end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
-                write!(stdout, "{} ", code)?;
+                write!(stdout, "{code} ")?;
             } else {
                 stdout.write_all(code).unwrap();
             }
@@ -134,7 +134,7 @@ fn dump_tree_helper(
 
     let count = node.object().child_count();
     if count != 0 {
-        let prefix = format!("{}{}", prefix, pref_child);
+        let prefix = format!("{prefix}{pref_child}");
         let mut i = count;
         let mut cursor = node.object().walk();
         cursor.goto_first_child();

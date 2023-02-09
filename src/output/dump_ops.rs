@@ -51,7 +51,7 @@ fn dump_space(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Yellow, true);
     write!(stdout, "{}: ", space.kind)?;
@@ -62,7 +62,7 @@ fn dump_space(
     color!(stdout, Red, true);
     writeln!(stdout, " (@{})", space.start_line)?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_space_ops(space, &prefix, space.spaces.is_empty(), stdout)?;
 
     if let Some((last, spaces)) = space.spaces.split_last() {
@@ -95,22 +95,22 @@ fn dump_ops_values(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
-    writeln!(stdout, "{}", name)?;
+    writeln!(stdout, "{name}")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     for op in ops.iter().take(ops.len() - 1) {
         color!(stdout, Blue);
-        write!(stdout, "{}|- ", prefix)?;
+        write!(stdout, "{prefix}|- ")?;
 
         color!(stdout, White);
-        writeln!(stdout, "{}", op)?;
+        writeln!(stdout, "{op}")?;
     }
 
     color!(stdout, Blue);
-    write!(stdout, "{}`- ", prefix)?;
+    write!(stdout, "{prefix}`- ")?;
 
     color!(stdout, White);
     writeln!(stdout, "{}", ops.last().unwrap())

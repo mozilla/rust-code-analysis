@@ -62,7 +62,7 @@ fn dump_space(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Yellow, true);
     write!(stdout, "{}: ", space.kind)?;
@@ -73,7 +73,7 @@ fn dump_space(
     color!(stdout, Red, true);
     writeln!(stdout, " (@{})", space.start_line)?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_metrics(&space.metrics, &prefix, space.spaces.is_empty(), stdout)?;
 
     if let Some((last, spaces)) = space.spaces.split_last() {
@@ -95,12 +95,12 @@ fn dump_metrics(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Yellow, true);
     writeln!(stdout, "metrics")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_cognitive(&metrics.cognitive, &prefix, false, stdout)?;
     dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout)?;
     dump_nargs(&metrics.nargs, &prefix, false, stdout)?;
@@ -124,12 +124,12 @@ fn dump_cognitive(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "cognitive")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value("sum", stats.cognitive(), &prefix, false, stdout)?;
     dump_value("average", stats.cognitive_average(), &prefix, true, stdout)
@@ -144,12 +144,12 @@ fn dump_cyclomatic(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "cyclomatic")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value("sum", stats.cyclomatic(), &prefix, false, stdout)?;
     dump_value("average", stats.cyclomatic_average(), &prefix, true, stdout)
@@ -164,12 +164,12 @@ fn dump_halstead(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "halstead")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value("n1", stats.u_operators(), &prefix, false, stdout)?;
     dump_value("N1", stats.operators(), &prefix, false, stdout)?;
@@ -203,12 +203,12 @@ fn dump_loc(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "loc")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
     dump_value("ploc", stats.ploc(), &prefix, false, stdout)?;
     dump_value("lloc", stats.lloc(), &prefix, false, stdout)?;
@@ -225,12 +225,12 @@ fn dump_nom(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "nom")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("functions", stats.functions(), &prefix, false, stdout)?;
     dump_value("closures", stats.closures(), &prefix, false, stdout)?;
     dump_value("total", stats.total(), &prefix, true, stdout)
@@ -245,12 +245,12 @@ fn dump_mi(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "mi")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("mi_original", stats.mi_original(), &prefix, false, stdout)?;
     dump_value("mi_sei", stats.mi_sei(), &prefix, false, stdout)?;
     dump_value(
@@ -271,12 +271,12 @@ fn dump_nargs(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "nargs")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("functions", stats.fn_args(), &prefix, false, stdout)?;
     dump_value("closures", stats.closure_args(), &prefix, false, stdout)?;
     dump_value("total", stats.nargs_total(), &prefix, false, stdout)?;
@@ -292,7 +292,7 @@ fn dump_nexits(
     let pref = if last { "`- " } else { "|- " };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     write!(stdout, "nexits: ")?;
@@ -310,12 +310,12 @@ fn dump_abc(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "abc")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value(
         "assignments",
@@ -342,12 +342,12 @@ fn dump_wmc(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "wmc")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("classes", stats.class_wmc_sum(), &prefix, false, stdout)?;
     dump_value(
         "interfaces",
@@ -372,12 +372,12 @@ fn dump_npm(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "npm")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("classes", stats.class_npm_sum(), &prefix, false, stdout)?;
     dump_value(
         "interfaces",
@@ -403,12 +403,12 @@ fn dump_npa(
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Green, true);
     writeln!(stdout, "npa")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("classes", stats.class_npa_sum(), &prefix, false, stdout)?;
     dump_value(
         "interfaces",
@@ -431,11 +431,11 @@ fn dump_value(
     let pref = if last { "`- " } else { "|- " };
 
     color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    write!(stdout, "{prefix}{pref}")?;
 
     color!(stdout, Magenta, true);
-    write!(stdout, "{}: ", name)?;
+    write!(stdout, "{name}: ")?;
 
     color!(stdout, White);
-    writeln!(stdout, "{}", val)
+    writeln!(stdout, "{val}")
 }

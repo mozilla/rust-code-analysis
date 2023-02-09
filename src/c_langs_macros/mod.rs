@@ -18,7 +18,7 @@ mod tests {
             let parser = CppParser::new(v_sample.clone(), &path, None);
             let root = parser.get_root();
             if debug || root.has_error() {
-                eprintln!("Sample (CPP) {}: {}", n, sample);
+                eprintln!("Sample (CPP) {n}: {sample}");
                 dump_node(&v_sample, &root, -1, None, None).unwrap();
             }
             assert!(!root.has_error());

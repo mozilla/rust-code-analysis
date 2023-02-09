@@ -69,7 +69,7 @@ fn dump_span(
     let pref = if last { "   `- " } else { "   |- " };
 
     color!(stdout, Blue);
-    write!(stdout, "{}", pref)?;
+    write!(stdout, "{pref}")?;
 
     if span.error {
         color!(stdout, Red, true);

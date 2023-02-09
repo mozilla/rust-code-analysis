@@ -332,14 +332,14 @@ fn main() {
     {
         Ok(all_files) => all_files,
         Err(e) => {
-            eprintln!("{:?}", e);
+            eprintln!("{e:?}");
             process::exit(1);
         }
     };
 
     if let Some(count) = count_lock {
         let count = Arc::try_unwrap(count).unwrap().into_inner().unwrap();
-        println!("{}", count);
+        println!("{count}");
     }
 
     if let Some(preproc) = preproc_lock {
@@ -350,7 +350,7 @@ fn main() {
         if let Some(output_path) = opts.output {
             write_file(&output_path, data.as_bytes()).unwrap();
         } else {
-            println!("{}", data);
+            println!("{data}");
         }
     }
 }
