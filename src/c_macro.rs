@@ -6,15 +6,12 @@ const DOLLARS: [u8; 2048] = [b'$'; 2048];
 
 #[inline(always)]
 fn is_identifier_part(c: u8) -> bool {
-    (b'A'..=b'Z').contains(&c)
-        || (b'a'..=b'z').contains(&c)
-        || (b'0'..=b'9').contains(&c)
-        || c == b'_'
+    c.is_ascii_uppercase() || c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'_'
 }
 
 #[inline(always)]
 fn is_identifier_starter(c: u8) -> bool {
-    (b'A'..=b'Z').contains(&c) || (b'a'..=b'z').contains(&c) || c == b'_'
+    c.is_ascii_uppercase() || c.is_ascii_lowercase() || c == b'_'
 }
 
 #[inline(always)]

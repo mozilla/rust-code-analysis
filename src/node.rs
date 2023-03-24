@@ -24,7 +24,7 @@ impl<'a> Node<'a> {
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
         let mut cursor = self.0.walk();
         cursor.goto_first_child();
-        (0..self.object().child_count()).into_iter().map(move |_| {
+        (0..self.object().child_count()).map(move |_| {
             let result = Node::new(cursor.node());
             cursor.goto_next_sibling();
             result
