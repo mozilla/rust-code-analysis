@@ -36,7 +36,7 @@ impl Serialize for Stats {
         S: Serializer,
     {
         let mut st = serializer.serialize_struct("nexits", 4)?;
-        st.serialize_field("sum", &self.exit())?;
+        st.serialize_field("sum", &self.exit_sum())?;
         st.serialize_field("average", &self.exit_average())?;
         st.serialize_field("min", &self.exit_min())?;
         st.serialize_field("max", &self.exit_max())?;
