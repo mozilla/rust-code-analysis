@@ -822,29 +822,54 @@ impl Loc for CcommentCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn python_sloc() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "
 
             a = 42
 
             ",
             "foo.py",
-            PythonParser,
-            loc,
-            [(sloc, 1, usize), (sloc_min, 1, usize), (sloc_max, 1, usize)],
-            [(sloc_average, 1.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_blank() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "
             a = 42
 
@@ -852,20 +877,41 @@ mod tests {
 
             ",
             "foo.py",
-            PythonParser,
-            loc,
-            [
-                (blank, 1, usize),
-                (blank_min, 1, usize),
-                (blank_max, 1, usize)
-            ],
-            [(blank_average, 1.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 1.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 1.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_blank() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "
 
             let a = 42;
@@ -874,33 +920,71 @@ mod tests {
 
             ",
             "foo.rs",
-            RustParser,
-            loc,
-            [
-                (blank, 1, usize),
-                (blank_min, 1, usize),
-                (blank_max, 1, usize)
-            ],
-            [(blank_average, 1.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 1.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 1.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
-            "fn func() { /* comment */ }",
-            "foo.rs",
-            RustParser,
-            loc,
-            [
-                (blank, 0, usize),
-                (blank_min, 0, usize),
-                (blank_max, 0, usize)
-            ],
-            [(blank_average, 0.0)] // The number of spaces is 2
-        );
+        check_metrics::<RustParser>("fn func() { /* comment */ }", "foo.rs", |metric| {
+            // Spaces: 2
+            insta::assert_json_snapshot!(
+                metric.loc,
+                @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 0.0,
+                      "cloc": 1.0,
+                      "blank": 0.0,
+                      "sloc_average": 0.5,
+                      "ploc_average": 0.5,
+                      "lloc_average": 0.0,
+                      "cloc_average": 0.5,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 1.0,
+                      "cloc_max": 1.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 0.0,
+                      "lloc_max": 0.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn c_blank() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "
 
             int a = 42;
@@ -909,14 +993,35 @@ mod tests {
 
             ",
             "foo.c",
-            CppParser,
-            loc,
-            [
-                (blank, 1, usize),
-                (blank_min, 1, usize),
-                (blank_max, 1, usize)
-            ],
-            [(blank_average, 1.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 1.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 1.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -924,7 +1029,7 @@ mod tests {
     fn python_no_zero_blank() {
         // Checks that the blank metric is not equal to 0 when there are some
         // comments next to code lines.
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def ConnectToUpdateServer():
                  pool = 4
 
@@ -936,32 +1041,35 @@ mod tests {
                  numTries = 20 # Number of IPC connection tries before
                                # giving up.",
             "foo.py",
-            PythonParser,
-            loc,
-            [
-                (sloc, 10, usize), // The number of lines is 10
-                (ploc, 7, usize),  // The number of code lines is 7
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 4, usize),  // The number of comments is 4
-                (blank, 1, usize)  // The number of blank lines is 1
-                (sloc_min, 9, usize),
-                (ploc_min, 7, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 2, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 9, usize),
-                (ploc_max, 7, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 2, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 5.0), // The number of spaces is 2
-                (ploc_average, 3.5),
-                (lloc_average, 3.0),
-                (cloc_average, 2.0),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 10.0,
+                      "ploc": 7.0,
+                      "lloc": 6.0,
+                      "cloc": 4.0,
+                      "blank": 1.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 3.5,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.5,
+                      "sloc_min": 9.0,
+                      "sloc_max": 9.0,
+                      "cloc_min": 2.0,
+                      "cloc_max": 2.0,
+                      "ploc_min": 7.0,
+                      "ploc_max": 7.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -969,7 +1077,7 @@ mod tests {
     fn python_no_blank() {
         // Checks that the blank metric is equal to 0 when there are no blank
         // lines and there are comments next to code lines.
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def ConnectToUpdateServer():
                  pool = 4
                  updateServer = -42
@@ -980,32 +1088,35 @@ mod tests {
                  numTries = 20 # Number of IPC connection tries before
                                # giving up.",
             "foo.py",
-            PythonParser,
-            loc,
-            [
-                (sloc, 9, usize),  // The number of lines is 9
-                (ploc, 7, usize),  // The number of code lines is 7
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 4, usize),  // The number of comments is 4
-                (blank, 0, usize), // The number of blank lines is 0
-                (sloc_min, 8, usize),
-                (ploc_min, 7, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 2, usize),
-                (blank_min, 0, usize),
-                (sloc_max, 8, usize),
-                (ploc_max, 7, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 2, usize),
-                (blank_max, 0, usize)
-            ],
-            [
-                (sloc_average, 4.5), // The number of spaces is 2
-                (ploc_average, 3.5),
-                (lloc_average, 3.0),
-                (cloc_average, 2.0),
-                (blank_average, 0.0)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 9.0,
+                      "ploc": 7.0,
+                      "lloc": 6.0,
+                      "cloc": 4.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.5,
+                      "ploc_average": 3.5,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 8.0,
+                      "sloc_max": 8.0,
+                      "cloc_min": 2.0,
+                      "cloc_max": 2.0,
+                      "ploc_min": 7.0,
+                      "ploc_max": 7.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1013,7 +1124,7 @@ mod tests {
     fn python_no_zero_blank_more_comments() {
         // Checks that the blank metric is not equal to 0 when there are more
         // comments next to code lines compared to the previous tests.
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def ConnectToUpdateServer():
                  pool = 4
 
@@ -1025,32 +1136,35 @@ mod tests {
                  numTries = 20 # Number of IPC connection tries before
                                # giving up.",
             "foo.py",
-            PythonParser,
-            loc,
-            [
-                (sloc, 10, usize), // The number of lines is 10
-                (ploc, 7, usize),  // The number of code lines is 7
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 9, usize),
-                (ploc_min, 7, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 3, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 9, usize),
-                (ploc_max, 7, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 3, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 5.0), // The number of spaces is 2
-                (ploc_average, 3.5),
-                (lloc_average, 3.0),
-                (cloc_average, 2.5),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 10.0,
+                      "ploc": 7.0,
+                      "lloc": 6.0,
+                      "cloc": 5.0,
+                      "blank": 1.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 3.5,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.5,
+                      "blank_average": 0.5,
+                      "sloc_min": 9.0,
+                      "sloc_max": 9.0,
+                      "cloc_min": 3.0,
+                      "cloc_max": 3.0,
+                      "ploc_min": 7.0,
+                      "ploc_max": 7.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1058,7 +1172,7 @@ mod tests {
     fn rust_no_zero_blank() {
         // Checks that the blank metric is not equal to 0 when there are some
         // comments next to code lines.
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn ConnectToUpdateServer() {
               let pool = 0;
 
@@ -1071,32 +1185,35 @@ mod tests {
                                     // giving up.
             }",
             "foo.rs",
-            RustParser,
-            loc,
-            [
-                (sloc, 11, usize), // The number of lines is 11
-                (ploc, 8, usize),  // The number of code lines is 8
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 4, usize),  // The number of comments is 4
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 11, usize),
-                (ploc_min, 8, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 4, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 11, usize),
-                (ploc_max, 8, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 4, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 5.5), // The number of spaces is 2
-                (ploc_average, 4.0),
-                (lloc_average, 3.0),
-                (cloc_average, 2.0),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 11.0,
+                      "ploc": 8.0,
+                      "lloc": 6.0,
+                      "cloc": 4.0,
+                      "blank": 1.0,
+                      "sloc_average": 5.5,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.5,
+                      "sloc_min": 11.0,
+                      "sloc_max": 11.0,
+                      "cloc_min": 4.0,
+                      "cloc_max": 4.0,
+                      "ploc_min": 8.0,
+                      "ploc_max": 8.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1104,7 +1221,7 @@ mod tests {
     fn javascript_no_zero_blank() {
         // Checks that the blank metric is not equal to 0 when there are some
         // comments next to code lines.
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "function ConnectToUpdateServer() {
               var pool = 0;
 
@@ -1117,32 +1234,35 @@ mod tests {
                                     // giving up.
             }",
             "foo.js",
-            JavascriptParser,
-            loc,
-            [
-                (sloc, 11, usize), // The number of lines is 11
-                (ploc, 8, usize),  // The number of code lines is 8
-                (lloc, 1, usize),  // The number of statements is 1
-                (cloc, 4, usize),  // The number of comments is 4
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 11, usize),
-                (ploc_min, 8, usize),
-                (lloc_min, 1, usize),
-                (cloc_min, 4, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 11, usize),
-                (ploc_max, 8, usize),
-                (lloc_max, 1, usize),
-                (cloc_max, 4, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 5.5), // The number of spaces is 2
-                (ploc_average, 4.0),
-                (lloc_average, 0.5),
-                (cloc_average, 2.0),
-                (blank_average, 0.5),
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 11.0,
+                      "ploc": 8.0,
+                      "lloc": 1.0,
+                      "cloc": 4.0,
+                      "blank": 1.0,
+                      "sloc_average": 5.5,
+                      "ploc_average": 4.0,
+                      "lloc_average": 0.5,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.5,
+                      "sloc_min": 11.0,
+                      "sloc_max": 11.0,
+                      "cloc_min": 4.0,
+                      "cloc_max": 4.0,
+                      "ploc_min": 8.0,
+                      "ploc_max": 8.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1150,7 +1270,7 @@ mod tests {
     fn cpp_no_zero_blank() {
         // Checks that the blank metric is not equal to 0 when there are some
         // comments next to code lines.
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void ConnectToUpdateServer() {
               int pool;
 
@@ -1163,32 +1283,35 @@ mod tests {
                                        // giving up.
             }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [
-                (sloc, 11, usize), // The number of lines is 11
-                (ploc, 8, usize),  // The number of code lines is 8
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 4, usize),  // The number of comments is 4
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 11, usize),
-                (ploc_min, 8, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 4, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 11, usize),
-                (ploc_max, 8, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 4, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 5.5), // The number of spaces is 2
-                (ploc_average, 4.0),
-                (lloc_average, 3.0),
-                (cloc_average, 2.0),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 11.0,
+                      "ploc": 8.0,
+                      "lloc": 6.0,
+                      "cloc": 4.0,
+                      "blank": 1.0,
+                      "sloc_average": 5.5,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.5,
+                      "sloc_min": 11.0,
+                      "sloc_max": 11.0,
+                      "cloc_min": 4.0,
+                      "cloc_max": 4.0,
+                      "ploc_min": 8.0,
+                      "ploc_max": 8.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1196,7 +1319,7 @@ mod tests {
     fn cpp_code_line_start_block_blank() {
         // Checks that the blank metric is equal to 1 when there are
         // block comments starting next to code lines.
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void ConnectToUpdateServer() {
               int pool;
 
@@ -1210,32 +1333,35 @@ mod tests {
                                        // giving up.
             }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [
-                (sloc, 12, usize), // The number of lines is 12
-                (ploc, 8, usize),  // The number of code lines is 8
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 12, usize),
-                (ploc_min, 8, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 5, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 12, usize),
-                (ploc_max, 8, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 5, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 6.0), // The number of spaces is 2
-                (ploc_average, 4.0),
-                (lloc_average, 3.0),
-                (cloc_average, 2.5),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 12.0,
+                      "ploc": 8.0,
+                      "lloc": 6.0,
+                      "cloc": 5.0,
+                      "blank": 1.0,
+                      "sloc_average": 6.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.5,
+                      "blank_average": 0.5,
+                      "sloc_min": 12.0,
+                      "sloc_max": 12.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
+                      "ploc_min": 8.0,
+                      "ploc_max": 8.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1243,7 +1369,7 @@ mod tests {
     fn cpp_block_comment_blank() {
         // Checks that the blank metric is equal to 1 when there are
         // block comments on independent lines.
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void ConnectToUpdateServer() {
               int pool;
 
@@ -1258,32 +1384,35 @@ mod tests {
                                        // giving up.
             }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [
-                (sloc, 13, usize), // The number of lines is 13
-                (ploc, 8, usize),  // The number of code lines is 8
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 13, usize),
-                (ploc_min, 8, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 5, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 13, usize),
-                (ploc_max, 8, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 5, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 6.5), // The number of spaces is 2
-                (ploc_average, 4.0),
-                (lloc_average, 3.0),
-                (cloc_average, 2.5),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 13.0,
+                      "ploc": 8.0,
+                      "lloc": 6.0,
+                      "cloc": 5.0,
+                      "blank": 1.0,
+                      "sloc_average": 6.5,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.5,
+                      "blank_average": 0.5,
+                      "sloc_min": 13.0,
+                      "sloc_max": 13.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
+                      "ploc_min": 8.0,
+                      "ploc_max": 8.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1291,7 +1420,7 @@ mod tests {
     fn cpp_code_line_block_one_line_blank() {
         // Checks that the blank metric is equal to 1 when there are
         // block comments before the same code line.
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void ConnectToUpdateServer() {
               int pool;
 
@@ -1303,32 +1432,35 @@ mod tests {
                                        // giving up.
             }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [
-                (sloc, 10, usize), // The number of lines is 10
-                (ploc, 8, usize),  // The number of code lines is 8
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 3, usize),  // The number of comments is 3
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 10, usize),
-                (ploc_min, 8, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 3, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 10, usize),
-                (ploc_max, 8, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 3, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 5.0), // The number of spaces is 2
-                (ploc_average, 4.0),
-                (lloc_average, 3.0),
-                (cloc_average, 1.5),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 10.0,
+                      "ploc": 8.0,
+                      "lloc": 6.0,
+                      "cloc": 3.0,
+                      "blank": 1.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 1.5,
+                      "blank_average": 0.5,
+                      "sloc_min": 10.0,
+                      "sloc_max": 10.0,
+                      "cloc_min": 3.0,
+                      "cloc_max": 3.0,
+                      "ploc_min": 8.0,
+                      "ploc_max": 8.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -1336,7 +1468,7 @@ mod tests {
     fn cpp_code_line_end_block_blank() {
         // Checks that the blank metric is equal to 1 when there are
         // block comments ending next to code lines.
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void ConnectToUpdateServer() {
               int pool;
 
@@ -1350,112 +1482,240 @@ mod tests {
                                        // giving up.
             }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [
-                (sloc, 12, usize), // The number of lines is 12
-                (ploc, 8, usize),  // The number of code lines is 8
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 5, usize),  // The number of comments is 5
-                (blank, 1, usize), // The number of blank lines is 1
-                (sloc_min, 12, usize),
-                (ploc_min, 8, usize),
-                (lloc_min, 6, usize),
-                (cloc_min, 5, usize),
-                (blank_min, 1, usize),
-                (sloc_max, 12, usize),
-                (ploc_max, 8, usize),
-                (lloc_max, 6, usize),
-                (cloc_max, 5, usize),
-                (blank_max, 1, usize)
-            ],
-            [
-                (sloc_average, 6.0), // The number of spaces is 2
-                (ploc_average, 4.0),
-                (lloc_average, 3.0),
-                (cloc_average, 2.5),
-                (blank_average, 0.5)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 12.0,
+                      "ploc": 8.0,
+                      "lloc": 6.0,
+                      "cloc": 5.0,
+                      "blank": 1.0,
+                      "sloc_average": 6.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.5,
+                      "blank_average": 0.5,
+                      "sloc_min": 12.0,
+                      "sloc_max": 12.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
+                      "ploc_min": 8.0,
+                      "ploc_max": 8.0,
+                      "lloc_min": 6.0,
+                      "lloc_max": 6.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_cloc() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "\"\"\"Block comment
             Block comment
             \"\"\"
             # Line Comment
             a = 42 # Line Comment",
             "foo.py",
-            PythonParser,
-            loc,
-            [(cloc, 5, usize), (cloc_min, 5, usize), (cloc_max, 5, usize)],
-            [(cloc_average, 5.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 5.0,
+                      "ploc": 1.0,
+                      "lloc": 2.0,
+                      "cloc": 5.0,
+                      "blank": 0.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 5.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 5.0,
+                      "sloc_max": 5.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_cloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "/*Block comment
             Block Comment*/
             //Line Comment
             /*Block Comment*/ let a = 42; // Line Comment",
             "foo.rs",
-            RustParser,
-            loc,
-            [(cloc, 5, usize), (cloc_min, 5, usize), (cloc_max, 5, usize)],
-            [(cloc_average, 5.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 5.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 5.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_cloc() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "/*Block comment
             Block Comment*/
             //Line Comment
             /*Block Comment*/ int a = 42; // Line Comment",
             "foo.c",
-            CppParser,
-            loc,
-            [(cloc, 5, usize), (cloc_min, 5, usize), (cloc_max, 5, usize)],
-            [(cloc_average, 5.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 5.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 5.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_lloc() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "for x in range(0,42):
                 if x % 2 == 0:
                     print(x)",
             "foo.py",
-            PythonParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 3.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "for x in 0..42 {
                 if x % 2 == 0 {
                     println!(\"{}\", x);
                 }
              }",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 5.0,
+                      "ploc": 5.0,
+                      "lloc": 3.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 5.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 5.0,
+                      "sloc_max": 5.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 5.0,
+                      "ploc_max": 5.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
 
         // LLOC returns three because there is an empty Rust statement
-        check_metrics!(
+        check_metrics::<RustParser>(
             "let a = 42;
              if true {
                 42
@@ -1463,269 +1723,685 @@ mod tests {
                 43
              };",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 6.0,
+                      "ploc": 6.0,
+                      "lloc": 3.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 6.0,
+                      "ploc_average": 6.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 6.0,
+                      "sloc_max": 6.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 6.0,
+                      "ploc_max": 6.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_lloc() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "for (;;)
                 break;",
             "foo.c",
-            CppParser,
-            loc,
-            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
-            [(lloc_average, 2.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 2.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 2.0,
+                      "sloc_max": 2.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn cpp_lloc() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "nsTArray<xpcGCCallback> callbacks(extraGCCallbacks.Clone());
              for (uint32_t i = 0; i < callbacks.Length(); ++i) {
                  callbacks[i](status);
              }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)], // nsTArray, for, callbacks
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                // lloc: nsTArray, for, callbacks
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 4.0,
+                      "lloc": 3.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 4.0,
+                      "ploc_max": 4.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn cpp_return_lloc() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "uint8_t* pixel_data = frame.GetFrameDataAtPos(DesktopVector(x, y));
              return RgbaColor(pixel_data) == blank_pixel_;",
             "foo.cpp",
-            CppParser,
-            loc,
-            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)], // pixel_data, return
-            [(lloc_average, 2.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                // lloc: pixel_data, return
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 2.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 2.0,
+                      "sloc_max": 2.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn cpp_for_lloc() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "for (; start != end; ++start) {
                  const unsigned char idx = *start;
                  if (idx > 127 || !kValidTokenMap[idx]) return false;
              }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [(lloc, 4, usize), (lloc_min, 4, usize), (lloc_max, 4, usize)], // for, idx, if, return
-            [(lloc_average, 4.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                // lloc: for, idx, if, return
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 4.0,
+                      "lloc": 4.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 4.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 4.0,
+                      "ploc_max": 4.0,
+                      "lloc_min": 4.0,
+                      "lloc_max": 4.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn cpp_while_lloc() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "while (sHeapAtoms) {
                  HttpHeapAtom* next = sHeapAtoms->next;
                  free(sHeapAtoms);
             }",
             "foo.cpp",
-            CppParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)], // while, next, free,
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                // lloc: while, next, free
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 4.0,
+                      "lloc": 3.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 4.0,
+                      "ploc_max": 4.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_string_on_new_line() {
         // More lines of the same instruction were counted as blank lines
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "capabilities[\"goog:chromeOptions\"][\"androidPackage\"] = \\
                 \"org.chromium.weblayer.shell\"",
             "foo.py",
-            PythonParser,
-            loc,
-            [
-                (sloc, 2, usize),
-                (ploc, 2, usize),
-                (lloc, 1, usize),
-                (cloc, 0, usize),
-                (blank, 0, usize),
-                (sloc_min, 2, usize),
-                (ploc_min, 2, usize),
-                (lloc_min, 1, usize),
-                (cloc_min, 0, usize),
-                (blank_min, 0, usize),
-                (sloc_max, 2, usize),
-                (ploc_max, 2, usize),
-                (lloc_max, 1, usize),
-                (cloc_max, 0, usize),
-                (blank_max, 0, usize)
-            ],
-            [
-                (sloc_average, 2.0), // The number of spaces is 1
-                (ploc_average, 2.0),
-                (lloc_average, 1.0),
-                (cloc_average, 0.0),
-                (blank_average, 0.0)
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 2.0,
+                      "ploc": 2.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 2.0,
+                      "sloc_max": 2.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_no_field_expression_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "struct Foo {
                 field: usize,
              }
              let foo = Foo { 42 };
              foo.field;",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
-            [(lloc_average, 2.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 5.0,
+                      "ploc": 5.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 5.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 5.0,
+                      "sloc_max": 5.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 5.0,
+                      "ploc_max": 5.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_no_parenthesized_expression_lloc() {
-        check_metrics!(
-            "let a = (42 + 0);",
-            "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
-            [(lloc_average, 1.0)] // The number of spaces is 1
-        );
+        check_metrics::<RustParser>("let a = (42 + 0);", "foo.rs", |metric| {
+            // Spaces: 1
+            insta::assert_json_snapshot!(
+                metric.loc,
+                @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_no_array_expression_lloc() {
-        check_metrics!(
-            "let a = [0; 42];",
-            "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
-            [(lloc_average, 1.0)] // The number of spaces is 1
-        );
+        check_metrics::<RustParser>("let a = [0; 42];", "foo.rs", |metric| {
+            // Spaces: 1
+            insta::assert_json_snapshot!(
+                metric.loc,
+                @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_no_tuple_expression_lloc() {
-        check_metrics!(
-            "let a = (0, 42);",
-            "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
-            [(lloc_average, 1.0)] // The number of spaces is 1
-        );
+        check_metrics::<RustParser>("let a = (0, 42);", "foo.rs", |metric| {
+            // Spaces: 1
+            insta::assert_json_snapshot!(
+                metric.loc,
+                @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_no_unit_expression_lloc() {
-        check_metrics!(
-            "let a = ();",
-            "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 1, usize), (lloc_min, 1, usize), (lloc_max, 1, usize)],
-            [(lloc_average, 1.0)] // The number of spaces is 1
-        );
+        check_metrics::<RustParser>("let a = ();", "foo.rs", |metric| {
+            // Spaces: 1
+            insta::assert_json_snapshot!(
+                metric.loc,
+                @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_call_function_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "let a = foo(); // +1
              foo(); // +1
              k!(foo()); // +1",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 3.0,
+                      "cloc": 3.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 3.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 3.0,
+                      "cloc_max": 3.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_macro_invocation_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "let a = foo!(); // +1
              foo!(); // +1
              k(foo!()); // +1",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 3.0,
+                      "cloc": 3.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 3.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 3.0,
+                      "cloc_max": 3.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_function_in_loop_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "for (a, b) in c.iter().enumerate() {} // +1
              while (a, b) in c.iter().enumerate() {} // +1
              while let Some(a) = c.strip_prefix(\"hi\") {} // +1",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 3, usize), (lloc_max, 3, usize)],
-            [(lloc_average, 3.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 3.0,
+                      "cloc": 3.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 3.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 3.0,
+                      "cloc_max": 3.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_function_in_if_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "if foo() {} // +1
              if let Some(a) = foo() {} // +1",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
-            [(lloc_average, 2.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 2.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 2.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 2.0,
+                      "sloc_max": 2.0,
+                      "cloc_min": 2.0,
+                      "cloc_max": 2.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_function_in_return_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "return foo();
              await foo();",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 2, usize), (lloc_min, 2, usize), (lloc_max, 2, usize)],
-            [(lloc_average, 2.0)] // The number of spaces is 1
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 2.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 2.0,
+                      "sloc_max": 2.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_closure_expression_lloc() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "let a = |i: i32| -> i32 { i + 1 }; // +1
              a(42); // +1
              k(b.iter().map(|n| n.parse.ok().unwrap_or(42))); // +1",
             "foo.rs",
-            RustParser,
-            loc,
-            [(lloc, 3, usize), (lloc_min, 0, usize), (lloc_max, 0, usize)],
-            [(lloc_average, 1.0)] // The number of spaces is 3
+            |metric| {
+                // Spaces: 3
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 3.0,
+                      "cloc": 3.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 1.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 0.0,
+                      "lloc_max": 0.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_general_loc() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def func(a,
                       b,
                       c):
@@ -1733,38 +2409,41 @@ mod tests {
                  print(b)
                  print(c)",
             "foo.py",
-            PythonParser,
-            loc,
-            [
-                (sloc, 6, usize),  // The number of lines is 6
-                (ploc, 6, usize),  // The number of code lines is 6
-                (lloc, 3, usize),  // The number of statements is 3 (print)
-                (cloc, 0, usize),  // The number of comments is 0
-                (blank, 0, usize), // The number of blank lines is 0
-                (sloc_min, 6, usize),
-                (ploc_min, 6, usize),
-                (lloc_min, 3, usize),
-                (cloc_min, 0, usize),
-                (blank_min, 0, usize),
-                (sloc_max, 6, usize),
-                (ploc_max, 6, usize),
-                (lloc_max, 3, usize),
-                (cloc_max, 0, usize),
-                (blank_max, 0, usize)
-            ],
-            [
-                (sloc_average, 3.0), // The number of spaces is 2
-                (ploc_average, 3.0),
-                (lloc_average, 1.5),
-                (cloc_average, 0.0),
-                (blank_average, 0.0)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 6.0,
+                      "ploc": 6.0,
+                      "lloc": 3.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 1.5,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 6.0,
+                      "sloc_max": 6.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 6.0,
+                      "ploc_max": 6.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_real_loc() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def web_socket_transfer_data(request):
                 while True:
                     line = request.ws_stream.receive_message()
@@ -1782,148 +2461,160 @@ mod tests {
                     # > # Suppress to re-respond client responding close frame.
                     # > raise Exception(\"customized server initiated closing handshake\")",
             "foo.py",
-            PythonParser,
-            loc,
-            [
-                (sloc, 16, usize), // The number of lines is 16
-                (ploc, 9, usize),  // The number of code lines is 9
-                (lloc, 8, usize),  // The number of statements is 8
-                (cloc, 7, usize),  // The number of comments is 7
-                (blank, 0, usize), // The number of blank lines is 0
-                (sloc_min, 16, usize),
-                (ploc_min, 9, usize),
-                (lloc_min, 8, usize),
-                (cloc_min, 7, usize),
-                (blank_min, 0, usize),
-                (sloc_max, 16, usize),
-                (ploc_max, 9, usize),
-                (lloc_max, 8, usize),
-                (cloc_max, 7, usize),
-                (blank_max, 0, usize)
-            ],
-            [
-                (sloc_average, 8.0), // The number of spaces is 2
-                (ploc_average, 4.5),
-                (lloc_average, 4.0),
-                (cloc_average, 3.5),
-                (blank_average, 0.0)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 16.0,
+                      "ploc": 9.0,
+                      "lloc": 8.0,
+                      "cloc": 7.0,
+                      "blank": 0.0,
+                      "sloc_average": 8.0,
+                      "ploc_average": 4.5,
+                      "lloc_average": 4.0,
+                      "cloc_average": 3.5,
+                      "blank_average": 0.0,
+                      "sloc_min": 16.0,
+                      "sloc_max": 16.0,
+                      "cloc_min": 7.0,
+                      "cloc_max": 7.0,
+                      "ploc_min": 9.0,
+                      "ploc_max": 9.0,
+                      "lloc_min": 8.0,
+                      "lloc_max": 8.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_real_loc() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "assert.throws(Test262Error, function() {
                for (let { poisoned: x = ++initEvalCount } = poisonedProperty; ; ) {
                  return;
                }
              });",
             "foo.js",
-            JavascriptParser,
-            loc,
-            [
-                (sloc, 5, usize),  // The number of lines is 5
-                (ploc, 5, usize),  // The number of code lines is 5
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 0, usize),  // The number of comments is 0
-                (blank, 0, usize), // The number of blank lines is 0
-                (sloc_min, 5, usize),
-                (ploc_min, 5, usize),
-                (lloc_min, 5, usize),
-                (cloc_min, 0, usize),
-                (blank_min, 0, usize),
-                (sloc_max, 5, usize),
-                (ploc_max, 5, usize),
-                (lloc_max, 5, usize),
-                (cloc_max, 0, usize),
-                (blank_max, 0, usize)
-            ],
-            [
-                (sloc_average, 2.5), // The number of spaces is 2
-                (ploc_average, 2.5),
-                (lloc_average, 3.0),
-                (cloc_average, 0.0),
-                (blank_average, 0.0)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 5.0,
+                      "ploc": 5.0,
+                      "lloc": 6.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.5,
+                      "ploc_average": 2.5,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 5.0,
+                      "sloc_max": 5.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 5.0,
+                      "ploc_max": 5.0,
+                      "lloc_min": 5.0,
+                      "lloc_max": 5.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_real_loc() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "assert.throws(Test262Error, function() {
                for (let { poisoned: x = ++initEvalCount } = poisonedProperty; ; ) {
                  return;
                }
              });",
             "foo.js",
-            MozjsParser,
-            loc,
-            [
-                (sloc, 5, usize),  // The number of lines is 5
-                (ploc, 5, usize),  // The number of code lines is 5
-                (lloc, 6, usize),  // The number of statements is 6
-                (cloc, 0, usize),  // The number of comments is 0
-                (blank, 0, usize), // The number of blank lines is 0
-                (sloc_min, 5, usize),
-                (ploc_min, 5, usize),
-                (lloc_min, 5, usize),
-                (cloc_min, 0, usize),
-                (blank_min, 0, usize),
-                (sloc_max, 5, usize),
-                (ploc_max, 5, usize),
-                (lloc_max, 5, usize),
-                (cloc_max, 0, usize),
-                (blank_max, 0, usize)
-            ],
-            [
-                (sloc_average, 2.5), // The number of spaces is 2
-                (ploc_average, 2.5),
-                (lloc_average, 3.0),
-                (cloc_average, 0.0),
-                (blank_average, 0.0)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 5.0,
+                      "ploc": 5.0,
+                      "lloc": 6.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.5,
+                      "ploc_average": 2.5,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 5.0,
+                      "sloc_max": 5.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 5.0,
+                      "ploc_max": 5.0,
+                      "lloc_min": 5.0,
+                      "lloc_max": 5.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn cpp_namespace_loc() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "namespace mozilla::dom::quota {} // namespace mozilla::dom::quota",
             "foo.cpp",
-            CppParser,
-            loc,
-            [
-                (sloc, 1, usize),  // The number of lines is 1
-                (ploc, 1, usize),  // The number of code lines is 1
-                (lloc, 0, usize),  // The number of statements is 0
-                (cloc, 1, usize),  // The number of comments is 1
-                (blank, 0, usize), // The number of blank lines is 0
-                (sloc_min, 1, usize),
-                (ploc_min, 1, usize),
-                (lloc_min, 0, usize),
-                (cloc_min, 0, usize),
-                (blank_min, 0, usize),
-                (sloc_max, 1, usize),
-                (ploc_max, 1, usize),
-                (lloc_max, 0, usize),
-                (cloc_max, 0, usize),
-                (blank_max, 0, usize)
-            ],
-            [
-                (sloc_average, 0.5), // The number of spaces is 2
-                (ploc_average, 0.5),
-                (lloc_average, 0.0),
-                (cloc_average, 0.5),
-                (blank_average, 0.0)
-            ]
+            |metric| {
+                // Spaces: 2
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 0.0,
+                      "cloc": 1.0,
+                      "blank": 0.0,
+                      "sloc_average": 0.5,
+                      "ploc_average": 0.5,
+                      "lloc_average": 0.0,
+                      "cloc_average": 0.5,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 0.0,
+                      "lloc_max": 0.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_comments() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "for (int i = 0; i < 100; i++) { \
                // Print hello
                System.out.println(\"hello\"); \
@@ -1931,152 +2622,384 @@ mod tests {
                System.out.println(\"hello\"); \
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (cloc, 2, usize), // The number of comments is 2
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 3.0,
+                      "cloc": 2.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 2.0,
+                      "cloc_max": 2.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_blank() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "int x = 1;
 
 
             int y = 2;",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (blank, 2, usize), // The number of blank lines is 2
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 2.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 2.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 2.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 2.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 2.0,
+                      "ploc_max": 2.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 2.0,
+                      "blank_max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_sloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "for (int i = 0; i < 100; i++) {
                System.out.println(i);
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (sloc, 3, usize), // The number of lines is 3
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_module_sloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "module helloworld{
               exports com.test;
             }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (sloc, 3, usize), // The number of lines is 3
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 0.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 0.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 0.0,
+                      "lloc_max": 0.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_single_ploc() {
-        check_metrics!(
-            "int x = 1;",
-            "foo.java",
-            JavaParser,
-            loc,
-            [
-                (ploc, 1, usize), // The number of code lines is 1
-            ]
-        );
+        check_metrics::<JavaParser>("int x = 1;", "foo.java", |metric| {
+            // Spaces: 1
+            insta::assert_json_snapshot!(
+                metric.loc,
+                @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn java_simple_ploc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "for (int i = 0; i < 100; i = i++) {
                System.out.println(i);
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (ploc, 3, usize), // The number of code lines is 3
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_multi_ploc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "int x = 1;
             for (int i = 0; i < 100; i++) {
                System.out.println(i);
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (ploc, 4, usize), // The number of code lines is 4
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 4.0,
+                      "lloc": 3.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 4.0,
+                      "ploc_max": 4.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_single_statement_lloc() {
-        check_metrics!(
-            "int max = 10;",
-            "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 1, usize), // The number of statements is 1
-            ]
-        );
+        check_metrics::<JavaParser>("int max = 10;", "foo.java", |metric| {
+            // Spaces: 1
+            insta::assert_json_snapshot!(
+                metric.loc,
+                @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 1.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn java_for_lloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "for (int i = 0; i < 100; i++) { // + 1
                System.out.println(i); // + 1
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 2, usize), // The number of statements is 2
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 3.0,
+                      "ploc": 3.0,
+                      "lloc": 2.0,
+                      "cloc": 2.0,
+                      "blank": 0.0,
+                      "sloc_average": 3.0,
+                      "ploc_average": 3.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 3.0,
+                      "sloc_max": 3.0,
+                      "cloc_min": 2.0,
+                      "cloc_max": 2.0,
+                      "ploc_min": 3.0,
+                      "ploc_max": 3.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_foreach_lloc() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "
             int arr[]={12,13,14,44}; // +1
             for (int i:arr) { // +1
                System.out.println(i); // +1
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 3, usize), // The number of statements is 3
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 4.0,
+                      "ploc": 4.0,
+                      "lloc": 1.0,
+                      "cloc": 3.0,
+                      "blank": 0.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 1.0,
+                      "cloc_average": 3.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 4.0,
+                      "sloc_max": 4.0,
+                      "cloc_min": 3.0,
+                      "cloc_max": 3.0,
+                      "ploc_min": 4.0,
+                      "ploc_max": 4.0,
+                      "lloc_min": 1.0,
+                      "lloc_max": 1.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_while_lloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "
             int i=0; // +1
             while(i < 10) { // +1
@@ -2084,17 +3007,41 @@ mod tests {
                 System.out.println(i); // +1
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 4, usize), // The number of statements is 4
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 5.0,
+                      "ploc": 5.0,
+                      "lloc": 4.0,
+                      "cloc": 4.0,
+                      "blank": 0.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 5.0,
+                      "lloc_average": 4.0,
+                      "cloc_average": 4.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 5.0,
+                      "sloc_max": 5.0,
+                      "cloc_min": 4.0,
+                      "cloc_max": 4.0,
+                      "ploc_min": 5.0,
+                      "ploc_max": 5.0,
+                      "lloc_min": 4.0,
+                      "lloc_max": 4.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_do_while_lloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "
             int i=0; // +1
             do { // +1
@@ -2102,17 +3049,41 @@ mod tests {
                 System.out.println(i); // +1
              } while(i < 10)",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 4, usize), // The number of statements is 4
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 5.0,
+                      "ploc": 5.0,
+                      "lloc": 4.0,
+                      "cloc": 4.0,
+                      "blank": 0.0,
+                      "sloc_average": 5.0,
+                      "ploc_average": 5.0,
+                      "lloc_average": 4.0,
+                      "cloc_average": 4.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 5.0,
+                      "sloc_max": 5.0,
+                      "cloc_min": 4.0,
+                      "cloc_max": 4.0,
+                      "ploc_min": 5.0,
+                      "ploc_max": 5.0,
+                      "lloc_min": 4.0,
+                      "lloc_max": 4.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_switch_lloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "switch(grade) { // +1
                 case 'A' :
                    System.out.println(\"Pass with distinction\"); // +1
@@ -2130,17 +3101,41 @@ mod tests {
                    System.out.println(\"Invalid grade\"); // +1
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 9, usize), // The number of statements is 6
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 16.0,
+                      "ploc": 16.0,
+                      "lloc": 9.0,
+                      "cloc": 9.0,
+                      "blank": 0.0,
+                      "sloc_average": 16.0,
+                      "ploc_average": 16.0,
+                      "lloc_average": 9.0,
+                      "cloc_average": 9.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 16.0,
+                      "sloc_max": 16.0,
+                      "cloc_min": 9.0,
+                      "cloc_max": 9.0,
+                      "ploc_min": 16.0,
+                      "ploc_max": 16.0,
+                      "lloc_min": 9.0,
+                      "lloc_max": 9.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_continue_lloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "int max = 10; // +1
 
             for (int i = 0; i < max; i++) { // +1
@@ -2148,17 +3143,41 @@ mod tests {
                 System.out.println(i); // +1
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 5, usize), // The number of statements is 5
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 6.0,
+                      "ploc": 5.0,
+                      "lloc": 5.0,
+                      "cloc": 3.0,
+                      "blank": 1.0,
+                      "sloc_average": 6.0,
+                      "ploc_average": 5.0,
+                      "lloc_average": 5.0,
+                      "cloc_average": 3.0,
+                      "blank_average": 1.0,
+                      "sloc_min": 6.0,
+                      "sloc_max": 6.0,
+                      "cloc_min": 3.0,
+                      "cloc_max": 3.0,
+                      "ploc_min": 5.0,
+                      "ploc_max": 5.0,
+                      "lloc_min": 5.0,
+                      "lloc_max": 5.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_try_lloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "try { // +1
                 int[] myNumbers = {1, 2, 3}; // +1
                 System.out.println(myNumbers[10]); // +1
@@ -2167,17 +3186,41 @@ mod tests {
                 throw e; // +1
               }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 5, usize), // The number of statements is 5
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 7.0,
+                      "ploc": 7.0,
+                      "lloc": 5.0,
+                      "cloc": 5.0,
+                      "blank": 0.0,
+                      "sloc_average": 7.0,
+                      "ploc_average": 7.0,
+                      "lloc_average": 5.0,
+                      "cloc_average": 5.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 7.0,
+                      "sloc_max": 7.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
+                      "ploc_min": 7.0,
+                      "ploc_max": 7.0,
+                      "lloc_min": 5.0,
+                      "lloc_max": 5.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_class_loc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "
             public class Person {
               private String name;
@@ -2189,17 +3232,41 @@ mod tests {
               }
             }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 2, usize), // The number of statements is 2
-            ]
+            |metric| {
+                // Spaces: 4
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 9.0,
+                      "ploc": 9.0,
+                      "lloc": 2.0,
+                      "cloc": 2.0,
+                      "blank": 0.0,
+                      "sloc_average": 2.25,
+                      "ploc_average": 2.25,
+                      "lloc_average": 0.5,
+                      "cloc_average": 0.5,
+                      "blank_average": 0.0,
+                      "sloc_min": 9.0,
+                      "sloc_max": 9.0,
+                      "cloc_min": 2.0,
+                      "cloc_max": 2.0,
+                      "ploc_min": 9.0,
+                      "ploc_max": 9.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_expressions_lloc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "int x = 10;                                                            // +1 local var declaration
             x=+89;                                                                  // +1 expression statement
             int y = x * 2;                                                          // +1 local var declaration
@@ -2213,32 +3280,78 @@ mod tests {
             done.run();                                                             // +1 expression statement
             ",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (lloc, 12, usize), // The number of statements is 12
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 11.0,
+                      "ploc": 11.0,
+                      "lloc": 12.0,
+                      "cloc": 11.0,
+                      "blank": 0.0,
+                      "sloc_average": 11.0,
+                      "ploc_average": 11.0,
+                      "lloc_average": 12.0,
+                      "cloc_average": 11.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 11.0,
+                      "sloc_max": 11.0,
+                      "cloc_min": 11.0,
+                      "cloc_max": 11.0,
+                      "ploc_min": 11.0,
+                      "ploc_max": 11.0,
+                      "lloc_min": 12.0,
+                      "lloc_max": 12.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_statement_inline_loc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "for (int i = 0; i < 100; i++) { System.out.println(\"hello\"); }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (ploc, 1, usize), // The number of code lines is 1
-                (lloc, 2, usize), // The number of statements is 2
-                (cloc, 0, usize), // The number of comments is 0
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 1.0,
+                      "ploc": 1.0,
+                      "lloc": 2.0,
+                      "cloc": 0.0,
+                      "blank": 0.0,
+                      "sloc_average": 1.0,
+                      "ploc_average": 1.0,
+                      "lloc_average": 2.0,
+                      "cloc_average": 0.0,
+                      "blank_average": 0.0,
+                      "sloc_min": 1.0,
+                      "sloc_max": 1.0,
+                      "cloc_min": 0.0,
+                      "cloc_max": 0.0,
+                      "ploc_min": 1.0,
+                      "ploc_max": 1.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_general_loc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "int max = 100;
 
             /*
@@ -2251,21 +3364,41 @@ mod tests {
                System.out.println(i);
              }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (sloc, 11, usize), // The number of lines is 11
-                (ploc, 4, usize),  // The number of code lines is 4
-                (lloc, 3, usize),  // The number of statements is 3
-                (cloc, 6, usize),  // The number of comments is 6
-                (blank, 1, usize)  // The number of blank lines is 1
-            ]
+            |metric| {
+                // Spaces: 1
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 11.0,
+                      "ploc": 4.0,
+                      "lloc": 3.0,
+                      "cloc": 6.0,
+                      "blank": 1.0,
+                      "sloc_average": 11.0,
+                      "ploc_average": 4.0,
+                      "lloc_average": 3.0,
+                      "cloc_average": 6.0,
+                      "blank_average": 1.0,
+                      "sloc_min": 11.0,
+                      "sloc_max": 11.0,
+                      "cloc_min": 6.0,
+                      "cloc_max": 6.0,
+                      "ploc_min": 4.0,
+                      "ploc_max": 4.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
+                      "blank_min": 1.0,
+                      "blank_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_main_class_loc() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "package com.company;
              /**
              * The HelloWorldApp class implements an application that
@@ -2279,15 +3412,35 @@ mod tests {
               }
             }",
             "foo.java",
-            JavaParser,
-            loc,
-            [
-                (sloc, 12, usize), // The number of lines is 12
-                (ploc, 7, usize),  // The number of code lines is 7
-                (lloc, 2, usize),  // The number of statements is 2
-                (cloc, 6, usize),  // The number of comments is 6
-                (blank, 1, usize)  // The number of blank lines is 1
-            ]
+            |metric| {
+                // Spaces: 3
+                insta::assert_json_snapshot!(
+                    metric.loc,
+                    @r###"
+                    {
+                      "sloc": 12.0,
+                      "ploc": 7.0,
+                      "lloc": 2.0,
+                      "cloc": 6.0,
+                      "blank": 1.0,
+                      "sloc_average": 4.0,
+                      "ploc_average": 2.3333333333333335,
+                      "lloc_average": 0.6666666666666666,
+                      "cloc_average": 2.0,
+                      "blank_average": 0.3333333333333333,
+                      "sloc_min": 6.0,
+                      "sloc_max": 6.0,
+                      "cloc_min": 2.0,
+                      "cloc_max": 2.0,
+                      "ploc_min": 6.0,
+                      "ploc_max": 6.0,
+                      "lloc_min": 2.0,
+                      "lloc_max": 2.0,
+                      "blank_min": 0.0,
+                      "blank_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 }
