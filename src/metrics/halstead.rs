@@ -338,13 +338,13 @@ impl Halstead for CcommentCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn python_operators_and_operands() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def foo():
                  def bar():
                      def toto():
@@ -352,14 +352,32 @@ mod tests {
                      b = 2 + a
                  c = 3 + 3",
             "foo.py",
-            PythonParser,
-            halstead,
-            [
-                (u_operators, 3, usize), // def, =, +
-                (operators, 9, usize),   // def, def, def, =, =, =, +, +, +
-                (u_operands, 9, usize),  // foo, bar, toto, a, b, c, 1, 2, 3
-                (operands, 12, usize)    // foo, bar, toto, a, b, c, 1, 1, 2, a, 3, 3
-            ]
+            |metric| {
+                // unique operators: def, =, +
+                // operators: def, def, def, =, =, =, +, +, +
+                // unique operands: foo, bar, toto, a, b, c, 1, 2, 3
+                // operands: foo, bar, toto, a, b, c, 1, 1, 2, a, 3, 3
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 3.0,
+                      "N1": 9.0,
+                      "n2": 9.0,
+                      "N2": 12.0,
+                      "length": 21.0,
+                      "estimated_program_length": 33.284212515144276,
+                      "purity_ratio": 1.584962500721156,
+                      "vocabulary": 12.0,
+                      "volume": 75.28421251514428,
+                      "difficulty": 2.0,
+                      "level": 0.5,
+                      "effort": 150.56842503028855,
+                      "time": 8.364912501682698,
+                      "bugs": 0.0094341190071077
+                    }"###
+                );
+            },
         );
     }
 
@@ -371,7 +389,7 @@ mod tests {
         // primitive types are treated as operators, since the definition of a
         // primitive type can be seen as the creation of a slot of a certain size.
         // i.e. The `int a;` definition creates a n-bytes slot.
-        check_metrics!(
+        check_metrics::<CppParser>(
             "main()
             {
               int a, b, c, avg;
@@ -380,41 +398,73 @@ mod tests {
               printf(\"avg = %d\", avg);
             }",
             "foo.c",
-            CppParser,
-            halstead,
-            [
-                (u_operators, 9, usize), // (), {}, int, &, =, +, /, ,, ;
-                (operators, 24, usize),
-                (u_operands, 10, usize), // main, a, b, c, avg, scanf, "%d %d %d", 3, printf, "avg = %d"
-                (operands, 18, usize)
-            ]
+            |metric| {
+                // unique operators: (), {}, int, &, =, +, /, ,, ;
+                // unique operands: main, a, b, c, avg, scanf, "%d %d %d", 3, printf, "avg = %d"
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 9.0,
+                      "N1": 24.0,
+                      "n2": 10.0,
+                      "N2": 18.0,
+                      "length": 42.0,
+                      "estimated_program_length": 61.74860596185444,
+                      "purity_ratio": 1.470204903853677,
+                      "vocabulary": 19.0,
+                      "volume": 178.41295556463058,
+                      "difficulty": 8.1,
+                      "level": 0.1234567901234568,
+                      "effort": 1445.1449400735075,
+                      "time": 80.28583000408375,
+                      "bugs": 0.04260752914034329
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_operators_and_operands() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn main() {
               let a = 5; let b = 5; let c = 5;
               let avg = (a + b + c) / 3;
               println!(\"{}\", avg);
             }",
             "foo.rs",
-            RustParser,
-            halstead,
-            [
+            |metric| {
                 // FIXME tree-sitter-rust does not parse the comma inside the println! macro
-                (u_operators, 9, usize), // fn, (), {}, let, =, +, /, ;, !
-                (operators, 22, usize),
-                (u_operands, 9, usize), // main, a, b, c, avg, 5, 3, println, "{}"
-                (operands, 15, usize)
-            ]
+                // unique operators: fn, (), {}, let, =, +, /, ;, !
+                // unique operands: main, a, b, c, avg, 5, 3, println, "{}"
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 9.0,
+                      "N1": 22.0,
+                      "n2": 9.0,
+                      "N2": 15.0,
+                      "length": 37.0,
+                      "estimated_program_length": 57.05865002596162,
+                      "purity_ratio": 1.542125676377341,
+                      "vocabulary": 18.0,
+                      "volume": 154.28722505336555,
+                      "difficulty": 7.5,
+                      "level": 0.13333333333333333,
+                      "effort": 1157.1541879002416,
+                      "time": 64.28634377223564,
+                      "bugs": 0.03674003504721376
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_operators_and_operands() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "function main() {
               var a, b, c, avg;
               a = 5; b = 5; c = 5;
@@ -422,20 +472,36 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.js",
-            JavascriptParser,
-            halstead,
-            [
-                (u_operators, 10, usize), // function, (), {}, var, =, +, /, ,, ., ;
-                (operators, 24, usize),
-                (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
-                (operands, 21, usize)
-            ]
+            |metric| {
+                // unique operators: function, (), {}, var, =, +, /, ,, ., ;
+                // unique operands: main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 10.0,
+                      "N1": 24.0,
+                      "n2": 11.0,
+                      "N2": 21.0,
+                      "length": 45.0,
+                      "estimated_program_length": 71.27302875388389,
+                      "purity_ratio": 1.583845083419642,
+                      "vocabulary": 21.0,
+                      "volume": 197.65428402504423,
+                      "difficulty": 9.545454545454545,
+                      "level": 0.10476190476190476,
+                      "effort": 1886.699983875422,
+                      "time": 104.81666577085679,
+                      "bugs": 0.05089564733125986
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_operators_and_operands() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function main() {
               var a, b, c, avg;
               a = 5; b = 5; c = 5;
@@ -443,20 +509,36 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.js",
-            MozjsParser,
-            halstead,
-            [
-                (u_operators, 10, usize), // function, (), {}, var, =, +, /, ,, ., ;
-                (operators, 24, usize),
-                (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
-                (operands, 21, usize)
-            ]
+            |metric| {
+                // unique operators: function, (), {}, var, =, +, /, ,, ., ;
+                // unique operands: main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 10.0,
+                      "N1": 24.0,
+                      "n2": 11.0,
+                      "N2": 21.0,
+                      "length": 45.0,
+                      "estimated_program_length": 71.27302875388389,
+                      "purity_ratio": 1.583845083419642,
+                      "vocabulary": 21.0,
+                      "volume": 197.65428402504423,
+                      "difficulty": 9.545454545454545,
+                      "level": 0.10476190476190476,
+                      "effort": 1886.699983875422,
+                      "time": 104.81666577085679,
+                      "bugs": 0.05089564733125986
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn typescript_operators_and_operands() {
-        check_metrics!(
+        check_metrics::<TypescriptParser>(
             "function main() {
               var a, b, c, avg;
               a = 5; b = 5; c = 5;
@@ -464,20 +546,36 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.ts",
-            TypescriptParser,
-            halstead,
-            [
-                (u_operators, 10, usize), // function, (), {}, var, =, +, /, ,, ., ;
-                (operators, 24, usize),
-                (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
-                (operands, 21, usize)
-            ]
+            |metric| {
+                // unique operators: function, (), {}, var, =, +, /, ,, ., ;
+                // unique operands: main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 10.0,
+                      "N1": 24.0,
+                      "n2": 11.0,
+                      "N2": 21.0,
+                      "length": 45.0,
+                      "estimated_program_length": 71.27302875388389,
+                      "purity_ratio": 1.583845083419642,
+                      "vocabulary": 21.0,
+                      "volume": 197.65428402504423,
+                      "difficulty": 9.545454545454545,
+                      "level": 0.10476190476190476,
+                      "effort": 1886.699983875422,
+                      "time": 104.81666577085679,
+                      "bugs": 0.05089564733125986
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn tsx_operators_and_operands() {
-        check_metrics!(
+        check_metrics::<TsxParser>(
             "function main() {
               var a, b, c, avg;
               a = 5; b = 5; c = 5;
@@ -485,53 +583,93 @@ mod tests {
               console.log(\"{}\", avg);
             }",
             "foo.ts",
-            TsxParser,
-            halstead,
-            [
-                (u_operators, 10, usize), // function, (), {}, var, =, +, /, ,, ., ;
-                (operators, 24, usize),
-                (u_operands, 11, usize), // main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
-                (operands, 21, usize)
-            ]
+            |metric| {
+                // unique operators: function, (), {}, var, =, +, /, ,, ., ;
+                // unique operands: main, a, b, c, avg, 3, 5, console.log, console, log, "{}"
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 10.0,
+                      "N1": 24.0,
+                      "n2": 11.0,
+                      "N2": 21.0,
+                      "length": 45.0,
+                      "estimated_program_length": 71.27302875388389,
+                      "purity_ratio": 1.583845083419642,
+                      "vocabulary": 21.0,
+                      "volume": 197.65428402504423,
+                      "difficulty": 9.545454545454545,
+                      "level": 0.10476190476190476,
+                      "effort": 1886.699983875422,
+                      "time": 104.81666577085679,
+                      "bugs": 0.05089564733125986
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_wrong_operators() {
-        check_metrics!(
-            "()[]{}",
-            "foo.py",
-            PythonParser,
-            halstead,
-            [(u_operators, 0, usize), (operators, 0, usize)]
-        );
+        check_metrics::<PythonParser>("()[]{}", "foo.py", |metric| {
+            insta::assert_json_snapshot!(
+                metric.halstead,
+                @r###"
+                    {
+                      "n1": 0.0,
+                      "N1": 0.0,
+                      "n2": 0.0,
+                      "N2": 0.0,
+                      "length": 0.0,
+                      "estimated_program_length": null,
+                      "purity_ratio": null,
+                      "vocabulary": 0.0,
+                      "volume": null,
+                      "difficulty": null,
+                      "level": null,
+                      "effort": null,
+                      "time": null,
+                      "bugs": null
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn python_check_metrics() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f():
                  pass",
             "foo.py",
-            PythonParser,
-            halstead,
-            [(vocabulary, 3, usize), (length, 3, usize)],
-            [
-                (volume, 4.754_887_502_163_468),
-                (estimated_program_length, 2.0),
-                (difficulty, 1.0),
-                (effort, 4.754_887_502_163_468),
-                (purity_ratio, 0.666_666_666_666_666_6),
-                (level, 1.0),
-                (time, 0.264_160_416_786_859_36),
-                (bugs, 0.000_942_552_557_372_941_4)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 2.0,
+                      "N1": 2.0,
+                      "n2": 1.0,
+                      "N2": 1.0,
+                      "length": 3.0,
+                      "estimated_program_length": 2.0,
+                      "purity_ratio": 0.6666666666666666,
+                      "vocabulary": 3.0,
+                      "volume": 4.754887502163468,
+                      "difficulty": 1.0,
+                      "level": 1.0,
+                      "effort": 4.754887502163468,
+                      "time": 0.26416041678685936,
+                      "bugs": 0.0009425525573729414
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_operators_and_operands() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "public class Main {
             public static void main(String args[]) {
                   int a, b, c, avg;
@@ -541,14 +679,30 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            halstead,
-            [
-                (u_operators, 16, usize), // { void ; ( String [ ] ) , int = + / format . }
-                (operators, 34, usize),
-                (u_operands, 12, usize), // Main main args a b c avg 5 3 MessageFormat format "{0}"
-                (operands, 22, usize)
-            ]
+            |metric| {
+                // { void ; ( String [ ] ) , int = + / format . }
+                // Main main args a b c avg 5 3 MessageFormat format "{0}"
+                insta::assert_json_snapshot!(
+                    metric.halstead,
+                    @r###"
+                    {
+                      "n1": 16.0,
+                      "N1": 34.0,
+                      "n2": 12.0,
+                      "N2": 22.0,
+                      "length": 56.0,
+                      "estimated_program_length": 107.01955000865388,
+                      "purity_ratio": 1.9110633930116765,
+                      "vocabulary": 28.0,
+                      "volume": 269.2118756352258,
+                      "difficulty": 14.666666666666666,
+                      "level": 0.06818181818181819,
+                      "effort": 3948.440842649978,
+                      "time": 219.35782459166546,
+                      "bugs": 0.08327139413010551
+                    }"###
+                );
+            },
         );
     }
 }
