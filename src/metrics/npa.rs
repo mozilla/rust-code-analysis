@@ -271,13 +271,13 @@ impl Npa for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn java_single_attributes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public byte a;      // +1
                 public short b;     // +1
@@ -297,27 +297,29 @@ mod tests {
                 char p;
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 8, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 16, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 8, usize),
-                (total_na, 16, usize)
-            ],
-            [
-                (class_cda, 0.5),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 8.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 16.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 8.0,
+                      "total_attributes": 16.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_multiple_attributes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public byte a1;                 // +1
                 public short b1, b2;            // +2
@@ -337,27 +339,29 @@ mod tests {
                 char p1, p2, p3, p4;
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 20, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 40, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 20, usize),
-                (total_na, 40, usize)
-            ],
-            [
-                (class_cda, 0.5),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 20.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 40.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 20.0,
+                      "total_attributes": 40.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_initialized_attributes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public byte a1 = 1;                             // +1
                 public short b1 = 2, b2;                        // +2
@@ -377,27 +381,29 @@ mod tests {
                 char p1 = 'a', p2 = 'b', p3 = 'c', p4 = 'd';
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 20, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 40, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 20, usize),
-                (total_na, 40, usize)
-            ],
-            [
-                (class_cda, 0.5),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 20.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 40.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 20.0,
+                      "total_attributes": 40.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_array_attributes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public byte[] a1, a2, a3, a4;                       // +4
                 public short b1[], b2[], b3[];                      // +3
@@ -417,27 +423,29 @@ mod tests {
                 char[] p1 = new char[5];
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 20, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 40, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 20, usize),
-                (total_na, 40, usize)
-            ],
-            [
-                (class_cda, 0.5),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 20.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 40.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 20.0,
+                      "total_attributes": 40.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_object_attributes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public Integer[] a1 = { 1 };                                    // +1
                 public Integer b1, b2;                                          // +2
@@ -453,27 +461,29 @@ mod tests {
                 Y l1[][], l2[], l3 = new Y();
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 12, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 24, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 12, usize),
-                (total_na, 24, usize)
-            ],
-            [
-                (class_cda, 0.5),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 12.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 24.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 12.0,
+                      "total_attributes": 24.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_generic_attributes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X<T, S extends T> {
                 public T a1;                            // +1
                 public Entry<T, S> b1, b2[];            // +2
@@ -487,27 +497,29 @@ mod tests {
                 TreeSet<Entry<S, T>> j1;
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 9, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 18, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 9, usize),
-                (total_na, 18, usize)
-            ],
-            [
-                (class_cda, 0.5),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 9.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 18.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 9.0,
+                      "total_attributes": 18.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_attribute_modifiers() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public transient volatile static int a;     // +1
                 transient public volatile static int b;     // +1
@@ -527,27 +539,29 @@ mod tests {
                 final public int p = 7;                     // +1
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 10, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 16, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 10, usize),
-                (total_na, 16, usize)
-            ],
-            [
-                (class_cda, 0.625),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.625)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 10.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 16.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.625,
+                      "interfaces_average": null,
+                      "total": 10.0,
+                      "total_attributes": 16.0,
+                      "average": 0.625
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public int a;       // +1
                 public boolean b;   // +1
@@ -559,27 +573,29 @@ mod tests {
                 public float f;      // +1
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 3, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 6, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 3, usize),
-                (total_na, 6, usize)
-            ],
-            [
-                (class_cda, 0.5),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 6.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_attributes": 6.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_nested_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public int a;           // +1
                 class Y {
@@ -590,27 +606,29 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 3, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 3, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 3, usize),
-                (total_na, 3, usize)
-            ],
-            [
-                (class_cda, 1.0),
-                (interface_cda, f64::NAN),
-                (total_cda, 1.0)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 3.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 1.0,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_attributes": 3.0,
+                      "average": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_local_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public int a;                   // +1
                 void x() {
@@ -626,27 +644,29 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 3, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 3, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 3, usize),
-                (total_na, 3, usize)
-            ],
-            [
-                (class_cda, 1.0),
-                (interface_cda, f64::NAN),
-                (total_cda, 1.0)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 3.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 1.0,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_attributes": 3.0,
+                      "average": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_anonymous_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "abstract class X {
                 public int a;               // +1
             }
@@ -665,48 +685,52 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 3, usize),
-                (interface_npa_sum, 0, usize),
-                (class_na_sum, 5, usize),
-                (interface_na_sum, 0, usize),
-                (total_npa, 3, usize),
-                (total_na, 5, usize)
-            ],
-            [
-                (class_cda, 0.6),
-                (interface_cda, f64::NAN),
-                (total_cda, 0.6)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_attributes": 5.0,
+                      "interface_attributes": 0.0,
+                      "classes_average": 0.6,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_attributes": 5.0,
+                      "average": 0.6
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_interface() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "interface X {
                 public int a = 0;           // +1
                 static boolean b = false;   // +1
                 final char c = ' ';         // +1
             }",
             "foo.java",
-            JavaParser,
-            npa,
-            [
-                (class_npa_sum, 0, usize),
-                (interface_npa_sum, 3, usize),
-                (class_na_sum, 0, usize),
-                (interface_na_sum, 3, usize),
-                (total_npa, 3, usize),
-                (total_na, 3, usize)
-            ],
-            [
-                (class_cda, f64::NAN),
-                (interface_cda, 1.0),
-                (total_cda, 1.0)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npa,
+                    @r###"
+                    {
+                      "classes": 0.0,
+                      "interfaces": 3.0,
+                      "class_attributes": 0.0,
+                      "interface_attributes": 3.0,
+                      "classes_average": null,
+                      "interfaces_average": 1.0,
+                      "total": 3.0,
+                      "total_attributes": 3.0,
+                      "average": 1.0
+                    }"###
+                );
+            },
         );
     }
 }
