@@ -272,30 +272,3 @@ macro_rules! mk_langs {
         mk_code!($( ($camel, $code, $parser, $name, stringify!($camel)) ),*);
     };
 }
-
-#[cfg(test)]
-macro_rules! check_metrics {
-    ($source: expr, $file: expr, $parser: ident, $metric: ident,
-     [ $( ( $func_int: ident, $true_int_value: expr $(,$type_int: ty)? )$(,)* )* ]$(,)*
-     $( [ $( ( $func_float: ident, $true_float_value: expr )$(,)* )* ] )?) => {
-        {
-            let path = PathBuf::from($file);
-            let mut trimmed_bytes = $source.trim_end().trim_matches('\n').as_bytes().to_vec();
-            trimmed_bytes.push(b'\n');
-            let parser = $parser::new(trimmed_bytes, &path, None);
-            let func_space = metrics(&parser, &path).unwrap();
-
-            $( assert_eq!(func_space.metrics.$metric.$func_int() $(as $type_int)?, $true_int_value); )*
-
-            $(
-                $(
-                    assert!(if ($true_float_value as f64).is_nan() {
-                        func_space.metrics.$metric.$func_float().is_nan()
-                    } else {
-                        func_space.metrics.$metric.$func_float().total_cmp(&$true_float_value) == std::cmp::Ordering::Equal
-                    });
-                )*
-            )?
-        }
-    };
-}
