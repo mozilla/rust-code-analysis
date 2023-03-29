@@ -40,7 +40,7 @@ tree-sitter-mozcpp = { path = "./tree-sitter-mozcpp", version = "=0.20.2" }
 tree-sitter-mozjs = { path = "./tree-sitter-mozjs", version = "=0.20.1" }
 
 [dev-dependencies]
-insta = { version = "1.22.0", features = ["yaml"] }
+insta = { version = "1.29.0", features = ["yaml", "json"] }
 pretty_assertions = "^1.3"
 
 [profile.dev.package.insta]
