@@ -154,13 +154,13 @@ impl Wmc for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn java_single_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "public class Example { // wmc = 13
 
                 public boolean m1(boolean a, boolean b) { // +1
@@ -170,7 +170,7 @@ mod tests {
                     }
                     return r;
                 }
-    
+
                 public boolean m2(int n) { // +1
                     for (int i = 0; i < n; i++) { // +1
                         int j = n;
@@ -180,7 +180,7 @@ mod tests {
                     }
                     return (n % 2 == 0) ? true : false; // +1
                 }
-                
+
                 public int m3(int x, int y, int z) { // +1
                     int ret;
                     try {
@@ -202,13 +202,18 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 13.0), // 1 class
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 13.0)
-            ]
+            |metric| {
+                // 1 class
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 13.0,
+                      "interfaces": 0.0,
+                      "total": 13.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -216,7 +221,7 @@ mod tests {
     // Reference: https://pdepend.org/documentation/software-metrics/weighted-method-count.html
     #[test]
     fn java_multiple_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "public class MainClass { // wmc = 3
                 private int a;
                 public MainClass() { // +1
@@ -229,7 +234,7 @@ mod tests {
                     return a;
                 }
             }
-            
+
             class TopLevelClass { // wmc = 2
                 private int b;
                 public TopLevelClass() { // +1
@@ -240,19 +245,24 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 5.0), // 2 classes (3 + 2)
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 5.0)
-            ]
+            |metric| {
+                // 2 classes (3 + 2)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 5.0,
+                      "interfaces": 0.0,
+                      "total": 5.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_static_nested_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "public class TopLevelClass { // wmc = 0
                 public static class StaticNestedClass { // wmc = 1
                     private void m() { // +1
@@ -261,45 +271,50 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 1.0), // 2 classes (0 + 1)
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 1.0)
-            ]
+            |metric| {
+                // 2 classes (0 + 2)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 1.0,
+                      "interfaces": 0.0,
+                      "total": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_nested_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "public class TopLevelClass { // wmc = 2
                 private int a;
-                
+
                 class InnerClassBefore { // wmc = 1
                     private boolean b = (a % 2 == 0) ? true : false;
                     public boolean getB() { // +1
                         return b;
                     }
                 }
-                  
+
                 public TopLevelClass(int n) { // +1
                     if (a != n) { // +1
                         a = n;
                     }
                 }
-                
+
                 class InnerClassAfter { // wmc = 2
                     private int c = a;
-        
+
                     public int getC() { // +1
                         return c;
                     }
                     public void setC(int n) { // +1
                         c = n;
                     }
-                    
+
                     class InnerClass1 { // wmc = 1
                         private int p1;
                         class InnerClass2 { // wmc = 1
@@ -324,27 +339,32 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 9.0), // 6 classes (2 + 1 + 2 + 1 + 1 + 2)
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 9.0)
-            ]
+            |metric| {
+                // 6 classes (2 + 1 + 2 + 1 + 1 + 2)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 9.0,
+                      "interfaces": 0.0,
+                      "total": 9.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_local_inner_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "import java.util.LinkedList;
             import java.util.List;
-            
+
             public final class FinalClass { // wmc = 5
                 private int a = 1;
                 public void test() { // +1
                     final List<String> localList = new LinkedList<String>();
-                    
+
                     class LocalInnerClass { // +1, wmc = 2
                         private int b = (a == 1) ? 1 : 0; // +1
                         public void print() { // +1
@@ -356,22 +376,27 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 7.0), // 2 classes (5 + 2)
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 7.0)
-            ]
+            |metric| {
+                // 2 classes (5 + 2)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 7.0,
+                      "interfaces": 0.0,
+                      "total": 7.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_anonymous_inner_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "abstract class AbstractClass { // wmc = 1
                 abstract void m1(); // +1
-            } 
+            }
             public class TopLevelClass{ // wmc = 3
                 public void m(){ // +1
                     AbstractClass ac1 = new AbstractClass() {
@@ -381,30 +406,35 @@ mod tests {
                             }
                         }
                     };
-                    ac1.m1();  
-                }  
+                    ac1.m1();
+                }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 4.0), // 2 classes (1 + 3)
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 4.0)
-            ]
+            |metric| {
+                // 2 classes (1 + 3)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 4.0,
+                      "interfaces": 0.0,
+                      "total": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_nested_anonymous_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "abstract class AbstractClass{ // wmc = 2
                 abstract void m1(); // +1
                 abstract void m2(); // +1
-            } 
+            }
             public class TopLevelClass{ // wmc = 6
                 public void m(){ // +1
-            
+
                     AbstractClass ac1 = new AbstractClass() {
                         void m1() { // +1
                             for (int i = 0; i < 5; i++) { // +1
@@ -424,53 +454,63 @@ mod tests {
                             System.out.println(\"Test 2\");
                         }
                     };
-                    ac1.m1();  
-                }  
+                    ac1.m1();
+                }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 8.0), // 2 classes (2 + 6)
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 8.0)
-            ]
+            |metric| {
+                // 2 classes (2 + 6)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 8.0,
+                      "interfaces": 0.0,
+                      "total": 8.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_lambda_expression() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "import java.util.ArrayList;
 
             public class TopLevelClass { // wmc = 2
                 private ArrayList<Integer> numbers;
-                
+
                 public void m1() { // +1
                     numbers = new ArrayList<Integer>();
                     numbers.add(1);
                     numbers.add(2);
                     numbers.add(3);
                 }
-                
+
                 public void m2() { // +1
                     numbers.forEach( (n) -> { System.out.println(n); } );
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 2.0), // 1 class
-                (interface_wmc_sum, 0.0),
-                (total_wmc, 2.0)
-            ]
+            |metric| {
+                // 1 class
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 2.0,
+                      "interfaces": 0.0,
+                      "total": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_single_interface() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "interface Example { // wmc = 6
                 default boolean m1(boolean a, boolean b) { // +1
                     return (a && b == a || b); // +2
@@ -481,51 +521,61 @@ mod tests {
                 void m3(); // +1
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 0.0),
-                (interface_wmc_sum, 6.0), // 1 interface
-                (total_wmc, 6.0)
-            ]
+            |metric| {
+                // 1 interface
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 0.0,
+                      "interfaces": 6.0,
+                      "total": 6.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_multiple_interfaces() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "interface FirstInterface { // wmc = 1
                 int a = 0;
                 default int getA() { // +1
                     return a;
                 }
             }
-            
+
             interface SecondInterface { // wmc = 2
                 void setB(int n); // +1
                 int getB(); // +1
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 0.0),
-                (interface_wmc_sum, 3.0), // 2 interfaces (1 + 2)
-                (total_wmc, 3.0)
-            ]
+            |metric| {
+                // 2 interfaces (1 + 2)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 0.0,
+                      "interfaces": 3.0,
+                      "total": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_nested_inner_interfaces() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "interface TopLevelInterface { // wmc = 1
                 interface InnerInterfaceBefore { // wmc = 1
                     void m1(); // +1
                 }
-                
+
                 void m2(); // +1
-                
+
                 interface InnerInterfaceAfter { // wmc = 2
                     void m3(); // +1
                     interface InnerInterface { // wmc = 1
@@ -535,23 +585,28 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 0.0),
-                (interface_wmc_sum, 5.0), // 4 interfaces (1 + 1 + 2 + 1)
-                (total_wmc, 5.0)
-            ]
+            |metric| {
+                // 4 interfaces (1 + 1 + 2 + 1)
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 0.0,
+                      "interfaces": 5.0,
+                      "total": 5.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_class_in_interface() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "interface TopLevelInterface { // wmc = 2
                 int getA(); // +1
                 boolean getB(); // +1
-                
+
                 class InnerClass { // wmc = 2
                     float c;
                     double d;
@@ -564,19 +619,24 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 2.0),     // 1 class
-                (interface_wmc_sum, 2.0), // 1 interface
-                (total_wmc, 4.0)
-            ]
+            |metric| {
+                // 1 class 1 interface
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 2.0,
+                      "interfaces": 2.0,
+                      "total": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_interface_in_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class TopLevelClass { // wmc = 2
                 int a;
                 boolean b;
@@ -586,20 +646,25 @@ mod tests {
                 boolean getB() { // +1
                     return b;
                 }
-                
+
                 interface InnerInterface { // wmc = 2
                     float getC(); // +1
                     double getD(); // +1
                 }
             }",
             "foo.java",
-            JavaParser,
-            wmc,
-            [
-                (class_wmc_sum, 2.0),     // 1 class
-                (interface_wmc_sum, 2.0), // 1 interface
-                (total_wmc, 4.0)
-            ]
+            |metric| {
+                // 1 class 1 interface
+                insta::assert_json_snapshot!(
+                    metric.wmc,
+                    @r###"
+                    {
+                      "classes": 2.0,
+                      "interfaces": 2.0,
+                      "total": 4.0
+                    }"###
+                );
+            },
         );
     }
 }
