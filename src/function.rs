@@ -2,12 +2,14 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use serde::Serialize;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
+use termcolor::{Color, ColorChoice, StandardStream, StandardStreamLock};
 
 use crate::traits::*;
 
 use crate::checker::Checker;
 use crate::getter::Getter;
+
+use crate::tools::{color, intense_color};
 
 /// Function span data.
 #[derive(Debug, Serialize)]
@@ -68,27 +70,27 @@ fn dump_span(
 
     let pref = if last { "   `- " } else { "   |- " };
 
-    color!(stdout, Blue);
+    color(stdout, Color::Blue)?;
     write!(stdout, "{pref}")?;
 
     if span.error {
-        color!(stdout, Red, true);
+        intense_color(stdout, Color::Red)?;
         write!(stdout, "error: ")?;
     } else {
-        color!(stdout, Magenta, true);
+        intense_color(stdout, Color::Magenta)?;
         write!(stdout, "{}: ", span.name)?;
     }
 
-    color!(stdout, Green);
+    color(stdout, Color::Green)?;
     write!(stdout, "from line ")?;
 
-    color!(stdout, White);
+    color(stdout, Color::White)?;
     write!(stdout, "{}", span.start_line)?;
 
-    color!(stdout, Green);
+    color(stdout, Color::Green)?;
     write!(stdout, " to line ")?;
 
-    color!(stdout, White);
+    color(stdout, Color::White)?;
     writeln!(stdout, "{}.", span.end_line)
 }
 
@@ -97,14 +99,14 @@ fn dump_spans(mut spans: Vec<FunctionSpan>, path: PathBuf) -> std::io::Result<()
         let stdout = StandardStream::stdout(ColorChoice::Always);
         let mut stdout = stdout.lock();
 
-        color!(stdout, Yellow, true);
+        intense_color(&mut stdout, Color::Yellow)?;
         writeln!(&mut stdout, "In file {}", path.to_str().unwrap_or("..."))?;
 
         for span in spans.drain(..spans.len() - 1) {
             dump_span(span, &mut stdout, false)?;
         }
         dump_span(spans.pop().unwrap(), &mut stdout, true)?;
-        color!(stdout, White);
+        color(&mut stdout, Color::White)?;
     }
     Ok(())
 }
