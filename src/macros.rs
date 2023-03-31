@@ -12,22 +12,6 @@ macro_rules! mk_checker {
     };
 }
 
-macro_rules! mk_else_if {
-    ($if_type:ident) => {
-        #[inline(always)]
-        fn is_else_if(node: &Node) -> bool {
-            if node.object().kind_id() != <Self as TSLanguage>::BaseLang::$if_type {
-                return false;
-            }
-            if let Some(parent) = node.object().parent() {
-                return node.object().kind_id() == <Self as TSLanguage>::BaseLang::$if_type
-                    && parent.kind_id() == <Self as TSLanguage>::BaseLang::$if_type;
-            }
-            false
-        }
-    };
-}
-
 macro_rules! get_language {
     (tree_sitter_cpp) => {
         tree_sitter_mozcpp::language()
