@@ -382,42 +382,30 @@ mod tests {
     #[test]
     fn test_guess_language() {
         let buf = b"// -*- foo: bar; mode: c++; hello: world\n";
-        assert_eq!(
-            guess_language(buf, "foo.cpp"),
-            (Some(LANG::Cpp), "c/c++".to_string())
-        );
+        assert_eq!(guess_language(buf, "foo.cpp"), (Some(LANG::Cpp), "c/c++"));
 
         let buf = b"// -*- c++ -*-\n";
-        assert_eq!(
-            guess_language(buf, "foo.cpp"),
-            (Some(LANG::Cpp), "c/c++".to_string())
-        );
+        assert_eq!(guess_language(buf, "foo.cpp"), (Some(LANG::Cpp), "c/c++"));
 
         let buf = b"// -*- foo: bar; bar-mode: c++; hello: world\n";
         assert_eq!(
             guess_language(buf, "foo.py"),
-            (Some(LANG::Python), "python".to_string())
+            (Some(LANG::Python), "python")
         );
 
         let buf = b"/* hello world */\n";
-        assert_eq!(
-            guess_language(buf, "foo.cpp"),
-            (Some(LANG::Cpp), "c/c++".to_string())
-        );
+        assert_eq!(guess_language(buf, "foo.cpp"), (Some(LANG::Cpp), "c/c++"));
 
         let buf = b"\n\n\n\n\n\n\n\n\n// vim: set ts=4 ft=c++\n\n\n";
-        assert_eq!(
-            guess_language(buf, "foo.c"),
-            (Some(LANG::Cpp), "c/c++".to_string())
-        );
+        assert_eq!(guess_language(buf, "foo.c"), (Some(LANG::Cpp), "c/c++"));
 
         let buf = b"\n\n\n\n\n\n\n\n\n\n\n\n";
-        assert_eq!(guess_language(buf, "foo.txt"), (None, "".to_string()));
+        assert_eq!(guess_language(buf, "foo.txt"), (None, ""));
 
         let buf = b"// -*- foo: bar; mode: Objective-C++; hello: world\n";
         assert_eq!(
             guess_language(buf, "foo.mm"),
-            (Some(LANG::Cpp), "obj-c/c++".to_string())
+            (Some(LANG::Cpp), "obj-c/c++")
         );
     }
 }
