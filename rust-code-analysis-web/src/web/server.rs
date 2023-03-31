@@ -121,7 +121,7 @@ async fn metrics_json(item: web::Json<WebMetricsPayload>) -> HttpResponse {
             id: payload.id,
             path,
             unit: payload.unit,
-            language: name,
+            language: name.to_string(),
         };
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -153,7 +153,7 @@ async fn metrics_plain(
                 .unit
                 .as_ref()
                 .map_or(false, |s| s == "1" || s == "true"),
-            language: name,
+            language: name.to_string(),
         };
         Ok(HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
