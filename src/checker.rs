@@ -174,7 +174,17 @@ impl Checker for CppCode {
         AC.is_match(code)
     }
 
-    mk_else_if!(IfStatement);
+    fn is_else_if(node: &Node) -> bool {
+        if node.object().kind_id() != Cpp::IfStatement {
+            return false;
+        }
+        if let Some(parent) = node.object().parent() {
+            return node.object().kind_id() == Cpp::IfStatement
+                && parent.kind_id() == Cpp::IfStatement;
+        }
+        false
+    }
+
     mk_checker!(is_non_arg, LPAREN, LPAREN2, COMMA, RPAREN);
 
     #[inline(always)]
@@ -250,11 +260,11 @@ impl Checker for MozjsCode {
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != <Self as TSLanguage>::BaseLang::IfStatement {
+        if node.object().kind_id() != Mozjs::IfStatement {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause;
+            return parent.kind_id() == Mozjs::ElseClause;
         }
         false
     }
@@ -280,7 +290,17 @@ impl Checker for JavascriptCode {
 
     is_js_func_and_closure_checker!(Javascript);
 
-    mk_else_if!(IfStatement);
+    #[inline(always)]
+    fn is_else_if(node: &Node) -> bool {
+        if node.object().kind_id() != Javascript::IfStatement {
+            return false;
+        }
+        if let Some(parent) = node.object().parent() {
+            return node.object().kind_id() == Javascript::IfStatement
+                && parent.kind_id() == Javascript::IfStatement;
+        }
+        false
+    }
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
@@ -306,11 +326,11 @@ impl Checker for TypescriptCode {
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != <Self as TSLanguage>::BaseLang::IfStatement {
+        if node.object().kind_id() != Typescript::IfStatement {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause;
+            return parent.kind_id() == Typescript::ElseClause;
         }
         false
     }
@@ -342,7 +362,16 @@ impl Checker for TsxCode {
 
     is_js_func_and_closure_checker!(Tsx);
 
-    mk_else_if!(IfStatement);
+    fn is_else_if(node: &Node) -> bool {
+        if node.object().kind_id() != Tsx::IfStatement {
+            return false;
+        }
+        if let Some(parent) = node.object().parent() {
+            return node.object().kind_id() == Tsx::IfStatement
+                && parent.kind_id() == Tsx::IfStatement;
+        }
+        false
+    }
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 
     #[inline(always)]
@@ -367,11 +396,11 @@ impl Checker for RustCode {
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != <Self as TSLanguage>::BaseLang::IfExpression {
+        if node.object().kind_id() != Rust::IfExpression {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return parent.kind_id() == <Self as TSLanguage>::BaseLang::ElseClause;
+            return parent.kind_id() == Rust::ElseClause;
         }
         false
     }
