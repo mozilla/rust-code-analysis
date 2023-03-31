@@ -127,7 +127,7 @@ mk_langs!(
 );
 
 pub(crate) mod fake {
-    pub fn get_true(ext: &str, mode: &str) -> Option<String> {
+    pub fn get_true<'a>(ext: &str, mode: &str) -> Option<&'a str> {
         if ext == "m"
             || ext == "mm"
             || mode == "objc"
@@ -135,7 +135,7 @@ pub(crate) mod fake {
             || mode == "objective-c++"
             || mode == "objective-c"
         {
-            Some("obj-c/c++".to_string())
+            Some("obj-c/c++")
         } else {
             None
         }
