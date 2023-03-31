@@ -189,7 +189,7 @@ fn get_emacs_mode(buf: &[u8]) -> Option<String> {
 /// ```
 ///
 /// [`LANG`]: enum.LANG.html
-pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, String) {
+pub fn guess_language<'a, P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, &'a str) {
     let ext = path
         .as_ref()
         .extension()
@@ -207,22 +207,22 @@ pub fn guess_language<P: AsRef<Path>>(buf: &[u8], path: P) -> (Option<LANG>, Str
             if lang_ext == lang_mode {
                 (
                     Some(lang_mode),
-                    fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name().to_string()),
+                    fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name()),
                 )
             } else {
                 // we should probably rely on extension here
-                (Some(lang_ext), lang_ext.get_name().to_string())
+                (Some(lang_ext), lang_ext.get_name())
             }
         } else {
             (
                 Some(lang_ext),
-                fake::get_true(&ext, &mode).unwrap_or_else(|| lang_ext.get_name().to_string()),
+                fake::get_true(&ext, &mode).unwrap_or_else(|| lang_ext.get_name()),
             )
         }
     } else if let Some(lang_mode) = from_mode {
         (
             Some(lang_mode),
-            fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name().to_string()),
+            fake::get_true(&ext, &mode).unwrap_or_else(|| lang_mode.get_name()),
         )
     } else {
         (None, fake::get_true(&ext, &mode).unwrap_or_default())
