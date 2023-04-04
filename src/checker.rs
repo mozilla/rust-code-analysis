@@ -81,7 +81,21 @@ macro_rules! is_js_func_and_closure_checker {
 }
 
 pub trait Checker {
-    fn is_comment(node: &Node) -> bool;
+    fn is_comment(_: &Node) -> bool;
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool;
+    fn is_func_space(_: &Node) -> bool;
+    fn is_func(_: &Node) -> bool;
+    fn is_closure(_: &Node) -> bool;
+    fn is_call(_: &Node) -> bool;
+    fn is_non_arg(_: &Node) -> bool;
+    fn is_string(_: &Node) -> bool;
+    fn is_else_if(_: &Node) -> bool;
+    fn is_primitive(_id: u16) -> bool;
+
+    fn is_error(node: &Node) -> bool {
+        node.object().is_error()
+    }
+}
 
     #[inline(always)]
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
