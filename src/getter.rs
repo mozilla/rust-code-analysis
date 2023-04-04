@@ -9,15 +9,12 @@ macro_rules! get_operator {
     ($language:ident) => {
         #[inline(always)]
         fn get_operator_id_as_str(id: u16) -> &'static str {
-            let typ: $language = id.into();
+            let typ = id.into();
             match typ {
                 $language::LPAREN => "()",
                 $language::LBRACK => "[]",
                 $language::LBRACE => "{}",
-                _ => {
-                    let tok: &'static str = typ.into();
-                    tok
-                }
+                _ => typ.into(),
             }
         }
     };
@@ -53,8 +50,7 @@ pub trait Getter {
 
 impl Getter for PythonCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             Python::FunctionDefinition => SpaceKind::Function,
             Python::ClassDefinition => SpaceKind::Class,
             Python::Module => SpaceKind::Unit,
@@ -65,8 +61,7 @@ impl Getter for PythonCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Python::*;
 
-        let id = node.object().kind_id();
-        match id.into() {
+        match node.object().kind_id().into() {
             Import | DOT | From | COMMA | As | STAR | GTGT | Assert | COLONEQ | Return | Def
             | Del | Raise | Pass | Break | Continue | If | Elif | Else | Async | For | In
             | While | Try | Except | Finally | With | DASHGT | EQ | Global | Exec | AT | Not
@@ -91,10 +86,8 @@ impl Getter for PythonCode {
         }
     }
 
-    #[inline(always)]
     fn get_operator_id_as_str(id: u16) -> &'static str {
-        let typ: Python = id.into();
-        typ.into()
+        Into::<Python>::into(id).into()
     }
 }
 
@@ -102,8 +95,7 @@ impl Getter for MozjsCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Mozjs::*;
 
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             Function
             | MethodDefinition
             | GeneratorFunction
@@ -147,8 +139,7 @@ impl Getter for MozjsCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Mozjs::*;
 
-        let id = node.object().kind_id();
-        match id.into() {
+        match node.object().kind_id().into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
             | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
@@ -172,8 +163,7 @@ impl Getter for JavascriptCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Javascript::*;
 
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             Function
             | MethodDefinition
             | GeneratorFunction
@@ -217,8 +207,7 @@ impl Getter for JavascriptCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Javascript::*;
 
-        let id = node.object().kind_id();
-        match id.into() {
+        match node.object().kind_id().into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
             | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
@@ -242,8 +231,7 @@ impl Getter for TypescriptCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Typescript::*;
 
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             Function
             | MethodDefinition
             | GeneratorFunction
@@ -288,8 +276,7 @@ impl Getter for TypescriptCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Typescript::*;
 
-        let id = node.object().kind_id();
-        match id.into() {
+        match node.object().kind_id().into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
             | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
@@ -313,8 +300,7 @@ impl Getter for TsxCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Tsx::*;
 
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             Function
             | MethodDefinition
             | GeneratorFunction
@@ -359,8 +345,7 @@ impl Getter for TsxCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Tsx::*;
 
-        let id = node.object().kind_id();
-        match id.into() {
+        match node.object().kind_id().into() {
             Export | Import | Import2 | Extends | DOT | From | LPAREN | COMMA | As | STAR
             | GTGT | GTGTGT | COLON | Return | Delete | Throw | Break | Continue | If | Else
             | Switch | Case | Default | Async | For | In | Of | While | Try | Catch | Finally
@@ -399,8 +384,7 @@ impl Getter for RustCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Rust::*;
 
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             FunctionItem | ClosureExpression => SpaceKind::Function,
             TraitItem => SpaceKind::Trait,
             ImplItem => SpaceKind::Impl,
@@ -412,8 +396,7 @@ impl Getter for RustCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Rust::*;
 
-        let id = node.object().kind_id();
-        match id.into() {
+        match node.object().kind_id().into() {
             LPAREN | LBRACE | LBRACK | EQGT | PLUS | STAR | Async | Await | Continue | For | If
             | Let | Loop | Match | Return | Unsafe | While | BANG | EQ | COMMA | DASHGT | QMARK
             | LT | GT | AMP | MutableSpecifier | DOTDOT | DOTDOTEQ | DASH | AMPAMP | PIPEPIPE
@@ -431,8 +414,7 @@ impl Getter for RustCode {
 
 impl Getter for CppCode {
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             Cpp::FunctionDefinition | Cpp::FunctionDefinition2 | Cpp::FunctionDefinition3 => {
                 if let Some(op_cast) = node.first_child(|id| Cpp::OperatorCast == id) {
                     let code = &code[op_cast.object().start_byte()..op_cast.object().end_byte()];
@@ -477,8 +459,7 @@ impl Getter for CppCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Cpp::*;
 
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             FunctionDefinition | FunctionDefinition2 | FunctionDefinition3 => SpaceKind::Function,
             StructSpecifier => SpaceKind::Struct,
             ClassSpecifier => SpaceKind::Class,
@@ -491,8 +472,7 @@ impl Getter for CppCode {
     fn get_op_type(node: &Node) -> HalsteadType {
         use Cpp::*;
 
-        let id = node.object().kind_id();
-        match id.into() {
+        match node.object().kind_id().into() {
             DOT | LPAREN | LPAREN2 | COMMA | STAR | GTGT | COLON | SEMI | Return | Break
             | Continue | If | Else | Switch | Case | Default | For | While | Goto | Do | Delete
             | New | Try | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | DASHDASH | DASHGT
@@ -515,8 +495,7 @@ impl Getter for JavaCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Java::*;
 
-        let typ = node.object().kind_id();
-        match typ.into() {
+        match node.object().kind_id().into() {
             ClassDeclaration => SpaceKind::Class,
             MethodDeclaration | ConstructorDeclaration | LambdaExpression => SpaceKind::Function,
             InterfaceDeclaration => SpaceKind::Interface,
@@ -530,9 +509,7 @@ impl Getter for JavaCode {
         // Some guides that informed grammar choice for Halstead
         // keywords, operators, literals: https://docs.oracle.com/javase/specs/jls/se18/html/jls-3.html#jls-3.12
         // https://www.geeksforgeeks.org/software-engineering-halsteads-software-metrics/?msclkid=5e181114abef11ecbb03527e95a34828
-        let typ = node.object().kind_id();
-
-        match typ.into() {
+        match node.object().kind_id().into() {
             // Operator: function calls
             MethodInvocation
             // Operator: control flow
