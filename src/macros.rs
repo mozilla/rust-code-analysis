@@ -1,17 +1,3 @@
-macro_rules! mk_checker {
-    ( $name:ident, $( $type:ident ),* ) => {
-        #[inline(always)]
-        #[allow(unused_variables)]
-        fn $name(node: &Node) -> bool {
-            let typ = node.object().kind_id();
-            false
-            $(
-                || typ == <Self as TSLanguage>::BaseLang::$type
-            )*
-        }
-    };
-}
-
 macro_rules! get_language {
     (tree_sitter_cpp) => {
         tree_sitter_mozcpp::language()
