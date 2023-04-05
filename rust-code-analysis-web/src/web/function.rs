@@ -21,11 +21,11 @@ pub struct WebFunctionInfo {
     pub file_name: String,
 }
 
-pub struct WebFunctionCallback {}
-
 pub struct WebFunctionCfg {
     pub id: String,
 }
+
+pub struct WebFunctionCallback;
 
 impl Callback for WebFunctionCallback {
     type Res = Value;
