@@ -15,7 +15,7 @@ pub enum Format {
 }
 
 impl Format {
-    pub fn all() -> &'static [&'static str] {
+    pub const fn all() -> &'static [&'static str] {
         &["cbor", "json", "toml", "yaml"]
     }
 
