@@ -1,5 +1,5 @@
 use std::io::Write;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
+use termcolor::{Color, ColorChoice, StandardStream, StandardStreamLock};
 
 use crate::abc;
 use crate::cognitive;
@@ -15,6 +15,8 @@ use crate::npm;
 use crate::wmc;
 
 use crate::spaces::{CodeMetrics, FuncSpace};
+
+use crate::tools::{color, intense_color};
 
 /// Dumps the metrics of a code.
 ///
@@ -48,7 +50,7 @@ pub fn dump_root(space: &FuncSpace) -> std::io::Result<()> {
     let stdout = StandardStream::stdout(ColorChoice::Always);
     let mut stdout = stdout.lock();
     dump_space(space, "", true, &mut stdout)?;
-    color!(stdout, White);
+    color(&mut stdout, Color::White)?;
 
     Ok(())
 }
@@ -61,19 +63,19 @@ fn dump_space(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Yellow, true);
+    intense_color(stdout, Color::Yellow)?;
     write!(stdout, "{}: ", space.kind)?;
 
-    color!(stdout, Cyan, true);
+    intense_color(stdout, Color::Cyan)?;
     write!(stdout, "{}", space.name.as_ref().map_or("", |name| name))?;
 
-    color!(stdout, Red, true);
+    intense_color(stdout, Color::Red)?;
     writeln!(stdout, " (@{})", space.start_line)?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_metrics(&space.metrics, &prefix, space.spaces.is_empty(), stdout)?;
 
     if let Some((last, spaces)) = space.spaces.split_last() {
@@ -94,13 +96,13 @@ fn dump_metrics(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Yellow, true);
+    intense_color(stdout, Color::Yellow)?;
     writeln!(stdout, "metrics")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_cognitive(&metrics.cognitive, &prefix, false, stdout)?;
     dump_cyclomatic(&metrics.cyclomatic, &prefix, false, stdout)?;
     dump_nargs(&metrics.nargs, &prefix, false, stdout)?;
@@ -123,13 +125,13 @@ fn dump_cognitive(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "cognitive")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value("sum", stats.cognitive(), &prefix, false, stdout)?;
     dump_value("average", stats.cognitive_average(), &prefix, true, stdout)
@@ -143,13 +145,13 @@ fn dump_cyclomatic(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "cyclomatic")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value("sum", stats.cyclomatic(), &prefix, false, stdout)?;
     dump_value("average", stats.cyclomatic_average(), &prefix, true, stdout)
@@ -163,13 +165,13 @@ fn dump_halstead(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "halstead")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value("n1", stats.u_operators(), &prefix, false, stdout)?;
     dump_value("N1", stats.operators(), &prefix, false, stdout)?;
@@ -202,13 +204,13 @@ fn dump_loc(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "loc")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("sloc", stats.sloc(), &prefix, false, stdout)?;
     dump_value("ploc", stats.ploc(), &prefix, false, stdout)?;
     dump_value("lloc", stats.lloc(), &prefix, false, stdout)?;
@@ -224,13 +226,13 @@ fn dump_nom(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "nom")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("functions", stats.functions(), &prefix, false, stdout)?;
     dump_value("closures", stats.closures(), &prefix, false, stdout)?;
     dump_value("total", stats.total(), &prefix, true, stdout)
@@ -244,13 +246,13 @@ fn dump_mi(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "mi")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("mi_original", stats.mi_original(), &prefix, false, stdout)?;
     dump_value("mi_sei", stats.mi_sei(), &prefix, false, stdout)?;
     dump_value(
@@ -270,13 +272,13 @@ fn dump_nargs(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "nargs")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("functions", stats.fn_args(), &prefix, false, stdout)?;
     dump_value("closures", stats.closure_args(), &prefix, false, stdout)?;
     dump_value("total", stats.nargs_total(), &prefix, false, stdout)?;
@@ -291,13 +293,13 @@ fn dump_nexits(
 ) -> std::io::Result<()> {
     let pref = if last { "`- " } else { "|- " };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     write!(stdout, "nexits: ")?;
 
-    color!(stdout, White);
+    color(stdout, Color::White)?;
     writeln!(stdout, "{}", stats.exit())
 }
 
@@ -309,13 +311,13 @@ fn dump_abc(
 ) -> std::io::Result<()> {
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "abc")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
 
     dump_value(
         "assignments",
@@ -341,13 +343,13 @@ fn dump_wmc(
 
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "wmc")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("classes", stats.class_wmc_sum(), &prefix, false, stdout)?;
     dump_value(
         "interfaces",
@@ -371,13 +373,13 @@ fn dump_npm(
 
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "npm")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("classes", stats.class_npm_sum(), &prefix, false, stdout)?;
     dump_value(
         "interfaces",
@@ -402,13 +404,13 @@ fn dump_npa(
 
     let (pref_child, pref) = if last { ("   ", "`- ") } else { ("|  ", "|- ") };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Green, true);
+    intense_color(stdout, Color::Green)?;
     writeln!(stdout, "npa")?;
 
-    let prefix = format!("{}{}", prefix, pref_child);
+    let prefix = format!("{prefix}{pref_child}");
     dump_value("classes", stats.class_npa_sum(), &prefix, false, stdout)?;
     dump_value(
         "interfaces",
@@ -430,12 +432,12 @@ fn dump_value(
 ) -> std::io::Result<()> {
     let pref = if last { "`- " } else { "|- " };
 
-    color!(stdout, Blue);
-    write!(stdout, "{}{}", prefix, pref)?;
+    color(stdout, Color::Blue)?;
+    write!(stdout, "{prefix}{pref}")?;
 
-    color!(stdout, Magenta, true);
-    write!(stdout, "{}: ", name)?;
+    intense_color(stdout, Color::Magenta)?;
+    write!(stdout, "{name}: ")?;
 
-    color!(stdout, White);
-    writeln!(stdout, "{}", val)
+    color(stdout, Color::White)?;
+    writeln!(stdout, "{val}")
 }

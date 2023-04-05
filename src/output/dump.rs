@@ -1,7 +1,9 @@
 use std::io::Write;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, StandardStreamLock, WriteColor};
+
+use termcolor::{Color, ColorChoice, StandardStream, StandardStreamLock};
 
 use crate::node::Node;
+use crate::tools::{color, intense_color};
 
 use crate::traits::*;
 
@@ -53,7 +55,7 @@ pub fn dump_node(
         &line_end,
     );
 
-    color!(stdout, White);
+    color(&mut stdout, Color::White)?;
 
     ret
 }
@@ -91,10 +93,10 @@ fn dump_tree_helper(
     }
 
     if display {
-        color!(stdout, Blue);
-        write!(stdout, "{}{}", prefix, pref)?;
+        color(stdout, Color::Blue)?;
+        write!(stdout, "{prefix}{pref}")?;
 
-        color!(stdout, Yellow, true);
+        intense_color(stdout, Color::Yellow)?;
         write!(
             stdout,
             "{{{}:{}}} ",
@@ -102,28 +104,28 @@ fn dump_tree_helper(
             node.object().kind_id()
         )?;
 
-        color!(stdout, White);
+        color(stdout, Color::White)?;
         write!(stdout, "from ")?;
 
-        color!(stdout, Green);
+        color(stdout, Color::Green)?;
         let pos = node.object().start_position();
         write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
-        color!(stdout, White);
+        color(stdout, Color::White)?;
         write!(stdout, "to ")?;
 
-        color!(stdout, Green);
+        color(stdout, Color::Green)?;
         let pos = node.object().end_position();
         write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
         if node.object().start_position().row == node.object().end_position().row {
-            color!(stdout, White);
+            color(stdout, Color::White)?;
             write!(stdout, ": ")?;
 
-            color!(stdout, Red, true);
+            intense_color(stdout, Color::Red)?;
             let code = &code[node.object().start_byte()..node.object().end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
-                write!(stdout, "{} ", code)?;
+                write!(stdout, "{code} ")?;
             } else {
                 stdout.write_all(code).unwrap();
             }
@@ -134,7 +136,7 @@ fn dump_tree_helper(
 
     let count = node.object().child_count();
     if count != 0 {
-        let prefix = format!("{}{}", prefix, pref_child);
+        let prefix = format!("{prefix}{pref_child}");
         let mut i = count;
         let mut cursor = node.object().walk();
         cursor.goto_first_child();

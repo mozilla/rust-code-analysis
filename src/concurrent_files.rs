@@ -39,7 +39,7 @@ where
         let path = job.path.clone();
 
         if let Err(err) = func(job.path, &job.cfg) {
-            eprintln!("{:?} for file {:?}", err, path);
+            eprintln!("{err:?} for file {path:?}");
         }
     }
 }
@@ -86,7 +86,7 @@ where
 
     for path in paths.drain(..) {
         if !path.exists() {
-            eprintln!("Warning: File doesn't exist: {:?}", path);
+            eprintln!("Warning: File doesn't exist: {path:?}");
             continue;
         }
         if path.is_dir() {
@@ -238,7 +238,7 @@ impl<Config: 'static + Send + Sync> ConcurrentRunner<Config> {
             let proc_files = proc_files.clone();
 
             let t = match thread::Builder::new()
-                .name(format!("Consumer {}", i))
+                .name(format!("Consumer {i}"))
                 .spawn(move || {
                     consumer(receiver, proc_files);
                 }) {

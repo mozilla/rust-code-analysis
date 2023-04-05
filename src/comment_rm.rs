@@ -83,7 +83,7 @@ impl Callback for CommentRm {
             if cfg.in_place {
                 write_file(&cfg.path, &new_source)?;
             } else if let Ok(new_source) = std::str::from_utf8(&new_source) {
-                println!("{}", new_source);
+                println!("{new_source}");
             } else {
                 io::stdout().write_all(&new_source)?;
             }

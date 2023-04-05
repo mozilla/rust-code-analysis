@@ -12,22 +12,6 @@ macro_rules! mk_checker {
     };
 }
 
-macro_rules! mk_else_if {
-    ($if_type:ident) => {
-        #[inline(always)]
-        fn is_else_if(node: &Node) -> bool {
-            if node.object().kind_id() != <Self as TSLanguage>::BaseLang::$if_type {
-                return false;
-            }
-            if let Some(parent) = node.object().parent() {
-                return node.object().kind_id() == <Self as TSLanguage>::BaseLang::$if_type
-                    && parent.kind_id() == <Self as TSLanguage>::BaseLang::$if_type;
-            }
-            false
-        }
-    };
-}
-
 macro_rules! get_language {
     (tree_sitter_cpp) => {
         tree_sitter_mozcpp::language()
@@ -286,19 +270,6 @@ macro_rules! mk_langs {
         mk_extensions!($( ($camel, [ $( $ext ),* ]) ),*);
         mk_emacs_mode!($( ($camel, [ $( $emacs_mode ),* ]) ),*);
         mk_code!($( ($camel, $code, $parser, $name, stringify!($camel)) ),*);
-    };
-}
-
-macro_rules! color {
-    ( $stdout: ident, $color: ident) => {
-        $stdout.set_color(ColorSpec::new().set_fg(Some(Color::$color)))?;
-    };
-    ( $stdout: ident, $color: ident, $intense: ident) => {
-        $stdout.set_color(
-            ColorSpec::new()
-                .set_fg(Some(Color::$color))
-                .set_intense($intense),
-        )?;
     };
 }
 

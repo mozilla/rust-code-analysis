@@ -107,7 +107,7 @@ async fn comment_removal_plain(
     } else {
         Ok(HttpResponse::NotFound()
             .append_header((http::header::CONTENT_TYPE, "text/plain"))
-            .body(format!("error: {}", INVALID_LANGUAGE)))
+            .body(format!("error: {INVALID_LANGUAGE}")))
     }
 }
 
@@ -121,7 +121,7 @@ async fn metrics_json(item: web::Json<WebMetricsPayload>) -> HttpResponse {
             id: payload.id,
             path,
             unit: payload.unit,
-            language: name,
+            language: name.to_string(),
         };
         HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -153,7 +153,7 @@ async fn metrics_plain(
                 .unit
                 .as_ref()
                 .map_or(false, |s| s == "1" || s == "true"),
-            language: name,
+            language: name.to_string(),
         };
         Ok(HttpResponse::Ok().json(action::<WebMetricsCallback>(
             &language,
@@ -165,7 +165,7 @@ async fn metrics_plain(
     } else {
         Ok(HttpResponse::NotFound()
             .append_header((http::header::CONTENT_TYPE, "text/plain"))
-            .body(format!("error: {}", INVALID_LANGUAGE)))
+            .body(format!("error: {INVALID_LANGUAGE}")))
     }
 }
 
@@ -210,7 +210,7 @@ async fn function_plain(
     } else {
         Ok(HttpResponse::NotFound()
             .append_header((http::header::CONTENT_TYPE, "text/plain"))
-            .body(format!("error: {}", INVALID_LANGUAGE)))
+            .body(format!("error: {INVALID_LANGUAGE}")))
     }
 }
 
@@ -542,7 +542,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::NOT_FOUND);
 
         let res = test::read_body(resp).await;
-        let expected = Bytes::from(format!("error: {}", INVALID_LANGUAGE));
+        let expected = Bytes::from(format!("error: {INVALID_LANGUAGE}"));
 
         assert_eq!(res, expected);
     }

@@ -4,13 +4,10 @@ This is the list of programming languages parsed by
 **rust-code-analysis**.
 
 - [x] C++
-- [ ] C#
-- [ ] CSS
-- [ ] Go
-- [ ] HTML
-- [ ] Java
+- [x] Java
 - [x] JavaScript
 - [x] The JavaScript used in Firefox internal
+- [ ] Kotlin
 - [x] Python
 - [x] Rust
 - [x] Typescript

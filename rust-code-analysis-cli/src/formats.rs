@@ -15,7 +15,7 @@ pub enum Format {
 }
 
 impl Format {
-    pub fn all() -> &'static [&'static str] {
+    pub const fn all() -> &'static [&'static str] {
         &["cbor", "json", "toml", "yaml"]
     }
 
@@ -41,7 +41,7 @@ impl Format {
                     } else {
                         serde_json::to_string(&space).unwrap()
                     };
-                    writeln!(stdout, "{}", json_data)
+                    writeln!(stdout, "{json_data}")
                 }
                 Format::Toml => {
                     let toml_data = if pretty {
@@ -49,7 +49,7 @@ impl Format {
                     } else {
                         toml::to_string(&space).unwrap()
                     };
-                    writeln!(stdout, "{}", toml_data)
+                    writeln!(stdout, "{toml_data}")
                 }
                 Format::Yaml => writeln!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
             }
@@ -122,11 +122,11 @@ impl FromStr for Format {
 
     fn from_str(format: &str) -> Result<Self, Self::Err> {
         match format {
-            "cbor" => Ok(Format::Cbor),
-            "json" => Ok(Format::Json),
-            "toml" => Ok(Format::Toml),
-            "yaml" => Ok(Format::Yaml),
-            format => Err(format!("{:?} is not a supported format", format)),
+            "cbor" => Ok(Self::Cbor),
+            "json" => Ok(Self::Json),
+            "toml" => Ok(Self::Toml),
+            "yaml" => Ok(Self::Yaml),
+            format => Err(format!("{format:?} is not a supported format")),
         }
     }
 }
