@@ -25,14 +25,14 @@ pub struct WebMetricsInfo {
     pub unit: Option<String>,
 }
 
-pub struct WebMetricsCallback {}
-
 pub struct WebMetricsCfg {
     pub id: String,
     pub path: PathBuf,
     pub unit: bool,
     pub language: String,
 }
+
+pub struct WebMetricsCallback;
 
 impl Callback for WebMetricsCallback {
     type Res = Value;

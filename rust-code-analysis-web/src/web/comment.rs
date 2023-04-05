@@ -20,11 +20,11 @@ pub struct WebCommentInfo {
     pub file_name: String,
 }
 
-pub struct WebCommentCallback {}
-
 pub struct WebCommentCfg {
     pub id: String,
 }
+
+pub struct WebCommentCallback;
 
 impl Callback for WebCommentCallback {
     type Res = WebCommentResponse;
