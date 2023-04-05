@@ -81,29 +81,16 @@ macro_rules! is_js_func_and_closure_checker {
 }
 
 pub trait Checker {
-    fn is_comment(node: &Node) -> bool;
-
-    #[inline(always)]
-    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
-        false
-    }
-
-    #[inline(always)]
-    fn is_else_if(_: &Node) -> bool {
-        false
-    }
-
-    fn is_string(node: &Node) -> bool;
-    fn is_call(node: &Node) -> bool;
-    fn is_func(node: &Node) -> bool;
-    fn is_closure(node: &Node) -> bool;
-    fn is_func_space(node: &Node) -> bool;
-    fn is_non_arg(node: &Node) -> bool;
-
-    #[inline(always)]
-    fn is_primitive(_id: u16) -> bool {
-        false
-    }
+    fn is_comment(_: &Node) -> bool;
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool;
+    fn is_func_space(_: &Node) -> bool;
+    fn is_func(_: &Node) -> bool;
+    fn is_closure(_: &Node) -> bool;
+    fn is_call(_: &Node) -> bool;
+    fn is_non_arg(_: &Node) -> bool;
+    fn is_string(_: &Node) -> bool;
+    fn is_else_if(_: &Node) -> bool;
+    fn is_primitive(_id: u16) -> bool;
 
     fn is_error(node: &Node) -> bool {
         node.object().is_error()
@@ -111,23 +98,52 @@ pub trait Checker {
 }
 
 impl Checker for PreprocCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, StringLiteral, RawStringLiteral);
-    mk_checker!(is_call,);
-    mk_checker!(is_func,);
-    mk_checker!(is_closure,);
-    mk_checker!(is_func_space,);
-    mk_checker!(is_non_arg,);
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Preproc::Comment
+    }
+
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
+        false
+    }
+
+    fn is_func_space(_: &Node) -> bool {
+        false
+    }
+
+    fn is_func(_: &Node) -> bool {
+        false
+    }
+
+    fn is_closure(_: &Node) -> bool {
+        false
+    }
+
+    fn is_call(_: &Node) -> bool {
+        false
+    }
+
+    fn is_non_arg(_: &Node) -> bool {
+        false
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Preproc::StringLiteral
+            || node.object().kind_id() == Preproc::RawStringLiteral
+    }
+
+    fn is_else_if(_: &Node) -> bool {
+        false
+    }
+
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
 }
 
 impl Checker for CcommentCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, StringLiteral, RawStringLiteral);
-    mk_checker!(is_call,);
-    mk_checker!(is_func,);
-    mk_checker!(is_closure,);
-    mk_checker!(is_func_space,);
-    mk_checker!(is_non_arg,);
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Ccomment::Comment
+    }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -136,35 +152,45 @@ impl Checker for CcommentCode {
         let code = &code[node.object().start_byte()..node.object().end_byte()];
         AC.is_match(code)
     }
+
+    fn is_func_space(_: &Node) -> bool {
+        false
+    }
+
+    fn is_func(_: &Node) -> bool {
+        false
+    }
+
+    fn is_closure(_: &Node) -> bool {
+        false
+    }
+
+    fn is_call(_: &Node) -> bool {
+        false
+    }
+
+    fn is_non_arg(_: &Node) -> bool {
+        false
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Ccomment::StringLiteral
+            || node.object().kind_id() == Ccomment::RawStringLiteral
+    }
+
+    fn is_else_if(_: &Node) -> bool {
+        false
+    }
+
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
 }
 
 impl Checker for CppCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(
-        is_string,
-        StringLiteral,
-        ConcatenatedString,
-        RawStringLiteral
-    );
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(
-        is_func,
-        FunctionDefinition,
-        FunctionDefinition2,
-        FunctionDefinition3,
-        FunctionDefinition4
-    );
-    mk_checker!(is_closure, LambdaExpression);
-    mk_checker!(
-        is_func_space,
-        TranslationUnit,
-        FunctionDefinition,
-        FunctionDefinition2,
-        FunctionDefinition3,
-        StructSpecifier,
-        ClassSpecifier,
-        NamespaceDefinition
-    );
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Cpp::Comment
+    }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -172,6 +198,51 @@ impl Checker for CppCode {
         }
         let code = &code[node.object().start_byte()..node.object().end_byte()];
         AC.is_match(code)
+    }
+
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Cpp::TranslationUnit
+                | Cpp::FunctionDefinition
+                | Cpp::FunctionDefinition2
+                | Cpp::FunctionDefinition3
+                | Cpp::StructSpecifier
+                | Cpp::ClassSpecifier
+                | Cpp::NamespaceDefinition
+        )
+    }
+
+    fn is_func(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Cpp::FunctionDefinition
+                | Cpp::FunctionDefinition2
+                | Cpp::FunctionDefinition3
+                | Cpp::FunctionDefinition4
+        )
+    }
+
+    fn is_closure(node: &Node) -> bool {
+        node.object().kind_id() == Cpp::LambdaExpression
+    }
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Cpp::CallExpression
+    }
+
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Cpp::LPAREN | Cpp::LPAREN2 | Cpp::COMMA | Cpp::RPAREN
+        )
+    }
+
+    fn is_string(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Cpp::StringLiteral | Cpp::ConcatenatedString | Cpp::RawStringLiteral
+        )
     }
 
     fn is_else_if(node: &Node) -> bool {
@@ -185,8 +256,6 @@ impl Checker for CppCode {
         false
     }
 
-    mk_checker!(is_non_arg, LPAREN, LPAREN2, COMMA, RPAREN);
-
     #[inline(always)]
     fn is_primitive(id: u16) -> bool {
         id == Cpp::PrimitiveType
@@ -194,7 +263,9 @@ impl Checker for CppCode {
 }
 
 impl Checker for PythonCode {
-    mk_checker!(is_comment, Comment);
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Python::Comment
+    }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         lazy_static! {
@@ -205,58 +276,133 @@ impl Checker for PythonCode {
             && RE.is_match(&code[node.object().start_byte()..node.object().end_byte()])
     }
 
-    mk_checker!(is_string, String, ConcatenatedString);
-    mk_checker!(is_call, Call);
-    mk_checker!(is_func, FunctionDefinition);
-    mk_checker!(is_closure, Lambda);
-    mk_checker!(is_func_space, Module, FunctionDefinition, ClassDefinition);
-    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Python::Module | Python::FunctionDefinition | Python::ClassDefinition
+        )
+    }
+
+    fn is_func(node: &Node) -> bool {
+        node.object().kind_id() == Python::FunctionDefinition
+    }
+
+    fn is_closure(node: &Node) -> bool {
+        node.object().kind_id() == Python::Lambda
+    }
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Python::Call
+    }
+
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Python::LPAREN | Python::COMMA | Python::RPAREN
+        )
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Python::String
+            || node.object().kind_id() == Python::ConcatenatedString
+    }
+
+    fn is_else_if(_: &Node) -> bool {
+        false
+    }
+
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
 }
 
 impl Checker for JavaCode {
-    mk_checker!(is_comment, LineComment, BlockComment);
-    mk_checker!(is_string, StringLiteral);
-    mk_checker!(is_call, MethodInvocation);
-    mk_checker!(is_func, MethodDeclaration, ConstructorDeclaration);
-    mk_checker!(is_closure, LambdaExpression);
-    mk_checker!(
-        is_func_space,
-        Program,
-        ClassDeclaration,
-        InterfaceDeclaration
-    );
-    mk_checker!(is_non_arg,);
-}
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Java::LineComment
+            || node.object().kind_id() == Java::BlockComment
+    }
 
-impl Checker for KotlinCode {
-    mk_checker!(is_comment,);
-    mk_checker!(is_string,);
-    mk_checker!(is_call,);
-    mk_checker!(is_func,);
-    mk_checker!(is_closure,);
-    mk_checker!(is_func_space,);
-    mk_checker!(is_non_arg,);
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
+        false
+    }
+
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Java::Program | Java::ClassDeclaration | Java::InterfaceDeclaration
+        )
+    }
+
+    fn is_func(node: &Node) -> bool {
+        node.object().kind_id() == Java::MethodDeclaration
+            || node.object().kind_id() == Java::ConstructorDeclaration
+    }
+
+    fn is_closure(node: &Node) -> bool {
+        node.object().kind_id() == Java::LambdaExpression
+    }
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Java::MethodInvocation
+    }
+
+    fn is_non_arg(_: &Node) -> bool {
+        false
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Java::StringLiteral
+    }
+
+    fn is_else_if(_: &Node) -> bool {
+        false
+    }
+
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
 }
 
 impl Checker for MozjsCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, String, TemplateString);
-    mk_checker!(is_call, CallExpression);
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Mozjs::Comment
+    }
 
-    mk_checker!(
-        is_func_space,
-        Program,
-        Function,
-        Class,
-        GeneratorFunction,
-        FunctionDeclaration,
-        MethodDefinition,
-        GeneratorFunctionDeclaration,
-        ClassDeclaration,
-        ArrowFunction
-    );
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
+        false
+    }
+
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Mozjs::Program
+                | Mozjs::Function
+                | Mozjs::Class
+                | Mozjs::GeneratorFunction
+                | Mozjs::FunctionDeclaration
+                | Mozjs::MethodDefinition
+                | Mozjs::GeneratorFunctionDeclaration
+                | Mozjs::ClassDeclaration
+                | Mozjs::ArrowFunction
+        )
+    }
 
     is_js_func_and_closure_checker!(Mozjs);
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Mozjs::CallExpression
+    }
+
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Mozjs::LPAREN | Mozjs::COMMA | Mozjs::RPAREN
+        )
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Mozjs::String || node.object().kind_id() == Mozjs::TemplateString
+    }
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
@@ -268,27 +414,53 @@ impl Checker for MozjsCode {
         }
         false
     }
-    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
+
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
 }
 
 impl Checker for JavascriptCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, String, TemplateString);
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(
-        is_func_space,
-        Program,
-        Function,
-        GeneratorFunction,
-        Class,
-        FunctionDeclaration,
-        MethodDefinition,
-        GeneratorFunctionDeclaration,
-        ClassDeclaration,
-        ArrowFunction
-    );
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Javascript::Comment
+    }
+
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
+        false
+    }
+
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Javascript::Program
+                | Javascript::Function
+                | Javascript::Class
+                | Javascript::GeneratorFunction
+                | Javascript::FunctionDeclaration
+                | Javascript::MethodDefinition
+                | Javascript::GeneratorFunctionDeclaration
+                | Javascript::ClassDeclaration
+                | Javascript::ArrowFunction
+        )
+    }
 
     is_js_func_and_closure_checker!(Javascript);
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Javascript::CallExpression
+    }
+
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Javascript::LPAREN | Javascript::COMMA | Javascript::RPAREN
+        )
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Javascript::String
+            || node.object().kind_id() == Javascript::TemplateString
+    }
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
@@ -301,28 +473,54 @@ impl Checker for JavascriptCode {
         }
         false
     }
-    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
+
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
 }
 
 impl Checker for TypescriptCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, String, TemplateString);
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(
-        is_func_space,
-        Program,
-        Function,
-        Class,
-        GeneratorFunction,
-        FunctionDeclaration,
-        MethodDefinition,
-        GeneratorFunctionDeclaration,
-        ClassDeclaration,
-        InterfaceDeclaration,
-        ArrowFunction
-    );
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Typescript::Comment
+    }
+
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
+        false
+    }
+
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Typescript::Program
+                | Typescript::Function
+                | Typescript::Class
+                | Typescript::GeneratorFunction
+                | Typescript::FunctionDeclaration
+                | Typescript::MethodDefinition
+                | Typescript::GeneratorFunctionDeclaration
+                | Typescript::ClassDeclaration
+                | Typescript::InterfaceDeclaration
+                | Typescript::ArrowFunction
+        )
+    }
 
     is_js_func_and_closure_checker!(Typescript);
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Typescript::CallExpression
+    }
+
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Typescript::LPAREN | Typescript::COMMA | Typescript::RPAREN
+        )
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Typescript::String
+            || node.object().kind_id() == Typescript::TemplateString
+    }
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
@@ -334,33 +532,54 @@ impl Checker for TypescriptCode {
         }
         false
     }
+
     #[inline(always)]
     fn is_primitive(id: u16) -> bool {
         id == Typescript::PredefinedType
     }
-    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
 
 impl Checker for TsxCode {
-    mk_checker!(is_comment, Comment);
-    mk_checker!(is_string, String, TemplateString);
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(
-        is_func_space,
-        Program,
-        Function,
-        GeneratorFunction,
-        Class,
-        FunctionDeclaration,
-        MethodDefinition,
-        GeneratorFunction,
-        GeneratorFunctionDeclaration,
-        ClassDeclaration,
-        InterfaceDeclaration,
-        ArrowFunction
-    );
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Tsx::Comment
+    }
+
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
+        false
+    }
+
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Tsx::Program
+                | Tsx::Function
+                | Tsx::Class
+                | Tsx::GeneratorFunction
+                | Tsx::FunctionDeclaration
+                | Tsx::MethodDefinition
+                | Tsx::GeneratorFunctionDeclaration
+                | Tsx::ClassDeclaration
+                | Tsx::InterfaceDeclaration
+                | Tsx::ArrowFunction
+        )
+    }
 
     is_js_func_and_closure_checker!(Tsx);
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Tsx::CallExpression
+    }
+
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Tsx::LPAREN | Tsx::COMMA | Tsx::RPAREN
+        )
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Tsx::String || node.object().kind_id() == Tsx::TemplateString
+    }
 
     fn is_else_if(node: &Node) -> bool {
         if node.object().kind_id() != Tsx::IfStatement {
@@ -372,7 +591,6 @@ impl Checker for TsxCode {
         }
         false
     }
-    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 
     #[inline(always)]
     fn is_primitive(id: u16) -> bool {
@@ -381,7 +599,10 @@ impl Checker for TsxCode {
 }
 
 impl Checker for RustCode {
-    mk_checker!(is_comment, LineComment, BlockComment);
+    fn is_comment(node: &Node) -> bool {
+        node.object().kind_id() == Rust::LineComment
+            || node.object().kind_id() == Rust::BlockComment
+    }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
         if let Some(parent) = node.object().parent() {
@@ -392,6 +613,41 @@ impl Checker for RustCode {
         }
         let code = &code[node.object().start_byte()..node.object().end_byte()];
         code.starts_with(b"/// cbindgen:")
+    }
+
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Rust::SourceFile
+                | Rust::FunctionItem
+                | Rust::ImplItem
+                | Rust::TraitItem
+                | Rust::ClosureExpression
+        )
+    }
+
+    fn is_func(node: &Node) -> bool {
+        node.object().kind_id() == Rust::FunctionItem
+    }
+
+    fn is_closure(node: &Node) -> bool {
+        node.object().kind_id() == Rust::ClosureExpression
+    }
+
+    fn is_call(node: &Node) -> bool {
+        node.object().kind_id() == Rust::CallExpression
+    }
+
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.object().kind_id().into(),
+            Rust::LPAREN | Rust::COMMA | Rust::RPAREN | Rust::PIPE | Rust::AttributeItem
+        )
+    }
+
+    fn is_string(node: &Node) -> bool {
+        node.object().kind_id() == Rust::StringLiteral
+            || node.object().kind_id() == Rust::RawStringLiteral
     }
 
     #[inline(always)]
@@ -409,17 +665,46 @@ impl Checker for RustCode {
     fn is_primitive(id: u16) -> bool {
         id == Rust::PrimitiveType
     }
-    mk_checker!(is_string, StringLiteral, RawStringLiteral);
-    mk_checker!(is_call, CallExpression);
-    mk_checker!(is_func, FunctionItem);
-    mk_checker!(is_closure, ClosureExpression);
-    mk_checker!(
-        is_func_space,
-        SourceFile,
-        FunctionItem,
-        ImplItem,
-        TraitItem,
-        ClosureExpression
-    );
-    mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN, PIPE, AttributeItem);
+}
+
+impl Checker for KotlinCode {
+    fn is_comment(_: &Node) -> bool {
+        false
+    }
+
+    fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
+        false
+    }
+
+    fn is_func_space(_: &Node) -> bool {
+        false
+    }
+
+    fn is_func(_: &Node) -> bool {
+        false
+    }
+
+    fn is_closure(_: &Node) -> bool {
+        false
+    }
+
+    fn is_call(_: &Node) -> bool {
+        false
+    }
+
+    fn is_non_arg(_: &Node) -> bool {
+        false
+    }
+
+    fn is_string(_: &Node) -> bool {
+        false
+    }
+
+    fn is_else_if(_: &Node) -> bool {
+        false
+    }
+
+    fn is_primitive(_id: u16) -> bool {
+        false
+    }
 }
