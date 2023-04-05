@@ -122,10 +122,10 @@ impl FromStr for Format {
 
     fn from_str(format: &str) -> Result<Self, Self::Err> {
         match format {
-            "cbor" => Ok(Format::Cbor),
-            "json" => Ok(Format::Json),
-            "toml" => Ok(Format::Toml),
-            "yaml" => Ok(Format::Yaml),
+            "cbor" => Ok(Self::Cbor),
+            "json" => Ok(Self::Json),
+            "toml" => Ok(Self::Toml),
+            "yaml" => Ok(Self::Yaml),
             format => Err(format!("{format:?} is not a supported format")),
         }
     }
