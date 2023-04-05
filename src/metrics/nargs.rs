@@ -242,297 +242,321 @@ impl NArgs for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn python_no_functions_and_closures() {
-        check_metrics!(
-            "a = 42",
-            "foo.py",
-            PythonParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 0, usize)
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 0.0)
-            ] // 0 functions + 0 closures = 0
-        );
+        check_metrics::<PythonParser>("a = 42", "foo.py", |metric| {
+            // 0 functions + 0 closures
+            insta::assert_json_snapshot!(
+                metric.nargs,
+                @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 0.0,
+                      "average_functions": 0.0,
+                      "average_closures": 0.0,
+                      "total": 0.0,
+                      "average": 0.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_no_functions_and_closures() {
-        check_metrics!(
-            "let a = 42;",
-            "foo.rs",
-            RustParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 0, usize)
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 0.0)
-            ] // 0 functions + 0 closures = 0
-        );
+        check_metrics::<RustParser>("let a = 42;", "foo.rs", |metric| {
+            // 0 functions + 0 closures
+            insta::assert_json_snapshot!(
+                metric.nargs,
+                @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 0.0,
+                      "average_functions": 0.0,
+                      "average_closures": 0.0,
+                      "total": 0.0,
+                      "average": 0.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn cpp_no_functions_and_closures() {
-        check_metrics!(
-            "int a = 42;",
-            "foo.cpp",
-            CppParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 0, usize)
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 0.0)
-            ] // 0 functions + 0 closures = 0
-        );
+        check_metrics::<CppParser>("int a = 42;", "foo.cpp", |metric| {
+            // 0 functions + 0 closures
+            insta::assert_json_snapshot!(
+                metric.nargs,
+                @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 0.0,
+                      "average_functions": 0.0,
+                      "average_closures": 0.0,
+                      "total": 0.0,
+                      "average": 0.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn javascript_no_functions_and_closures() {
-        check_metrics!(
-            "var a = 42;",
-            "foo.js",
-            JavascriptParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 0, usize)
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 0.0)
-            ] // 0 functions + 0 closures = 0
-        );
+        check_metrics::<JavascriptParser>("var a = 42;", "foo.js", |metric| {
+            // 0 functions + 0 closures
+            insta::assert_json_snapshot!(
+                metric.nargs,
+                @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 0.0,
+                      "average_functions": 0.0,
+                      "average_closures": 0.0,
+                      "total": 0.0,
+                      "average": 0.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn python_single_function() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  if a:
                      return a",
             "foo.py",
-            PythonParser,
-            nargs,
-            [
-                (fn_args_sum, 2, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 2, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 1 function
+            |metric| {
+                // 1 function
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 2.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 2.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_single_function() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f(a: bool, b: usize) {
                  if a {
                      return a;
                 }
              }",
             "foo.rs",
-            RustParser,
-            nargs,
-            [
-                (fn_args_sum, 2, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 2, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 1 function
+            |metric| {
+                // 1 function
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 2.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 2.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_single_function() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "int f(int a, int b) {
                  if (a) {
                      return a;
                 }
              }",
             "foo.c",
-            CppParser,
-            nargs,
-            [
-                (fn_args_sum, 2, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 2, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 1 function
+            |metric| {
+                // 1 function
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 2.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 2.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_single_function() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "function f(a, b) {
                  return a * b;
              }",
             "foo.js",
-            JavascriptParser,
-            nargs,
-            [
-                (fn_args_sum, 2, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 2, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 1 function
+            |metric| {
+                // 1 function
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 2.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 2.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_single_lambda() {
-        check_metrics!(
-            "bar = lambda a: True",
-            "foo.py",
-            PythonParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 1, usize),
-                (nargs_total, 1, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 0, usize),
-                (closure_args_min, 1, usize),
-                (closure_args_max, 1, usize),
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 1.0),
-                (nargs_average, 1.0)
-            ] // 1 lambda
-        );
+        check_metrics::<PythonParser>("bar = lambda a: True", "foo.py", |metric| {
+            // 1 lambda
+            insta::assert_json_snapshot!(
+                metric.nargs,
+                @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 1.0,
+                      "average_functions": 0.0,
+                      "average_closures": 1.0,
+                      "total": 1.0,
+                      "average": 1.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 1.0,
+                      "closures_max": 1.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_single_closure() {
-        check_metrics!(
-            "let bar = |i: i32| -> i32 { i + 1 };",
-            "foo.rs",
-            RustParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 1, usize),
-                (nargs_total, 1, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 0, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 1, usize),
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 1.0),
-                (nargs_average, 1.0)
-            ] // 1 lambda
-        );
+        check_metrics::<RustParser>("let bar = |i: i32| -> i32 { i + 1 };", "foo.rs", |metric| {
+            // 1 lambda
+            insta::assert_json_snapshot!(
+                metric.nargs,
+                @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 1.0,
+                      "average_functions": 0.0,
+                      "average_closures": 1.0,
+                      "total": 1.0,
+                      "average": 1.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn cpp_single_lambda() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "auto bar = [](int x, int y) -> int { return x + y; };",
             "foo.cpp",
-            CppParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 2, usize),
-                (nargs_total, 2, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 0, usize),
-                (closure_args_min, 2, usize),
-                (closure_args_max, 2, usize),
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 2.0),
-                (nargs_average, 2.0)
-            ] // 1 lambda
+            |metric| {
+                // 1 lambda
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 2.0,
+                      "average_functions": 0.0,
+                      "average_closures": 2.0,
+                      "total": 2.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 2.0,
+                      "closures_max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_single_closure() {
-        check_metrics!(
-            "function (a, b) {return a + b};",
-            "foo.js",
-            JavascriptParser,
-            nargs,
-            [
-                (fn_args_sum, 0, usize),
-                (closure_args_sum, 2, usize),
-                (nargs_total, 2, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 0, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 2, usize),
-            ],
-            [
-                (fn_args_average, 0.0),
-                (closure_args_average, 2.0),
-                (nargs_average, 2.0)
-            ] // 1 lambda
-        );
+        check_metrics::<JavascriptParser>("function (a, b) {return a + b};", "foo.js", |metric| {
+            // 1 lambda
+            insta::assert_json_snapshot!(
+                metric.nargs,
+                @r###"
+                    {
+                      "total_functions": 0.0,
+                      "total_closures": 2.0,
+                      "average_functions": 0.0,
+                      "average_closures": 2.0,
+                      "total": 2.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 2.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn python_functions() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  if a:
                      return a
@@ -540,25 +564,28 @@ mod tests {
                  if b:
                      return b",
             "foo.py",
-            PythonParser,
-            nargs,
-            [
-                (fn_args_sum, 4, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 4, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 4.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 4.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  if a:
                      return a
@@ -566,28 +593,31 @@ mod tests {
                  if b:
                      return b",
             "foo.py",
-            PythonParser,
-            nargs,
-            [
-                (fn_args_sum, 5, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 5, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 3, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.5),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.5)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 5.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.5,
+                      "average_closures": 0.0,
+                      "total": 5.0,
+                      "average": 2.5,
+                      "functions_min": 0.0,
+                      "functions_max": 3.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_functions() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f(a: bool, b: usize) {
                  if a {
                      return a;
@@ -599,25 +629,28 @@ mod tests {
                 }
              }",
             "foo.rs",
-            RustParser,
-            nargs,
-            [
-                (fn_args_sum, 4, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 4, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 4.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 4.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f(a: bool, b: usize) {
                  if a {
                      return a;
@@ -629,28 +662,31 @@ mod tests {
                 }
              }",
             "foo.rs",
-            RustParser,
-            nargs,
-            [
-                (fn_args_sum, 5, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 5, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 3, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.5),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.5)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 5.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.5,
+                      "average_closures": 0.0,
+                      "total": 5.0,
+                      "average": 2.5,
+                      "functions_min": 0.0,
+                      "functions_max": 3.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_functions() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "int f(int a, int b) {
                  if (a) {
                      return a;
@@ -662,25 +698,28 @@ mod tests {
                 }
              }",
             "foo.c",
-            CppParser,
-            nargs,
-            [
-                (fn_args_sum, 4, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 4, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 4.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 4.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<CppParser>(
             "int f(int a, int b) {
                  if (a) {
                      return a;
@@ -692,28 +731,31 @@ mod tests {
                 }
              }",
             "foo.c",
-            CppParser,
-            nargs,
-            [
-                (fn_args_sum, 5, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 5, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 3, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.5),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.5)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 5.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.5,
+                      "average_closures": 0.0,
+                      "total": 5.0,
+                      "average": 2.5,
+                      "functions_min": 0.0,
+                      "functions_max": 3.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_functions() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "function f(a, b) {
                  return a * b;
              }
@@ -721,25 +763,28 @@ mod tests {
                  return a * b;
              }",
             "foo.js",
-            JavascriptParser,
-            nargs,
-            [
-                (fn_args_sum, 4, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 4, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.0),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.0)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 4.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.0,
+                      "average_closures": 0.0,
+                      "total": 4.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "function f(a, b) {
                  return a * b;
              }
@@ -747,28 +792,31 @@ mod tests {
                  return a * b;
              }",
             "foo.js",
-            JavascriptParser,
-            nargs,
-            [
-                (fn_args_sum, 5, usize),
-                (closure_args_sum, 0, usize),
-                (nargs_total, 5, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 3, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 0, usize),
-            ],
-            [
-                (fn_args_average, 2.5),
-                (closure_args_average, 0.0),
-                (nargs_average, 2.5)
-            ] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 5.0,
+                      "total_closures": 0.0,
+                      "average_functions": 2.5,
+                      "average_closures": 0.0,
+                      "total": 5.0,
+                      "average": 2.5,
+                      "functions_min": 0.0,
+                      "functions_max": 3.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_nested_functions() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  def foo(a):
                      if a:
@@ -776,28 +824,31 @@ mod tests {
                  bar = lambda a: lambda b: b or True or True
                  return bar(foo(a))(a)",
             "foo.py",
-            PythonParser,
-            nargs,
-            [
-                (fn_args_sum, 3, usize),
-                (closure_args_sum, 2, usize),
-                (nargs_total, 5, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 2, usize),
-            ],
-            [
-                (fn_args_average, 1.5),
-                (closure_args_average, 1.0),
-                (nargs_average, 1.25)
-            ] // 2 functions + 2 lambdas = 4
+            |metric| {
+                // 2 functions + 2 lambdas = 4
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 3.0,
+                      "total_closures": 2.0,
+                      "average_functions": 1.5,
+                      "average_closures": 1.0,
+                      "total": 5.0,
+                      "average": 1.25,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_nested_functions() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f(a: i32, b: i32) -> i32 {
                  fn foo(a: i32) -> i32 {
                      return a;
@@ -807,56 +858,62 @@ mod tests {
                  return bar(foo(a), a);
              }",
             "foo.rs",
-            RustParser,
-            nargs,
-            [
-                (fn_args_sum, 3, usize),
-                (closure_args_sum, 3, usize),
-                (nargs_total, 6, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 2, usize),
-            ],
-            [
-                (fn_args_average, 1.5),
-                (closure_args_average, 1.5),
-                (nargs_average, 1.5)
-            ] // 2 functions + 2 lambdas = 4
+            |metric| {
+                // 2 functions + 2 lambdas = 4
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 3.0,
+                      "total_closures": 3.0,
+                      "average_functions": 1.5,
+                      "average_closures": 1.5,
+                      "total": 6.0,
+                      "average": 1.5,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn cpp_nested_functions() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "int f(int a, int b, int c) {
                  auto foo = [](int x) -> int { return x; };
                  auto bar = [](int x, int y) -> int { return x + y; };
                  return bar(foo(a), a);
              }",
             "foo.cpp",
-            CppParser,
-            nargs,
-            [
-                (fn_args_sum, 3, usize),
-                (closure_args_sum, 3, usize),
-                (nargs_total, 6, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 3, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 3, usize),
-            ],
-            [
-                (fn_args_average, 3.0),
-                (closure_args_average, 1.5),
-                (nargs_average, 2.0)
-            ] // 1 function + 2 lambdas = 3
+            |metric| {
+                // 1 functions + 2 lambdas = 3
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 3.0,
+                      "total_closures": 3.0,
+                      "average_functions": 3.0,
+                      "average_closures": 1.5,
+                      "total": 6.0,
+                      "average": 2.0,
+                      "functions_min": 0.0,
+                      "functions_max": 3.0,
+                      "closures_min": 0.0,
+                      "closures_max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_nested_functions() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "function f(a, b) {
                  function foo(a, c) {
                      return a;
@@ -866,22 +923,25 @@ mod tests {
                  return bar(foo(a), a);
              }",
             "foo.js",
-            JavascriptParser,
-            nargs,
-            [
-                (fn_args_sum, 6, usize),
-                (closure_args_sum, 1, usize),
-                (nargs_total, 7, usize),
-                (fn_args_min, 0, usize),
-                (fn_args_max, 2, usize),
-                (closure_args_min, 0, usize),
-                (closure_args_max, 1, usize),
-            ],
-            [
-                (fn_args_average, 2.),
-                (closure_args_average, 1.),
-                (nargs_average, 1.75)
-            ] // 3 functions + 1 lambdas = 4
+            |metric| {
+                // 3 functions + 1 lambdas = 4
+                insta::assert_json_snapshot!(
+                    metric.nargs,
+                    @r###"
+                    {
+                      "total_functions": 6.0,
+                      "total_closures": 1.0,
+                      "average_functions": 2.0,
+                      "average_closures": 1.0,
+                      "total": 7.0,
+                      "average": 1.75,
+                      "functions_min": 0.0,
+                      "functions_max": 2.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 }

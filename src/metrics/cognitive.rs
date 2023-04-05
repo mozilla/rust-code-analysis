@@ -453,91 +453,95 @@ impl Cognitive for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn python_no_cognitive() {
-        check_metrics!(
-            "a = 42",
-            "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 0, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 0, usize)
-            ],
-            [(cognitive_average, f64::NAN)]
-        );
+        check_metrics::<PythonParser>("a = 42", "foo.py", |metric| {
+            insta::assert_json_snapshot!(
+                metric.cognitive,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_no_cognitive() {
-        check_metrics!(
-            "let a = 42;",
-            "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 0, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 0, usize)
-            ],
-            [(cognitive_average, f64::NAN)]
-        );
+        check_metrics::<RustParser>("let a = 42;", "foo.rs", |metric| {
+            insta::assert_json_snapshot!(
+                metric.cognitive,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn c_no_cognitive() {
-        check_metrics!(
-            "int a = 42;",
-            "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 0, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 0, usize)
-            ],
-            [(cognitive_average, f64::NAN)]
-        );
+        check_metrics::<CppParser>("int a = 42;", "foo.c", |metric| {
+            insta::assert_json_snapshot!(
+                metric.cognitive,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn mozjs_no_cognitive() {
-        check_metrics!(
-            "var a = 42;",
-            "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 0, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 0, usize)
-            ],
-            [(cognitive_average, f64::NAN)]
-        );
+        check_metrics::<MozjsParser>("var a = 42;", "foo.js", |metric| {
+            insta::assert_json_snapshot!(
+                metric.cognitive,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn python_simple_function() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if a and b:  # +2 (+1 and)
                    return 1
                 if c and d: # +2 (+1 and)
                    return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -545,18 +549,22 @@ mod tests {
     fn python_expression_statement() {
         // Boolean expressions containing `And` and `Or` operators were not
         // considered in assignments
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 c = True and True",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 1, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 1, usize)
-            ],
-            [(cognitive_average, 1.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -564,18 +572,22 @@ mod tests {
     fn python_tuple() {
         // Boolean expressions containing `And` and `Or` operators were not
         // considered inside tuples
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 return \"%s%s\" % (a and \"Get\" or \"Set\", b)",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -583,21 +595,25 @@ mod tests {
     fn python_elif_function() {
         // Boolean expressions containing `And` and `Or` operators were not
         // considered in `elif` statements
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if a and b:  # +2 (+1 and)
                    return 1
                 elif c and d: # +2 (+1 and)
                    return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -605,7 +621,7 @@ mod tests {
     fn python_more_elifs_function() {
         // Boolean expressions containing `And` and `Or` operators were not
         // considered when there were more `elif` statements
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if a and b:  # +2 (+1 and)
                    return 1
@@ -614,20 +630,24 @@ mod tests {
                 elif e and f: # +2 (+1 and)
                    return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 6, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 6, usize)
-            ],
-            [(cognitive_average, 6.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 6.0,
+                      "average": 6.0,
+                      "min": 0.0,
+                      "max": 6.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_simple_function() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if a && b { // +2 (+1 &&)
                      println!(\"test\");
@@ -637,20 +657,24 @@ mod tests {
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_simple_function() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  if (a && b) { // +2 (+1 &&)
                      printf(\"test\");
@@ -660,20 +684,24 @@ mod tests {
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_simple_function() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  if (a && b) { // +2 (+1 &&)
                      window.print(\"test\");
@@ -683,355 +711,431 @@ mod tests {
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_sequence_same_booleans() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if a and b and True:  # +2 (+1 sequence of and)
                    return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_sequence_same_booleans() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if a && b && true { // +2 (+1 sequence of &&)
                      println!(\"test\");
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if a || b || c || d { // +2 (+1 sequence of ||)
                      println!(\"test\");
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_sequence_same_booleans() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  if (a && b && 1 == 1) { // +2 (+1 sequence of &&)
                      printf(\"test\");
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  if (a || b || c || d) { // +2 (+1 sequence of ||)
                      printf(\"test\");
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_sequence_same_booleans() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  if (a && b && 1 == 1) { // +2 (+1 sequence of &&)
                      window.print(\"test\");
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  if (a || b || c || d) { // +2 (+1 sequence of ||)
                      window.print(\"test\");
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_not_booleans() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if !a && !b { // +2 (+1 &&)
                      println!(\"test\");
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 2, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 2, usize)
-            ],
-            [(cognitive_average, 2.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if a && !(b && c) { // +3 (+1 &&, +1 &&)
                      println!(\"test\");
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if !(a || b) && !(c || d) { // +4 (+1 ||, +1 &&, +1 ||)
                      println!(\"test\");
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_not_booleans() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
                      printf(\"test\");
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  if (!(a || b) && !(c || d)) { // +4 (+1 ||, +1 &&, +1 ||)
                      printf(\"test\");
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_not_booleans() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
                      window.print(\"test\");
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  if (!(a || b) && !(c || d)) { // +4 (+1 ||, +1 &&, +1 ||)
                      window.print(\"test\");
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_sequence_different_booleans() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if a and b or True:  # +3 (+1 and, +1 or)
                    return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_sequence_different_booleans() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if a && b || true { // +3 (+1 &&, +1 ||)
                      println!(\"test\");
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_sequence_different_booleans() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  if (a && b || 1 == 1) { // +3 (+1 &&, +1 ||)
                      printf(\"test\");
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_sequence_different_booleans() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  if (a && b || 1 == 1) { // +3 (+1 &&, +1 ||)
                      window.print(\"test\");
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_formatted_sequence_different_booleans() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if (  # +1
                     a and b and  # +1
@@ -1039,39 +1143,47 @@ mod tests {
                 ):
                    return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_1_level_nesting() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if a:  # +1
                     for i in range(b):  # +2
                         return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_1_level_nesting() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if true { // +1
                      if true { // +2 (nesting = 1)
@@ -1088,17 +1200,21 @@ mod tests {
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 11, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 11, usize)
-            ],
-            [(cognitive_average, 11.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 11.0,
+                      "average": 11.0,
+                      "min": 0.0,
+                      "max": 11.0
+                    }"###
+                );
+            },
         );
 
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if true { // +1
                      match true { // +2 (nesting = 1)
@@ -1108,20 +1224,24 @@ mod tests {
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_1_level_nesting() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  if (1 == 1) { // +1
                      if (1 == 1) { // +2 (nesting = 1)
@@ -1138,20 +1258,24 @@ mod tests {
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 11, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 11, usize)
-            ],
-            [(cognitive_average, 11.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 11.0,
+                      "average": 11.0,
+                      "min": 0.0,
+                      "max": 11.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_1_level_nesting() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  if (1 == 1) { // +1
                      if (1 == 1) { // +2 (nesting = 1)
@@ -1168,40 +1292,48 @@ mod tests {
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 11, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 11, usize)
-            ],
-            [(cognitive_average, 11.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 11.0,
+                      "average": 11.0,
+                      "min": 0.0,
+                      "max": 11.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_2_level_nesting() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 if a:  # +1
                     for i in range(b):  # +2
                         if b:  # +3
                             return 1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 6, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 6, usize)
-            ],
-            [(cognitive_average, 6.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 6.0,
+                      "average": 6.0,
+                      "min": 0.0,
+                      "max": 6.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_2_level_nesting() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  if true { // +1
                      for i in 0..4 { // +2 (nesting = 1)
@@ -1213,20 +1345,24 @@ mod tests {
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 6, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 6, usize)
-            ],
-            [(cognitive_average, 6.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 6.0,
+                      "average": 6.0,
+                      "min": 0.0,
+                      "max": 6.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_try_construct() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                 try:
                     for foo in bar:  # +1
@@ -1235,20 +1371,24 @@ mod tests {
                     if a < 0:  # +2
                         return a",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_try_construct() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function asyncOnChannelRedirect(oldChannel, newChannel, flags, callback) {
                  for (const collector of this.collectors) {
                      try {
@@ -1263,21 +1403,25 @@ mod tests {
                  callback.onRedirectVerifyCallback(Cr.NS_OK);
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_break_continue() {
         // Only labeled break and continue statements are considered
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() {
                  'tens: for ten in 0..3 { // +1
                      '_units: for unit in 0..=9 { // +2 (nesting = 1)
@@ -1294,20 +1438,24 @@ mod tests {
                  }
              }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 11, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 11, usize)
-            ],
-            [(cognitive_average, 11.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 11.0,
+                      "average": 11.0,
+                      "min": 0.0,
+                      "max": 11.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_goto() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
              OUT: for (int i = 1; i <= max; ++i) { // +1
                       for (int j = 2; j < i; ++j) { // +2 (nesting = 1)
@@ -1318,20 +1466,24 @@ mod tests {
                   }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 7, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 7, usize)
-            ],
-            [(cognitive_average, 7.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 7.0,
+                      "average": 7.0,
+                      "min": 0.0,
+                      "max": 7.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_switch() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() {
                  switch (1) { // +1
                      case 1:
@@ -1349,20 +1501,24 @@ mod tests {
                  }
              }",
             "foo.c",
-            CppParser,
-            cognitive,
-            [
-                (cognitive_sum, 1, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 1, usize)
-            ],
-            [(cognitive_average, 1.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn mozjs_switch() {
-        check_metrics!(
+        check_metrics::<MozjsParser>(
             "function f() {
                  switch (1) { // +1
                      case 1:
@@ -1380,39 +1536,47 @@ mod tests {
                  }
              }",
             "foo.js",
-            MozjsParser,
-            cognitive,
-            [
-                (cognitive_sum, 1, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 1, usize)
-            ],
-            [(cognitive_average, 1.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_ternary_operator() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  if a % 2:  # +1
                      return 'c' if a else 'd'  # +2
                  return 'a' if a else 'b'  # +1",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_nested_functions_lambdas() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  def foo(a):
                      if a:  # +2 (+1 nesting)
@@ -1421,20 +1585,25 @@ mod tests {
                  bar = lambda a: lambda b: b or True or True
                  return bar(foo(a))(a)",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 5, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 1.25)] // 2 functions + 2 lamdas = 4
+            |metric| {
+                // 2 functions + 2 lamdas = 4
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 5.0,
+                      "average": 1.25,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_real_function() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def process_raw_constant(constant, min_word_length):
                  processed_words = []
                  raw_camelcase_words = []
@@ -1450,20 +1619,24 @@ mod tests {
                                  processed_words.append(word.lower())
                  return processed_words, raw_camelcase_words",
             "foo.py",
-            PythonParser,
-            cognitive,
-            [
-                (cognitive_sum, 9, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 9, usize)
-            ],
-            [(cognitive_average, 9.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 9.0,
+                      "average": 9.0,
+                      "min": 0.0,
+                      "max": 9.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_if_let_else_if_else() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "pub fn create_usage_no_title(p: &Parser, used: &[&str]) -> String {
                  debugln!(\"usage::create_usage_no_title;\");
                  if let Some(u) = p.meta.usage_str { // +1
@@ -1475,20 +1648,24 @@ mod tests {
                 }
             }",
             "foo.rs",
-            RustParser,
-            cognitive,
-            [
-                (cognitive_sum, 3, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 3, usize)
-            ],
-            [(cognitive_average, 3.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn typescript_if_else_if_else() {
-        check_metrics!(
+        check_metrics::<TypescriptParser>(
             "function foo() {
                  if (this._closed) return Promise.resolve(); // +1
                  if (this._tempDirectory) { // +1
@@ -1502,14 +1679,18 @@ mod tests {
                 return this._processClosing;
             }",
             "foo.ts",
-            TypescriptParser,
-            cognitive,
-            [
-                (cognitive_sum, 4, usize),
-                (cognitive_min, 0, usize),
-                (cognitive_max, 4, usize)
-            ],
-            [(cognitive_average, 4.0)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 }

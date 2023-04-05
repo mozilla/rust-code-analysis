@@ -225,52 +225,62 @@ impl Cyclomatic for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn python_simple_function() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b): # +2 (+1 unit space)
                 if a and b:  # +2 (+1 and)
                    return 1
                 if c and d: # +2 (+1 and)
                    return 1",
             "foo.py",
-            PythonParser,
-            cyclomatic,
-            [(cyclomatic_sum, 6, usize)],
-            [
-                (cyclomatic_average, 3.0), // nspace = 2 (func and unit)
-                (cyclomatic_max, 5.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 2 (func and unit)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 6.0,
+                      "average": 3.0,
+                      "min": 1.0,
+                      "max": 5.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_1_level_nesting() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b): # +2 (+1 unit space)
                 if a:  # +1
                     for i in range(b):  # +1
                         return 1",
             "foo.py",
-            PythonParser,
-            cyclomatic,
-            [(cyclomatic_sum, 4, usize)],
-            [
-                (cyclomatic_average, 2.0), // nspace = 2 (func and unit)
-                (cyclomatic_max, 3.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 2 (func and unit)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 2.0,
+                      "min": 1.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_1_level_nesting() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "fn f() { // +2 (+1 unit space)
                  if true { // +1
                      match true {
@@ -280,20 +290,25 @@ mod tests {
                  }
              }",
             "foo.rs",
-            RustParser,
-            cyclomatic,
-            [(cyclomatic_sum, 5, usize)],
-            [
-                (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
-                (cyclomatic_max, 4.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 2 (func and unit)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 5.0,
+                      "average": 2.5,
+                      "min": 1.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_switch() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "void f() { // +2 (+1 unit space)
                  switch (1) {
                      case 1: // +1
@@ -311,20 +326,25 @@ mod tests {
                  }
              }",
             "foo.c",
-            CppParser,
-            cyclomatic,
-            [(cyclomatic_sum, 5, usize)],
-            [
-                (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
-                (cyclomatic_max, 4.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 2 (func and unit)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 5.0,
+                      "average": 2.5,
+                      "min": 1.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_real_function() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "int sumOfPrimes(int max) { // +2 (+1 unit space)
                  int total = 0;
                  OUT: for (int i = 1; i <= max; ++i) { // +1
@@ -338,19 +358,25 @@ mod tests {
                  return total;
             }",
             "foo.c",
-            CppParser,
-            cyclomatic,
-            [(cyclomatic_sum, 5, usize)],
-            [
-                (cyclomatic_average, 2.5), // nspace = 2 (func and unit)
-                (cyclomatic_max, 4.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 2 (func and unit)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 5.0,
+                      "average": 2.5,
+                      "min": 1.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
+
     #[test]
     fn c_unit_before() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "
             int a=42;
             if(a==42) //+2(+1 unit space)
@@ -359,9 +385,9 @@ mod tests {
             }
             if(a==34) //+1
             {
-                
+
             }
-            int sumOfPrimes(int max) { // +1 
+            int sumOfPrimes(int max) { // +1
                  int total = 0;
                  OUT: for (int i = 1; i <= max; ++i) { // +1
                    for (int j = 2; j < i; ++j) { // +1
@@ -374,24 +400,30 @@ mod tests {
                  return total;
             }",
             "foo.c",
-            CppParser,
-            cyclomatic,
-            [(cyclomatic_sum, 7, usize)],
-            [
-                (cyclomatic_average, 3.5), // nspace = 2 (func and unit)
-                (cyclomatic_max, 4.0),
-                (cyclomatic_min, 3.0)
-            ]
+            |metric| {
+                // nspace = 2 (func and unit)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 7.0,
+                      "average": 3.5,
+                      "min": 3.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
+
     /// Test to handle the case of min and max when merge happen before the final value of one module are setted.
     /// In this case the min value should be 3 because the unit space has 2 branches and a complexity of 3
     /// while the function sumOfPrimes has a complexity of 4.
     #[test]
     fn c_unit_after() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "
-            int sumOfPrimes(int max) { // +1 
+            int sumOfPrimes(int max) { // +1
                  int total = 0;
                  OUT: for (int i = 1; i <= max; ++i) { // +1
                    for (int j = 2; j < i; ++j) { // +1
@@ -403,7 +435,7 @@ mod tests {
                  }
                  return total;
             }
-            
+
             int a=42;
             if(a==42) //+2(+1 unit space)
             {
@@ -411,29 +443,34 @@ mod tests {
             }
             if(a==34) //+1
             {
-                
+
             }",
             "foo.c",
-            CppParser,
-            cyclomatic,
-            [(cyclomatic_sum, 7, usize)],
-            [
-                (cyclomatic_average, 3.5), // nspace = 2 (func and unit)
-                (cyclomatic_max, 4.0),
-                (cyclomatic_min, 3.0)
-            ]
+            |metric| {
+                // nspace = 2 (func and unit)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 7.0,
+                      "average": 3.5,
+                      "min": 3.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_simple_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "
             public class Example { // +2 (+1 unit space)
                 int a = 10;
                 boolean b = (a > 5) ? true : false; // +1
                 boolean c = b && true; // +1
-            
+
                 public void m1() { // +1
                     if (a % 2 == 0) { // +1
                         b = b || c; // +1
@@ -447,20 +484,25 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            cyclomatic,
-            [(cyclomatic_sum, 9, usize)],
-            [
-                (cyclomatic_average, 2.25), // nspace = 4 (unit, class and 2 methods)
-                (cyclomatic_max, 3.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 4 (unit, class and 2 methods)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 9.0,
+                      "average": 2.25,
+                      "min": 1.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_real_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "
             public class Matrix { // +2 (+1 unit space)
                 private int[][] m = new int[5][5];
@@ -495,14 +537,19 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            cyclomatic,
-            [(cyclomatic_sum, 11, usize)],
-            [
-                (cyclomatic_average, 2.2), // nspace = 5 (unit, class and 3 methods)
-                (cyclomatic_max, 3.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 5 (unit, class and 3 methods)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 11.0,
+                      "average": 2.2,
+                      "min": 1.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
         );
     }
 
@@ -512,14 +559,14 @@ mod tests {
     // Only the complexity of the anonymous class content is considered for the computation
     #[test]
     fn java_anonymous_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "
             abstract class A { // +2 (+1 unit space)
                 public abstract boolean m1(int n); // +1
                 public abstract boolean m2(int n); // +1
             }
             public class B { // +1
-            
+
                 public void test() { // +1
                     A a = new A() {
                         public boolean m1(int n) { // +1
@@ -538,14 +585,19 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            cyclomatic,
-            [(cyclomatic_sum, 10, usize)],
-            [
-                (cyclomatic_average, 1.25), // nspace = 8 (unit, 2 classes and 5 methods)
-                (cyclomatic_max, 2.0),
-                (cyclomatic_min, 1.0)
-            ]
+            |metric| {
+                // nspace = 8 (unit, 2 classes and 5 methods)
+                insta::assert_json_snapshot!(
+                    metric.cyclomatic,
+                    @r###"
+                    {
+                      "sum": 10.0,
+                      "average": 1.25,
+                      "min": 1.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
     }
 }

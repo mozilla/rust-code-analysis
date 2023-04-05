@@ -116,7 +116,7 @@ impl Mi for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
@@ -124,18 +124,21 @@ mod tests {
     fn check_mi_metrics() {
         // This test checks that MI metric is computed correctly, so it verifies
         // the calculations are correct, the adopted source code is irrelevant
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f():
                  pass",
             "foo.py",
-            PythonParser,
-            mi,
-            [],
-            [
-                (mi_original, 151.203_315_883_223_2),
-                (mi_sei, 142.643_061_717_489_76),
-                (mi_visual_studio, 88.422_991_744_574_97),
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.mi,
+                    @r###"
+                    {
+                      "mi_original": 151.2033158832232,
+                      "mi_sei": 142.64306171748976,
+                      "mi_visual_studio": 88.42299174457497
+                    }"###
+                );
+            },
         );
     }
 }

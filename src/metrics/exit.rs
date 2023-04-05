@@ -187,95 +187,105 @@ impl Exit for CcommentCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn python_no_exit() {
-        check_metrics!(
-            "a = 42",
-            "foo.py",
-            PythonParser,
-            nexits,
-            [
-                (exit_sum, 0, usize),
-                (exit_min, 0, usize),
-                (exit_max, 0, usize)
-            ],
-            [(exit_average, f64::NAN)] // 0 functions
-        );
+        check_metrics::<PythonParser>("a = 42", "foo.py", |metric| {
+            // 0 functions
+            insta::assert_json_snapshot!(
+                metric.nexits,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn rust_no_exit() {
-        check_metrics!(
-            "let a = 42;",
-            "foo.rs",
-            RustParser,
-            nexits,
-            [
-                (exit_sum, 0, usize),
-                (exit_min, 0, usize),
-                (exit_max, 0, usize)
-            ],
-            [(exit_average, f64::NAN)] // 0 functions
-        );
+        check_metrics::<RustParser>("let a = 42;", "foo.rs", |metric| {
+            // 0 functions
+            insta::assert_json_snapshot!(
+                metric.nexits,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn c_no_exit() {
-        check_metrics!(
-            "int a = 42;",
-            "foo.c",
-            CppParser,
-            nexits,
-            [
-                (exit_sum, 0, usize),
-                (exit_min, 0, usize),
-                (exit_max, 0, usize)
-            ],
-            [(exit_average, f64::NAN)] // 0 functions
-        );
+        check_metrics::<CppParser>("int a = 42;", "foo.c", |metric| {
+            // 0 functions
+            insta::assert_json_snapshot!(
+                metric.nexits,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn javascript_no_exit() {
-        check_metrics!(
-            "var a = 42;",
-            "foo.js",
-            JavascriptParser,
-            nexits,
-            [
-                (exit_sum, 0, usize),
-                (exit_min, 0, usize),
-                (exit_max, 0, usize)
-            ],
-            [(exit_average, f64::NAN)] // 0 functions
-        );
+        check_metrics::<JavascriptParser>("var a = 42;", "foo.js", |metric| {
+            // 0 functions
+            insta::assert_json_snapshot!(
+                metric.nexits,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn python_simple_function() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  if a:
                      return a",
             "foo.py",
-            PythonParser,
-            nexits,
-            [
-                (exit_sum, 1, usize),
-                (exit_min, 0, usize),
-                (exit_max, 1, usize)
-            ],
-            [(exit_average, 1.0)] // 1 function
+            |metric| {
+                println!("{:?}", metric.nexits);
+                // 1 function
+                insta::assert_json_snapshot!(
+                    metric.nexits,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_more_functions() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  if a:
                      return a
@@ -283,20 +293,25 @@ mod tests {
                  if b:
                      return b",
             "foo.py",
-            PythonParser,
-            nexits,
-            [
-                (exit_sum, 2, usize),
-                (exit_min, 0, usize),
-                (exit_max, 1, usize)
-            ],
-            [(exit_average, 1.0)] // 2 functions
+            |metric| {
+                // 2 functions
+                insta::assert_json_snapshot!(
+                    metric.nexits,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn python_nested_functions() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def f(a, b):
                  def foo(a):
                      if a:
@@ -304,56 +319,67 @@ mod tests {
                  bar = lambda a: lambda b: b or True or True
                  return bar(foo(a))(a)",
             "foo.py",
-            PythonParser,
-            nexits,
-            [
-                (exit_sum, 2, usize),
-                (exit_min, 0, usize),
-                (exit_max, 1, usize)
-            ],
-            [(exit_average, 0.5)] // 2 functions + 2 lambdas = 4
+            |metric| {
+                // 2 functions + 2 lambdas = 4
+                insta::assert_json_snapshot!(
+                    metric.nexits,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 0.5,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_no_exit() {
-        check_metrics!(
-            "int a = 42;",
-            "foo.java",
-            JavaParser,
-            nexits,
-            [
-                (exit_sum, 0, usize),
-                (exit_min, 0, usize),
-                (exit_max, 0, usize)
-            ],
-            [(exit_average, f64::NAN)] // 0 functions
-        );
+        check_metrics::<JavaParser>("int a = 42;", "foo.java", |metric| {
+            // 0 functions
+            insta::assert_json_snapshot!(
+                metric.nexits,
+                @r###"
+                    {
+                      "sum": 0.0,
+                      "average": null,
+                      "min": 0.0,
+                      "max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn java_simple_function() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class A {
               public int sum(int x, int y) {
                 return x + y;
               }
             }",
             "foo.java",
-            JavaParser,
-            nexits,
-            [
-                (exit_sum, 1, usize),
-                (exit_min, 0, usize),
-                (exit_max, 1, usize)
-            ],
-            [(exit_average, 1.0)] // 1 exit / 1 space
+            |metric| {
+                // 1 exit / 1 space
+                insta::assert_json_snapshot!(
+                    metric.nexits,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_split_function() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class A {
               public int multiply(int x, int y) {
                 if(x == 0 || y == 0){
@@ -363,14 +389,19 @@ mod tests {
               }
             }",
             "foo.java",
-            JavaParser,
-            nexits,
-            [
-                (exit_sum, 2, usize),
-                (exit_min, 0, usize),
-                (exit_max, 2, usize)
-            ],
-            [(exit_average, 2.0)] // 2 exit / space 1
+            |metric| {
+                // 2 exit / space 1
+                insta::assert_json_snapshot!(
+                    metric.nexits,
+                    @r###"
+                    {
+                      "sum": 2.0,
+                      "average": 2.0,
+                      "min": 0.0,
+                      "max": 2.0
+                    }"###
+                );
+            },
         );
     }
 }

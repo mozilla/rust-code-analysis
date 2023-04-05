@@ -262,13 +262,13 @@ impl Npm for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn java_constructors() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 X() {}
                 private X(int a) {}
@@ -276,27 +276,29 @@ mod tests {
                 public X(int a, int b, int c) {}    // +1
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 1, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 4, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 1, usize),
-                (total_nm, 4, usize)
-            ],
-            [
-                (class_coa, 0.25),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.25)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 1.0,
+                      "interfaces": 0.0,
+                      "class_methods": 4.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.25,
+                      "interfaces_average": null,
+                      "total": 1.0,
+                      "total_methods": 4.0,
+                      "average": 0.25
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_methods_returning_primitive_types() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public byte a() {}      // +1
                 public short b() {}     // +1
@@ -316,27 +318,29 @@ mod tests {
                 char p() {}
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 8, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 16, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 8, usize),
-                (total_nm, 16, usize)
-            ],
-            [
-                (class_coa, 0.5),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 8.0,
+                      "interfaces": 0.0,
+                      "class_methods": 16.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 8.0,
+                      "total_methods": 16.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_methods_returning_arrays() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public byte[] a() {}    // +1
                 public short[] b() {}   // +1
@@ -356,27 +360,29 @@ mod tests {
                 char[] p() {}
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 8, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 16, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 8, usize),
-                (total_nm, 16, usize)
-            ],
-            [
-                (class_coa, 0.5),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 8.0,
+                      "interfaces": 0.0,
+                      "class_methods": 16.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 8.0,
+                      "total_methods": 16.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_methods_returning_objects() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public Integer[] a() {} // +1
                 public Integer b() {}   // +1
@@ -392,27 +398,29 @@ mod tests {
                 Y l() {}
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 6, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 12, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 6, usize),
-                (total_nm, 12, usize)
-            ],
-            [
-                (class_coa, 0.5),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 6.0,
+                      "interfaces": 0.0,
+                      "class_methods": 12.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 6.0,
+                      "total_methods": 12.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_methods_with_generic_types() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public <T, S extends T> void a(T x, S y) {} // +1
                 public <T, S> int b(T x, S y) {}            // +1
@@ -426,27 +434,29 @@ mod tests {
                 Y<String> j() {}
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 5, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 10, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 5, usize),
-                (total_nm, 10, usize)
-            ],
-            [
-                (class_coa, 0.5),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 5.0,
+                      "interfaces": 0.0,
+                      "class_methods": 10.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 5.0,
+                      "total_methods": 10.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_method_modifiers() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "abstract class X {
                 public static final synchronized strictfp void a() {}   // +1
                 static public final synchronized strictfp void b() {}   // +1
@@ -462,27 +472,29 @@ mod tests {
                 abstract void l();
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 6, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 12, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 6, usize),
-                (total_nm, 12, usize)
-            ],
-            [
-                (class_coa, 0.5),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 6.0,
+                      "interfaces": 0.0,
+                      "class_methods": 12.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 6.0,
+                      "total_methods": 12.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public void a() {}  // +1
                 public void b() {}  // +1
@@ -494,27 +506,29 @@ mod tests {
                 public void f() {}  // +1
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 3, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 6, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 3, usize),
-                (total_nm, 6, usize)
-            ],
-            [
-                (class_coa, 0.5),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.5)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_methods": 6.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.5,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_methods": 6.0,
+                      "average": 0.5
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_nested_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public void a() {}          // +1
                 class Y {
@@ -525,27 +539,29 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 3, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 3, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 3, usize),
-                (total_nm, 3, usize)
-            ],
-            [
-                (class_coa, 1.0),
-                (interface_coa, f64::NAN),
-                (total_coa, 1.0)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_methods": 3.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 1.0,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_methods": 3.0,
+                      "average": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_local_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class X {
                 public void a() {                   // +1
                     class Y {
@@ -558,27 +574,29 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 3, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 3, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 3, usize),
-                (total_nm, 3, usize)
-            ],
-            [
-                (class_coa, 1.0),
-                (interface_coa, f64::NAN),
-                (total_coa, 1.0)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_methods": 3.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 1.0,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_methods": 3.0,
+                      "average": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_anonymous_inner_classes() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "abstract class X {
                 public abstract void a();   // +1
             }
@@ -598,54 +616,58 @@ mod tests {
                 }
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 3, usize),
-                (interface_npm_sum, 0, usize),
-                (class_nm_sum, 5, usize),
-                (interface_nm_sum, 0, usize),
-                (total_npm, 3, usize),
-                (total_nm, 5, usize)
-            ],
-            [
-                (class_coa, 0.6),
-                (interface_coa, f64::NAN),
-                (total_coa, 0.6)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 0.0,
+                      "class_methods": 5.0,
+                      "interface_methods": 0.0,
+                      "classes_average": 0.6,
+                      "interfaces_average": null,
+                      "total": 3.0,
+                      "total_methods": 5.0,
+                      "average": 0.6
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_interface() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "interface X {
                 public int a(); // +1
                 boolean b();    // +1
                 void c();       // +1
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 0, usize),
-                (interface_npm_sum, 3, usize),
-                (class_nm_sum, 0, usize),
-                (interface_nm_sum, 3, usize),
-                (total_npm, 3, usize),
-                (total_nm, 3, usize)
-            ],
-            [
-                (class_coa, f64::NAN),
-                (interface_coa, 1.0),
-                (total_coa, 1.0)
-            ]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 0.0,
+                      "interfaces": 3.0,
+                      "class_methods": 0.0,
+                      "interface_methods": 3.0,
+                      "classes_average": null,
+                      "interfaces_average": 1.0,
+                      "total": 3.0,
+                      "total_methods": 3.0,
+                      "average": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_interfaces_and_class() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "interface X {
                 void a();           // +1
             }
@@ -664,17 +686,23 @@ mod tests {
                 void e() {}
             }",
             "foo.java",
-            JavaParser,
-            npm,
-            [
-                (class_npm_sum, 3, usize),
-                (interface_npm_sum, 3, usize),
-                (class_nm_sum, 5, usize),
-                (interface_nm_sum, 3, usize),
-                (total_npm, 6, usize),
-                (total_nm, 8, usize)
-            ],
-            [(class_coa, 0.6), (interface_coa, 1.0), (total_coa, 0.75)]
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.npm,
+                    @r###"
+                    {
+                      "classes": 3.0,
+                      "interfaces": 3.0,
+                      "class_methods": 5.0,
+                      "interface_methods": 3.0,
+                      "classes_average": 0.6,
+                      "interfaces_average": 1.0,
+                      "total": 6.0,
+                      "total_methods": 8.0,
+                      "average": 0.75
+                    }"###
+                );
+            },
         );
     }
 }

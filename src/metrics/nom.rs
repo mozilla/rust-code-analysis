@@ -19,6 +19,7 @@ pub struct Stats {
     closures_max: usize,
     space_count: usize,
 }
+
 impl Default for Stats {
     fn default() -> Self {
         Self {
@@ -34,6 +35,7 @@ impl Default for Stats {
         }
     }
 }
+
 impl Serialize for Stats {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -213,13 +215,13 @@ impl Nom for KotlinCode {}
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use crate::tools::check_metrics;
 
     use super::*;
 
     #[test]
     fn python_nom() {
-        check_metrics!(
+        check_metrics::<PythonParser>(
             "def a():
                  pass
              def b():
@@ -228,110 +230,122 @@ mod tests {
                  pass
              x = lambda a : a + 42",
             "foo.py",
-            PythonParser,
-            nom,
-            [
-                (functions_sum, 3, usize),
-                (closures_sum, 1, usize),
-                (total, 4, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.75), // number of spaces = 4
-                (closures_average, 0.25),
-                (average, 1.0)
-            ]
+            |metric| {
+                // Number of spaces = 4
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 3.0,
+                      "closures": 1.0,
+                      "functions_average": 0.75,
+                      "closures_average": 0.25,
+                      "total": 4.0,
+                      "average": 1.0,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn rust_nom() {
-        check_metrics!(
+        check_metrics::<RustParser>(
             "mod A { fn foo() {}}
              mod B { fn foo() {}}
              let closure = |i: i32| -> i32 { i + 42 };",
             "foo.rs",
-            RustParser,
-            nom,
-            [
-                (functions_sum, 2, usize),
-                (closures_sum, 1, usize),
-                (total, 3, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 4
-                (closures_average, 0.25),
-                (average, 0.75)
-            ]
+            |metric| {
+                // Number of spaces = 4
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 2.0,
+                      "closures": 1.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.25,
+                      "total": 3.0,
+                      "average": 0.75,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn c_nom() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "int foo();
 
              int foo() {
                  return 0;
              }",
             "foo.c",
-            CppParser,
-            nom,
-            [
-                (functions_sum, 1, usize),
-                (closures_sum, 0, usize),
-                (total, 1, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 2
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn cpp_nom() {
-        check_metrics!(
+        check_metrics::<CppParser>(
             "struct A {
                  void foo(int) {}
                  void foo(double) {}
              };
              int b = [](int x) -> int { return x + 42; };",
             "foo.cpp",
-            CppParser,
-            nom,
-            [
-                (functions_sum, 2, usize),
-                (closures_sum, 1, usize),
-                (total, 3, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 4
-                (closures_average, 0.25),
-                (average, 0.75)
-            ]
+            |metric| {
+                // Number of spaces = 4
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 2.0,
+                      "closures": 1.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.25,
+                      "total": 3.0,
+                      "average": 0.75,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "function f(a, b) {
                  function foo(a) {
                      return a;
@@ -346,352 +360,392 @@ mod tests {
                  return bar(foo(a), a);
              }",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 3, usize), // f, foo, bar
-                (closures_sum, 1, usize),  // return function ()
-                (total, 4, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.6), // number of spaces = 5
-                (closures_average, 0.2),
-                (average, 0.8)
-            ]
+            |metric| {
+                // Number of spaces = 5
+                // functions: f, foo, bar
+                // closures:  return function ()
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 3.0,
+                      "closures": 1.0,
+                      "functions_average": 0.6,
+                      "closures_average": 0.2,
+                      "total": 4.0,
+                      "average": 0.8,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_call_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "add_task(async function test_safe_mode() {
                  gAppInfo.inSafeMode = true;
              });",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 1, usize), // test_safe_mode
-                (closures_sum, 0, usize),
-                (total, 1, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 2
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                // functions: test_safe_mode
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_assignment_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "AnimationTest.prototype.enableDisplay = function(element) {};",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 1, usize),
-                (closures_sum, 0, usize),
-                (total, 1, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 2
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_labeled_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "toJSON: function() {
                  return this.inspect(true);
              }",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 1, usize),
-                (closures_sum, 0, usize),
-                (total, 1, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 2
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_labeled_arrow_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "const dimConverters = {
                 pt: x => x,
              };",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 1, usize),
-                (closures_sum, 0, usize),
-                (total, 1, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 2
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_pair_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "return {
                  initialize: function(object) {
                      this._object = object.toObject();
                  },
              }",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 1, usize),
-                (closures_sum, 0, usize),
-                (total, 1, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 2
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_unnamed_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "Ajax.getTransport = Try.these(
                  function() {
                      return function(){ return new XMLHttpRequest()}
                  }
              );",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 0, usize),
-                (closures_sum, 2, usize),
-                (total, 2, usize),
-                (functions_max, 0, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.0), // number of spaces = 3
-                (closures_average, 0.6666666666666666),
-                (average, 0.6666666666666666)
-            ]
+            |metric| {
+                // Number of spaces = 3
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 0.0,
+                      "closures": 2.0,
+                      "functions_average": 0.0,
+                      "closures_average": 0.6666666666666666,
+                      "total": 2.0,
+                      "average": 0.6666666666666666,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_arrow_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "var materials = [\"Hydrogen\"];
              materials.map(material => material.length);
              let add = (a, b)  => a + b;",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 1, usize), // add
-                (closures_sum, 1, usize),  // materials.map
-                (total, 2, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.3333333333333333), // number of spaces = 3
-                (closures_average, 0.3333333333333333),
-                (average, 0.6666666666666666)
-            ]
+            |metric| {
+                // Number of spaces = 3
+                // Functions: add
+                // Closures: material.map
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 1.0,
+                      "functions_average": 0.3333333333333333,
+                      "closures_average": 0.3333333333333333,
+                      "total": 2.0,
+                      "average": 0.6666666666666666,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_arrow_assignment_nom() {
-        check_metrics!(
-            "sink.onPull = () => { };",
-            "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 1, usize),
-                (closures_sum, 0, usize),
-                (total, 1, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 2
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
-        );
+        check_metrics::<JavascriptParser>("sink.onPull = () => { };", "foo.js", |metric| {
+            // Number of spaces = 2
+            insta::assert_json_snapshot!(
+                metric.nom,
+                @r###"
+                    {
+                      "functions": 1.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+            );
+        });
     }
 
     #[test]
     fn javascript_arrow_new_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "const response = new Promise(resolve => channel.port1.onmessage = resolve);",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 0, usize),
-                (closures_sum, 1, usize),
-                (total, 1, usize),
-                (functions_max, 0, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.0), // number of spaces = 2
-                (closures_average, 0.5),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 0.0,
+                      "closures": 1.0,
+                      "functions_average": 0.0,
+                      "closures_average": 0.5,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn javascript_arrow_call_nom() {
-        check_metrics!(
+        check_metrics::<JavascriptParser>(
             "let notDisabled = TestUtils.waitForCondition(
                  () => !backbutton.hasAttribute(\"disabled\")
              );",
             "foo.js",
-            JavascriptParser,
-            nom,
-            [
-                (functions_sum, 0, usize),
-                (closures_sum, 1, usize),
-                (total, 1, usize),
-                (functions_max, 0, usize),
-                (functions_min, 0, usize),
-                (closures_min, 0, usize),
-                (closures_max, 1, usize),
-            ],
-            [
-                (functions_average, 0.0), // number of spaces = 2
-                (closures_average, 0.5),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 2
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 0.0,
+                      "closures": 1.0,
+                      "functions_average": 0.0,
+                      "closures_average": 0.5,
+                      "total": 1.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 0.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_nom() {
-        check_metrics!(
+        check_metrics::<JavaParser>(
             "class A {
                 public void foo(){
                     return;
                 }
                 public void bar(){
                     return;
-                }  
+                }
             }",
             "foo.java",
-            JavaParser,
-            nom,
-            [
-                (functions_sum, 2, usize),
-                (closures_sum, 0, usize),
-                (total, 2, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_max, 0, usize),
-                (closures_min, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 4
-                (closures_average, 0.0),
-                (average, 0.5)
-            ]
+            |metric| {
+                // Number of spaces = 4
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 2.0,
+                      "closures": 0.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.0,
+                      "total": 2.0,
+                      "average": 0.5,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 0.0
+                    }"###
+                );
+            },
         );
     }
 
     #[test]
     fn java_closure_nom() {
-        check_metrics!(
-            "interface printable{  
-                void print();  
+        check_metrics::<JavaParser>(
+            "interface printable{
+                void print();
               }
-              
+
               interface IntFunc {
                 int func(int n);
               }
-              
-              class Printer implements printable{  
+
+              class Printer implements printable{
                 public void print(){System.out.println(\"Hello\");}
-                  
-                public static void main(String args[]){  
-                  Printer  obj = new Printer();  
+
+                public static void main(String args[]){
+                  Printer  obj = new Printer();
                   obj.print();
                   IntFunc meaning = (i) -> i + 42;
                   int i = meaning.func(1);
                 }
               }",
             "foo.java",
-            JavaParser,
-            nom,
-            [
-                (functions_sum, 4, usize),
-                (closures_sum, 1, usize),
-                (total, 5, usize),
-                (functions_max, 1, usize),
-                (functions_min, 0, usize),
-                (closures_max, 1, usize),
-                (closures_min, 0, usize),
-            ],
-            [
-                (functions_average, 0.5), // number of spaces = 8
-                (closures_average, 0.125),
-                (average, 0.625)
-            ]
+            |metric| {
+                // Number of spaces = 8
+                insta::assert_json_snapshot!(
+                    metric.nom,
+                    @r###"
+                    {
+                      "functions": 4.0,
+                      "closures": 1.0,
+                      "functions_average": 0.5,
+                      "closures_average": 0.125,
+                      "total": 5.0,
+                      "average": 0.625,
+                      "functions_min": 0.0,
+                      "functions_max": 1.0,
+                      "closures_min": 0.0,
+                      "closures_max": 1.0
+                    }"###
+                );
+            },
         );
     }
 }
