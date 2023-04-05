@@ -189,7 +189,7 @@ impl Checker for CppCode {
 
     #[inline(always)]
     fn is_primitive(id: u16) -> bool {
-        matches!(id.into(), Cpp::PrimitiveType)
+        id == Cpp::PrimitiveType
     }
 }
 
@@ -336,7 +336,7 @@ impl Checker for TypescriptCode {
     }
     #[inline(always)]
     fn is_primitive(id: u16) -> bool {
-        matches!(id.into(), Typescript::PredefinedType)
+        id == Typescript::PredefinedType
     }
     mk_checker!(is_non_arg, LPAREN, COMMA, RPAREN);
 }
@@ -376,7 +376,7 @@ impl Checker for TsxCode {
 
     #[inline(always)]
     fn is_primitive(id: u16) -> bool {
-        matches!(id.into(), Tsx::PredefinedType)
+        id == Tsx::PredefinedType
     }
 }
 
@@ -407,7 +407,7 @@ impl Checker for RustCode {
 
     #[inline(always)]
     fn is_primitive(id: u16) -> bool {
-        matches!(id.into(), Rust::PrimitiveType)
+        id == Rust::PrimitiveType
     }
     mk_checker!(is_string, StringLiteral, RawStringLiteral);
     mk_checker!(is_call, CallExpression);
