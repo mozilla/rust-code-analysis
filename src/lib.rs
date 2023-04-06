@@ -46,8 +46,6 @@
 
 #![allow(clippy::upper_case_acronyms)]
 
-#[macro_use]
-mod asttools;
 mod c_langs_macros;
 mod c_macro;
 #[macro_use]
