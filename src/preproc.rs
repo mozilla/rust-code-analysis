@@ -206,7 +206,7 @@ pub fn preprocess(parser: &PreprocParser, path: &Path, results: &mut PreprocResu
             }
         }
 
-        let id = Preproc::from(node.object().kind_id());
+        let id = Preproc::from(node.kind_id());
         match id {
             Preproc::Define | Preproc::Undef => {
                 cursor.reset(node.object());

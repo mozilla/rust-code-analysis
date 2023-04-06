@@ -270,7 +270,7 @@ fn compute_halstead<'a, T: Getter>(
         HalsteadType::Operator => {
             *halstead_maps
                 .operators
-                .entry(node.object().kind_id())
+                .entry(node.kind_id())
                 .or_insert(0) += 1;
         }
         HalsteadType::Operand => {

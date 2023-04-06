@@ -44,7 +44,7 @@ macro_rules! check_if_arrow_func {
 
 macro_rules! is_js_func {
     ($node: ident) => {
-        match $node.object().kind_id().into() {
+        match $node.kind_id().into() {
             FunctionDeclaration | MethodDefinition => true,
             Function => check_if_func!($node),
             ArrowFunction => check_if_arrow_func!($node),
@@ -55,7 +55,7 @@ macro_rules! is_js_func {
 
 macro_rules! is_js_closure {
     ($node: ident) => {
-        match $node.object().kind_id().into() {
+        match $node.kind_id().into() {
             GeneratorFunction | GeneratorFunctionDeclaration => true,
             Function => !check_if_func!($node),
             ArrowFunction => !check_if_arrow_func!($node),
@@ -99,7 +99,7 @@ pub trait Checker {
 
 impl Checker for PreprocCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Preproc::Comment
+        node.kind_id() == Preproc::Comment
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
@@ -127,8 +127,8 @@ impl Checker for PreprocCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Preproc::StringLiteral
-            || node.object().kind_id() == Preproc::RawStringLiteral
+        node.kind_id() == Preproc::StringLiteral
+            || node.kind_id() == Preproc::RawStringLiteral
     }
 
     fn is_else_if(_: &Node) -> bool {
@@ -142,7 +142,7 @@ impl Checker for PreprocCode {
 
 impl Checker for CcommentCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Ccomment::Comment
+        node.kind_id() == Ccomment::Comment
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
@@ -174,8 +174,8 @@ impl Checker for CcommentCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Ccomment::StringLiteral
-            || node.object().kind_id() == Ccomment::RawStringLiteral
+        node.kind_id() == Ccomment::StringLiteral
+            || node.kind_id() == Ccomment::RawStringLiteral
     }
 
     fn is_else_if(_: &Node) -> bool {
@@ -189,7 +189,7 @@ impl Checker for CcommentCode {
 
 impl Checker for CppCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Cpp::Comment
+        node.kind_id() == Cpp::Comment
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
@@ -202,7 +202,7 @@ impl Checker for CppCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Cpp::TranslationUnit
                 | Cpp::FunctionDefinition
                 | Cpp::FunctionDefinition2
@@ -215,7 +215,7 @@ impl Checker for CppCode {
 
     fn is_func(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Cpp::FunctionDefinition
                 | Cpp::FunctionDefinition2
                 | Cpp::FunctionDefinition3
@@ -224,33 +224,33 @@ impl Checker for CppCode {
     }
 
     fn is_closure(node: &Node) -> bool {
-        node.object().kind_id() == Cpp::LambdaExpression
+        node.kind_id() == Cpp::LambdaExpression
     }
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Cpp::CallExpression
+        node.kind_id() == Cpp::CallExpression
     }
 
     fn is_non_arg(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Cpp::LPAREN | Cpp::LPAREN2 | Cpp::COMMA | Cpp::RPAREN
         )
     }
 
     fn is_string(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Cpp::StringLiteral | Cpp::ConcatenatedString | Cpp::RawStringLiteral
         )
     }
 
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != Cpp::IfStatement {
+        if node.kind_id() != Cpp::IfStatement {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return node.object().kind_id() == Cpp::IfStatement
+            return node.kind_id() == Cpp::IfStatement
                 && parent.kind_id() == Cpp::IfStatement;
         }
         false
@@ -264,7 +264,7 @@ impl Checker for CppCode {
 
 impl Checker for PythonCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Python::Comment
+        node.kind_id() == Python::Comment
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
@@ -278,33 +278,33 @@ impl Checker for PythonCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Python::Module | Python::FunctionDefinition | Python::ClassDefinition
         )
     }
 
     fn is_func(node: &Node) -> bool {
-        node.object().kind_id() == Python::FunctionDefinition
+        node.kind_id() == Python::FunctionDefinition
     }
 
     fn is_closure(node: &Node) -> bool {
-        node.object().kind_id() == Python::Lambda
+        node.kind_id() == Python::Lambda
     }
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Python::Call
+        node.kind_id() == Python::Call
     }
 
     fn is_non_arg(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Python::LPAREN | Python::COMMA | Python::RPAREN
         )
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Python::String
-            || node.object().kind_id() == Python::ConcatenatedString
+        node.kind_id() == Python::String
+            || node.kind_id() == Python::ConcatenatedString
     }
 
     fn is_else_if(_: &Node) -> bool {
@@ -318,8 +318,8 @@ impl Checker for PythonCode {
 
 impl Checker for JavaCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Java::LineComment
-            || node.object().kind_id() == Java::BlockComment
+        node.kind_id() == Java::LineComment
+            || node.kind_id() == Java::BlockComment
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
@@ -328,22 +328,22 @@ impl Checker for JavaCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Java::Program | Java::ClassDeclaration | Java::InterfaceDeclaration
         )
     }
 
     fn is_func(node: &Node) -> bool {
-        node.object().kind_id() == Java::MethodDeclaration
-            || node.object().kind_id() == Java::ConstructorDeclaration
+        node.kind_id() == Java::MethodDeclaration
+            || node.kind_id() == Java::ConstructorDeclaration
     }
 
     fn is_closure(node: &Node) -> bool {
-        node.object().kind_id() == Java::LambdaExpression
+        node.kind_id() == Java::LambdaExpression
     }
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Java::MethodInvocation
+        node.kind_id() == Java::MethodInvocation
     }
 
     fn is_non_arg(_: &Node) -> bool {
@@ -351,7 +351,7 @@ impl Checker for JavaCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Java::StringLiteral
+        node.kind_id() == Java::StringLiteral
     }
 
     fn is_else_if(_: &Node) -> bool {
@@ -365,7 +365,7 @@ impl Checker for JavaCode {
 
 impl Checker for MozjsCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Mozjs::Comment
+        node.kind_id() == Mozjs::Comment
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
@@ -374,7 +374,7 @@ impl Checker for MozjsCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Mozjs::Program
                 | Mozjs::Function
                 | Mozjs::Class
@@ -390,23 +390,23 @@ impl Checker for MozjsCode {
     is_js_func_and_closure_checker!(Mozjs);
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Mozjs::CallExpression
+        node.kind_id() == Mozjs::CallExpression
     }
 
     fn is_non_arg(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Mozjs::LPAREN | Mozjs::COMMA | Mozjs::RPAREN
         )
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Mozjs::String || node.object().kind_id() == Mozjs::TemplateString
+        node.kind_id() == Mozjs::String || node.kind_id() == Mozjs::TemplateString
     }
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != Mozjs::IfStatement {
+        if node.kind_id() != Mozjs::IfStatement {
             return false;
         }
         if let Some(parent) = node.object().parent() {
@@ -422,7 +422,7 @@ impl Checker for MozjsCode {
 
 impl Checker for JavascriptCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Javascript::Comment
+        node.kind_id() == Javascript::Comment
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
@@ -431,7 +431,7 @@ impl Checker for JavascriptCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Javascript::Program
                 | Javascript::Function
                 | Javascript::Class
@@ -447,28 +447,28 @@ impl Checker for JavascriptCode {
     is_js_func_and_closure_checker!(Javascript);
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Javascript::CallExpression
+        node.kind_id() == Javascript::CallExpression
     }
 
     fn is_non_arg(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Javascript::LPAREN | Javascript::COMMA | Javascript::RPAREN
         )
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Javascript::String
-            || node.object().kind_id() == Javascript::TemplateString
+        node.kind_id() == Javascript::String
+            || node.kind_id() == Javascript::TemplateString
     }
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != Javascript::IfStatement {
+        if node.kind_id() != Javascript::IfStatement {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return node.object().kind_id() == Javascript::IfStatement
+            return node.kind_id() == Javascript::IfStatement
                 && parent.kind_id() == Javascript::IfStatement;
         }
         false
@@ -481,7 +481,7 @@ impl Checker for JavascriptCode {
 
 impl Checker for TypescriptCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Typescript::Comment
+        node.kind_id() == Typescript::Comment
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
@@ -490,7 +490,7 @@ impl Checker for TypescriptCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Typescript::Program
                 | Typescript::Function
                 | Typescript::Class
@@ -507,24 +507,24 @@ impl Checker for TypescriptCode {
     is_js_func_and_closure_checker!(Typescript);
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Typescript::CallExpression
+        node.kind_id() == Typescript::CallExpression
     }
 
     fn is_non_arg(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Typescript::LPAREN | Typescript::COMMA | Typescript::RPAREN
         )
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Typescript::String
-            || node.object().kind_id() == Typescript::TemplateString
+        node.kind_id() == Typescript::String
+            || node.kind_id() == Typescript::TemplateString
     }
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != Typescript::IfStatement {
+        if node.kind_id() != Typescript::IfStatement {
             return false;
         }
         if let Some(parent) = node.object().parent() {
@@ -541,7 +541,7 @@ impl Checker for TypescriptCode {
 
 impl Checker for TsxCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Tsx::Comment
+        node.kind_id() == Tsx::Comment
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
@@ -550,7 +550,7 @@ impl Checker for TsxCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Tsx::Program
                 | Tsx::Function
                 | Tsx::Class
@@ -567,26 +567,26 @@ impl Checker for TsxCode {
     is_js_func_and_closure_checker!(Tsx);
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Tsx::CallExpression
+        node.kind_id() == Tsx::CallExpression
     }
 
     fn is_non_arg(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Tsx::LPAREN | Tsx::COMMA | Tsx::RPAREN
         )
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Tsx::String || node.object().kind_id() == Tsx::TemplateString
+        node.kind_id() == Tsx::String || node.kind_id() == Tsx::TemplateString
     }
 
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != Tsx::IfStatement {
+        if node.kind_id() != Tsx::IfStatement {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return node.object().kind_id() == Tsx::IfStatement
+            return node.kind_id() == Tsx::IfStatement
                 && parent.kind_id() == Tsx::IfStatement;
         }
         false
@@ -600,8 +600,8 @@ impl Checker for TsxCode {
 
 impl Checker for RustCode {
     fn is_comment(node: &Node) -> bool {
-        node.object().kind_id() == Rust::LineComment
-            || node.object().kind_id() == Rust::BlockComment
+        node.kind_id() == Rust::LineComment
+            || node.kind_id() == Rust::BlockComment
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
@@ -617,7 +617,7 @@ impl Checker for RustCode {
 
     fn is_func_space(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Rust::SourceFile
                 | Rust::FunctionItem
                 | Rust::ImplItem
@@ -627,32 +627,32 @@ impl Checker for RustCode {
     }
 
     fn is_func(node: &Node) -> bool {
-        node.object().kind_id() == Rust::FunctionItem
+        node.kind_id() == Rust::FunctionItem
     }
 
     fn is_closure(node: &Node) -> bool {
-        node.object().kind_id() == Rust::ClosureExpression
+        node.kind_id() == Rust::ClosureExpression
     }
 
     fn is_call(node: &Node) -> bool {
-        node.object().kind_id() == Rust::CallExpression
+        node.kind_id() == Rust::CallExpression
     }
 
     fn is_non_arg(node: &Node) -> bool {
         matches!(
-            node.object().kind_id().into(),
+            node.kind_id().into(),
             Rust::LPAREN | Rust::COMMA | Rust::RPAREN | Rust::PIPE | Rust::AttributeItem
         )
     }
 
     fn is_string(node: &Node) -> bool {
-        node.object().kind_id() == Rust::StringLiteral
-            || node.object().kind_id() == Rust::RawStringLiteral
+        node.kind_id() == Rust::StringLiteral
+            || node.kind_id() == Rust::RawStringLiteral
     }
 
     #[inline(always)]
     fn is_else_if(node: &Node) -> bool {
-        if node.object().kind_id() != Rust::IfExpression {
+        if node.kind_id() != Rust::IfExpression {
             return false;
         }
         if let Some(parent) = node.object().parent() {

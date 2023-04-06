@@ -197,7 +197,7 @@ pub fn operands_and_operators<'a, T: ParserTrait>(parser: &'a T, path: &'a Path)
 
         if let Some(state) = state_stack.last_mut() {
             T::Halstead::compute(&node, code, &mut state.halstead_maps);
-            if T::Checker::is_primitive(node.object().kind_id()) {
+            if T::Checker::is_primitive(node.kind_id()) {
                 let code = &code[node.object().start_byte()..node.object().end_byte()];
                 let primitive_string = String::from_utf8(code.to_vec())
                     .unwrap_or_else(|_| String::from("primitive_type"));

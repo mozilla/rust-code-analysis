@@ -53,7 +53,7 @@ impl Alterator for CcommentCode {}
 
 impl Alterator for CppCode {
     fn alterate(node: &Node, code: &[u8], span: bool, mut children: Vec<AstNode>) -> AstNode {
-        match Cpp::from(node.object().kind_id()) {
+        match Cpp::from(node.kind_id()) {
             Cpp::StringLiteral | Cpp::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
                 AstNode::new(node.object().kind(), text, span, Vec::new())
@@ -78,7 +78,7 @@ impl Alterator for KotlinCode {}
 
 impl Alterator for MozjsCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Mozjs::from(node.object().kind_id()) {
+        match Mozjs::from(node.kind_id()) {
             Mozjs::String => {
                 // TODO: have a thought about template_strings:
                 // they may have children for replacement...
@@ -92,7 +92,7 @@ impl Alterator for MozjsCode {
 
 impl Alterator for JavascriptCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Javascript::from(node.object().kind_id()) {
+        match Javascript::from(node.kind_id()) {
             Javascript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
                 AstNode::new(node.object().kind(), text, span, Vec::new())
@@ -104,7 +104,7 @@ impl Alterator for JavascriptCode {
 
 impl Alterator for TypescriptCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Typescript::from(node.object().kind_id()) {
+        match Typescript::from(node.kind_id()) {
             Typescript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
                 AstNode::new(node.object().kind(), text, span, Vec::new())
@@ -116,7 +116,7 @@ impl Alterator for TypescriptCode {
 
 impl Alterator for TsxCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Tsx::from(node.object().kind_id()) {
+        match Tsx::from(node.kind_id()) {
             Tsx::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
                 AstNode::new(node.object().kind(), text, span, Vec::new())
@@ -128,7 +128,7 @@ impl Alterator for TsxCode {
 
 impl Alterator for RustCode {
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        match Rust::from(node.object().kind_id()) {
+        match Rust::from(node.kind_id()) {
             Rust::StringLiteral | Rust::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
                 AstNode::new(node.object().kind(), text, span, Vec::new())

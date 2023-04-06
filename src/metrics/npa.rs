@@ -222,15 +222,15 @@ impl Npa for JavaCode {
             stats.is_class_space = true;
         }
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             ClassBody => {
                 stats.class_na += node
                     .children()
-                    .filter(|node| matches!(node.object().kind_id().into(), FieldDeclaration))
+                    .filter(|node| matches!(node.kind_id().into(), FieldDeclaration))
                     .map(|declaration| {
                         let attributes = declaration
                             .children()
-                            .filter(|n| matches!(n.object().kind_id().into(), VariableDeclarator))
+                            .filter(|n| matches!(n.kind_id().into(), VariableDeclarator))
                             .count();
                         // The first child node contains the list of attribute modifiers
                         // There are several modifiers that may be part of a field declaration
@@ -256,9 +256,9 @@ impl Npa for JavaCode {
                 // Source: https://docs.oracle.com/javase/tutorial/java/IandI/createinterface.html
                 stats.interface_na += node
                     .children()
-                    .filter(|node| matches!(node.object().kind_id().into(), ConstantDeclaration))
+                    .filter(|node| matches!(node.kind_id().into(), ConstantDeclaration))
                     .flat_map(|node| node.children())
-                    .filter(|node| matches!(node.object().kind_id().into(), VariableDeclarator))
+                    .filter(|node| matches!(node.kind_id().into(), VariableDeclarator))
                     .count();
                 stats.interface_npa = stats.interface_na;
             }

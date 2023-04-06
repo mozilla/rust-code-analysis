@@ -222,7 +222,7 @@ impl Npm for JavaCode {
             stats.is_class_space = true;
         }
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             ClassBody => {
                 stats.class_nm += node
                     .children()

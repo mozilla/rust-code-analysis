@@ -134,7 +134,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
                 _ => {
                     if let Ok(n) = f.parse::<u16>() {
                         res.push(Box::new(move |node: &Node| -> bool {
-                            node.object().kind_id() == n
+                            node.kind_id() == n
                         }));
                     } else {
                         let f = f.to_owned();

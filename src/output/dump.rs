@@ -101,7 +101,7 @@ fn dump_tree_helper(
             stdout,
             "{{{}:{}}} ",
             node.object().kind(),
-            node.object().kind_id()
+            node.kind_id()
         )?;
 
         color(stdout, Color::White)?;

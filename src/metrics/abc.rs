@@ -312,7 +312,7 @@ fn java_inspect_container(container_node: &Node, conditions: &mut f64) {
 fn java_count_unary_conditions(list_node: &Node, conditions: &mut f64) {
     use Java::*;
 
-    let list_kind = list_node.object().kind_id().into();
+    let list_kind = list_node.kind_id().into();
     let mut cursor = list_node.object().walk();
 
     // Scans the immediate children nodes of the argument node
@@ -361,7 +361,7 @@ impl Abc for JavaCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Java::*;
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             STAREQ | SLASHEQ | PERCENTEQ | DASHEQ | PLUSEQ | LTLTEQ | GTGTEQ | AMPEQ | PIPEEQ
             | CARETEQ | GTGTGTEQ | PLUSPLUS | DASHDASH => {
                 stats.assignments += 1.;
