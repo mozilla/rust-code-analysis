@@ -127,7 +127,7 @@ mk_langs!(
 );
 
 pub(crate) mod fake {
-    pub fn get_true<'a>(ext: &str, mode: &str) -> Option<&'a str> {
+    pub(crate) fn get_true<'a>(ext: &str, mode: &str) -> Option<&'a str> {
         if ext == "m"
             || ext == "mm"
             || mode == "objc"
