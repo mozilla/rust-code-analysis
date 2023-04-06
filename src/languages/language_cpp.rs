@@ -1015,7 +1015,7 @@ impl From<u16> for Cpp {
 impl PartialEq<u16> for Cpp {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Cpp::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

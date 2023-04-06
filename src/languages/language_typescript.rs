@@ -743,7 +743,7 @@ impl From<u16> for Typescript {
 impl PartialEq<u16> for Typescript {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Typescript::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

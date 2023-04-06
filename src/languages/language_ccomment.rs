@@ -59,7 +59,7 @@ impl From<u16> for Ccomment {
 impl PartialEq<u16> for Ccomment {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Ccomment::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

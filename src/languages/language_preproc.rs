@@ -99,7 +99,7 @@ impl From<u16> for Preproc {
 impl PartialEq<u16> for Preproc {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Preproc::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

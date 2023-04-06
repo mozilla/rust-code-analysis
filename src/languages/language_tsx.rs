@@ -761,7 +761,7 @@ impl From<u16> for Tsx {
 impl PartialEq<u16> for Tsx {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Tsx::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

@@ -525,7 +525,7 @@ impl From<u16> for Javascript {
 impl PartialEq<u16> for Javascript {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Javascript::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

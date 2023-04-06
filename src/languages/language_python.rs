@@ -513,7 +513,7 @@ impl From<u16> for Python {
 impl PartialEq<u16> for Python {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Python::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 
