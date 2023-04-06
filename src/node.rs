@@ -152,27 +152,16 @@ impl<'a> Node<'a> {
 
     pub(crate) fn has_ancestors(&self, typ: fn(&Node) -> bool, typs: fn(&Node) -> bool) -> bool {
         let mut res = false;
-        loop {
-            let mut node = *self;
-            if let Some(parent) = node.parent() {
-                if typ(&parent) {
-                    node = parent;
-                } else {
-                    break;
-                }
-            } else {
-                break;
+        let mut node = *self;
+        if let Some(parent) = node.parent() {
+            if typ(&parent) {
+                node = parent;
             }
-            if let Some(parent) = node.parent() {
-                if typs(&parent) {
-                    res = true;
-                } else {
-                    break;
-                }
-            } else {
-                break;
+        }
+        if let Some(parent) = node.parent() {
+            if typs(&parent) {
+                res = true;
             }
-            break;
         }
         res
     }
