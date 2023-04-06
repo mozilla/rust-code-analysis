@@ -31,7 +31,7 @@ impl From<u16> for {{ c_name }} {
 impl PartialEq<u16> for {{ c_name }} {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == {{ c_name }}::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

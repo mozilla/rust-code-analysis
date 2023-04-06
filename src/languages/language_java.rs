@@ -613,7 +613,7 @@ impl From<u16> for Java {
 impl PartialEq<u16> for Java {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Java::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

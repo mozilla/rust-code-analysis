@@ -673,7 +673,7 @@ impl From<u16> for Rust {
 impl PartialEq<u16> for Rust {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Rust::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 

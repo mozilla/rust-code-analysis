@@ -731,7 +731,7 @@ impl From<u16> for Kotlin {
 impl PartialEq<u16> for Kotlin {
     #[inline(always)]
     fn eq(&self, x: &u16) -> bool {
-        *self == Kotlin::from(*x)
+        *self == Into::<Self>::into(*x)
     }
 }
 
