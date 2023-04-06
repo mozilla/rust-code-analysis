@@ -21,6 +21,10 @@ impl<'a> Node<'a> {
         self.0
     }
 
+    pub(crate) fn kind_id(&self) -> u16 {
+        self.0.kind_id()
+    }
+
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
         let mut cursor = self.0.walk();
         cursor.goto_first_child();
