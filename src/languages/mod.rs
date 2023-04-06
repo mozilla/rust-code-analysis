@@ -1,5 +1,3 @@
-// FIXME: this should be fixed in some way to avoid useless allocations
-#![allow(clippy::cmp_owned)]
 #![allow(clippy::enum_variant_names)]
 
 pub mod language_ccomment;
