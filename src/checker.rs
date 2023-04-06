@@ -5,61 +5,79 @@ use regex::bytes::Regex;
 use crate::*;
 
 macro_rules! check_if_func {
-    ($node: ident) => {
-        count_specific_ancestors!(
-            $node,
-            VariableDeclarator | AssignmentExpression | LabeledStatement | Pair,
-            StatementBlock | ReturnStatement | NewExpression | Arguments
+    ($parser: ident, $node: ident) => {
+        $node.count_specific_ancestors::<$parser>(
+            |node| {
+                matches!(
+                    node.kind_id().into(),
+                    VariableDeclarator | AssignmentExpression | LabeledStatement | Pair
+                )
+            },
+            |node| {
+                matches!(
+                    node.kind_id().into(),
+                    StatementBlock | ReturnStatement | NewExpression | Arguments
+                )
+            },
         ) > 0
             || $node.is_child(Identifier as u16)
     };
 }
 
 macro_rules! check_if_arrow_func {
-    ($node: ident) => {
-        count_specific_ancestors!(
-            $node,
-            VariableDeclarator | AssignmentExpression | LabeledStatement,
-            StatementBlock | ReturnStatement | NewExpression | CallExpression
+    ($parser: ident, $node: ident) => {
+        $node.count_specific_ancestors::<$parser>(
+            |node| {
+                matches!(
+                    node.kind_id().into(),
+                    VariableDeclarator | AssignmentExpression | LabeledStatement
+                )
+            },
+            |node| {
+                matches!(
+                    node.kind_id().into(),
+                    StatementBlock | ReturnStatement | NewExpression | CallExpression
+                )
+            },
         ) > 0
             || $node.has_sibling(PropertyIdentifier as u16)
     };
 }
 
 macro_rules! is_js_func {
-    ($node: ident) => {
+    ($parser: ident, $node: ident) => {
         match $node.kind_id().into() {
             FunctionDeclaration | MethodDefinition => true,
-            Function => check_if_func!($node),
-            ArrowFunction => check_if_arrow_func!($node),
+            Function => check_if_func!($parser, $node),
+            ArrowFunction => check_if_arrow_func!($parser, $node),
             _ => false,
         }
     };
 }
 
 macro_rules! is_js_closure {
-    ($node: ident) => {
+    ($parser: ident, $node: ident) => {
         match $node.kind_id().into() {
             GeneratorFunction | GeneratorFunctionDeclaration => true,
-            Function => !check_if_func!($node),
-            ArrowFunction => !check_if_arrow_func!($node),
+            Function => !check_if_func!($parser, $node),
+            ArrowFunction => !check_if_arrow_func!($parser, $node),
             _ => false,
         }
     };
 }
 
 macro_rules! is_js_func_and_closure_checker {
-    ($grammar: ident) => {
+    ($parser: ident, $language: ident) => {
         #[inline(always)]
         fn is_func(node: &Node) -> bool {
-            use $grammar::*;
-            is_js_func!(node)
+            use $language::*;
+            is_js_func!($parser, node)
         }
 
         #[inline(always)]
         fn is_closure(node: &Node) -> bool {
-            use $grammar::*;
-            is_js_closure!(node)
+            use $language::*;
+            is_js_closure!($parser, node)
         }
     };
 }
@@ -364,7 +382,7 @@ impl Checker for MozjsCode {
         )
     }
 
-    is_js_func_and_closure_checker!(Mozjs);
+    is_js_func_and_closure_checker!(MozjsParser, Mozjs);
 
     fn is_call(node: &Node) -> bool {
         node.kind_id() == Mozjs::CallExpression
@@ -421,7 +439,7 @@ impl Checker for JavascriptCode {
         )
     }
 
-    is_js_func_and_closure_checker!(Javascript);
+    is_js_func_and_closure_checker!(JavascriptParser, Javascript);
 
     fn is_call(node: &Node) -> bool {
         node.kind_id() == Javascript::CallExpression
@@ -480,7 +498,7 @@ impl Checker for TypescriptCode {
         )
     }
 
-    is_js_func_and_closure_checker!(Typescript);
+    is_js_func_and_closure_checker!(TypescriptParser, Typescript);
 
     fn is_call(node: &Node) -> bool {
         node.kind_id() == Typescript::CallExpression
@@ -539,7 +557,7 @@ impl Checker for TsxCode {
         )
     }
 
-    is_js_func_and_closure_checker!(Tsx);
+    is_js_func_and_closure_checker!(TsxParser, Tsx);
 
     fn is_call(node: &Node) -> bool {
         node.kind_id() == Tsx::CallExpression
