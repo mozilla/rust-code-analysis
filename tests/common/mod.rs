@@ -8,8 +8,8 @@ use globset::{Glob, GlobSetBuilder};
 use rust_code_analysis::LANG;
 use rust_code_analysis::*;
 
-const REPO: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/", "repositories");
-const SNAPSHOT_PATH: &'static str = concat!(
+const REPO: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/", "repositories");
+const SNAPSHOT_PATH: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/tests/",
     "repositories/rca-output/snapshots"
