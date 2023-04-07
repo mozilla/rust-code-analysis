@@ -8,7 +8,12 @@ use globset::{Glob, GlobSetBuilder};
 use rust_code_analysis::LANG;
 use rust_code_analysis::*;
 
-const REPO: &'static str = "./tests/repositories";
+const REPO: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/", "repositories");
+const SNAPSHOT_PATH: &'static str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/",
+    "repositories/rca-output/snapshots"
+);
 
 #[derive(Debug)]
 struct Config {
@@ -35,7 +40,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     // Get FuncSpace struct
     let funcspace_struct = get_function_spaces(&language, source, &path, None).unwrap();
 
-    insta::with_settings!({snapshot_path =>  Path::new("./repositories/rca-output/snapshots")
+    insta::with_settings!({snapshot_path => Path::new(SNAPSHOT_PATH)
                 .join(path.strip_prefix(Path::new(REPO)).unwrap())
                 .parent()
                 .unwrap(),
@@ -48,6 +53,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
                 ..funcspace_struct
             }
         );
+
         insta::assert_snapshot!(
             path.file_name().unwrap().to_string_lossy().as_ref(),
             value,
