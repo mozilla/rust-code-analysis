@@ -44,6 +44,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
                 .join(path.strip_prefix(Path::new(REPO)).unwrap())
                 .parent()
                 .unwrap(),
+                prepend_module_to_snapshot => false
     }, {
         // Redact away the name since paths are different on windows.
         let value = format!(
