@@ -1,11 +1,12 @@
 use globset::GlobSet;
 use globset::{Glob, GlobSetBuilder};
-use once_cell::sync::Lazy;
 use rust_code_analysis::LANG;
 use rust_code_analysis::*;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
+
+const REPO: &'static str = "./tests/repositories";
 
 #[derive(Debug)]
 struct Config {
@@ -33,7 +34,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     let funcspace_struct = get_function_spaces(&language, source, &path, None).unwrap();
 
     insta::with_settings!({snapshot_path =>  Path::new("./repositories/rca-output/snapshots")
-                .join(path.strip_prefix(*REPO).unwrap())
+                .join(path.strip_prefix(Path::new(REPO)).unwrap())
                 .parent()
                 .unwrap(),
     }, {
@@ -56,8 +57,6 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     Ok(())
 }
 
-static REPO: Lazy<&Path> = Lazy::new(|| Path::new("./tests/repositories"));
-
 /// Produces metrics runtime and compares them with previously generated json files
 fn compare_rca_output_with_files(repo_name: &str, include: &[&str]) {
     let num_jobs = 4;
@@ -72,7 +71,7 @@ fn compare_rca_output_with_files(repo_name: &str, include: &[&str]) {
     let files_data = FilesData {
         include: gsbi.build().unwrap(),
         exclude: GlobSet::empty(),
-        paths: vec![REPO.join(repo_name)],
+        paths: vec![Path::new(REPO).join(repo_name)],
     };
 
     if let Err(e) = ConcurrentRunner::new(num_jobs, act_on_file).run(cfg, files_data) {
