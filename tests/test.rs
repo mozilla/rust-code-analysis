@@ -32,15 +32,11 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     // Get FuncSpace struct
     let funcspace_struct = get_function_spaces(&language, source, &path, None).unwrap();
 
-    let mut settings = insta::Settings::new();
-
-    settings.set_snapshot_path(
-        Path::new("./repositories/rca-output/snapshots")
-            .join(path.strip_prefix(*REPO).unwrap())
-            .parent()
-            .unwrap(),
-    );
-    settings.bind(|| {
+    insta::with_settings!({snapshot_path =>  Path::new("./repositories/rca-output/snapshots")
+                .join(path.strip_prefix(*REPO).unwrap())
+                .parent()
+                .unwrap(),
+    }, {
         // Redact away the name since paths are different on windows.
         let value = format!(
             "{:#.3?}",
@@ -54,6 +50,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
             value,
             "funcspace_struct"
         );
+
     });
 
     Ok(())
