@@ -53,7 +53,7 @@ tasks:
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
                pre-commit run --show-diff-on-failure -c .pre-commit-audit-config.yaml &&
-               cargo test --workspace --verbose --all-features -- --nocapture &&
+               cargo test --workspace --verbose --all-features --no-fail-fast -- --nocapture &&
                cd enums &&
                cargo build --verbose --all-features"
         metadata:
@@ -149,7 +149,7 @@ tasks:
             - cd rust-code-analysis
             - git -c advice.detachedHead=false checkout ${head_rev}
             - git submodule update --init
-            - cargo test --workspace --verbose --all-features -- --nocapture
+            - cargo test --workspace --verbose --all-features --no-fail-fast -- --nocapture
           mounts:
             - content:
                 url: https://win.rustup.rs/
