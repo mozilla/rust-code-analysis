@@ -79,6 +79,12 @@ impl<'a> Node<'a> {
 #[derive(Clone)]
 pub struct Cursor<'a>(TreeCursor<'a>);
 
+impl<'a> Cursor<'a> {
+    pub(crate) fn reset(&mut self, node: &Node<'a>) {
+        self.0.reset(node.0);
+    }
+}
+
 impl<'a> Search<'a> for Node<'a> {
     fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
         let mut cursor = self.0.walk();
