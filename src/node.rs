@@ -1,4 +1,5 @@
 use tree_sitter::Node as OtherNode;
+use tree_sitter::TreeCursor;
 
 use crate::traits::Search;
 
@@ -69,6 +70,10 @@ impl<'a> Node<'a> {
         })
     }
 }
+
+/// An `AST` cursor.
+#[derive(Clone)]
+pub struct Cursor<'a>(TreeCursor<'a>);
 
 impl<'a> Search<'a> for Node<'a> {
     fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
