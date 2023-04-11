@@ -27,7 +27,7 @@ pub trait Getter {
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
         // we're in a function or in a class
-        if let Some(name) = node.object().child_by_field_name("name") {
+        if let Some(name) = node.child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
@@ -109,7 +109,7 @@ impl Getter for MozjsCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.object().child_by_field_name("name") {
+        if let Some(name) = node.child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
@@ -177,7 +177,7 @@ impl Getter for JavascriptCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.object().child_by_field_name("name") {
+        if let Some(name) = node.child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
@@ -246,7 +246,7 @@ impl Getter for TypescriptCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.object().child_by_field_name("name") {
+        if let Some(name) = node.child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
@@ -315,7 +315,7 @@ impl Getter for TsxCode {
     }
 
     fn get_func_space_name<'a>(node: &Node, code: &'a [u8]) -> Option<&'a str> {
-        if let Some(name) = node.object().child_by_field_name("name") {
+        if let Some(name) = node.child_by_field_name("name") {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
         } else {
@@ -370,9 +370,8 @@ impl Getter for RustCode {
         // we're in a function or in a class or an impl
         // for an impl: we've  'impl ... type {...'
         if let Some(name) = node
-            .object()
             .child_by_field_name("name")
-            .or_else(|| node.object().child_by_field_name("type"))
+            .or_else(|| node.child_by_field_name("type"))
         {
             let code = &code[name.start_byte()..name.end_byte()];
             std::str::from_utf8(code).ok()
@@ -421,8 +420,8 @@ impl Getter for CppCode {
                     return std::str::from_utf8(code).ok();
                 }
                 // we're in a function_definition so need to get the declarator
-                if let Some(declarator) = node.object().child_by_field_name("declarator") {
-                    let declarator_node = Node::new(declarator);
+                if let Some(declarator) = node.child_by_field_name("declarator") {
+                    let declarator_node = declarator;
                     if let Some(fd) = declarator_node.first_occurence(|id| {
                         Cpp::FunctionDeclarator == id
                             || Cpp::FunctionDeclarator2 == id
@@ -447,7 +446,7 @@ impl Getter for CppCode {
                 }
             }
             _ => {
-                if let Some(name) = node.object().child_by_field_name("name") {
+                if let Some(name) = node.child_by_field_name("name") {
                     let code = &code[name.start_byte()..name.end_byte()];
                     return std::str::from_utf8(code).ok();
                 }
