@@ -25,6 +25,10 @@ impl<'a> Node<'a> {
         self.0.kind_id()
     }
 
+    pub(crate) fn child_by_field_name(&self, name: &str) -> Option<Node> {
+        self.0.child_by_field_name(name).map(|n| Node::new(n))
+    }
+
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
         let mut cursor = self.0.walk();
         cursor.goto_first_child();
