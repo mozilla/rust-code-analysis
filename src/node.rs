@@ -37,6 +37,11 @@ impl<'a> Node<'a> {
         self.0.end_byte()
     }
 
+    pub(crate) fn start_position(&self) -> (usize, usize) {
+        let temp = self.0.start_position();
+        (temp.row, temp.column)
+    }
+
     pub(crate) fn start_row(&self) -> usize {
         self.0.start_position().row
     }
