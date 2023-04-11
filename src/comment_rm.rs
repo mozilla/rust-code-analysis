@@ -21,7 +21,7 @@ pub fn rm_comments<T: ParserTrait>(parser: &T) -> Option<Vec<u8>> {
     while let Some(node) = stack.pop() {
         if T::Checker::is_comment(&node) && !T::Checker::is_useful_comment(&node, parser.get_code())
         {
-            let lines = node.object().end_position().row - node.object().start_position().row;
+            let lines = node.object().end_position().row - node.start_row();
             spans.push((node.object().start_byte(), node.object().end_byte(), lines));
         } else {
             cursor.reset(node.object());

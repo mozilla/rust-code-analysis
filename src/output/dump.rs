@@ -83,7 +83,7 @@ fn dump_tree_helper(
         ("│  ", "├─ ")
     };
 
-    let node_row = node.object().start_position().row + 1;
+    let node_row = node.start_row() + 1;
     let mut display = true;
     if let Some(line_start) = line_start {
         display = node_row >= *line_start
@@ -118,7 +118,7 @@ fn dump_tree_helper(
         let pos = node.object().end_position();
         write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
-        if node.object().start_position().row == node.object().end_position().row {
+        if node.start_row() == node.object().end_position().row {
             color(stdout, Color::White)?;
             write!(stdout, ": ")?;
 

@@ -272,7 +272,7 @@ impl Checker for PythonCode {
             // comment containing coding info are useful
             static ref RE: Regex = Regex::new(r"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)").unwrap();
         }
-        node.object().start_position().row <= 1
+        node.start_row() <= 1
             && RE.is_match(&code[node.object().start_byte()..node.object().end_byte()])
     }
 

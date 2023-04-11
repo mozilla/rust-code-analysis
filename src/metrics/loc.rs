@@ -509,7 +509,7 @@ where
 
 #[inline(always)]
 fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (usize, usize) {
-    let start = node.object().start_position().row;
+    let start = node.start_row();
     let end = node.object().end_position().row;
 
     if is_func_space {

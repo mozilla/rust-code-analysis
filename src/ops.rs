@@ -43,13 +43,13 @@ impl Ops {
                     (0, 0)
                 } else {
                     (
-                        node.object().start_position().row + 1,
+                        node.start_row() + 1,
                         node.object().end_position().row,
                     )
                 }
             }
             _ => (
-                node.object().start_position().row + 1,
+                node.start_row() + 1,
                 node.object().end_position().row + 1,
             ),
         };
