@@ -26,6 +26,10 @@ impl<'a> Node<'a> {
         self.0.kind()
     }
 
+    pub(crate) fn utf8_text(&self, data: &'a [u8]) -> Option<&'a str> {
+        self.0.utf8_text(data).ok()
+    }
+
     pub(crate) fn kind_id(&self) -> u16 {
         self.0.kind_id()
     }
