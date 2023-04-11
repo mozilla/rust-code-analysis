@@ -87,6 +87,10 @@ impl<'a> Cursor<'a> {
     pub(crate) fn goto_first_child(&mut self) -> bool {
         self.0.goto_first_child()
     }
+
+    pub(crate) fn goto_next_sibling(&mut self) -> bool {
+        self.0.goto_next_sibling()
+    }
 }
 
 impl<'a> Search<'a> for Node<'a> {
