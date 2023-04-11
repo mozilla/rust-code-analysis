@@ -150,7 +150,7 @@ impl FuncSpace {
     fn new<T: Getter>(node: &Node, code: &[u8], kind: SpaceKind) -> Self {
         let (start_position, end_position) = match kind {
             SpaceKind::Unit => {
-                if node.object().child_count() == 0 {
+                if node.child_count() == 0 {
                     (0, 0)
                 } else {
                     (

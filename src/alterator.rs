@@ -28,7 +28,7 @@ where
     }
 
     fn get_default(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
-        let (text, span) = Self::get_text_span(node, code, span, node.object().child_count() == 0);
+        let (text, span) = Self::get_text_span(node, code, span, node.child_count() == 0);
         AstNode::new(node.object().kind(), text, span, children)
     }
 

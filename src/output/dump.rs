@@ -129,7 +129,7 @@ fn dump_tree_helper(
         writeln!(stdout)?;
     }
 
-    let count = node.object().child_count();
+    let count = node.child_count();
     if count != 0 {
         let prefix = format!("{prefix}{pref_child}");
         let mut i = count;
