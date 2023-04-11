@@ -65,10 +65,10 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
-        let mut cursor = self.0.walk();
+        let mut cursor = self.cursor();
         cursor.goto_first_child();
         (0..self.child_count()).map(move |_| {
-            let result = Node::new(cursor.node());
+            let result = cursor.node();
             cursor.goto_next_sibling();
             result
         })
@@ -99,20 +99,20 @@ impl<'a> Cursor<'a> {
 
 impl<'a> Search<'a> for Node<'a> {
     fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
-        let mut cursor = self.0.walk();
+        let mut cursor = self.cursor();
         let mut stack = Vec::new();
         let mut children = Vec::new();
 
         stack.push(*self);
 
         while let Some(node) = stack.pop() {
-            if pred(node.0.kind_id()) {
+            if pred(node.kind_id()) {
                 return Some(node);
             }
-            cursor.reset(node.0);
+            cursor.reset(&node);
             if cursor.goto_first_child() {
                 loop {
-                    children.push(Node::new(cursor.node()));
+                    children.push(cursor.node());
                     if !cursor.goto_next_sibling() {
                         break;
                     }
@@ -127,7 +127,7 @@ impl<'a> Search<'a> for Node<'a> {
     }
 
     fn act_on_node(&self, action: &mut dyn FnMut(&Node<'a>)) {
-        let mut cursor = self.0.walk();
+        let mut cursor = self.cursor();
         let mut stack = Vec::new();
         let mut children = Vec::new();
 
@@ -135,10 +135,10 @@ impl<'a> Search<'a> for Node<'a> {
 
         while let Some(node) = stack.pop() {
             action(&node);
-            cursor.reset(node.0);
+            cursor.reset(&node);
             if cursor.goto_first_child() {
                 loop {
-                    children.push(Node::new(cursor.node()));
+                    children.push(cursor.node());
                     if !cursor.goto_next_sibling() {
                         break;
                     }
