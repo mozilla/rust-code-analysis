@@ -22,6 +22,10 @@ impl<'a> Node<'a> {
         self.0
     }
 
+    pub(crate) fn kind(&self) -> &'static str {
+        self.0.kind()
+    }
+
     pub(crate) fn kind_id(&self) -> u16 {
         self.0.kind_id()
     }
