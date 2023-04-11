@@ -139,7 +139,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
                     } else {
                         let f = f.to_owned();
                         res.push(Box::new(move |node: &Node| -> bool {
-                            node.object().kind().contains(&f)
+                            node.kind().contains(&f)
                         }));
                     }
                 }

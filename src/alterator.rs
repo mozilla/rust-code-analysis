@@ -29,7 +29,7 @@ where
 
     fn get_default(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
         let (text, span) = Self::get_text_span(node, code, span, node.child_count() == 0);
-        AstNode::new(node.object().kind(), text, span, children)
+        AstNode::new(node.kind(), text, span, children)
     }
 
     fn get_ast_node(
@@ -56,7 +56,7 @@ impl Alterator for CppCode {
         match Cpp::from(node.kind_id()) {
             Cpp::StringLiteral | Cpp::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.object().kind(), text, span, Vec::new())
+                AstNode::new(node.kind(), text, span, Vec::new())
             }
             Cpp::PreprocDef | Cpp::PreprocFunctionDef | Cpp::PreprocCall => {
                 if let Some(last) = children.last() {
@@ -83,7 +83,7 @@ impl Alterator for MozjsCode {
                 // TODO: have a thought about template_strings:
                 // they may have children for replacement...
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.object().kind(), text, span, Vec::new())
+                AstNode::new(node.kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -95,7 +95,7 @@ impl Alterator for JavascriptCode {
         match Javascript::from(node.kind_id()) {
             Javascript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.object().kind(), text, span, Vec::new())
+                AstNode::new(node.kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -107,7 +107,7 @@ impl Alterator for TypescriptCode {
         match Typescript::from(node.kind_id()) {
             Typescript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.object().kind(), text, span, Vec::new())
+                AstNode::new(node.kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -119,7 +119,7 @@ impl Alterator for TsxCode {
         match Tsx::from(node.kind_id()) {
             Tsx::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.object().kind(), text, span, Vec::new())
+                AstNode::new(node.kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -131,7 +131,7 @@ impl Alterator for RustCode {
         match Rust::from(node.kind_id()) {
             Rust::StringLiteral | Rust::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.object().kind(), text, span, Vec::new())
+                AstNode::new(node.kind(), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }

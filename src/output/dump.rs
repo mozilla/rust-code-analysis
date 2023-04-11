@@ -97,7 +97,7 @@ fn dump_tree_helper(
         write!(stdout, "{prefix}{pref}")?;
 
         intense_color(stdout, Color::Yellow)?;
-        write!(stdout, "{{{}:{}}} ", node.object().kind(), node.kind_id())?;
+        write!(stdout, "{{{}:{}}} ", node.kind(), node.kind_id())?;
 
         color(stdout, Color::White)?;
         write!(stdout, "from ")?;
