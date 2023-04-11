@@ -29,6 +29,14 @@ impl<'a> Node<'a> {
         self.0.child_by_field_name(name).map(|n| Node::new(n))
     }
 
+    pub(crate) fn start_byte(&self) -> usize {
+        self.0.start_byte()
+    }
+
+    pub(crate) fn end_byte(&self) -> usize {
+        self.0.end_byte()
+    }
+
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
         let mut cursor = self.0.walk();
         cursor.goto_first_child();
