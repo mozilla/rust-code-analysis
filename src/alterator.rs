@@ -16,11 +16,11 @@ where
             "".to_string()
         };
         if span {
-            let spos = node.object().start_position();
+            let (spos_row, spos_column) = node.start_position();
             let epos = node.object().end_position();
             (
                 text,
-                Some((spos.row + 1, spos.column + 1, epos.row + 1, epos.column + 1)),
+                Some((spos_row + 1, spos_column + 1, epos.row + 1, epos.column + 1)),
             )
         } else {
             (text, None)

@@ -103,8 +103,8 @@ fn dump_tree_helper(
         write!(stdout, "from ")?;
 
         color(stdout, Color::Green)?;
-        let pos = node.object().start_position();
-        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
+        let (pos_row, pos_column) = node.start_position();
+        write!(stdout, "({}, {}) ", pos_row + 1, pos_column + 1)?;
 
         color(stdout, Color::White)?;
         write!(stdout, "to ")?;
