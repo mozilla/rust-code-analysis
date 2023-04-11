@@ -97,12 +97,7 @@ fn dump_tree_helper(
         write!(stdout, "{prefix}{pref}")?;
 
         intense_color(stdout, Color::Yellow)?;
-        write!(
-            stdout,
-            "{{{}:{}}} ",
-            node.object().kind(),
-            node.kind_id()
-        )?;
+        write!(stdout, "{{{}:{}}} ", node.object().kind(), node.kind_id())?;
 
         color(stdout, Color::White)?;
         write!(stdout, "from ")?;
@@ -123,7 +118,7 @@ fn dump_tree_helper(
             write!(stdout, ": ")?;
 
             intense_color(stdout, Color::Red)?;
-            let code = &code[node.object().start_byte()..node.object().end_byte()];
+            let code = &code[node.start_byte()..node.end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
                 write!(stdout, "{code} ")?;
             } else {
