@@ -151,19 +151,17 @@ impl<'a> Search<'a> for Node<'a> {
     }
 
     fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
-        let mut cursor = self.0.walk();
-        for child in self.0.children(&mut cursor) {
+        for child in self.children() {
             if pred(child.kind_id()) {
-                return Some(Node::new(child));
+                return Some(child);
             }
         }
         None
     }
 
     fn act_on_child(&self, action: &mut dyn FnMut(&Node<'a>)) {
-        let mut cursor = self.0.walk();
-        for child in self.0.children(&mut cursor) {
-            action(&Node::new(child));
+        for child in self.children() {
+            action(&child);
         }
     }
 }
