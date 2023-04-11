@@ -110,8 +110,8 @@ fn dump_tree_helper(
         write!(stdout, "to ")?;
 
         color(stdout, Color::Green)?;
-        let pos = node.object().end_position();
-        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
+        let (pos_row, pos_column) = node.end_position();
+        write!(stdout, "({}, {}) ", pos_row + 1, pos_column + 1)?;
 
         if node.start_row() == node.end_row() {
             color(stdout, Color::White)?;

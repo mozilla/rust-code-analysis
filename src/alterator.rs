@@ -17,10 +17,10 @@ where
         };
         if span {
             let (spos_row, spos_column) = node.start_position();
-            let epos = node.object().end_position();
+            let (epos_row, epos_column) = node.end_position();
             (
                 text,
-                Some((spos_row + 1, spos_column + 1, epos.row + 1, epos.column + 1)),
+                Some((spos_row + 1, spos_column + 1, epos_row + 1, epos_column + 1)),
             )
         } else {
             (text, None)
