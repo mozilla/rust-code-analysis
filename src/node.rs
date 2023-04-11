@@ -1,5 +1,5 @@
 use tree_sitter::Node as OtherNode;
-use tree_sitter::TreeCursor;
+use tree_sitter::{Tree, TreeCursor};
 
 use crate::traits::Search;
 
@@ -12,6 +12,10 @@ impl<'a> Node<'a> {
     /// anywhere within it.
     pub fn has_error(&self) -> bool {
         self.0.has_error()
+    }
+
+    pub(crate) fn get_tree_root(tree: &'a Tree) -> Self {
+        Self(tree.root_node())
     }
 
     pub(crate) fn new(node: OtherNode<'a>) -> Self {
