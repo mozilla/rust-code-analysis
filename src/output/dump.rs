@@ -118,7 +118,7 @@ fn dump_tree_helper(
         let pos = node.object().end_position();
         write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
 
-        if node.start_row() == node.object().end_position().row {
+        if node.start_row() == node.end_row() {
             color(stdout, Color::White)?;
             write!(stdout, ": ")?;
 

@@ -37,7 +37,7 @@ pub fn function<T: ParserTrait>(parser: &T) -> Vec<FunctionSpan> {
     root.act_on_node(&mut |n| {
         if T::Checker::is_func(n) {
             let start_line = n.start_row() + 1;
-            let end_line = n.object().end_position().row + 1;
+            let end_line = n.end_row() + 1;
             if let Some(name) = T::Getter::get_func_name(n, code) {
                 spans.push(FunctionSpan {
                     name: name.to_string(),
