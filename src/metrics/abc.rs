@@ -17,7 +17,8 @@ use crate::*;
 /// Official paper and definition:
 ///
 /// Fitzpatrick, Jerry (1997). "Applying the ABC metric to C, C++ and Java". C++ Report.
-/// https://www.softwarerenovation.com/Articles.aspx
+///
+/// <https://www.softwarerenovation.com/Articles.aspx>
 #[derive(Debug, Clone)]
 pub struct Stats {
     assignments: f64,
