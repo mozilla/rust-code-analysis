@@ -55,6 +55,10 @@ impl<'a> Node<'a> {
         self.0.end_position().row
     }
 
+    pub(crate) fn child_count(&self) -> usize {
+        self.0.child_count()
+    }
+
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
         let mut cursor = self.0.walk();
         cursor.goto_first_child();
