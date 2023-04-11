@@ -91,6 +91,10 @@ impl<'a> Cursor<'a> {
     pub(crate) fn goto_next_sibling(&mut self) -> bool {
         self.0.goto_next_sibling()
     }
+
+    pub(crate) fn node(&self) -> Node<'a> {
+        Node::new(self.0.node())
+    }
 }
 
 impl<'a> Search<'a> for Node<'a> {
