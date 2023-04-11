@@ -4,7 +4,6 @@ use num_format::{Locale, ToFormattedString};
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
-use crate::node::Node;
 use crate::traits::*;
 
 /// Counts the types of nodes specified in the input slice
@@ -12,7 +11,7 @@ use crate::traits::*;
 pub fn count<T: ParserTrait>(parser: &T, filters: &[String]) -> (usize, usize) {
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
-    let mut cursor = node.object().walk();
+    let mut cursor = node.cursor();
     let mut stack = Vec::new();
     let mut good = 0;
     let mut total = 0;
@@ -24,10 +23,10 @@ pub fn count<T: ParserTrait>(parser: &T, filters: &[String]) -> (usize, usize) {
         if filters.any(&node) {
             good += 1;
         }
-        cursor.reset(node.object());
+        cursor.reset(&node);
         if cursor.goto_first_child() {
             loop {
-                stack.push(Node::new(cursor.node()));
+                stack.push(cursor.node());
                 if !cursor.goto_next_sibling() {
                     break;
                 }
