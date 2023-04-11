@@ -112,7 +112,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
 
     #[inline(always)]
     fn get_root(&self) -> Node {
-        Node::new(self.tree.root_node())
+        Node::get_tree_root(&self.tree)
     }
 
     #[inline(always)]
@@ -133,9 +133,7 @@ impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> Pars
                 "function" => res.push(Box::new(T::is_func)),
                 _ => {
                     if let Ok(n) = f.parse::<u16>() {
-                        res.push(Box::new(move |node: &Node| -> bool {
-                            node.kind_id() == n
-                        }));
+                        res.push(Box::new(move |node: &Node| -> bool { node.kind_id() == n }));
                     } else {
                         let f = f.to_owned();
                         res.push(Box::new(move |node: &Node| -> bool {
