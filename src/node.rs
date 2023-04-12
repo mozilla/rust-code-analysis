@@ -50,6 +50,10 @@ impl<'a> Node<'a> {
         self.0.child_by_field_name(name).map(|n| Node::new(n))
     }
 
+    pub(crate) fn child(&self, pos: usize) -> Option<Node> {
+        self.0.child(pos).map(|c| Node::new(c))
+    }
+
     pub(crate) fn start_byte(&self) -> usize {
         self.0.start_byte()
     }
