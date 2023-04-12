@@ -416,7 +416,7 @@ impl Getter for CppCode {
         match node.kind_id().into() {
             Cpp::FunctionDefinition | Cpp::FunctionDefinition2 | Cpp::FunctionDefinition3 => {
                 if let Some(op_cast) = node.first_child(|id| Cpp::OperatorCast == id) {
-                    let code = &code[op_cast.object().start_byte()..op_cast.object().end_byte()];
+                    let code = &code[op_cast.start_byte()..op_cast.end_byte()];
                     return std::str::from_utf8(code).ok();
                 }
                 // we're in a function_definition so need to get the declarator
