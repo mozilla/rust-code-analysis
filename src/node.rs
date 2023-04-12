@@ -72,6 +72,10 @@ impl<'a> Node<'a> {
         self.0.child_count()
     }
 
+    pub(crate) fn next_sibling(&self) -> Option<Node<'a>> {
+        self.0.next_sibling().map(|s| Node::new(s))
+    }
+
     pub(crate) fn cursor(&self) -> Cursor<'a> {
         Cursor(self.0.walk())
     }
