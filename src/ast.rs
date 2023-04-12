@@ -92,7 +92,7 @@ fn build<T: ParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNod
     So once we have built the array of children we can build the node itself until the root. */
     loop {
         let ts_node = node_stack.last().unwrap();
-        cursor.reset(&ts_node);
+        cursor.reset(ts_node);
         if cursor.goto_first_child() {
             let node = cursor.node();
             child_stack.push(Vec::with_capacity(node.child_count()));
