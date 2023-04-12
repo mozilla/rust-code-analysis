@@ -10,8 +10,7 @@ where
 
     fn get_text_span(node: &Node, code: &[u8], span: bool, text: bool) -> (String, Span) {
         let text = if text {
-            String::from_utf8(code[node.object().start_byte()..node.object().end_byte()].to_vec())
-                .unwrap()
+            String::from_utf8(code[node.start_byte()..node.end_byte()].to_vec()).unwrap()
         } else {
             "".to_string()
         };
