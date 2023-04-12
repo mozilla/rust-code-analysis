@@ -80,7 +80,7 @@ impl AstNode {
 fn build<T: ParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNode> {
     let code = parser.get_code();
     let root = parser.get_root();
-    let mut cursor = root.object().walk();
+    let mut cursor = root.cursor();
     let mut node_stack = Vec::new();
     let mut child_stack = Vec::new();
 
@@ -92,11 +92,11 @@ fn build<T: ParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNod
     So once we have built the array of children we can build the node itself until the root. */
     loop {
         let ts_node = node_stack.last().unwrap();
-        cursor.reset(ts_node.object());
+        cursor.reset(&ts_node);
         if cursor.goto_first_child() {
             let node = cursor.node();
             child_stack.push(Vec::with_capacity(node.child_count()));
-            node_stack.push(Node::new(node));
+            node_stack.push(node);
         } else {
             loop {
                 let ts_node = node_stack.pop().unwrap();
@@ -113,9 +113,9 @@ fn build<T: ParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNod
                         return Some(node);
                     }
                 }
-                if let Some(next_node) = ts_node.object().next_sibling() {
+                if let Some(next_node) = ts_node.next_sibling() {
                     child_stack.push(Vec::with_capacity(next_node.child_count()));
-                    node_stack.push(Node::new(next_node));
+                    node_stack.push(next_node);
                     break;
                 }
             }
