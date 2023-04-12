@@ -22,10 +22,6 @@ impl<'a> Node<'a> {
         Node(node)
     }
 
-    pub(crate) fn object(&self) -> OtherNode<'a> {
-        self.0
-    }
-
     pub(crate) fn parent(&self) -> Option<Node<'a>> {
         self.0.parent().map(|p| Node::new(p))
     }
