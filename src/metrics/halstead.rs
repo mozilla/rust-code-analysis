@@ -257,7 +257,7 @@ where
 
 #[inline(always)]
 fn get_id<'a>(node: &Node<'a>, code: &'a [u8]) -> &'a [u8] {
-    &code[node.object().start_byte()..node.object().end_byte()]
+    &code[node.start_byte()..node.end_byte()]
 }
 
 #[inline(always)]
@@ -268,10 +268,7 @@ fn compute_halstead<'a, T: Getter>(
 ) {
     match T::get_op_type(node) {
         HalsteadType::Operator => {
-            *halstead_maps
-                .operators
-                .entry(node.kind_id())
-                .or_insert(0) += 1;
+            *halstead_maps.operators.entry(node.kind_id()).or_insert(0) += 1;
         }
         HalsteadType::Operand => {
             *halstead_maps
