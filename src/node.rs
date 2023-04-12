@@ -18,10 +18,6 @@ impl<'a> Node<'a> {
         Self(tree.root_node())
     }
 
-    pub(crate) fn parent(&self) -> Option<Node<'a>> {
-        self.0.parent().map(|p| Node(p))
-    }
-
     pub(crate) fn id(&self) -> usize {
         self.0.id()
     }
@@ -30,20 +26,12 @@ impl<'a> Node<'a> {
         self.0.kind()
     }
 
-    pub(crate) fn utf8_text(&self, data: &'a [u8]) -> Option<&'a str> {
-        self.0.utf8_text(data).ok()
-    }
-
     pub(crate) fn kind_id(&self) -> u16 {
         self.0.kind_id()
     }
 
-    pub(crate) fn child_by_field_name(&self, name: &str) -> Option<Node> {
-        self.0.child_by_field_name(name).map(|n| Node(n))
-    }
-
-    pub(crate) fn child(&self, pos: usize) -> Option<Node<'a>> {
-        self.0.child(pos).map(|c| Node(c))
+    pub(crate) fn utf8_text(&self, data: &'a [u8]) -> Option<&'a str> {
+        self.0.utf8_text(data).ok()
     }
 
     pub(crate) fn start_byte(&self) -> usize {
@@ -72,27 +60,8 @@ impl<'a> Node<'a> {
         self.0.end_position().row
     }
 
-    pub(crate) fn child_count(&self) -> usize {
-        self.0.child_count()
-    }
-
-    pub(crate) fn previous_sibling(&self) -> Option<Node<'a>> {
-        self.0.prev_sibling().map(|s| Node(s))
-    }
-
-    pub(crate) fn next_sibling(&self) -> Option<Node<'a>> {
-        self.0.next_sibling().map(|s| Node(s))
-    }
-
-    pub(crate) fn cursor(&self) -> Cursor<'a> {
-        Cursor(self.0.walk())
-    }
-
-    #[inline(always)]
-    pub(crate) fn is_child(&self, id: u16) -> bool {
-        self.0
-            .children(&mut self.0.walk())
-            .any(|child| child.kind_id() == id)
+    pub(crate) fn parent(&self) -> Option<Node<'a>> {
+        self.0.parent().map(|p| Node(p))
     }
 
     #[inline(always)]
@@ -104,6 +73,33 @@ impl<'a> Node<'a> {
         })
     }
 
+    pub(crate) fn previous_sibling(&self) -> Option<Node<'a>> {
+        self.0.prev_sibling().map(|s| Node(s))
+    }
+
+    pub(crate) fn next_sibling(&self) -> Option<Node<'a>> {
+        self.0.next_sibling().map(|s| Node(s))
+    }
+
+    #[inline(always)]
+    pub(crate) fn is_child(&self, id: u16) -> bool {
+        self.0
+            .children(&mut self.0.walk())
+            .any(|child| child.kind_id() == id)
+    }
+
+    pub(crate) fn child_count(&self) -> usize {
+        self.0.child_count()
+    }
+
+    pub(crate) fn child_by_field_name(&self, name: &str) -> Option<Node> {
+        self.0.child_by_field_name(name).map(|n| Node(n))
+    }
+
+    pub(crate) fn child(&self, pos: usize) -> Option<Node<'a>> {
+        self.0.child(pos).map(|c| Node(c))
+    }
+
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
         let mut cursor = self.cursor();
         cursor.goto_first_child();
@@ -112,6 +108,10 @@ impl<'a> Node<'a> {
             cursor.goto_next_sibling();
             result
         })
+    }
+
+    pub(crate) fn cursor(&self) -> Cursor<'a> {
+        Cursor(self.0.walk())
     }
 }
 
@@ -124,12 +124,12 @@ impl<'a> Cursor<'a> {
         self.0.reset(node.0);
     }
 
-    pub(crate) fn goto_first_child(&mut self) -> bool {
-        self.0.goto_first_child()
-    }
-
     pub(crate) fn goto_next_sibling(&mut self) -> bool {
         self.0.goto_next_sibling()
+    }
+
+    pub(crate) fn goto_first_child(&mut self) -> bool {
+        self.0.goto_first_child()
     }
 
     pub(crate) fn node(&self) -> Node<'a> {
