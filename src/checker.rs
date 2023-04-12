@@ -77,7 +77,7 @@ pub trait Checker {
     fn is_primitive(_id: u16) -> bool;
 
     fn is_error(node: &Node) -> bool {
-        node.object().is_error()
+        node.has_error()
     }
 }
 
@@ -132,7 +132,7 @@ impl Checker for CcommentCode {
         lazy_static! {
             static ref AC: AhoCorasick = AhoCorasick::new(vec![b"<div rustbindgen"]);
         }
-        let code = &code[node.object().start_byte()..node.object().end_byte()];
+        let code = &code[node.start_byte()..node.end_byte()];
         AC.is_match(code)
     }
 
@@ -178,7 +178,7 @@ impl Checker for CppCode {
         lazy_static! {
             static ref AC: AhoCorasick = AhoCorasick::new(vec![b"<div rustbindgen"]);
         }
-        let code = &code[node.object().start_byte()..node.object().end_byte()];
+        let code = &code[node.start_byte()..node.end_byte()];
         AC.is_match(code)
     }
 
@@ -253,8 +253,7 @@ impl Checker for PythonCode {
             // comment containing coding info are useful
             static ref RE: Regex = Regex::new(r"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)").unwrap();
         }
-        node.start_row() <= 1
-            && RE.is_match(&code[node.object().start_byte()..node.object().end_byte()])
+        node.start_row() <= 1 && RE.is_match(&code[node.start_byte()..node.end_byte()])
     }
 
     fn is_func_space(node: &Node) -> bool {
@@ -585,7 +584,7 @@ impl Checker for RustCode {
                 return true;
             }
         }
-        let code = &code[node.object().start_byte()..node.object().end_byte()];
+        let code = &code[node.start_byte()..node.end_byte()];
         code.starts_with(b"/// cbindgen:")
     }
 
