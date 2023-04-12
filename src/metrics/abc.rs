@@ -258,13 +258,13 @@ where
 fn java_inspect_container(container_node: &Node, conditions: &mut f64) {
     use Java::*;
 
-    let mut node = container_node.object();
+    let mut node = *container_node;
     let mut node_kind = node.kind_id().into();
 
     // Initializes the flag to true if the container is known to contain a boolean value
     let mut has_boolean_content = match node.parent().unwrap().kind_id().into() {
         BinaryExpression | IfStatement | WhileStatement | DoStatement | ForStatement => true,
-        TernaryExpression => node.prev_sibling().map_or(true, |prev_node| {
+        TernaryExpression => node.previous_sibling().map_or(true, |prev_node| {
             !matches!(prev_node.kind_id().into(), QMARK | COLON)
         }),
         _ => false,
