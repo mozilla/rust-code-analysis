@@ -61,7 +61,7 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn parent(&self) -> Option<Node<'a>> {
-        self.0.parent().map(|p| Node(p))
+        self.0.parent().map(Node)
     }
 
     #[inline(always)]
@@ -74,11 +74,11 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn previous_sibling(&self) -> Option<Node<'a>> {
-        self.0.prev_sibling().map(|s| Node(s))
+        self.0.prev_sibling().map(Node)
     }
 
     pub(crate) fn next_sibling(&self) -> Option<Node<'a>> {
-        self.0.next_sibling().map(|s| Node(s))
+        self.0.next_sibling().map(Node)
     }
 
     #[inline(always)]
@@ -93,11 +93,11 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn child_by_field_name(&self, name: &str) -> Option<Node> {
-        self.0.child_by_field_name(name).map(|n| Node(n))
+        self.0.child_by_field_name(name).map(Node)
     }
 
     pub(crate) fn child(&self, pos: usize) -> Option<Node<'a>> {
-        self.0.child(pos).map(|c| Node(c))
+        self.0.child(pos).map(Node)
     }
 
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
@@ -191,12 +191,7 @@ impl<'a> Search<'a> for Node<'a> {
     }
 
     fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
-        for child in self.children() {
-            if pred(child.kind_id()) {
-                return Some(child);
-            }
-        }
-        None
+        self.children().find(|&child| pred(child.kind_id()))
     }
 
     fn act_on_child(&self, action: &mut dyn FnMut(&Node<'a>)) {
