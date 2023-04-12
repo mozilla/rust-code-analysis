@@ -42,16 +42,10 @@ impl Ops {
                 if node.child_count() == 0 {
                     (0, 0)
                 } else {
-                    (
-                        node.start_row() + 1,
-                        node.end_row(),
-                    )
+                    (node.start_row() + 1, node.end_row())
                 }
             }
-            _ => (
-                node.start_row() + 1,
-                node.end_row() + 1,
-            ),
+            _ => (node.start_row() + 1, node.end_row() + 1),
         };
         Self {
             name: T::get_func_space_name(node, code).map(|name| name.to_string()),
@@ -164,7 +158,7 @@ fn finalize<T: ParserTrait>(state_stack: &mut Vec<State>, diff_level: usize) {
 pub fn operands_and_operators<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Ops> {
     let code = parser.get_code();
     let node = parser.get_root();
-    let mut cursor = node.object().walk();
+    let mut cursor = node.cursor();
     let mut stack = Vec::new();
     let mut children = Vec::new();
     let mut state_stack: Vec<State> = Vec::new();
@@ -198,17 +192,17 @@ pub fn operands_and_operators<'a, T: ParserTrait>(parser: &'a T, path: &'a Path)
         if let Some(state) = state_stack.last_mut() {
             T::Halstead::compute(&node, code, &mut state.halstead_maps);
             if T::Checker::is_primitive(node.kind_id()) {
-                let code = &code[node.object().start_byte()..node.object().end_byte()];
+                let code = &code[node.start_byte()..node.end_byte()];
                 let primitive_string = String::from_utf8(code.to_vec())
                     .unwrap_or_else(|_| String::from("primitive_type"));
                 state.primitive_types.insert(primitive_string);
             }
         }
 
-        cursor.reset(node.object());
+        cursor.reset(&node);
         if cursor.goto_first_child() {
             loop {
-                children.push((Node::new(cursor.node()), new_level));
+                children.push((cursor.node(), new_level));
                 if !cursor.goto_next_sibling() {
                     break;
                 }
