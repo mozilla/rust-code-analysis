@@ -18,12 +18,8 @@ impl<'a> Node<'a> {
         Self(tree.root_node())
     }
 
-    pub(crate) fn new(node: OtherNode<'a>) -> Self {
-        Node(node)
-    }
-
     pub(crate) fn parent(&self) -> Option<Node<'a>> {
-        self.0.parent().map(|p| Node::new(p))
+        self.0.parent().map(|p| Node(p))
     }
 
     pub(crate) fn id(&self) -> usize {
@@ -43,11 +39,11 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn child_by_field_name(&self, name: &str) -> Option<Node> {
-        self.0.child_by_field_name(name).map(|n| Node::new(n))
+        self.0.child_by_field_name(name).map(|n| Node(n))
     }
 
     pub(crate) fn child(&self, pos: usize) -> Option<Node<'a>> {
-        self.0.child(pos).map(|c| Node::new(c))
+        self.0.child(pos).map(|c| Node(c))
     }
 
     pub(crate) fn start_byte(&self) -> usize {
@@ -81,11 +77,11 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn previous_sibling(&self) -> Option<Node<'a>> {
-        self.0.prev_sibling().map(|s| Node::new(s))
+        self.0.prev_sibling().map(|s| Node(s))
     }
 
     pub(crate) fn next_sibling(&self) -> Option<Node<'a>> {
-        self.0.next_sibling().map(|s| Node::new(s))
+        self.0.next_sibling().map(|s| Node(s))
     }
 
     pub(crate) fn cursor(&self) -> Cursor<'a> {
@@ -137,7 +133,7 @@ impl<'a> Cursor<'a> {
     }
 
     pub(crate) fn node(&self) -> Node<'a> {
-        Node::new(self.0.node())
+        Node(self.0.node())
     }
 }
 
