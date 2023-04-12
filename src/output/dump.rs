@@ -133,14 +133,14 @@ fn dump_tree_helper(
     if count != 0 {
         let prefix = format!("{prefix}{pref_child}");
         let mut i = count;
-        let mut cursor = node.object().walk();
+        let mut cursor = node.cursor();
         cursor.goto_first_child();
 
         loop {
             i -= 1;
             dump_tree_helper(
                 code,
-                &Node::new(cursor.node()),
+                &cursor.node(),
                 &prefix,
                 i == 0,
                 stdout,
