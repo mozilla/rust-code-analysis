@@ -26,6 +26,10 @@ impl<'a> Node<'a> {
         self.0
     }
 
+    pub(crate) fn parent(&self) -> Option<Node<'a>> {
+        self.0.parent().map(|p| Node::new(p))
+    }
+
     pub(crate) fn id(&self) -> usize {
         self.0.id()
     }
