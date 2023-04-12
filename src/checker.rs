@@ -231,7 +231,7 @@ impl Checker for CppCode {
         if node.kind_id() != Cpp::IfStatement {
             return false;
         }
-        if let Some(parent) = node.object().parent() {
+        if let Some(parent) = node.parent() {
             return node.kind_id() == Cpp::IfStatement && parent.kind_id() == Cpp::IfStatement;
         }
         false
@@ -387,7 +387,7 @@ impl Checker for MozjsCode {
         if node.kind_id() != Mozjs::IfStatement {
             return false;
         }
-        if let Some(parent) = node.object().parent() {
+        if let Some(parent) = node.parent() {
             return parent.kind_id() == Mozjs::ElseClause;
         }
         false
@@ -444,7 +444,7 @@ impl Checker for JavascriptCode {
         if node.kind_id() != Javascript::IfStatement {
             return false;
         }
-        if let Some(parent) = node.object().parent() {
+        if let Some(parent) = node.parent() {
             return node.kind_id() == Javascript::IfStatement
                 && parent.kind_id() == Javascript::IfStatement;
         }
@@ -503,7 +503,7 @@ impl Checker for TypescriptCode {
         if node.kind_id() != Typescript::IfStatement {
             return false;
         }
-        if let Some(parent) = node.object().parent() {
+        if let Some(parent) = node.parent() {
             return parent.kind_id() == Typescript::ElseClause;
         }
         false
@@ -561,7 +561,7 @@ impl Checker for TsxCode {
         if node.kind_id() != Tsx::IfStatement {
             return false;
         }
-        if let Some(parent) = node.object().parent() {
+        if let Some(parent) = node.parent() {
             return node.kind_id() == Tsx::IfStatement && parent.kind_id() == Tsx::IfStatement;
         }
         false
@@ -579,7 +579,7 @@ impl Checker for RustCode {
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        if let Some(parent) = node.object().parent() {
+        if let Some(parent) = node.parent() {
             if parent.kind_id() == Rust::TokenTree {
                 // A comment could be a macro token
                 return true;
@@ -628,7 +628,7 @@ impl Checker for RustCode {
         if node.kind_id() != Rust::IfExpression {
             return false;
         }
-        if let Some(parent) = node.object().parent() {
+        if let Some(parent) = node.parent() {
             return parent.kind_id() == Rust::ElseClause;
         }
         false

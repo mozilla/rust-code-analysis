@@ -573,10 +573,10 @@ impl Loc for PythonCode {
                 add_cloc_lines(stats, start, end);
             }
             String => {
-                let parent = node.object().parent().unwrap();
+                let parent = node.parent().unwrap();
                 if let ExpressionStatement = parent.kind_id().into() {
                     add_cloc_lines(stats, start, end);
-                } else if parent.start_position().row != start {
+                } else if parent.start_row() != start {
                     check_comment_ends_on_code_line(stats, start);
                     stats.ploc.lines.insert(start);
                 }

@@ -401,7 +401,7 @@ impl Abc for JavaCode {
             }
             GT | LT => {
                 // Excludes `<` and `>` used for generic types
-                if let Some(parent) = node.object().parent() {
+                if let Some(parent) = node.parent() {
                     if !matches!(parent.kind_id().into(), TypeArguments) {
                         stats.conditions += 1.;
                     }
@@ -409,8 +409,8 @@ impl Abc for JavaCode {
             }
             // Counts unary conditions in elements separated by `&&` or `||` boolean operators
             AMPAMP | PIPEPIPE => {
-                if let Some(parent) = node.object().parent() {
-                    java_count_unary_conditions(&Node::new(parent), &mut stats.conditions);
+                if let Some(parent) = node.parent() {
+                    java_count_unary_conditions(&parent, &mut stats.conditions);
                 }
             }
             // Counts unary conditions among method arguments

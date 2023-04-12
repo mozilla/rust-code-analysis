@@ -75,7 +75,7 @@ fn dump_tree_helper(
         return Ok(());
     }
 
-    let (pref_child, pref) = if node.object().parent().is_none() {
+    let (pref_child, pref) = if node.parent().is_none() {
         ("", "")
     } else if last {
         ("   ", "╰─ ")

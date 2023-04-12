@@ -196,7 +196,7 @@ fn get_nesting_from_map(
     node: &Node,
     nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
 ) -> (usize, usize, usize) {
-    if let Some(parent) = node.object().parent() {
+    if let Some(parent) = node.parent() {
         if let Some(n) = nesting_map.get(&parent.id()) {
             *n
         } else {

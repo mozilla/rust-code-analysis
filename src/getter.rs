@@ -75,7 +75,7 @@ impl Getter for PythonCode {
             String => {
                 let mut operator = HalsteadType::Unknown;
                 // check if we've a documentation string or a multiline comment
-                if let Some(parent) = node.object().parent() {
+                if let Some(parent) = node.parent() {
                     if parent.kind_id() != ExpressionStatement || parent.child_count() != 1 {
                         operator = HalsteadType::Operand;
                     };
@@ -115,7 +115,7 @@ impl Getter for MozjsCode {
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.object().parent() {
+            if let Some(parent) = node.parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
@@ -183,7 +183,7 @@ impl Getter for JavascriptCode {
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.object().parent() {
+            if let Some(parent) = node.parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
@@ -252,7 +252,7 @@ impl Getter for TypescriptCode {
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.object().parent() {
+            if let Some(parent) = node.parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
@@ -321,7 +321,7 @@ impl Getter for TsxCode {
         } else {
             // We can be in a pair: foo: function() {}
             // Or in a variable declaration: var aFun = function() {}
-            if let Some(parent) = node.object().parent() {
+            if let Some(parent) = node.parent() {
                 match parent.kind_id().into() {
                     Mozjs::Pair => {
                         if let Some(name) = parent.child_by_field_name("key") {
