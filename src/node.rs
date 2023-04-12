@@ -84,6 +84,22 @@ impl<'a> Node<'a> {
         Cursor(self.0.walk())
     }
 
+    #[inline(always)]
+    pub(crate) fn is_child(&self, id: u16) -> bool {
+        self.0
+            .children(&mut self.0.walk())
+            .any(|child| child.kind_id() == id)
+    }
+
+    #[inline(always)]
+    pub(crate) fn has_sibling(&self, id: u16) -> bool {
+        self.0.parent().map_or(false, |parent| {
+            self.0
+                .children(&mut parent.walk())
+                .any(|child| child.kind_id() == id)
+        })
+    }
+
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> {
         let mut cursor = self.cursor();
         cursor.goto_first_child();

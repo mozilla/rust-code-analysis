@@ -4,22 +4,6 @@ use regex::bytes::Regex;
 
 use crate::*;
 
-#[inline(always)]
-fn is_child(node: &Node, id: u16) -> bool {
-    node.object()
-        .children(&mut node.object().walk())
-        .any(|child| child.kind_id() == id)
-}
-
-#[inline(always)]
-fn has_sibling(node: &Node, id: u16) -> bool {
-    node.object().parent().map_or(false, |parent| {
-        node.object()
-            .children(&mut parent.walk())
-            .any(|child| child.kind_id() == id)
-    })
-}
-
 macro_rules! check_if_func {
     ($node: ident) => {
         count_specific_ancestors!(
@@ -27,7 +11,7 @@ macro_rules! check_if_func {
             VariableDeclarator | AssignmentExpression | LabeledStatement | Pair,
             StatementBlock | ReturnStatement | NewExpression | Arguments
         ) > 0
-            || is_child($node, Identifier as u16)
+            || $node.is_child(Identifier as u16)
     };
 }
 
@@ -38,7 +22,7 @@ macro_rules! check_if_arrow_func {
             VariableDeclarator | AssignmentExpression | LabeledStatement,
             StatementBlock | ReturnStatement | NewExpression | CallExpression
         ) > 0
-            || has_sibling($node, PropertyIdentifier as u16)
+            || $node.has_sibling(PropertyIdentifier as u16)
     };
 }
 
@@ -127,8 +111,7 @@ impl Checker for PreprocCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.kind_id() == Preproc::StringLiteral
-            || node.kind_id() == Preproc::RawStringLiteral
+        node.kind_id() == Preproc::StringLiteral || node.kind_id() == Preproc::RawStringLiteral
     }
 
     fn is_else_if(_: &Node) -> bool {
@@ -174,8 +157,7 @@ impl Checker for CcommentCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.kind_id() == Ccomment::StringLiteral
-            || node.kind_id() == Ccomment::RawStringLiteral
+        node.kind_id() == Ccomment::StringLiteral || node.kind_id() == Ccomment::RawStringLiteral
     }
 
     fn is_else_if(_: &Node) -> bool {
@@ -250,8 +232,7 @@ impl Checker for CppCode {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return node.kind_id() == Cpp::IfStatement
-                && parent.kind_id() == Cpp::IfStatement;
+            return node.kind_id() == Cpp::IfStatement && parent.kind_id() == Cpp::IfStatement;
         }
         false
     }
@@ -303,8 +284,7 @@ impl Checker for PythonCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.kind_id() == Python::String
-            || node.kind_id() == Python::ConcatenatedString
+        node.kind_id() == Python::String || node.kind_id() == Python::ConcatenatedString
     }
 
     fn is_else_if(_: &Node) -> bool {
@@ -318,8 +298,7 @@ impl Checker for PythonCode {
 
 impl Checker for JavaCode {
     fn is_comment(node: &Node) -> bool {
-        node.kind_id() == Java::LineComment
-            || node.kind_id() == Java::BlockComment
+        node.kind_id() == Java::LineComment || node.kind_id() == Java::BlockComment
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
@@ -334,8 +313,7 @@ impl Checker for JavaCode {
     }
 
     fn is_func(node: &Node) -> bool {
-        node.kind_id() == Java::MethodDeclaration
-            || node.kind_id() == Java::ConstructorDeclaration
+        node.kind_id() == Java::MethodDeclaration || node.kind_id() == Java::ConstructorDeclaration
     }
 
     fn is_closure(node: &Node) -> bool {
@@ -458,8 +436,7 @@ impl Checker for JavascriptCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.kind_id() == Javascript::String
-            || node.kind_id() == Javascript::TemplateString
+        node.kind_id() == Javascript::String || node.kind_id() == Javascript::TemplateString
     }
 
     #[inline(always)]
@@ -518,8 +495,7 @@ impl Checker for TypescriptCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.kind_id() == Typescript::String
-            || node.kind_id() == Typescript::TemplateString
+        node.kind_id() == Typescript::String || node.kind_id() == Typescript::TemplateString
     }
 
     #[inline(always)]
@@ -586,8 +562,7 @@ impl Checker for TsxCode {
             return false;
         }
         if let Some(parent) = node.object().parent() {
-            return node.kind_id() == Tsx::IfStatement
-                && parent.kind_id() == Tsx::IfStatement;
+            return node.kind_id() == Tsx::IfStatement && parent.kind_id() == Tsx::IfStatement;
         }
         false
     }
@@ -600,8 +575,7 @@ impl Checker for TsxCode {
 
 impl Checker for RustCode {
     fn is_comment(node: &Node) -> bool {
-        node.kind_id() == Rust::LineComment
-            || node.kind_id() == Rust::BlockComment
+        node.kind_id() == Rust::LineComment || node.kind_id() == Rust::BlockComment
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
@@ -646,8 +620,7 @@ impl Checker for RustCode {
     }
 
     fn is_string(node: &Node) -> bool {
-        node.kind_id() == Rust::StringLiteral
-            || node.kind_id() == Rust::RawStringLiteral
+        node.kind_id() == Rust::StringLiteral || node.kind_id() == Rust::RawStringLiteral
     }
 
     #[inline(always)]
