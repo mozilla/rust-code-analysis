@@ -9,7 +9,7 @@ use crate::traits::*;
 pub fn find<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> Option<Vec<Node<'a>>> {
     let filters = parser.get_filters(filters);
     let node = parser.get_root();
-    let mut cursor = node.object().walk();
+    let mut cursor = node.cursor();
     let mut stack = Vec::new();
     let mut good = Vec::new();
     let mut children = Vec::new();
@@ -20,10 +20,10 @@ pub fn find<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> Option<Vec
         if filters.any(&node) {
             good.push(node);
         }
-        cursor.reset(node.object());
+        cursor.reset(&node);
         if cursor.goto_first_child() {
             loop {
-                children.push(Node::new(cursor.node()));
+                children.push(cursor.node());
                 if !cursor.goto_next_sibling() {
                     break;
                 }
