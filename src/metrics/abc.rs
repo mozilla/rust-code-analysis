@@ -313,7 +313,7 @@ fn java_count_unary_conditions(list_node: &Node, conditions: &mut f64) {
     use Java::*;
 
     let list_kind = list_node.kind_id().into();
-    let mut cursor = list_node.object().walk();
+    let mut cursor = list_node.cursor();
 
     // Scans the immediate children nodes of the argument node
     if cursor.goto_first_child() {
@@ -330,7 +330,7 @@ fn java_count_unary_conditions(list_node: &Node, conditions: &mut f64) {
                 *conditions += 1.;
             } else {
                 // Checks if the node is a unary condition container
-                java_inspect_container(&Node::new(node), conditions);
+                java_inspect_container(&node, conditions);
             }
 
             // Moves the cursor to the next sibling node of the current node
