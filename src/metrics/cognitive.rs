@@ -138,8 +138,7 @@ fn compute_booleans<T: std::cmp::PartialEq + std::convert::From<u16>>(
     typs1: T,
     typs2: T,
 ) {
-    let mut cursor = node.object().walk();
-    for child in node.object().children(&mut cursor) {
+    for child in node.children() {
         if typs1 == child.kind_id().into() || typs2 == child.kind_id().into() {
             stats.structural = stats
                 .boolean_seq
@@ -213,7 +212,7 @@ fn increment_function_depth<T: std::cmp::PartialEq + std::convert::From<u16>>(
     stop: T,
 ) {
     // Increase depth function nesting if needed
-    let mut child = node.object();
+    let mut child = *node;
     while let Some(parent) = child.parent() {
         if stop == parent.kind_id().into() {
             *depth += 1;
@@ -293,7 +292,7 @@ impl Cognitive for PythonCode {
             _ => {}
         }
         // Add node to nesting map
-        nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
     }
 }
 
@@ -343,7 +342,7 @@ impl Cognitive for RustCode {
             }
             _ => {}
         }
-        nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
     }
 }
 
@@ -381,7 +380,7 @@ impl Cognitive for CppCode {
             }
             _ => {}
         }
-        nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
     }
 }
 
@@ -425,7 +424,7 @@ macro_rules! js_cognitive {
                 }
                 _ => {}
             }
-            nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+            nesting_map.insert(node.id(), (nesting, depth, lambda));
         }
     };
 }
