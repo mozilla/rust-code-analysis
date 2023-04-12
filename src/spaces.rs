@@ -153,16 +153,10 @@ impl FuncSpace {
                 if node.child_count() == 0 {
                     (0, 0)
                 } else {
-                    (
-                        node.start_row() + 1,
-                        node.end_row(),
-                    )
+                    (node.start_row() + 1, node.end_row())
                 }
             }
-            _ => (
-                node.start_row() + 1,
-                node.end_row() + 1,
-            ),
+            _ => (node.start_row() + 1, node.end_row() + 1),
         };
 
         Self {
@@ -291,7 +285,7 @@ struct State<'a> {
 pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<FuncSpace> {
     let code = parser.get_code();
     let node = parser.get_root();
-    let mut cursor = node.object().walk();
+    let mut cursor = node.cursor();
     let mut stack = Vec::new();
     let mut children = Vec::new();
     let mut state_stack: Vec<State> = Vec::new();
@@ -299,7 +293,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
     // Initialize nesting_map used for storing nesting information for cognitive
     // Three type of nesting info: conditionals, functions and lambdas
     let mut nesting_map = FxHashMap::<usize, (usize, usize, usize)>::default();
-    nesting_map.insert(node.object().id(), (0, 0, 0));
+    nesting_map.insert(node.id(), (0, 0, 0));
     stack.push((node, 0));
 
     while let Some((node, level)) = stack.pop() {
@@ -339,10 +333,10 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
             T::Npa::compute(&node, &mut last.metrics.npa);
         }
 
-        cursor.reset(node.object());
+        cursor.reset(&node);
         if cursor.goto_first_child() {
             loop {
-                children.push((Node::new(cursor.node()), new_level));
+                children.push((cursor.node(), new_level));
                 if !cursor.goto_next_sibling() {
                     break;
                 }
