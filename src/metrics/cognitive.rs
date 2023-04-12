@@ -321,7 +321,7 @@ impl Cognitive for RustCode {
                 increment_by_one(stats);
             }
             BreakExpression | ContinueExpression => {
-                if let Some(label_child) = node.object().child(1) {
+                if let Some(label_child) = node.child(1) {
                     if let LoopLabel = label_child.kind_id().into() {
                         increment_by_one(stats);
                     }

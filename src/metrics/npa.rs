@@ -235,12 +235,10 @@ impl Npa for JavaCode {
                         // The first child node contains the list of attribute modifiers
                         // There are several modifiers that may be part of a field declaration
                         // Source: https://docs.oracle.com/javase/tutorial/reflect/member/fieldModifiers.html
-                        if declaration.object().child(0).map_or(false, |modifiers| {
+                        if declaration.child(0).map_or(false, |modifiers| {
                             // Looks for the `public` keyword in the list of attribute modifiers
                             matches!(modifiers.kind_id().into(), Modifiers)
-                                && Node::new(modifiers)
-                                    .first_child(|id| id == Public)
-                                    .is_some()
+                                && modifiers.first_child(|id| id == Public).is_some()
                         }) {
                             stats.class_npa += attributes;
                         }

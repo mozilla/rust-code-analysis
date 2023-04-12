@@ -427,7 +427,7 @@ impl Getter for CppCode {
                             || Cpp::FunctionDeclarator2 == id
                             || Cpp::FunctionDeclarator3 == id
                     }) {
-                        if let Some(first) = fd.object().child(0) {
+                        if let Some(first) = fd.child(0) {
                             match first.kind_id().into() {
                                 Cpp::TypeIdentifier
                                 | Cpp::Identifier
