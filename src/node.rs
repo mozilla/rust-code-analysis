@@ -84,6 +84,10 @@ impl<'a> Node<'a> {
         self.0.child_count()
     }
 
+    pub(crate) fn previous_sibling(&self) -> Option<Node<'a>> {
+        self.0.prev_sibling().map(|s| Node::new(s))
+    }
+
     pub(crate) fn next_sibling(&self) -> Option<Node<'a>> {
         self.0.next_sibling().map(|s| Node::new(s))
     }
