@@ -354,11 +354,6 @@ fn main() {
         .into_inner()
         .unwrap();
 
-    // If there are no spaces, exit.
-    if spaces_context.is_empty() {
-        return;
-    }
-
     if let Some(output_format) = opts.output_format.as_ref() {
         for spaces in spaces_context {
             output_format
@@ -375,11 +370,6 @@ fn main() {
 
     // Retrieve ops
     let ops_context = Arc::try_unwrap(ops_context).unwrap().into_inner().unwrap();
-
-    // If there are no spaces, exit.
-    if ops_context.is_empty() {
-        return;
-    }
 
     if let Some(output_format) = opts.output_format {
         for ops in ops_context {
