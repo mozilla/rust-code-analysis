@@ -247,6 +247,29 @@ struct Opts {
     warning: bool,
 }
 
+fn print_data<T: std::fmt::Debug, F, S>(
+    context: Arc<Mutex<Vec<T>>>,
+    output_format: Option<&Format>,
+    write_on_file: F,
+    write_on_stdout: S,
+) where
+    F: Fn(T, &Format) -> std::io::Result<()>,
+    S: Fn(T) -> std::io::Result<()>,
+{
+    let context = Arc::try_unwrap(context).unwrap().into_inner().unwrap();
+
+    if let Some(output_format) = output_format {
+        for data in context {
+            write_on_file(data, output_format).unwrap();
+        }
+    } else {
+        for data in context {
+            write_on_stdout(data).unwrap();
+            println!();
+        }
+    }
+}
+
 fn main() {
     let opts = Opts::parse();
 
@@ -348,42 +371,21 @@ fn main() {
         }
     };
 
-    // Retrieve spaces
-    let spaces_context = Arc::try_unwrap(spaces_context)
-        .unwrap()
-        .into_inner()
-        .unwrap();
+    // Print spaces
+    print_data(
+        spaces_context,
+        opts.output_format.as_ref(),
+        |d, format| format.dump_formats(&d.space, &d.path, &opts.output, opts.pretty),
+        |d| dump_root(&d.space),
+    );
 
-    if let Some(output_format) = opts.output_format.as_ref() {
-        for spaces in spaces_context {
-            output_format
-                .dump_formats(&spaces.space, &spaces.path, &opts.output, opts.pretty)
-                .unwrap()
-        }
-    } else {
-        for spaces in spaces_context {
-            // Print on stdout
-            dump_root(&spaces.space).unwrap();
-            println!();
-        }
-    }
-
-    // Retrieve ops
-    let ops_context = Arc::try_unwrap(ops_context).unwrap().into_inner().unwrap();
-
-    if let Some(output_format) = opts.output_format {
-        for ops in ops_context {
-            output_format
-                .dump_formats(&ops.ops, &ops.path, &opts.output, opts.pretty)
-                .unwrap()
-        }
-    } else {
-        for ops in ops_context {
-            // Print on stdout
-            dump_ops(&ops.ops).unwrap();
-            println!();
-        }
-    }
+    // Print ops
+    print_data(
+        ops_context,
+        opts.output_format.as_ref(),
+        |d, format| format.dump_formats(&d.ops, &d.path, &opts.output, opts.pretty),
+        |d| dump_ops(&d.ops),
+    );
 
     if let Some(count) = count_lock {
         let count = Arc::try_unwrap(count).unwrap().into_inner().unwrap();
