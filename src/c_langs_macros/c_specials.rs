@@ -62,6 +62,6 @@ const SPECIALS: &[&str] = &[
     "wchar_t",
 ];
 
-pub fn is_specials(mac: &str) -> bool {
+pub(crate) fn is_specials(mac: &str) -> bool {
     SPECIALS.contains(&mac)
 }

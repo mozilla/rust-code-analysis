@@ -6,6 +6,6 @@ const {{ u_name }}: &[&str] = &[
     {% endfor %}
 ];
 
-pub fn is_{{ l_name }}(mac: &str) -> bool {
+pub(crate) fn is_{{ l_name }}(mac: &str) -> bool {
    {{ u_name }}.contains(&mac)
  }

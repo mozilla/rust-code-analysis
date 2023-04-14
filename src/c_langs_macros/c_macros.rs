@@ -221,6 +221,6 @@ const PREDEFINED_MACROS: &[&str] = &[
     "UINT_LEAST8_MIN",
 ];
 
-pub fn is_predefined_macros(mac: &str) -> bool {
+pub(crate) fn is_predefined_macros(mac: &str) -> bool {
     PREDEFINED_MACROS.contains(&mac)
 }
