@@ -19,13 +19,13 @@ use rust_code_analysis::LANG;
 // Structs
 use rust_code_analysis::{
     CommentRm, CommentRmCfg, ConcurrentRunner, Count, CountCfg, Dump, DumpCfg, FilesData, Find,
-    FindCfg, FuncSpace, Function, FunctionCfg, OpsCfg, OpsCode, PreprocParser, PreprocResults,
+    FindCfg, FuncSpace, Function, FunctionCfg, Ops, PreprocParser, PreprocResults,
 };
 
 // Functions
 use rust_code_analysis::{
-    action, dump_root, fix_includes, get_from_ext, get_function_spaces, get_ops, guess_language,
-    preprocess, read_file, read_file_with_eol, write_file,
+    action, dump_ops, dump_root, fix_includes, get_from_ext, get_function_spaces, get_ops,
+    guess_language, preprocess, read_file, read_file_with_eol, write_file,
 };
 
 // Traits
@@ -35,6 +35,12 @@ use rust_code_analysis::ParserTrait;
 struct Spaces {
     path: PathBuf,
     space: FuncSpace,
+}
+
+#[derive(Debug)]
+struct OpsContext {
+    path: PathBuf,
+    ops: Ops,
 }
 
 #[derive(Debug)]
@@ -49,6 +55,7 @@ struct Config {
     metrics: bool,
     ops: bool,
     spaces_context: Arc<Mutex<Vec<Spaces>>>,
+    ops_context: Arc<Mutex<Vec<OpsContext>>>,
     output_format: Option<Format>,
     output: Option<PathBuf>,
     pretty: bool,
@@ -105,14 +112,14 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
         }
         Ok(())
     } else if cfg.ops {
-        if let Some(output_format) = &cfg.output_format {
-            let ops = get_ops(&language, source, &path, pr).unwrap();
-            output_format.dump_formats(&ops, &path, &cfg.output, cfg.pretty)
-        } else {
-            let cfg = OpsCfg { path };
-            let path = cfg.path.clone();
-            action::<OpsCode>(&language, source, &path, pr, cfg)
+        if let Some(ops) = get_ops(&language, source, &path, pr) {
+            cfg.ops_context
+                .as_ref()
+                .lock()
+                .unwrap()
+                .push(OpsContext { path, ops });
         }
+        Ok(())
     } else if cfg.comments {
         let cfg = CommentRmCfg {
             in_place: cfg.in_place,
@@ -305,6 +312,8 @@ fn main() {
 
     // Create container for spaces and paths.
     let spaces_context = Arc::new(Mutex::new(Vec::new()));
+    // Create container for ops and paths.
+    let ops_context = Arc::new(Mutex::new(Vec::new()));
 
     let cfg = Config {
         dump: opts.dump,
@@ -317,6 +326,7 @@ fn main() {
         metrics: opts.metrics,
         ops: opts.ops,
         spaces_context: spaces_context.clone(),
+        ops_context: ops_context.clone(),
         output_format: opts.output_format.clone(),
         pretty: opts.pretty,
         output: opts.output.clone(),
@@ -355,7 +365,7 @@ fn main() {
         return;
     }
 
-    if let Some(output_format) = opts.output_format {
+    if let Some(output_format) = opts.output_format.as_ref() {
         for spaces in spaces_context {
             output_format
                 .dump_formats(&spaces.space, &spaces.path, &opts.output, opts.pretty)
@@ -365,6 +375,28 @@ fn main() {
         for spaces in spaces_context {
             // Print on stdout
             dump_root(&spaces.space).unwrap();
+            println!();
+        }
+    }
+
+    // Retrieve ops
+    let ops_context = Arc::try_unwrap(ops_context).unwrap().into_inner().unwrap();
+
+    // If there are no spaces, exit.
+    if ops_context.is_empty() {
+        return;
+    }
+
+    if let Some(output_format) = opts.output_format {
+        for ops in ops_context {
+            output_format
+                .dump_formats(&ops.ops, &ops.path, &opts.output, opts.pretty)
+                .unwrap()
+        }
+    } else {
+        for ops in ops_context {
+            // Print on stdout
+            dump_ops(&ops.ops).unwrap();
             println!();
         }
     }
