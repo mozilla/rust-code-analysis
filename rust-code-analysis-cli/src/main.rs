@@ -19,18 +19,23 @@ use rust_code_analysis::LANG;
 // Structs
 use rust_code_analysis::{
     CommentRm, CommentRmCfg, ConcurrentRunner, Count, CountCfg, Dump, DumpCfg, FilesData, Find,
-    FindCfg, Function, FunctionCfg, Metrics, MetricsCfg, OpsCfg, OpsCode, PreprocParser,
-    PreprocResults,
+    FindCfg, FuncSpace, Function, FunctionCfg, OpsCfg, OpsCode, PreprocParser, PreprocResults,
 };
 
 // Functions
 use rust_code_analysis::{
-    action, fix_includes, get_from_ext, get_function_spaces, get_ops, guess_language, preprocess,
-    read_file, read_file_with_eol, write_file,
+    action, dump_root, fix_includes, get_from_ext, get_function_spaces, get_ops, guess_language,
+    preprocess, read_file, read_file_with_eol, write_file,
 };
 
 // Traits
 use rust_code_analysis::ParserTrait;
+
+#[derive(Debug)]
+struct Spaces {
+    path: PathBuf,
+    space: FuncSpace,
+}
 
 #[derive(Debug)]
 struct Config {
@@ -43,6 +48,7 @@ struct Config {
     function: bool,
     metrics: bool,
     ops: bool,
+    spaces_context: Arc<Mutex<Vec<Spaces>>>,
     output_format: Option<Format>,
     output: Option<PathBuf>,
     pretty: bool,
@@ -90,17 +96,14 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
         };
         action::<Dump>(&language, source, &path, pr, cfg)
     } else if cfg.metrics {
-        if let Some(output_format) = &cfg.output_format {
-            if let Some(space) = get_function_spaces(&language, source, &path, pr) {
-                output_format.dump_formats(&space, &path, &cfg.output, cfg.pretty)
-            } else {
-                Ok(())
-            }
-        } else {
-            let cfg = MetricsCfg { path };
-            let path = cfg.path.clone();
-            action::<Metrics>(&language, source, &path, pr, cfg)
+        if let Some(space) = get_function_spaces(&language, source, &path, pr) {
+            cfg.spaces_context
+                .as_ref()
+                .lock()
+                .unwrap()
+                .push(Spaces { path, space });
         }
+        Ok(())
     } else if cfg.ops {
         if let Some(output_format) = &cfg.output_format {
             let ops = get_ops(&language, source, &path, pr).unwrap();
@@ -300,6 +303,9 @@ fn main() {
     let include = mk_globset(opts.include);
     let exclude = mk_globset(opts.exclude);
 
+    // Create container for spaces and paths.
+    let spaces_context = Arc::new(Mutex::new(Vec::new()));
+
     let cfg = Config {
         dump: opts.dump,
         in_place: opts.in_place,
@@ -310,7 +316,8 @@ fn main() {
         function: opts.function,
         metrics: opts.metrics,
         ops: opts.ops,
-        output_format: opts.output_format,
+        spaces_context: spaces_context.clone(),
+        output_format: opts.output_format.clone(),
         pretty: opts.pretty,
         output: opts.output.clone(),
         line_start: opts.line_start,
@@ -336,6 +343,31 @@ fn main() {
             process::exit(1);
         }
     };
+
+    // Retrieve spaces
+    let spaces_context = Arc::try_unwrap(spaces_context)
+        .unwrap()
+        .into_inner()
+        .unwrap();
+
+    // If there are no spaces, exit.
+    if spaces_context.is_empty() {
+        return;
+    }
+
+    if let Some(output_format) = opts.output_format {
+        for spaces in spaces_context {
+            output_format
+                .dump_formats(&spaces.space, &spaces.path, &opts.output, opts.pretty)
+                .unwrap()
+        }
+    } else {
+        for spaces in spaces_context {
+            // Print on stdout
+            dump_root(&spaces.space).unwrap();
+            println!();
+        }
+    }
 
     if let Some(count) = count_lock {
         let count = Arc::try_unwrap(count).unwrap().into_inner().unwrap();
