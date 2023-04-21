@@ -306,7 +306,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/ast")
-            .set_json(&AstPayload {
+            .set_json(AstPayload {
                 id: "1234".to_string(),
                 file_name: "foo.c".to_string(),
                 code: "int x = 1;".to_string(),
@@ -381,7 +381,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/ast")
-            .set_json(&AstPayload {
+            .set_json(AstPayload {
                 id: "1234".to_string(),
                 file_name: "foo.js".to_string(),
                 code: "var x = \"hello world\";".to_string(),
@@ -435,7 +435,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/comment")
-            .set_json(&WebCommentPayload {
+            .set_json(WebCommentPayload {
                 id: "1234".to_string(),
                 file_name: "foo.c".to_string(),
                 code: "int x = 1; // hello".to_string(),
@@ -460,7 +460,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/comment")
-            .set_json(&WebCommentPayload {
+            .set_json(WebCommentPayload {
                 id: "1234".to_string(),
                 file_name: "foo.unexisting_extension".to_string(),
                 code: "int x = 1; // hello".to_string(),
@@ -485,7 +485,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/comment")
-            .set_json(&WebCommentPayload {
+            .set_json(WebCommentPayload {
                 id: "1234".to_string(),
                 file_name: "foo.c".to_string(),
                 code: "int x = 1;".to_string(),
@@ -605,7 +605,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/metrics")
-            .set_json(&WebMetricsPayload {
+            .set_json(WebMetricsPayload {
                 id: "1234".to_string(),
                 file_name: "test.py".to_string(),
                 code: "# -*- Mode: Objective-C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-\n\ndef foo():\n    pass\n".to_string(),
@@ -687,7 +687,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/metrics")
-            .set_json(&WebMetricsPayload {
+            .set_json(WebMetricsPayload {
                 id: "1234".to_string(),
                 file_name: "test.py".to_string(),
                 code: "def foo():\n    pass\n".to_string(),
@@ -819,7 +819,7 @@ mod tests {
         .await;
         let req = test::TestRequest::post()
             .uri("/function")
-            .set_json(&WebCommentPayload {
+            .set_json(WebCommentPayload {
                 id: "1234".to_string(),
                 file_name: "test.py".to_string(),
                 code: "def foo():\n    pass\n\ndef bar():\n    pass".to_string(),
