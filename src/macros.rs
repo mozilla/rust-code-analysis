@@ -224,7 +224,7 @@ macro_rules! mk_code {
             pub struct $code { _guard: (), }
             impl private::CodeMetricsT for $code { }
 
-            impl TSLanguage for $code {
+            impl private::TSLanguage for $code {
                 type BaseLang = $camel;
 
                 fn get_lang() -> LANG {

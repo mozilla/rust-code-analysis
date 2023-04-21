@@ -43,15 +43,14 @@ pub(crate) mod private {
         Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi + Wmc + Abc + Npm + Npa
     {
     }
-}
 
-#[doc(hidden)]
-pub trait TSLanguage {
-    type BaseLang;
+    pub trait TSLanguage {
+        type BaseLang;
 
-    fn get_lang() -> LANG;
-    fn get_language() -> Language;
-    fn get_lang_name() -> &'static str;
+        fn get_lang() -> LANG;
+        fn get_language() -> Language;
+        fn get_lang_name() -> &'static str;
+    }
 }
 
 #[doc(hidden)]
