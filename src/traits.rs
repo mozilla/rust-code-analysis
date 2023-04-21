@@ -36,10 +36,13 @@ pub trait Callback {
     fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
 }
 
-#[doc(hidden)]
-pub trait CodeMetricsT:
-    Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi + Wmc + Abc + Npm + Npa
-{
+pub(crate) mod private {
+    use super::*;
+
+    pub trait CodeMetricsT:
+        Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi + Wmc + Abc + Npm + Npa
+    {
+    }
 }
 
 #[doc(hidden)]

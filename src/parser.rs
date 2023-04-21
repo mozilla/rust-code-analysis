@@ -12,7 +12,7 @@ use crate::node::Node;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
-pub struct Parser<T: TSLanguage + Checker + Getter + Alterator + CodeMetricsT> {
+pub struct Parser<T: TSLanguage + Checker + Getter + Alterator + private::CodeMetricsT> {
     code: Vec<u8>,
     tree: Tree,
     phantom: PhantomData<T>,
@@ -63,7 +63,7 @@ fn get_fake_code<T: TSLanguage>(
     }
 }
 
-impl<T: 'static + TSLanguage + Checker + Getter + Alterator + CodeMetricsT> ParserTrait
+impl<T: 'static + TSLanguage + Checker + Getter + Alterator + private::CodeMetricsT> ParserTrait
     for Parser<T>
 {
     type Checker = T;
