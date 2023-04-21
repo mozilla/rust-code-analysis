@@ -11,7 +11,7 @@ description = "Tool to compute and export code metrics"
 license = "MPL-2.0"
 
 [dependencies]
-aho-corasick = "^0.7"
+aho-corasick = "^1.0"
 crossbeam = { version = "^0.8", features = ["crossbeam-channel"] }
 fxhash = "0.2"
 globset = "^0.4"
