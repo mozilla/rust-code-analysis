@@ -38,7 +38,7 @@ pub struct Stats {
 }
 
 #[derive(Debug, Clone)]
-pub enum DeclKind {
+enum DeclKind {
     Var,
     Const,
 }
