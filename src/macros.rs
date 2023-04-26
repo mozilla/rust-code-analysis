@@ -236,7 +236,7 @@ macro_rules! mk_code {
                 }
 
                 fn get_lang_name() -> &'static str {
-                    stringify!($camel)
+                    $docname
                 }
             }
 
