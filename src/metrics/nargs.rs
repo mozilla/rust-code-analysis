@@ -228,16 +228,19 @@ impl NArgs for CppCode {
     }
 }
 
-impl NArgs for MozjsCode {}
-impl NArgs for JavascriptCode {}
-impl NArgs for TypescriptCode {}
-impl NArgs for TsxCode {}
-impl NArgs for PreprocCode {}
-impl NArgs for CcommentCode {}
-impl NArgs for RustCode {}
-impl NArgs for PythonCode {}
-impl NArgs for JavaCode {}
-impl NArgs for KotlinCode {}
+implement_metric_trait!(
+    [NArgs],
+    PythonCode,
+    MozjsCode,
+    JavascriptCode,
+    TypescriptCode,
+    TsxCode,
+    RustCode,
+    PreprocCode,
+    CcommentCode,
+    JavaCode,
+    KotlinCode
+);
 
 #[cfg(test)]
 mod tests {

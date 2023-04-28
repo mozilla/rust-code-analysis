@@ -200,17 +200,20 @@ where
     }
 }
 
-impl Nom for PythonCode {}
-impl Nom for MozjsCode {}
-impl Nom for JavascriptCode {}
-impl Nom for TypescriptCode {}
-impl Nom for TsxCode {}
-impl Nom for RustCode {}
-impl Nom for CppCode {}
-impl Nom for PreprocCode {}
-impl Nom for CcommentCode {}
-impl Nom for JavaCode {}
-impl Nom for KotlinCode {}
+implement_metric_trait!(
+    [Nom],
+    PythonCode,
+    MozjsCode,
+    JavascriptCode,
+    TypescriptCode,
+    TsxCode,
+    CppCode,
+    RustCode,
+    PreprocCode,
+    CcommentCode,
+    JavaCode,
+    KotlinCode
+);
 
 #[cfg(test)]
 mod tests {

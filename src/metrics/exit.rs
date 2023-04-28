@@ -110,7 +110,7 @@ pub trait Exit
 where
     Self: Checker,
 {
-    fn compute(_node: &Node, _stats: &mut Stats) {}
+    fn compute(node: &Node, stats: &mut Stats);
 }
 
 impl Exit for PythonCode {
@@ -179,10 +179,7 @@ impl Exit for JavaCode {
     }
 }
 
-impl Exit for KotlinCode {}
-
-impl Exit for PreprocCode {}
-impl Exit for CcommentCode {}
+implement_metric_trait!(Exit, KotlinCode, PreprocCode, CcommentCode);
 
 #[cfg(test)]
 mod tests {

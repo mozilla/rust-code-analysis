@@ -199,18 +199,8 @@ pub trait Npa
 where
     Self: Checker,
 {
-    fn compute(_node: &Node, _stats: &mut Stats) {}
+    fn compute(node: &Node, stats: &mut Stats);
 }
-
-impl Npa for PythonCode {}
-impl Npa for MozjsCode {}
-impl Npa for JavascriptCode {}
-impl Npa for TypescriptCode {}
-impl Npa for TsxCode {}
-impl Npa for RustCode {}
-impl Npa for CppCode {}
-impl Npa for PreprocCode {}
-impl Npa for CcommentCode {}
 
 impl Npa for JavaCode {
     fn compute(node: &Node, stats: &mut Stats) {
@@ -266,7 +256,19 @@ impl Npa for JavaCode {
     }
 }
 
-impl Npa for KotlinCode {}
+implement_metric_trait!(
+    Npa,
+    PythonCode,
+    MozjsCode,
+    JavascriptCode,
+    TypescriptCode,
+    TsxCode,
+    RustCode,
+    CppCode,
+    PreprocCode,
+    CcommentCode,
+    KotlinCode
+);
 
 #[cfg(test)]
 mod tests {

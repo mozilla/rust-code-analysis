@@ -105,7 +105,7 @@ pub trait Cyclomatic
 where
     Self: Checker,
 {
-    fn compute(_node: &Node, _stats: &mut Stats) {}
+    fn compute(node: &Node, stats: &mut Stats);
 }
 
 impl Cyclomatic for PythonCode {
@@ -204,9 +204,6 @@ impl Cyclomatic for CppCode {
     }
 }
 
-impl Cyclomatic for PreprocCode {}
-impl Cyclomatic for CcommentCode {}
-
 impl Cyclomatic for JavaCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Java::*;
@@ -220,7 +217,7 @@ impl Cyclomatic for JavaCode {
     }
 }
 
-impl Cyclomatic for KotlinCode {}
+implement_metric_trait!(Cyclomatic, KotlinCode, PreprocCode, CcommentCode);
 
 #[cfg(test)]
 mod tests {

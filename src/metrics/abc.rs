@@ -249,7 +249,7 @@ pub trait Abc
 where
     Self: Checker,
 {
-    fn compute(_node: &Node, _stats: &mut Stats) {}
+    fn compute(node: &Node, stats: &mut Stats);
 }
 
 // Inspects the content of Java parenthesized expressions
@@ -341,16 +341,19 @@ fn java_count_unary_conditions(list_node: &Node, conditions: &mut f64) {
     }
 }
 
-impl Abc for PythonCode {}
-impl Abc for MozjsCode {}
-impl Abc for JavascriptCode {}
-impl Abc for TypescriptCode {}
-impl Abc for TsxCode {}
-impl Abc for RustCode {}
-impl Abc for CppCode {}
-impl Abc for PreprocCode {}
-impl Abc for CcommentCode {}
-impl Abc for KotlinCode {}
+implement_metric_trait!(
+    Abc,
+    PythonCode,
+    MozjsCode,
+    JavascriptCode,
+    TypescriptCode,
+    TsxCode,
+    RustCode,
+    CppCode,
+    PreprocCode,
+    CcommentCode,
+    KotlinCode
+);
 
 // Fitzpatrick, Jerry (1997). "Applying the ABC metric to C, C++ and Java". C++ Report.
 // Source: https://www.softwarerenovation.com/Articles.aspx

@@ -101,17 +101,20 @@ where
     }
 }
 
-impl Mi for RustCode {}
-impl Mi for CppCode {}
-impl Mi for PythonCode {}
-impl Mi for MozjsCode {}
-impl Mi for JavascriptCode {}
-impl Mi for TypescriptCode {}
-impl Mi for TsxCode {}
-impl Mi for PreprocCode {}
-impl Mi for CcommentCode {}
-impl Mi for JavaCode {}
-impl Mi for KotlinCode {}
+implement_metric_trait!(
+    [Mi],
+    PythonCode,
+    MozjsCode,
+    JavascriptCode,
+    TypescriptCode,
+    TsxCode,
+    RustCode,
+    CppCode,
+    PreprocCode,
+    CcommentCode,
+    JavaCode,
+    KotlinCode
+);
 
 #[cfg(test)]
 mod tests {

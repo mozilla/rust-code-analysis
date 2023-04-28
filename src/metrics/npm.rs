@@ -199,18 +199,8 @@ pub trait Npm
 where
     Self: Checker,
 {
-    fn compute(_node: &Node, _stats: &mut Stats) {}
+    fn compute(node: &Node, stats: &mut Stats);
 }
-
-impl Npm for PythonCode {}
-impl Npm for MozjsCode {}
-impl Npm for JavascriptCode {}
-impl Npm for TypescriptCode {}
-impl Npm for TsxCode {}
-impl Npm for RustCode {}
-impl Npm for CppCode {}
-impl Npm for PreprocCode {}
-impl Npm for CcommentCode {}
 
 impl Npm for JavaCode {
     fn compute(node: &Node, stats: &mut Stats) {
@@ -257,7 +247,19 @@ impl Npm for JavaCode {
     }
 }
 
-impl Npm for KotlinCode {}
+implement_metric_trait!(
+    Npm,
+    PythonCode,
+    MozjsCode,
+    JavascriptCode,
+    TypescriptCode,
+    TsxCode,
+    RustCode,
+    CppCode,
+    PreprocCode,
+    CcommentCode,
+    KotlinCode
+);
 
 #[cfg(test)]
 mod tests {
