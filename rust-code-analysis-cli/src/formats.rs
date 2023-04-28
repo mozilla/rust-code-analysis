@@ -26,9 +26,7 @@ impl Format {
         output_path: &Option<PathBuf>,
         pretty: bool,
     ) -> std::io::Result<()> {
-        if output_path.is_none() {
-            self.dump_stdout(space, pretty)
-        } else {
+        if let Some(output_path) = output_path {
             let format_ext = match self {
                 Format::Cbor => ".cbor",
                 Format::Json => ".json",
@@ -59,7 +57,7 @@ impl Format {
             let filename = cleaned_path.join("/") + format_ext;
 
             // Build the file path
-            let format_path = output_path.as_ref().unwrap().join(filename);
+            let format_path = output_path.join(filename);
 
             // Create directories
             create_dir_all(format_path.parent().unwrap()).unwrap();
@@ -88,6 +86,8 @@ impl Format {
                 Format::Yaml => serde_yaml::to_writer(format_file, &space)
                     .map_err(|e| Error::new(ErrorKind::Other, e.to_string())),
             }
+        } else {
+            self.dump_stdout(space, pretty)
         }
     }
 
