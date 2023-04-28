@@ -36,7 +36,7 @@ pub trait Callback {
     fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
 }
 
-pub(crate) mod private {
+pub(crate) mod _private {
     use super::*;
 
     pub trait CodeMetricsT:
