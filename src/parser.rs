@@ -18,8 +18,9 @@ use crate::npm::Npm;
 use crate::wmc::Wmc;
 
 use crate::alterator::Alterator;
-use crate::c_macro;
 use crate::getter::Getter;
+
+use crate::c_macro;
 use crate::langs::*;
 use crate::node::Node;
 use crate::preproc::{get_macros, PreprocResults};
