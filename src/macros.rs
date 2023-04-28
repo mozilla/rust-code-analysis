@@ -13,6 +13,56 @@ macro_rules! get_language {
     };
 }
 
+macro_rules! implement_metric_trait {
+    (Abc, $($code:ident),+) => (
+        $(
+           impl Abc for $code {
+               fn compute(_node: &Node, _stats: &mut Stats) {}
+           }
+        )+
+    );
+    (Cognitive, $($code:ident),+) => (
+        $(
+           impl Cognitive for $code {
+               fn compute(_node: &Node, _stats: &mut Stats, _nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,) {}
+           }
+        )+
+    );
+    (Halstead, $($code:ident),+) => (
+        $(
+           impl Halstead for $code {
+               fn compute<'a>(_node: &Node<'a>, _code: &'a [u8], _halstead_maps: &mut HalsteadMaps<'a>) {}
+           }
+        )+
+    );
+    (Loc, $($code:ident),+) => (
+        $(
+           impl Loc for $code {
+               fn compute(_node: &Node, _stats: &mut Stats, _is_func_space: bool, _is_unit: bool) {}
+           }
+        )+
+    );
+    (Wmc, $($code:ident),+) => (
+        $(
+           impl Wmc for $code {
+               fn compute(_space_kind: SpaceKind, _cyclomatic: &cyclomatic::Stats, _stats: &mut Stats) {}
+           }
+        )+
+    );
+    ([$trait:ident], $($code:ident),+) => (
+        $(
+           impl $trait for $code {}
+        )+
+    );
+    ($trait:ident, $($code:ident),+) => (
+        $(
+           impl $trait for $code {
+               fn compute(_node: &Node, _stats: &mut Stats) {}
+           }
+        )+
+    )
+}
+
 macro_rules! mk_enum {
     ( $( $camel:ident, $description:expr ),* ) => {
         /// The list of supported languages.
