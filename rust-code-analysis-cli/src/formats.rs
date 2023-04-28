@@ -27,32 +27,7 @@ impl Format {
         pretty: bool,
     ) -> std::io::Result<()> {
         if output_path.is_none() {
-            let stdout = std::io::stdout();
-            let mut stdout = stdout.lock();
-
-            match self {
-                Format::Cbor => Err(Error::new(
-                    ErrorKind::Other,
-                    "Cbor format cannot be printed to stdout",
-                )),
-                Format::Json => {
-                    let json_data = if pretty {
-                        serde_json::to_string_pretty(&space).unwrap()
-                    } else {
-                        serde_json::to_string(&space).unwrap()
-                    };
-                    writeln!(stdout, "{json_data}")
-                }
-                Format::Toml => {
-                    let toml_data = if pretty {
-                        toml::to_string_pretty(&space).unwrap()
-                    } else {
-                        toml::to_string(&space).unwrap()
-                    };
-                    writeln!(stdout, "{toml_data}")
-                }
-                Format::Yaml => writeln!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
-            }
+            self.dump_stdout(space, pretty)
         } else {
             let format_ext = match self {
                 Format::Cbor => ".cbor",
@@ -113,6 +88,35 @@ impl Format {
                 Format::Yaml => serde_yaml::to_writer(format_file, &space)
                     .map_err(|e| Error::new(ErrorKind::Other, e.to_string())),
             }
+        }
+    }
+
+    fn dump_stdout<T: Serialize>(&self, space: &T, pretty: bool) -> std::io::Result<()> {
+        let stdout = std::io::stdout();
+        let mut stdout = stdout.lock();
+
+        match self {
+            Self::Cbor => Err(Error::new(
+                ErrorKind::Other,
+                "Cbor format cannot be printed to stdout",
+            )),
+            Self::Json => {
+                let json_data = if pretty {
+                    serde_json::to_string_pretty(&space).unwrap()
+                } else {
+                    serde_json::to_string(&space).unwrap()
+                };
+                writeln!(stdout, "{json_data}")
+            }
+            Self::Toml => {
+                let toml_data = if pretty {
+                    toml::to_string_pretty(&space).unwrap()
+                } else {
+                    toml::to_string(&space).unwrap()
+                };
+                writeln!(stdout, "{toml_data}")
+            }
+            Self::Yaml => writeln!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
         }
     }
 }
