@@ -185,7 +185,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Nom
 where
     Self: Checker,

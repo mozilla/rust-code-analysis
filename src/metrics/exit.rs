@@ -106,7 +106,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Exit
 where
     Self: Checker,

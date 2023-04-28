@@ -499,7 +499,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Loc
 where
     Self: Checker,

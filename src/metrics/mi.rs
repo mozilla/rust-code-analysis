@@ -82,7 +82,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Mi
 where
     Self: Checker,

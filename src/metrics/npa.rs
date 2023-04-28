@@ -195,7 +195,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Npa
 where
     Self: Checker,

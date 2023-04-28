@@ -27,7 +27,6 @@ pub enum HalsteadType {
     Unknown,
 }
 
-#[doc(hidden)]
 #[derive(Debug, Default, Clone)]
 pub struct HalsteadMaps<'a> {
     pub(crate) operators: FxHashMap<u16, u64>,
@@ -247,7 +246,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Halstead
 where
     Self: Checker,

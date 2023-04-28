@@ -119,7 +119,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Cognitive
 where
     Self: Checker,

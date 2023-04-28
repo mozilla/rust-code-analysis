@@ -101,7 +101,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Cyclomatic
 where
     Self: Checker,

@@ -116,7 +116,6 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Wmc
 where
     Self: Checker,

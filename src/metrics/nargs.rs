@@ -192,7 +192,6 @@ fn compute_args<T: Checker>(node: &Node, nargs: &mut usize) {
     }
 }
 
-#[doc(hidden)]
 pub trait NArgs
 where
     Self: Checker,
