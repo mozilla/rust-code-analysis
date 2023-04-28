@@ -19,7 +19,6 @@ use crate::wmc::Wmc;
 
 use crate::alterator::Alterator;
 use crate::c_macro;
-use crate::checker::*;
 use crate::getter::Getter;
 use crate::langs::*;
 use crate::node::Node;
