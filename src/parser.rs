@@ -12,7 +12,7 @@ use crate::node::Node;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
-pub struct Parser<T: private::TSLanguage + Checker + Getter + Alterator + private::CodeMetricsT> {
+pub struct Parser<T: _private::TSLanguage + Checker + Getter + Alterator + _private::CodeMetricsT> {
     code: Vec<u8>,
     tree: Tree,
     phantom: PhantomData<T>,
@@ -45,7 +45,7 @@ impl Filter {
 }
 
 #[inline(always)]
-fn get_fake_code<T: private::TSLanguage>(
+fn get_fake_code<T: _private::TSLanguage>(
     code: &[u8],
     path: &Path,
     pr: Option<Arc<PreprocResults>>,
@@ -63,7 +63,7 @@ fn get_fake_code<T: private::TSLanguage>(
     }
 }
 
-impl<T: 'static + private::TSLanguage + Checker + Getter + Alterator + private::CodeMetricsT>
+impl<T: 'static + _private::TSLanguage + Checker + Getter + Alterator + _private::CodeMetricsT>
     ParserTrait for Parser<T>
 {
     type Checker = T;
