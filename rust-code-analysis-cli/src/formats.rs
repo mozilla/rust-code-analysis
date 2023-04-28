@@ -27,40 +27,7 @@ impl Format {
         pretty: bool,
     ) -> std::io::Result<()> {
         if let Some(output_path) = output_path {
-            let format_ext = match self {
-                Format::Cbor => ".cbor",
-                Format::Json => ".json",
-                Format::Toml => ".toml",
-                Format::Yaml => ".yml",
-            };
-
-            // Remove root /
-            let path = path.strip_prefix("/").unwrap_or(path);
-
-            // Remove root ./
-            let path = path.strip_prefix("./").unwrap_or(path);
-
-            // Replace .. with . to keep files inside the output folder
-            let cleaned_path: Vec<&str> = path
-                .iter()
-                .map(|os_str| {
-                    let s_str = os_str.to_str().unwrap();
-                    if s_str == ".." {
-                        "."
-                    } else {
-                        s_str
-                    }
-                })
-                .collect();
-
-            // Create the filename
-            let filename = cleaned_path.join("/") + format_ext;
-
-            // Build the file path
-            let format_path = output_path.join(filename);
-
-            // Create directories
-            create_dir_all(format_path.parent().unwrap()).unwrap();
+            let format_path = self.create_unique_output_filename(path, output_path);
 
             let mut format_file = File::create(format_path)?;
             match self {
@@ -118,6 +85,45 @@ impl Format {
             }
             Self::Yaml => writeln!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
         }
+    }
+
+    fn create_unique_output_filename(&self, path: &Path, output_path: &PathBuf) -> PathBuf {
+        let format_ext = match self {
+            Self::Cbor => ".cbor",
+            Self::Json => ".json",
+            Self::Toml => ".toml",
+            Self::Yaml => ".yml",
+        };
+
+        // Remove root /
+        let path = path.strip_prefix("/").unwrap_or(path);
+
+        // Remove root ./
+        let path = path.strip_prefix("./").unwrap_or(path);
+
+        // Replace .. with . to keep files inside the output folder
+        let cleaned_path: Vec<&str> = path
+            .iter()
+            .map(|os_str| {
+                let s_str = os_str.to_str().unwrap();
+                if s_str == ".." {
+                    "."
+                } else {
+                    s_str
+                }
+            })
+            .collect();
+
+        // Create the filename
+        let filename = cleaned_path.join("/") + format_ext;
+
+        // Build the file path
+        let format_path = output_path.join(filename);
+
+        // Create directories
+        create_dir_all(format_path.parent().unwrap()).unwrap();
+
+        format_path
     }
 }
 
