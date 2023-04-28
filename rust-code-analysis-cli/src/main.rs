@@ -92,7 +92,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     } else if cfg.metrics {
         if let Some(output_format) = &cfg.output_format {
             if let Some(space) = get_function_spaces(&language, source, &path, pr) {
-                output_format.dump_formats(&space, &path, &cfg.output, cfg.pretty)
+                output_format.dump_formats(space, path, cfg.output.as_ref(), cfg.pretty)
             } else {
                 Ok(())
             }
@@ -104,7 +104,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
     } else if cfg.ops {
         if let Some(output_format) = &cfg.output_format {
             let ops = get_ops(&language, source, &path, pr).unwrap();
-            output_format.dump_formats(&ops, &path, &cfg.output, cfg.pretty)
+            output_format.dump_formats(ops, path, cfg.output.as_ref(), cfg.pretty)
         } else {
             let cfg = OpsCfg { path };
             let path = cfg.path.clone();

@@ -21,9 +21,9 @@ impl Format {
 
     pub fn dump_formats<T: Serialize>(
         &self,
-        space: &T,
-        path: &Path,
-        output_path: &Option<PathBuf>,
+        space: T,
+        path: PathBuf,
+        output_path: Option<&PathBuf>,
         pretty: bool,
     ) -> std::io::Result<()> {
         if let Some(output_path) = output_path {
@@ -34,7 +34,7 @@ impl Format {
         }
     }
 
-    fn dump_stdout<T: Serialize>(&self, space: &T, pretty: bool) -> std::io::Result<()> {
+    fn dump_stdout<T: Serialize>(&self, space: T, pretty: bool) -> std::io::Result<()> {
         let stdout = std::io::stdout();
         let mut stdout = stdout.lock();
 
@@ -65,7 +65,7 @@ impl Format {
 
     fn dump_on_file<T: Serialize>(
         &self,
-        space: &T,
+        space: T,
         path: PathBuf,
         pretty: bool,
     ) -> std::io::Result<()> {
@@ -95,7 +95,7 @@ impl Format {
         }
     }
 
-    fn create_unique_output_filename(&self, path: &Path, output_path: &PathBuf) -> PathBuf {
+    fn create_unique_output_filename(&self, path: PathBuf, output_path: &Path) -> PathBuf {
         let format_ext = match self {
             Self::Cbor => ".cbor",
             Self::Json => ".json",
@@ -104,7 +104,7 @@ impl Format {
         };
 
         // Remove root /
-        let path = path.strip_prefix("/").unwrap_or(path);
+        let path = path.as_path().strip_prefix("/").unwrap_or(path.as_path());
 
         // Remove root ./
         let path = path.strip_prefix("./").unwrap_or(path);
