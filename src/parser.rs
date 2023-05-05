@@ -3,16 +3,47 @@ use std::path::Path;
 use std::sync::Arc;
 use tree_sitter::{Parser as TSParser, Tree};
 
+use crate::abc::Abc;
+use crate::checker::Checker;
+use crate::cognitive::Cognitive;
+use crate::cyclomatic::Cyclomatic;
+use crate::exit::Exit;
+use crate::halstead::Halstead;
+use crate::loc::Loc;
+use crate::mi::Mi;
+use crate::nargs::NArgs;
+use crate::nom::Nom;
+use crate::npa::Npa;
+use crate::npm::Npm;
+use crate::wmc::Wmc;
+
 use crate::alterator::Alterator;
-use crate::c_macro;
-use crate::checker::*;
 use crate::getter::Getter;
+
+use crate::c_macro;
 use crate::langs::*;
 use crate::node::Node;
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
-pub struct Parser<T: _private::TSLanguage + Checker + Getter + Alterator + _private::CodeMetricsT> {
+pub struct Parser<
+    T: _private::TSLanguage
+        + Alterator
+        + Checker
+        + Getter
+        + Abc
+        + Cognitive
+        + Cyclomatic
+        + Exit
+        + Halstead
+        + Loc
+        + Mi
+        + NArgs
+        + Nom
+        + Npa
+        + Npm
+        + Wmc,
+> {
     code: Vec<u8>,
     tree: Tree,
     phantom: PhantomData<T>,
@@ -63,8 +94,25 @@ fn get_fake_code<T: _private::TSLanguage>(
     }
 }
 
-impl<T: 'static + _private::TSLanguage + Checker + Getter + Alterator + _private::CodeMetricsT>
-    ParserTrait for Parser<T>
+impl<
+        T: 'static
+            + _private::TSLanguage
+            + Alterator
+            + Checker
+            + Getter
+            + Abc
+            + Cognitive
+            + Cyclomatic
+            + Exit
+            + Halstead
+            + Loc
+            + Mi
+            + NArgs
+            + Nom
+            + Npa
+            + Npm
+            + Wmc,
+    > ParserTrait for Parser<T>
 {
     type Checker = T;
     type Getter = T;

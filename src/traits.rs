@@ -39,11 +39,6 @@ pub trait Callback {
 pub(crate) mod _private {
     use super::*;
 
-    pub trait CodeMetricsT:
-        Cognitive + Cyclomatic + Exit + Halstead + NArgs + Loc + Nom + Mi + Wmc + Abc + Npm + Npa
-    {
-    }
-
     pub trait TSLanguage {
         type BaseLang;
 

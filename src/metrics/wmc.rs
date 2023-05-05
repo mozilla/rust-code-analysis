@@ -116,23 +116,12 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Wmc
 where
     Self: Checker,
 {
-    fn compute(_space_kind: SpaceKind, _cyclomatic: &cyclomatic::Stats, _stats: &mut Stats) {}
+    fn compute(space_kind: SpaceKind, cyclomatic: &cyclomatic::Stats, stats: &mut Stats);
 }
-
-impl Wmc for PythonCode {}
-impl Wmc for MozjsCode {}
-impl Wmc for JavascriptCode {}
-impl Wmc for TypescriptCode {}
-impl Wmc for TsxCode {}
-impl Wmc for RustCode {}
-impl Wmc for CppCode {}
-impl Wmc for PreprocCode {}
-impl Wmc for CcommentCode {}
 
 impl Wmc for JavaCode {
     fn compute(space_kind: SpaceKind, cyclomatic: &cyclomatic::Stats, stats: &mut Stats) {
@@ -150,7 +139,19 @@ impl Wmc for JavaCode {
     }
 }
 
-impl Wmc for KotlinCode {}
+implement_metric_trait!(
+    Wmc,
+    PythonCode,
+    MozjsCode,
+    JavascriptCode,
+    TypescriptCode,
+    TsxCode,
+    RustCode,
+    CppCode,
+    PreprocCode,
+    CcommentCode,
+    KotlinCode
+);
 
 #[cfg(test)]
 mod tests {

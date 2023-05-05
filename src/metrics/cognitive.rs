@@ -119,17 +119,15 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Cognitive
 where
     Self: Checker,
 {
     fn compute(
-        _node: &Node,
-        _stats: &mut Stats,
-        _nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
-    ) {
-    }
+        node: &Node,
+        stats: &mut Stats,
+        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+    );
 }
 
 fn compute_booleans<T: std::cmp::PartialEq + std::convert::From<u16>>(
@@ -446,10 +444,7 @@ impl Cognitive for TsxCode {
     js_cognitive!(Tsx);
 }
 
-impl Cognitive for PreprocCode {}
-impl Cognitive for CcommentCode {}
-impl Cognitive for JavaCode {}
-impl Cognitive for KotlinCode {}
+implement_metric_trait!(Cognitive, PreprocCode, CcommentCode, JavaCode, KotlinCode);
 
 #[cfg(test)]
 mod tests {

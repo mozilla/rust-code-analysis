@@ -499,12 +499,11 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Loc
 where
     Self: Checker,
 {
-    fn compute(_node: &Node, _stats: &mut Stats, _is_func_space: bool, _is_unit: bool) {}
+    fn compute(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool);
 }
 
 #[inline(always)]
@@ -815,10 +814,7 @@ impl Loc for JavaCode {
     }
 }
 
-impl Loc for KotlinCode {}
-
-impl Loc for PreprocCode {}
-impl Loc for CcommentCode {}
+implement_metric_trait!(Loc, PreprocCode, CcommentCode, KotlinCode);
 
 #[cfg(test)]
 mod tests {

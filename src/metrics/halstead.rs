@@ -27,7 +27,6 @@ pub enum HalsteadType {
     Unknown,
 }
 
-#[doc(hidden)]
 #[derive(Debug, Default, Clone)]
 pub struct HalsteadMaps<'a> {
     pub(crate) operators: FxHashMap<u16, u64>,
@@ -247,12 +246,11 @@ impl Stats {
     }
 }
 
-#[doc(hidden)]
 pub trait Halstead
 where
     Self: Checker,
 {
-    fn compute<'a>(_node: &Node<'a>, _code: &'a [u8], _halstead_maps: &mut HalsteadMaps<'a>) {}
+    fn compute<'a>(node: &Node<'a>, code: &'a [u8], halstead_maps: &mut HalsteadMaps<'a>);
 }
 
 #[inline(always)]
@@ -331,10 +329,7 @@ impl Halstead for JavaCode {
     }
 }
 
-impl Halstead for KotlinCode {}
-
-impl Halstead for PreprocCode {}
-impl Halstead for CcommentCode {}
+implement_metric_trait!(Halstead, KotlinCode, PreprocCode, CcommentCode);
 
 #[cfg(test)]
 mod tests {
