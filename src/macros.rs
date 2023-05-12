@@ -102,6 +102,16 @@ macro_rules! mk_impl_lang {
                     )*
                 }
             }
+
+            // Returns a tree-sitter language.
+            // This function is only used to construct a parser.
+            pub(crate) fn get_ts_language(&self) -> Language {
+                    match self {
+                        $(
+                            LANG::$camel => get_language!($name),
+                        )*
+                    }
+            }
         }
     };
 }
@@ -273,15 +283,11 @@ macro_rules! mk_code {
         $(
             pub struct $code { _guard: (), }
 
-            impl _private::TSLanguage for $code {
+            impl LanguageInfo for $code {
                 type BaseLang = $camel;
 
                 fn get_lang() -> LANG {
                     LANG::$camel
-                }
-
-                fn get_language() -> Language {
-                    get_language!($name)
                 }
 
                 fn get_lang_name() -> &'static str {

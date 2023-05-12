@@ -27,7 +27,7 @@ use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
 pub struct Parser<
-    T: _private::TSLanguage
+    T: LanguageInfo
         + Alterator
         + Checker
         + Getter
@@ -76,7 +76,7 @@ impl Filter {
 }
 
 #[inline(always)]
-fn get_fake_code<T: _private::TSLanguage>(
+fn get_fake_code<T: LanguageInfo>(
     code: &[u8],
     path: &Path,
     pr: Option<Arc<PreprocResults>>,
@@ -96,7 +96,7 @@ fn get_fake_code<T: _private::TSLanguage>(
 
 impl<
         T: 'static
-            + _private::TSLanguage
+            + LanguageInfo
             + Alterator
             + Checker
             + Getter
@@ -131,7 +131,9 @@ impl<
 
     fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self {
         let mut parser = TSParser::new();
-        parser.set_language(T::get_language()).unwrap();
+        parser
+            .set_language(T::get_lang().get_ts_language())
+            .unwrap();
         let fake_code = get_fake_code::<T>(&code, path, pr);
         /*let tree = if let Some(fake) = fake_code {
             parser.parse(&fake, None).unwrap()

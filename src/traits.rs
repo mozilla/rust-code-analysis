@@ -1,6 +1,5 @@
 use std::path::Path;
 use std::sync::Arc;
-use tree_sitter::Language;
 
 use crate::abc::Abc;
 use crate::alterator::Alterator;
@@ -36,16 +35,11 @@ pub trait Callback {
     fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res;
 }
 
-pub(crate) mod _private {
-    use super::*;
+pub trait LanguageInfo {
+    type BaseLang;
 
-    pub trait TSLanguage {
-        type BaseLang;
-
-        fn get_lang() -> LANG;
-        fn get_language() -> Language;
-        fn get_lang_name() -> &'static str;
-    }
+    fn get_lang() -> LANG;
+    fn get_lang_name() -> &'static str;
 }
 
 #[doc(hidden)]
