@@ -27,111 +27,37 @@ impl Format {
         pretty: bool,
     ) -> std::io::Result<()> {
         if let Some(output_path) = output_path {
-            let format_path = self.create_unique_output_filename(path, output_path);
-            self.dump_on_file(space, format_path, pretty)
+            match self {
+                Self::Cbor => Ok(Cbor::with_writer(space, path, output_path)),
+                Self::Json => Ok(Json::with_pretty_writer(space, path, output_path, pretty)),
+                Self::Toml => Ok(Toml::with_pretty_writer(space, path, output_path, pretty)),
+                Self::Yaml => Ok(Yaml::with_writer(space, path, output_path)),
+            }
         } else {
-            self.dump_stdout(space, pretty)
+            match self {
+                Self::Json => Ok(Json::write_on_stdout_pretty(space, pretty)),
+                Self::Toml => Ok(Toml::write_on_stdout_pretty(space, pretty)),
+                Self::Yaml => Ok(Yaml::write_on_stdout(space)),
+                Self::Cbor => Err(Error::new(
+                    ErrorKind::Other,
+                    "Cbor format cannot be printed to stdout",
+                )),
+            }
         }
     }
+}
 
-    fn dump_stdout<T: Serialize>(&self, space: T, pretty: bool) -> std::io::Result<()> {
-        let stdout = std::io::stdout();
-        let mut stdout = stdout.lock();
+impl FromStr for Format {
+    type Err = String;
 
-        match self {
-            Self::Cbor => Err(Error::new(
-                ErrorKind::Other,
-                "Cbor format cannot be printed to stdout",
-            )),
-            Self::Json => {
-                let json_data = if pretty {
-                    serde_json::to_string_pretty(&space).unwrap()
-                } else {
-                    serde_json::to_string(&space).unwrap()
-                };
-                writeln!(stdout, "{json_data}")
-            }
-            Self::Toml => {
-                let toml_data = if pretty {
-                    toml::to_string_pretty(&space).unwrap()
-                } else {
-                    toml::to_string(&space).unwrap()
-                };
-                writeln!(stdout, "{toml_data}")
-            }
-            Self::Yaml => writeln!(stdout, "{}", serde_yaml::to_string(&space).unwrap()),
+    fn from_str(format: &str) -> Result<Self, Self::Err> {
+        match format {
+            "cbor" => Ok(Self::Cbor),
+            "json" => Ok(Self::Json),
+            "toml" => Ok(Self::Toml),
+            "yaml" => Ok(Self::Yaml),
+            format => Err(format!("{format:?} is not a supported format")),
         }
-    }
-
-    fn dump_on_file<T: Serialize>(
-        &self,
-        space: T,
-        path: PathBuf,
-        pretty: bool,
-    ) -> std::io::Result<()> {
-        let mut format_file = File::create(path)?;
-        match self {
-            Self::Cbor => serde_cbor::to_writer(format_file, &space)
-                .map_err(|e| Error::new(ErrorKind::Other, e.to_string())),
-            Self::Json => {
-                if pretty {
-                    serde_json::to_writer_pretty(format_file, &space)
-                        .map_err(|e| Error::new(ErrorKind::Other, e.to_string()))
-                } else {
-                    serde_json::to_writer(format_file, &space)
-                        .map_err(|e| Error::new(ErrorKind::Other, e.to_string()))
-                }
-            }
-            Self::Toml => {
-                let toml_data = if pretty {
-                    toml::to_string_pretty(&space).unwrap()
-                } else {
-                    toml::to_string(&space).unwrap()
-                };
-                format_file.write_all(toml_data.as_bytes())
-            }
-            Self::Yaml => serde_yaml::to_writer(format_file, &space)
-                .map_err(|e| Error::new(ErrorKind::Other, e.to_string())),
-        }
-    }
-
-    fn create_unique_output_filename(&self, path: PathBuf, output_path: &Path) -> PathBuf {
-        let format_ext = match self {
-            Self::Cbor => ".cbor",
-            Self::Json => ".json",
-            Self::Toml => ".toml",
-            Self::Yaml => ".yml",
-        };
-
-        // Remove root /
-        let path = path.as_path().strip_prefix("/").unwrap_or(path.as_path());
-
-        // Remove root ./
-        let path = path.strip_prefix("./").unwrap_or(path);
-
-        // Replace .. with . to keep files inside the output folder
-        let cleaned_path: Vec<&str> = path
-            .iter()
-            .map(|os_str| {
-                let s_str = os_str.to_str().unwrap();
-                if s_str == ".." {
-                    "."
-                } else {
-                    s_str
-                }
-            })
-            .collect();
-
-        // Create the filename
-        let filename = cleaned_path.join("/") + format_ext;
-
-        // Build the file path
-        let format_path = output_path.join(filename);
-
-        // Create directories
-        create_dir_all(format_path.parent().unwrap()).unwrap();
-
-        format_path
     }
 }
 
@@ -311,19 +237,5 @@ impl WriteFile for Cbor {
 
     fn with_writer<T: Serialize>(content: T, path: PathBuf, output_path: &Path) {
         serde_cbor::to_writer(Self::open_file(path, output_path), &content).unwrap()
-    }
-}
-
-impl FromStr for Format {
-    type Err = String;
-
-    fn from_str(format: &str) -> Result<Self, Self::Err> {
-        match format {
-            "cbor" => Ok(Self::Cbor),
-            "json" => Ok(Self::Json),
-            "toml" => Ok(Self::Toml),
-            "yaml" => Ok(Self::Yaml),
-            format => Err(format!("{format:?} is not a supported format")),
-        }
     }
 }
