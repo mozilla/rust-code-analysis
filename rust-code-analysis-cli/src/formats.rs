@@ -57,11 +57,13 @@ impl FromStr for Format {
     }
 }
 
+#[inline(always)]
 fn print_on_stdout(content: String) {
     writeln!(std::io::stdout().lock(), "{content}").unwrap();
 }
 
 trait WriteOnStdout {
+    #[inline(always)]
     fn write_on_stdout<T: Serialize>(content: T) {
         print_on_stdout(Self::format(content));
     }
