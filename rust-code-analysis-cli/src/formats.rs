@@ -1,6 +1,5 @@
 use std::fs::{create_dir_all, File};
 use std::io::Write;
-use std::io::{Error, ErrorKind};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
@@ -25,23 +24,20 @@ impl Format {
         path: PathBuf,
         output_path: Option<&PathBuf>,
         pretty: bool,
-    ) -> std::io::Result<()> {
+    ) {
         if let Some(output_path) = output_path {
             match self {
-                Self::Cbor => Ok(Cbor::with_writer(space, path, output_path)),
-                Self::Json => Ok(Json::with_pretty_writer(space, path, output_path, pretty)),
-                Self::Toml => Ok(Toml::with_pretty_writer(space, path, output_path, pretty)),
-                Self::Yaml => Ok(Yaml::with_writer(space, path, output_path)),
+                Self::Cbor => Cbor::with_writer(space, path, output_path),
+                Self::Json => Json::with_pretty_writer(space, path, output_path, pretty),
+                Self::Toml => Toml::with_pretty_writer(space, path, output_path, pretty),
+                Self::Yaml => Yaml::with_writer(space, path, output_path),
             }
         } else {
             match self {
-                Self::Json => Ok(Json::write_on_stdout_pretty(space, pretty)),
-                Self::Toml => Ok(Toml::write_on_stdout_pretty(space, pretty)),
-                Self::Yaml => Ok(Yaml::write_on_stdout(space)),
-                Self::Cbor => Err(Error::new(
-                    ErrorKind::Other,
-                    "Cbor format cannot be printed to stdout",
-                )),
+                Self::Json => Json::write_on_stdout_pretty(space, pretty),
+                Self::Toml => Toml::write_on_stdout_pretty(space, pretty),
+                Self::Yaml => Yaml::write_on_stdout(space),
+                Self::Cbor => panic!("Cbor format cannot be printed to stdout"),
             }
         }
     }
