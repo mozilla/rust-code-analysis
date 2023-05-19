@@ -140,6 +140,7 @@ tasks:
             - set CARGO_PATH=%USERPROFILE%\.cargo\bin
             - set PATH=%RUSTUP_INIT_PATH%;%CARGO_PATH%;%VSWHERE%;%PATH%
             - set VSWHERE_CMD=vswhere -latest -products * -find %VS_BINS%
+            - set CURL_SSL_BACKEND=openssl
             - FOR /F "tokens=*" %%o IN ('%VSWHERE_CMD%') do (SET LIB_PATH=%%o)
             - set PATH=%LIB_PATH%;%PATH%
             - rustup-init -yv --default-toolchain stable ^
