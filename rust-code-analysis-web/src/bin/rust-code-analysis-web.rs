@@ -1,15 +1,8 @@
-// After adding new fields for min and max in the json (server.rs line 630) this error arose:
-// error: recursion limit reached while expanding `json_internal!`
-// This solution was proposed as help by the compiler
-// for the full error details check here :https://github.com/mozilla/rust-code-analysis/pull/793#discussion_r817610530
-#![recursion_limit = "256"]
-mod web;
-
 use std::thread::available_parallelism;
 
 use clap::Parser;
 
-use web::server;
+use rust_code_analysis_web::server::run;
 
 #[derive(Parser, Debug)]
 #[clap(
@@ -40,7 +33,7 @@ async fn main() {
             .get()
     });
 
-    if let Err(e) = server::run(&opts.host, opts.port, num_jobs).await {
+    if let Err(e) = run(&opts.host, opts.port, num_jobs).await {
         eprintln!(
             "Cannot run the server at {}:{}: {}",
             opts.host, opts.port, e

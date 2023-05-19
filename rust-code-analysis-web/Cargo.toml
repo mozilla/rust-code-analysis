@@ -8,9 +8,6 @@ keywords = ["metrics"]
 description = "Run a web service to compute and export code metrics"
 license = "MPL-2.0"
 
-[[bin]]
-name = "rust-code-analysis-web"
-
 [dependencies]
 actix-rt = "^2.6"
 actix-web = "^4.2"
