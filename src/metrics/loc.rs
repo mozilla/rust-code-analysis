@@ -762,10 +762,14 @@ impl Loc for CppCode {
                 stats.lloc.logical_lines += 1;
             }
             Declaration => {
-                if count_specific_ancestors!(
-                    node,
-                    WhileStatement | ForStatement | IfStatement,
-                    CompoundStatement
+                if node.count_specific_ancestors::<CppParser>(
+                    |node| {
+                        matches!(
+                            node.kind_id().into(),
+                            WhileStatement | ForStatement | IfStatement
+                        )
+                    },
+                    |node| node.kind_id() == CompoundStatement,
                 ) == 0
                 {
                     stats.lloc.logical_lines += 1;
@@ -799,7 +803,11 @@ impl Loc for JavaCode {
                 stats.lloc.logical_lines += 1;
             }
             LocalVariableDeclaration => {
-                if count_specific_ancestors!(node, ForStatement, Block) == 0 {
+                if node.count_specific_ancestors::<JavaParser>(
+                    |node| node.kind_id() == ForStatement,
+                    |node| node.kind_id() == Block,
+                ) == 0
+                {
                     // The initializer, condition, and increment in a for loop are expressions.
                     // Don't count the variable declaration if in a ForStatement.
                     // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/for.html

@@ -266,11 +266,19 @@ impl Cognitive for PythonCode {
                 stats.boolean_seq.not_operator(node.kind_id());
             }
             BooleanOperator => {
-                if count_specific_ancestors!(node, BooleanOperator, Lambda) == 0 {
-                    stats.structural += count_specific_ancestors!(
-                        node,
-                        Lambda,
-                        ExpressionList | IfStatement | ForStatement | WhileStatement
+                if node.count_specific_ancestors::<PythonParser>(
+                    |node| node.kind_id() == BooleanOperator,
+                    |node| node.kind_id() == Lambda,
+                ) == 0
+                {
+                    stats.structural += node.count_specific_ancestors::<PythonParser>(
+                        |node| node.kind_id() == Lambda,
+                        |node| {
+                            matches!(
+                                node.kind_id().into(),
+                                ExpressionList | IfStatement | ForStatement | WhileStatement
+                            )
+                        },
                     );
                 }
                 compute_booleans::<language_python::Python>(node, stats, And, Or);

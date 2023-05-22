@@ -36,23 +36,3 @@ macro_rules! has_ancestors {
         res
     }};
 }
-
-macro_rules! count_specific_ancestors {
-    ($node:expr, $( $typs:pat_param )|*, $( $stops:pat_param )|*) => {{
-        let mut count = 0;
-        let mut node = *$node;
-        while let Some(parent) = node.parent() {
-            match parent.kind_id().into() {
-                $( $typs )|* => {
-                    if !Self::is_else_if(&parent) {
-                        count += 1;
-                    }
-                },
-                $( $stops )|* => break,
-                _ => {}
-            }
-            node = parent;
-        }
-        count
-    }};
-}

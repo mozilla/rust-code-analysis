@@ -1,6 +1,7 @@
 use tree_sitter::Node as OtherNode;
 use tree_sitter::{Tree, TreeCursor};
 
+use crate::checker::Checker;
 use crate::traits::Search;
 
 /// An `AST` node.
@@ -128,6 +129,25 @@ impl<'a> Node<'a> {
         }
 
         Some(node)
+    }
+
+    pub(crate) fn count_specific_ancestors<T: crate::ParserTrait>(
+        &self,
+        check: fn(&Node) -> bool,
+        stop: fn(&Node) -> bool,
+    ) -> usize {
+        let mut count = 0;
+        let mut node = *self;
+        while let Some(parent) = node.parent() {
+            if stop(&parent) {
+                break;
+            }
+            if check(&parent) && !T::Checker::is_else_if(&parent) {
+                count += 1;
+            }
+            node = parent;
+        }
+        count
     }
 }
 
