@@ -218,6 +218,30 @@ async fn ping() -> HttpResponse {
     HttpResponse::Ok().body(())
 }
 
+/// Runs an HTTP Server which provides a series of services.
+///
+/// Each service corresponds to a functionality of the main library and can be
+/// accessed through a different route.
+///
+/// # Examples
+///
+/// ```no_run
+/// use rust_code_analysis_web::server::run;
+///
+/// #[actix_web::main]
+/// async fn main() {
+///     let host = "127.0.0.1";
+///     let port = 8080;
+///     let num_threads = 4;
+///
+///     // Runs a server on a determined host with a specific port and using a
+///     // certain number of threads.
+///     // If the server does not run correctly, an error will be shown.
+///     if let Err(e) = run(host, port, num_threads).await {
+///        eprintln!("Cannot run the server at {host}:{port}: {e}");
+///     }
+/// }
+/// ```
 pub async fn run(host: &str, port: u16, n_threads: usize) -> std::io::Result<()> {
     let max_size = 1024 * 1024 * 4;
 
