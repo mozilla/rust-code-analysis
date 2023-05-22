@@ -211,7 +211,7 @@ impl Npm for JavaCode {
             stats.is_class_space = true;
         }
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             ClassBody => {
                 stats.class_nm += node
                     .children()
@@ -220,12 +220,10 @@ impl Npm for JavaCode {
                         // The first child node contains the list of method modifiers
                         // There are several modifiers that may be part of a method declaration
                         // Source: https://docs.oracle.com/javase/tutorial/reflect/member/methodModifiers.html
-                        if let Some(modifiers) = method.object().child(0) {
+                        if let Some(modifiers) = method.child(0) {
                             // Looks for the `public` keyword in the list of method modifiers
                             if matches!(modifiers.kind_id().into(), Modifiers)
-                                && Node::new(modifiers)
-                                    .first_child(|id| id == Public)
-                                    .is_some()
+                                && modifiers.first_child(|id| id == Public).is_some()
                             {
                                 stats.class_npm += 1;
                             }

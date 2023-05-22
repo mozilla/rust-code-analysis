@@ -136,8 +136,7 @@ fn compute_booleans<T: std::cmp::PartialEq + std::convert::From<u16>>(
     typs1: T,
     typs2: T,
 ) {
-    let mut cursor = node.object().walk();
-    for child in node.object().children(&mut cursor) {
+    for child in node.children() {
         if typs1 == child.kind_id().into() || typs2 == child.kind_id().into() {
             stats.structural = stats
                 .boolean_seq
@@ -194,7 +193,7 @@ fn get_nesting_from_map(
     node: &Node,
     nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
 ) -> (usize, usize, usize) {
-    if let Some(parent) = node.object().parent() {
+    if let Some(parent) = node.parent() {
         if let Some(n) = nesting_map.get(&parent.id()) {
             *n
         } else {
@@ -211,7 +210,7 @@ fn increment_function_depth<T: std::cmp::PartialEq + std::convert::From<u16>>(
     stop: T,
 ) {
     // Increase depth function nesting if needed
-    let mut child = node.object();
+    let mut child = *node;
     while let Some(parent) = child.parent() {
         if stop == parent.kind_id().into() {
             *depth += 1;
@@ -240,7 +239,7 @@ impl Cognitive for PythonCode {
         // Get nesting of the parent
         let (mut nesting, mut depth, mut lambda) = get_nesting_from_map(node, nesting_map);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             IfStatement | ForStatement | WhileStatement | ConditionalExpression => {
                 increase_nesting(stats, &mut nesting, depth, lambda);
             }
@@ -264,7 +263,7 @@ impl Cognitive for PythonCode {
                 stats.boolean_seq.reset();
             }
             NotOperator => {
-                stats.boolean_seq.not_operator(node.object().kind_id());
+                stats.boolean_seq.not_operator(node.kind_id());
             }
             BooleanOperator => {
                 if count_specific_ancestors!(node, BooleanOperator, Lambda) == 0 {
@@ -291,7 +290,7 @@ impl Cognitive for PythonCode {
             _ => {}
         }
         // Add node to nesting map
-        nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
     }
 }
 
@@ -305,7 +304,7 @@ impl Cognitive for RustCode {
         //TODO: Implement macros
         let (mut nesting, mut depth, mut lambda) = get_nesting_from_map(node, nesting_map);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             IfExpression => {
                 // Check if a node is not an else-if
                 if !Self::is_else_if(node) {
@@ -319,14 +318,14 @@ impl Cognitive for RustCode {
                 increment_by_one(stats);
             }
             BreakExpression | ContinueExpression => {
-                if let Some(label_child) = node.object().child(1) {
+                if let Some(label_child) = node.child(1) {
                     if let LoopLabel = label_child.kind_id().into() {
                         increment_by_one(stats);
                     }
                 }
             }
             UnaryExpression => {
-                stats.boolean_seq.not_operator(node.object().kind_id());
+                stats.boolean_seq.not_operator(node.kind_id());
             }
             BinaryExpression => {
                 compute_booleans::<language_rust::Rust>(node, stats, AMPAMP, PIPEPIPE);
@@ -341,7 +340,7 @@ impl Cognitive for RustCode {
             }
             _ => {}
         }
-        nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
     }
 }
 
@@ -356,7 +355,7 @@ impl Cognitive for CppCode {
         //TODO: Implement macros
         let (mut nesting, depth, mut lambda) = get_nesting_from_map(node, nesting_map);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             IfStatement => {
                 if !Self::is_else_if(node) {
                     increase_nesting(stats,&mut nesting, depth, lambda);
@@ -369,7 +368,7 @@ impl Cognitive for CppCode {
                 increment_by_one(stats);
             }
             UnaryExpression2 => {
-                stats.boolean_seq.not_operator(node.object().kind_id());
+                stats.boolean_seq.not_operator(node.kind_id());
             }
             BinaryExpression2 => {
                 compute_booleans::<language_cpp::Cpp>(node, stats, AMPAMP, PIPEPIPE);
@@ -379,7 +378,7 @@ impl Cognitive for CppCode {
             }
             _ => {}
         }
-        nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
     }
 }
 
@@ -389,7 +388,7 @@ macro_rules! js_cognitive {
             use $lang::*;
             let (mut nesting, mut depth, mut lambda) = get_nesting_from_map(node, nesting_map);
 
-            match node.object().kind_id().into() {
+            match node.kind_id().into() {
                 IfStatement => {
                     if !Self::is_else_if(&node) {
                         increase_nesting(stats,&mut nesting, depth, lambda);
@@ -406,7 +405,7 @@ macro_rules! js_cognitive {
                     stats.boolean_seq.reset();
                 }
                 UnaryExpression => {
-                    stats.boolean_seq.not_operator(node.object().kind_id());
+                    stats.boolean_seq.not_operator(node.kind_id());
                 }
                 BinaryExpression => {
                     compute_booleans::<$lang>(node, stats, AMPAMP, PIPEPIPE);
@@ -423,7 +422,7 @@ macro_rules! js_cognitive {
                 }
                 _ => {}
             }
-            nesting_map.insert(node.object().id(), (nesting, depth, lambda));
+            nesting_map.insert(node.id(), (nesting, depth, lambda));
         }
     };
 }

@@ -211,25 +211,23 @@ impl Npa for JavaCode {
             stats.is_class_space = true;
         }
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             ClassBody => {
                 stats.class_na += node
                     .children()
-                    .filter(|node| matches!(node.object().kind_id().into(), FieldDeclaration))
+                    .filter(|node| matches!(node.kind_id().into(), FieldDeclaration))
                     .map(|declaration| {
                         let attributes = declaration
                             .children()
-                            .filter(|n| matches!(n.object().kind_id().into(), VariableDeclarator))
+                            .filter(|n| matches!(n.kind_id().into(), VariableDeclarator))
                             .count();
                         // The first child node contains the list of attribute modifiers
                         // There are several modifiers that may be part of a field declaration
                         // Source: https://docs.oracle.com/javase/tutorial/reflect/member/fieldModifiers.html
-                        if declaration.object().child(0).map_or(false, |modifiers| {
+                        if declaration.child(0).map_or(false, |modifiers| {
                             // Looks for the `public` keyword in the list of attribute modifiers
                             matches!(modifiers.kind_id().into(), Modifiers)
-                                && Node::new(modifiers)
-                                    .first_child(|id| id == Public)
-                                    .is_some()
+                                && modifiers.first_child(|id| id == Public).is_some()
                         }) {
                             stats.class_npa += attributes;
                         }
@@ -245,9 +243,9 @@ impl Npa for JavaCode {
                 // Source: https://docs.oracle.com/javase/tutorial/java/IandI/createinterface.html
                 stats.interface_na += node
                     .children()
-                    .filter(|node| matches!(node.object().kind_id().into(), ConstantDeclaration))
+                    .filter(|node| matches!(node.kind_id().into(), ConstantDeclaration))
                     .flat_map(|node| node.children())
-                    .filter(|node| matches!(node.object().kind_id().into(), VariableDeclarator))
+                    .filter(|node| matches!(node.kind_id().into(), VariableDeclarator))
                     .count();
                 stats.interface_npa = stats.interface_na;
             }

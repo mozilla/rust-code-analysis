@@ -508,8 +508,8 @@ where
 
 #[inline(always)]
 fn init(node: &Node, stats: &mut Stats, is_func_space: bool, is_unit: bool) -> (usize, usize) {
-    let start = node.object().start_position().row;
-    let end = node.object().end_position().row;
+    let start = node.start_row();
+    let end = node.end_row();
 
     if is_func_space {
         stats.sloc.start = start;
@@ -566,16 +566,16 @@ impl Loc for PythonCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             DQUOTE | DQUOTE2 | Block | Module => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
             }
             String => {
-                let parent = node.object().parent().unwrap();
+                let parent = node.parent().unwrap();
                 if let ExpressionStatement = parent.kind_id().into() {
                     add_cloc_lines(stats, start, end);
-                } else if parent.start_position().row != start {
+                } else if parent.start_row() != start {
                     check_comment_ends_on_code_line(stats, start);
                     stats.ploc.lines.insert(start);
                 }
@@ -618,7 +618,7 @@ impl Loc for MozjsCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
@@ -644,7 +644,7 @@ impl Loc for JavascriptCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
@@ -670,7 +670,7 @@ impl Loc for TypescriptCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
@@ -696,7 +696,7 @@ impl Loc for TsxCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             String | DQUOTE | Program => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
@@ -722,7 +722,7 @@ impl Loc for RustCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             StringLiteral | RawStringLiteral | Block | SourceFile => {}
             LineComment | BlockComment => {
                 add_cloc_lines(stats, start, end);
@@ -749,7 +749,7 @@ impl Loc for CppCode {
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             RawStringLiteral | StringLiteral | DeclarationList | FieldDeclarationList
             | TranslationUnit => {}
             Comment => {
@@ -784,7 +784,7 @@ impl Loc for JavaCode {
         use Java::*;
 
         let (start, end) = init(node, stats, is_func_space, is_unit);
-        let kind_id: Java = node.object().kind_id().into();
+        let kind_id: Java = node.kind_id().into();
         // LLOC in Java is counted for statements only
         // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/expressions.html
         match kind_id {

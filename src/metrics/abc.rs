@@ -257,13 +257,13 @@ where
 fn java_inspect_container(container_node: &Node, conditions: &mut f64) {
     use Java::*;
 
-    let mut node = container_node.object();
+    let mut node = *container_node;
     let mut node_kind = node.kind_id().into();
 
     // Initializes the flag to true if the container is known to contain a boolean value
     let mut has_boolean_content = match node.parent().unwrap().kind_id().into() {
         BinaryExpression | IfStatement | WhileStatement | DoStatement | ForStatement => true,
-        TernaryExpression => node.prev_sibling().map_or(true, |prev_node| {
+        TernaryExpression => node.previous_sibling().map_or(true, |prev_node| {
             !matches!(prev_node.kind_id().into(), QMARK | COLON)
         }),
         _ => false,
@@ -311,8 +311,8 @@ fn java_inspect_container(container_node: &Node, conditions: &mut f64) {
 fn java_count_unary_conditions(list_node: &Node, conditions: &mut f64) {
     use Java::*;
 
-    let list_kind = list_node.object().kind_id().into();
-    let mut cursor = list_node.object().walk();
+    let list_kind = list_node.kind_id().into();
+    let mut cursor = list_node.cursor();
 
     // Scans the immediate children nodes of the argument node
     if cursor.goto_first_child() {
@@ -329,7 +329,7 @@ fn java_count_unary_conditions(list_node: &Node, conditions: &mut f64) {
                 *conditions += 1.;
             } else {
                 // Checks if the node is a unary condition container
-                java_inspect_container(&Node::new(node), conditions);
+                java_inspect_container(&node, conditions);
             }
 
             // Moves the cursor to the next sibling node of the current node
@@ -363,7 +363,7 @@ impl Abc for JavaCode {
     fn compute(node: &Node, stats: &mut Stats) {
         use Java::*;
 
-        match node.object().kind_id().into() {
+        match node.kind_id().into() {
             STAREQ | SLASHEQ | PERCENTEQ | DASHEQ | PLUSEQ | LTLTEQ | GTGTEQ | AMPEQ | PIPEEQ
             | CARETEQ | GTGTGTEQ | PLUSPLUS | DASHDASH => {
                 stats.assignments += 1.;
@@ -403,7 +403,7 @@ impl Abc for JavaCode {
             }
             GT | LT => {
                 // Excludes `<` and `>` used for generic types
-                if let Some(parent) = node.object().parent() {
+                if let Some(parent) = node.parent() {
                     if !matches!(parent.kind_id().into(), TypeArguments) {
                         stats.conditions += 1.;
                     }
@@ -411,8 +411,8 @@ impl Abc for JavaCode {
             }
             // Counts unary conditions in elements separated by `&&` or `||` boolean operators
             AMPAMP | PIPEPIPE => {
-                if let Some(parent) = node.object().parent() {
-                    java_count_unary_conditions(&Node::new(parent), &mut stats.conditions);
+                if let Some(parent) = node.parent() {
+                    java_count_unary_conditions(&parent, &mut stats.conditions);
                 }
             }
             // Counts unary conditions among method arguments
@@ -422,30 +422,30 @@ impl Abc for JavaCode {
             // Counts unary conditions inside assignments
             VariableDeclarator | AssignmentExpression => {
                 // The child node of index 2 contains the right operand of an assignment operation
-                if let Some(right_operand) = node.object().child(2) {
+                if let Some(right_operand) = node.child(2) {
                     if matches!(
                         right_operand.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
                     ) {
-                        java_inspect_container(&Node::new(right_operand), &mut stats.conditions);
+                        java_inspect_container(&right_operand, &mut stats.conditions);
                     }
                 }
             }
             // Counts unary conditions inside if and while statements
             IfStatement | WhileStatement => {
                 // The child node of index 1 contains the condition
-                if let Some(condition) = node.object().child(1) {
+                if let Some(condition) = node.child(1) {
                     if matches!(condition.kind_id().into(), ParenthesizedExpression) {
-                        java_inspect_container(&Node::new(condition), &mut stats.conditions);
+                        java_inspect_container(&condition, &mut stats.conditions);
                     }
                 }
             }
             // Counts unary conditions do-while statements
             DoStatement => {
                 // The child node of index 3 contains the condition
-                if let Some(condition) = node.object().child(3) {
+                if let Some(condition) = node.child(3) {
                     if matches!(condition.kind_id().into(), ParenthesizedExpression) {
-                        java_inspect_container(&Node::new(condition), &mut stats.conditions);
+                        java_inspect_container(&condition, &mut stats.conditions);
                     }
                 }
             }
@@ -454,23 +454,20 @@ impl Abc for JavaCode {
                 // The child node of index 3 contains the `condition` when
                 // the initialization expression is a variable declaration
                 // e.g. `for ( int i=0; `condition`; ... ) {}`
-                if let Some(condition) = node.object().child(3) {
+                if let Some(condition) = node.child(3) {
                     match condition.kind_id().into() {
                         SEMI => {
                             // The child node of index 4 contains the `condition` when
                             // the initialization expression is not a variable declaration
                             // e.g. `for ( i=0; `condition`; ... ) {}`
-                            if let Some(cond) = node.object().child(4) {
+                            if let Some(cond) = node.child(4) {
                                 match cond.kind_id().into() {
                                     MethodInvocation | Identifier | True | False | SEMI
                                     | RPAREN => {
                                         stats.conditions += 1.;
                                     }
                                     ParenthesizedExpression | UnaryExpression => {
-                                        java_inspect_container(
-                                            &Node::new(cond),
-                                            &mut stats.conditions,
-                                        );
+                                        java_inspect_container(&cond, &mut stats.conditions);
                                     }
                                     _ => {}
                                 }
@@ -480,7 +477,7 @@ impl Abc for JavaCode {
                             stats.conditions += 1.;
                         }
                         ParenthesizedExpression | UnaryExpression => {
-                            java_inspect_container(&Node::new(condition), &mut stats.conditions);
+                            java_inspect_container(&condition, &mut stats.conditions);
                         }
                         _ => {}
                     }
@@ -489,57 +486,57 @@ impl Abc for JavaCode {
             // Counts unary conditions inside return statements
             ReturnStatement => {
                 // The child node of index 1 contains the return value
-                if let Some(value) = node.object().child(1) {
+                if let Some(value) = node.child(1) {
                     if matches!(
                         value.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
                     ) {
-                        java_inspect_container(&Node::new(value), &mut stats.conditions)
+                        java_inspect_container(&value, &mut stats.conditions)
                     }
                 }
             }
             // Counts unary conditions inside implicit return statements in lambda expressions
             LambdaExpression => {
                 // The child node of index 2 contains the return value
-                if let Some(value) = node.object().child(2) {
+                if let Some(value) = node.child(2) {
                     if matches!(
                         value.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
                     ) {
-                        java_inspect_container(&Node::new(value), &mut stats.conditions)
+                        java_inspect_container(&value, &mut stats.conditions)
                     }
                 }
             }
             // Counts unary conditions inside ternary expressions
             TernaryExpression => {
                 // The child node of index 0 contains the condition
-                if let Some(condition) = node.object().child(0) {
+                if let Some(condition) = node.child(0) {
                     match condition.kind_id().into() {
                         MethodInvocation | Identifier | True | False => {
                             stats.conditions += 1.;
                         }
                         ParenthesizedExpression | UnaryExpression => {
-                            java_inspect_container(&Node::new(condition), &mut stats.conditions);
+                            java_inspect_container(&condition, &mut stats.conditions);
                         }
                         _ => {}
                     }
                 }
                 // The child node of index 2 contains the first expression
-                if let Some(expression) = node.object().child(2) {
+                if let Some(expression) = node.child(2) {
                     if matches!(
                         expression.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
                     ) {
-                        java_inspect_container(&Node::new(expression), &mut stats.conditions);
+                        java_inspect_container(&expression, &mut stats.conditions);
                     }
                 }
                 // The child node of index 4 contains the second expression
-                if let Some(expression) = node.object().child(4) {
+                if let Some(expression) = node.child(4) {
                     if matches!(
                         expression.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
                     ) {
-                        java_inspect_container(&Node::new(expression), &mut stats.conditions);
+                        java_inspect_container(&expression, &mut stats.conditions);
                     }
                 }
             }

@@ -115,7 +115,7 @@ where
 
 impl Exit for PythonCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Python::ReturnStatement) {
+        if matches!(node.kind_id().into(), Python::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -123,7 +123,7 @@ impl Exit for PythonCode {
 
 impl Exit for MozjsCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Mozjs::ReturnStatement) {
+        if matches!(node.kind_id().into(), Mozjs::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -131,7 +131,7 @@ impl Exit for MozjsCode {
 
 impl Exit for JavascriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Javascript::ReturnStatement) {
+        if matches!(node.kind_id().into(), Javascript::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -139,7 +139,7 @@ impl Exit for JavascriptCode {
 
 impl Exit for TypescriptCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Typescript::ReturnStatement) {
+        if matches!(node.kind_id().into(), Typescript::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -147,7 +147,7 @@ impl Exit for TypescriptCode {
 
 impl Exit for TsxCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Tsx::ReturnStatement) {
+        if matches!(node.kind_id().into(), Tsx::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -155,8 +155,8 @@ impl Exit for TsxCode {
 
 impl Exit for RustCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Rust::ReturnExpression)
-            || Self::is_func(node) && node.object().child_by_field_name("return_type").is_some()
+        if matches!(node.kind_id().into(), Rust::ReturnExpression)
+            || Self::is_func(node) && node.child_by_field_name("return_type").is_some()
         {
             stats.exit += 1;
         }
@@ -165,7 +165,7 @@ impl Exit for RustCode {
 
 impl Exit for CppCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Cpp::ReturnStatement) {
+        if matches!(node.kind_id().into(), Cpp::ReturnStatement) {
             stats.exit += 1;
         }
     }
@@ -173,7 +173,7 @@ impl Exit for CppCode {
 
 impl Exit for JavaCode {
     fn compute(node: &Node, stats: &mut Stats) {
-        if matches!(node.object().kind_id().into(), Java::ReturnStatement) {
+        if matches!(node.kind_id().into(), Java::ReturnStatement) {
             stats.exit += 1;
         }
     }

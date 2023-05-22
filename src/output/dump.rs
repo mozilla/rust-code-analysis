@@ -75,7 +75,7 @@ fn dump_tree_helper(
         return Ok(());
     }
 
-    let (pref_child, pref) = if node.object().parent().is_none() {
+    let (pref_child, pref) = if node.parent().is_none() {
         ("", "")
     } else if last {
         ("   ", "╰─ ")
@@ -83,7 +83,7 @@ fn dump_tree_helper(
         ("│  ", "├─ ")
     };
 
-    let node_row = node.object().start_position().row + 1;
+    let node_row = node.start_row() + 1;
     let mut display = true;
     if let Some(line_start) = line_start {
         display = node_row >= *line_start
@@ -97,33 +97,28 @@ fn dump_tree_helper(
         write!(stdout, "{prefix}{pref}")?;
 
         intense_color(stdout, Color::Yellow)?;
-        write!(
-            stdout,
-            "{{{}:{}}} ",
-            node.object().kind(),
-            node.object().kind_id()
-        )?;
+        write!(stdout, "{{{}:{}}} ", node.kind(), node.kind_id())?;
 
         color(stdout, Color::White)?;
         write!(stdout, "from ")?;
 
         color(stdout, Color::Green)?;
-        let pos = node.object().start_position();
-        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
+        let (pos_row, pos_column) = node.start_position();
+        write!(stdout, "({}, {}) ", pos_row + 1, pos_column + 1)?;
 
         color(stdout, Color::White)?;
         write!(stdout, "to ")?;
 
         color(stdout, Color::Green)?;
-        let pos = node.object().end_position();
-        write!(stdout, "({}, {}) ", pos.row + 1, pos.column + 1)?;
+        let (pos_row, pos_column) = node.end_position();
+        write!(stdout, "({}, {}) ", pos_row + 1, pos_column + 1)?;
 
-        if node.object().start_position().row == node.object().end_position().row {
+        if node.start_row() == node.end_row() {
             color(stdout, Color::White)?;
             write!(stdout, ": ")?;
 
             intense_color(stdout, Color::Red)?;
-            let code = &code[node.object().start_byte()..node.object().end_byte()];
+            let code = &code[node.start_byte()..node.end_byte()];
             if let Ok(code) = String::from_utf8(code.to_vec()) {
                 write!(stdout, "{code} ")?;
             } else {
@@ -134,18 +129,18 @@ fn dump_tree_helper(
         writeln!(stdout)?;
     }
 
-    let count = node.object().child_count();
+    let count = node.child_count();
     if count != 0 {
         let prefix = format!("{prefix}{pref_child}");
         let mut i = count;
-        let mut cursor = node.object().walk();
+        let mut cursor = node.cursor();
         cursor.goto_first_child();
 
         loop {
             i -= 1;
             dump_tree_helper(
                 code,
-                &Node::new(cursor.node()),
+                &cursor.node(),
                 &prefix,
                 i == 0,
                 stdout,

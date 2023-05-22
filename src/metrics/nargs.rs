@@ -182,8 +182,8 @@ impl Stats {
 
 #[inline(always)]
 fn compute_args<T: Checker>(node: &Node, nargs: &mut usize) {
-    if let Some(params) = node.object().child_by_field_name("parameters") {
-        let node_params = Node::new(params);
+    if let Some(params) = node.child_by_field_name("parameters") {
+        let node_params = params;
         node_params.act_on_child(&mut |n| {
             if !T::is_non_arg(n) {
                 *nargs += 1;
@@ -212,16 +212,16 @@ where
 impl NArgs for CppCode {
     fn compute(node: &Node, stats: &mut Stats) {
         if Self::is_func(node) {
-            if let Some(declarator) = node.object().child_by_field_name("declarator") {
-                let new_node = Node::new(declarator);
+            if let Some(declarator) = node.child_by_field_name("declarator") {
+                let new_node = declarator;
                 compute_args::<Self>(&new_node, &mut stats.fn_nargs);
             }
             return;
         }
 
         if Self::is_closure(node) {
-            if let Some(declarator) = node.object().child_by_field_name("declarator") {
-                let new_node = Node::new(declarator);
+            if let Some(declarator) = node.child_by_field_name("declarator") {
+                let new_node = declarator;
                 compute_args::<Self>(&new_node, &mut stats.closure_nargs);
             }
         }
