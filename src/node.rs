@@ -113,6 +113,22 @@ impl<'a> Node<'a> {
     pub(crate) fn cursor(&self) -> Cursor<'a> {
         Cursor(self.0.walk())
     }
+
+    #[allow(dead_code)]
+    pub(crate) fn get_parent(&self, level: usize) -> Option<Node<'a>> {
+        let mut level = level;
+        let mut node = *self;
+        while level != 0 {
+            if let Some(parent) = node.parent() {
+                node = parent;
+            } else {
+                return None;
+            }
+            level -= 1;
+        }
+
+        Some(node)
+    }
 }
 
 /// An `AST` cursor.
