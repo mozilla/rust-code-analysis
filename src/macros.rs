@@ -63,25 +63,6 @@ macro_rules! implement_metric_trait {
     )
 }
 
-macro_rules! mk_enum {
-    ( $( $camel:ident, $description:expr ),* ) => {
-        /// The list of supported languages.
-        #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-        pub enum LANG {
-            $(
-                #[doc = $description]
-                $camel,
-            )*
-        }
-        impl LANG {
-            pub fn into_enum_iter() -> impl Iterator<Item=LANG> {
-                use LANG::*;
-                [$( $camel, )*].into_iter()
-            }
-        }
-    };
-}
-
 macro_rules! mk_lang {
     ( $( ($camel:ident, $name:ident, $display: expr, $description:expr) ),* ) => {
         /// The list of supported languages.
