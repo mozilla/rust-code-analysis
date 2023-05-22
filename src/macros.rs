@@ -63,8 +63,8 @@ macro_rules! implement_metric_trait {
     )
 }
 
-macro_rules! mk_enum {
-    ( $( $camel:ident, $description:expr ),* ) => {
+macro_rules! mk_lang {
+    ( $( ($camel:ident, $name:ident, $display: expr, $description:expr) ),* ) => {
         /// The list of supported languages.
         #[derive(Clone, Copy, Debug, PartialEq, Eq)]
         pub enum LANG {
@@ -78,13 +78,6 @@ macro_rules! mk_enum {
                 use LANG::*;
                 [$( $camel, )*].into_iter()
             }
-        }
-    };
-}
-
-macro_rules! mk_impl_lang {
-    ( $( ($camel:ident, $name:ident, $display: expr) ),* ) => {
-        impl LANG {
 
             /// Returns the name of a language as a `&str`.
             ///
@@ -305,8 +298,7 @@ macro_rules! mk_code {
 
 macro_rules! mk_langs {
     ( $( ($camel:ident, $description: expr, $display: expr, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
-        mk_enum!($( $camel, $description ),*);
-        mk_impl_lang!($( ($camel, $name, $display) ),*);
+        mk_lang!($( ($camel, $name, $display, $description) ),*);
         mk_action!($( ($camel, $parser) ),*);
         mk_extensions!($( ($camel, [ $( $ext ),* ]) ),*);
         mk_emacs_mode!($( ($camel, [ $( $emacs_mode ),* ]) ),*);
