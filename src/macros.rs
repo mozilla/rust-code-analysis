@@ -82,9 +82,21 @@ macro_rules! mk_enum {
     };
 }
 
-macro_rules! mk_impl_lang {
-    ( $( ($camel:ident, $name:ident, $display: expr) ),* ) => {
+macro_rules! mk_lang {
+    ( $( ($camel:ident, $name:ident, $display: expr, $description:expr) ),* ) => {
+        /// The list of supported languages.
+        #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+        pub enum LANG {
+            $(
+                #[doc = $description]
+                $camel,
+            )*
+        }
         impl LANG {
+            pub fn into_enum_iter() -> impl Iterator<Item=LANG> {
+                use LANG::*;
+                [$( $camel, )*].into_iter()
+            }
 
             /// Returns the name of a language as a `&str`.
             ///
@@ -305,8 +317,7 @@ macro_rules! mk_code {
 
 macro_rules! mk_langs {
     ( $( ($camel:ident, $description: expr, $display: expr, $code:ident, $parser:ident, $name:ident, [ $( $ext:ident ),* ], [ $( $emacs_mode:expr ),* ]) ),* ) => {
-        mk_enum!($( $camel, $description ),*);
-        mk_impl_lang!($( ($camel, $name, $display) ),*);
+        mk_lang!($( ($camel, $name, $display, $description) ),*);
         mk_action!($( ($camel, $parser) ),*);
         mk_extensions!($( ($camel, [ $( $ext ),* ]) ),*);
         mk_emacs_mode!($( ($camel, [ $( $emacs_mode ),* ]) ),*);
