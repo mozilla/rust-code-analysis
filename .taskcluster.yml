@@ -130,7 +130,7 @@ tasks:
         created: {$fromNow: ''}
         deadline: {$fromNow: '1 hour'}
         provisionerId: proj-relman
-        workerType: win2012r2
+        workerType: win2022
         payload:
           maxRunTime: 3600
           command:
@@ -520,7 +520,7 @@ tasks:
           created: {$fromNow: ''}
           deadline: {$fromNow: '2 hour'}
           provisionerId: proj-relman
-          workerType: win2012r2
+          workerType: win2022
           payload:
             maxRunTime: 3600
             command:
