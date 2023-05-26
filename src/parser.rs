@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
 use std::path::Path;
 use std::sync::Arc;
-use tree_sitter::{Parser as TSParser, Tree};
 
 use crate::abc::Abc;
 use crate::checker::Checker;
@@ -22,7 +21,7 @@ use crate::getter::Getter;
 
 use crate::c_macro;
 use crate::langs::*;
-use crate::node::Node;
+use crate::node::{Node, Tree};
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
@@ -130,17 +129,14 @@ impl<
     type Npa = T;
 
     fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self {
-        let mut parser = TSParser::new();
-        parser
-            .set_language(T::get_lang().get_ts_language())
-            .unwrap();
         let fake_code = get_fake_code::<T>(&code, path, pr);
         let code = if let Some(fake) = fake_code {
             fake
         } else {
             code
         };
-        let tree = parser.parse(&code, None).unwrap();
+
+        let tree = Tree::new::<T>(&code);
 
         Self {
             code,
@@ -156,7 +152,7 @@ impl<
 
     #[inline(always)]
     fn get_root(&self) -> Node {
-        Node::get_tree_root(&self.tree)
+        self.tree.get_root()
     }
 
     #[inline(always)]
