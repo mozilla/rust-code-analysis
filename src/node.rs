@@ -34,10 +34,6 @@ impl<'a> Node<'a> {
         self.0.has_error()
     }
 
-    pub(crate) fn get_tree_root(tree: &'a Tree) -> Self {
-        Self(tree.root_node())
-    }
-
     pub(crate) fn id(&self) -> usize {
         self.0.id()
     }
