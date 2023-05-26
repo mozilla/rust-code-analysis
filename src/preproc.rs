@@ -190,8 +190,6 @@ pub fn preprocess(parser: &PreprocParser, path: &Path, results: &mut PreprocResu
     let code = parser.get_code();
     let mut file_result = PreprocFile::default();
 
-    //dump_node(code, &node, -1, None, None);
-    //eprintln!("DEBUG {:?}", path);
     stack.push(node);
 
     while let Some(node) = stack.pop() {
