@@ -48,9 +48,8 @@
 
 mod c_langs_macros;
 mod c_macro;
-#[macro_use]
-mod macros;
 mod getter;
+mod macros;
 
 mod alterator;
 pub(crate) use alterator::*;

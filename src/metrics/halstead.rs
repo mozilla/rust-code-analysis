@@ -5,6 +5,7 @@ use std::fmt;
 
 use crate::checker::Checker;
 use crate::getter::Getter;
+use crate::macros::implement_metric_trait;
 
 use crate::*;
 
