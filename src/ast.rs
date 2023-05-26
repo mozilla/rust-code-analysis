@@ -149,4 +149,3 @@ impl Callback for AstCallback {
         }
     }
 }
-/* where T::Checker: Alterator*/
