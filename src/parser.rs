@@ -135,13 +135,7 @@ impl<
             .set_language(T::get_lang().get_ts_language())
             .unwrap();
         let fake_code = get_fake_code::<T>(&code, path, pr);
-        /*let tree = if let Some(fake) = fake_code {
-            parser.parse(&fake, None).unwrap()
-        } else {
-            parser.parse(&code, None).unwrap()
-        };*/
         let code = if let Some(fake) = fake_code {
-            //eprintln!("{}", String::from_utf8(fake.clone()).unwrap());
             fake
         } else {
             code
@@ -200,4 +194,3 @@ impl<
         Filter { filters: res }
     }
 }
-// other => |node: &Node| -> bool { node.kind() == other },
