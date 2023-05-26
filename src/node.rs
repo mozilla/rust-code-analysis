@@ -1,8 +1,27 @@
 use tree_sitter::Node as OtherNode;
-use tree_sitter::{Tree, TreeCursor};
+use tree_sitter::Tree as OtherTree;
+use tree_sitter::{Parser, TreeCursor};
 
 use crate::checker::Checker;
-use crate::traits::Search;
+use crate::traits::{LanguageInfo, Search};
+
+#[derive(Clone)]
+pub(crate) struct Tree(OtherTree);
+
+impl Tree {
+    pub(crate) fn new<T: LanguageInfo>(code: &[u8]) -> Self {
+        let mut parser = Parser::new();
+        parser
+            .set_language(T::get_lang().get_ts_language())
+            .unwrap();
+
+        Self(parser.parse(code, None).unwrap())
+    }
+
+    pub(crate) fn get_root(&self) -> Node {
+        Node(self.0.root_node())
+    }
+}
 
 /// An `AST` node.
 #[derive(Clone, Copy)]
