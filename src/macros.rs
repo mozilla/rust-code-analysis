@@ -74,6 +74,17 @@ macro_rules! mk_lang {
             )*
         }
         impl LANG {
+            /// Return an iterator over the supported languages.
+             ///
+            /// # Examples
+            ///
+            /// ```
+            /// use rust_code_analysis::LANG;
+            ///
+            /// for lang in LANG::into_enum_iter() {
+            ///     println!("{:?}", lang);
+            /// }
+            /// ```
             pub fn into_enum_iter() -> impl Iterator<Item=LANG> {
                 use LANG::*;
                 [$( $camel, )*].into_iter()
