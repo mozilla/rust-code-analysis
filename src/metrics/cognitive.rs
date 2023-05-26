@@ -4,6 +4,7 @@ use serde::Serialize;
 use std::fmt;
 
 use crate::checker::Checker;
+use crate::macros::implement_metric_trait;
 use crate::*;
 
 // TODO: Find a way to increment the cognitive complexity value

@@ -305,3 +305,8 @@ macro_rules! mk_langs {
         mk_code!($( ($camel, $code, $parser, $name, stringify!($camel)) ),*);
     };
 }
+
+pub(crate) use implement_metric_trait;
+pub(crate) use {
+    get_language, mk_action, mk_code, mk_emacs_mode, mk_extensions, mk_lang, mk_langs,
+};

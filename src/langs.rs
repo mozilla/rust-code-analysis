@@ -2,6 +2,9 @@ use std::path::Path;
 use std::sync::Arc;
 use tree_sitter::Language;
 
+use crate::macros::{
+    get_language, mk_action, mk_code, mk_emacs_mode, mk_extensions, mk_lang, mk_langs,
+};
 use crate::preproc::PreprocResults;
 use crate::*;
 

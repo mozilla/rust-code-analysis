@@ -3,6 +3,7 @@ use serde::Serialize;
 use std::fmt;
 
 use crate::checker::Checker;
+use crate::macros::implement_metric_trait;
 use crate::*;
 
 // FIX ME: New Java switches are not correctly recognised by tree-sitter-java version 0.19.0

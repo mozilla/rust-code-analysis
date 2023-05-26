@@ -4,6 +4,7 @@ use std::fmt;
 
 use crate::checker::Checker;
 use crate::langs::*;
+use crate::macros::implement_metric_trait;
 use crate::node::Node;
 use crate::*;
 

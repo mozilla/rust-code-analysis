@@ -4,6 +4,7 @@ use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
 
+use crate::macros::implement_metric_trait;
 use crate::*;
 
 /// The `SLoc` metric suite.

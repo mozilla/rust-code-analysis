@@ -7,6 +7,7 @@ use super::halstead;
 use super::loc;
 
 use crate::checker::Checker;
+use crate::macros::implement_metric_trait;
 
 use crate::*;
 
