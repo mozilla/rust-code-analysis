@@ -173,7 +173,10 @@ pub fn fix_includes<S: ::std::hash::BuildHasher>(
                 }
             }
         } else {
-            //eprintln!("Warning: included file which has not been preprocessed: {:?}", path);
+            eprintln!(
+                "Warning: included file which has not been preprocessed: {:?}",
+                path
+            );
         }
     }
 }
