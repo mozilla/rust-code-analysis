@@ -1764,12 +1764,12 @@ mod tests {
         check_metrics!(
             "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
                 if(a && b){ // +2
-                  System.out.println(\"test1\");
+                    System.out.println(\"test1\");
                 }
                 if(c && d){ // +2
-                  System.out.println(\"test2\");
+                    System.out.println(\"test2\");
                 }
-              }",
+                }",
             "foo.java",
             JavaParser,
             cognitive,
