@@ -1781,4 +1781,31 @@ mod tests {
             []
         );
     }
+
+    #[test]
+    fn java_case_conditions() {
+        check_metrics!(
+            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+                switch(expr){
+                    case 1:
+                        System.out.println(\"test1\");
+                        break;
+                    case 2:
+                    System.out.println(\"test2\");
+                        break;
+                    default:
+                        System.out.println(\"test\");
+                }
+              }",
+            "foo.java",
+            JavaParser,
+            cognitive,
+            [
+                (cognitive_sum, 1, usize),
+                (cognitive_min, 1, usize),
+                (cognitive_max, 1, usize)
+            ],
+            []
+        );
+    }
 }
