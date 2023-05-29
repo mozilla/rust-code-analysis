@@ -1717,25 +1717,29 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn java_single_branch_function() {
-    //     check_metrics!(
-    //         "public static void print(Boolean a){  
-    //             if(a){ // +1
-    //               System.out.println(\"test1\");
-    //             }
-    //           }",
-    //         "foo.java",
-    //         JavaParser,
-    //         cognitive,
-    //         [
-    //             (cognitive_sum, 1, usize),
-    //             (cognitive_min, 1, usize),
-    //             (cognitive_max, 1, usize)
-    //         ],
-    //         []
-    //     );
-    // }
+    #[test]
+    fn java_single_branch_function() {
+        check_metrics::<JavaParser>(
+            "public static void print(Boolean a){  
+                if(a){ // +1
+                  System.out.println(\"test1\");
+                }
+              }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 1.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
+        );
+    }
 
     // #[test]
     // fn java_multiple_branch_function() {
