@@ -470,18 +470,18 @@ impl Cognitive for JavaCode {
                     increase_nesting(stats,&mut nesting, depth, lambda);
                 }
             }
-            // ForStatement | WhileStatement | DoStatement | SwitchStatement | CatchClause => {
-            //     increase_nesting(stats,&mut nesting, depth, lambda);
-            // }
+            ForStatement | WhileStatement | DoStatement | SwitchBlock | CatchClause => {
+                increase_nesting(stats,&mut nesting, depth, lambda);
+            }
             Else /* else-if also */ => {
                 increment_by_one(stats);
             }
             // UnaryExpression2 => {
             //     stats.boolean_seq.not_operator(node.kind_id());
             // }
-            // BinaryExpression2 => {
-            //     compute_booleans::<language_cpp::Cpp>(node, stats, AMPAMP, PIPEPIPE);
-            // }
+            BinaryExpression => {
+                compute_booleans::<language_java::Java>(node, stats, AMPAMP, PIPEPIPE);
+            }
             LambdaExpression => {
                 lambda += 1;
             }
@@ -1838,10 +1838,10 @@ mod tests {
     }
 
     #[test]
-    fn java_case_conditions() {
+    fn java_switch_statement() {
         check_metrics::<JavaParser>(
             "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
-                switch(expr){
+                switch(expr){ //+1
                     case 1:
                         System.out.println(\"test1\");
                         break;
@@ -1850,6 +1850,33 @@ mod tests {
                         break;
                     default:
                         System.out.println(\"test\");
+                }
+              }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": null,
+                      "min": 1.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
+        );
+    }
+
+
+    #[test]
+    fn java_switch_expression() {
+        check_metrics::<JavaParser>(
+            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+                switch(expr){ // +1
+                    case 1 -> System.out.println(\"test1\");
+                    case 2 -> System.out.println(\"test2\");
+                    default -> System.out.println(\"test\");
                 }
               }",
             "foo.java",
