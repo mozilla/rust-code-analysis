@@ -452,7 +452,46 @@ impl Cognitive for TsxCode {
     js_cognitive!(Tsx);
 }
 
-implement_metric_trait!(Cognitive, PreprocCode, CcommentCode, JavaCode, KotlinCode);
+
+impl Cognitive for JavaCode {
+    fn compute(
+        node: &Node,
+        stats: &mut Stats,
+        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+    ) {
+        use Java::*;
+
+        //TODO: Implement macros
+        let (mut nesting, depth, mut lambda) = get_nesting_from_map(node, nesting_map);
+
+        match node.kind_id().into() {
+            IfStatement => {
+                if !Self::is_else_if(node) {
+                    increase_nesting(stats,&mut nesting, depth, lambda);
+                }
+            }
+            // ForStatement | WhileStatement | DoStatement | SwitchStatement | CatchClause => {
+            //     increase_nesting(stats,&mut nesting, depth, lambda);
+            // }
+            Else /* else-if also */ => {
+                increment_by_one(stats);
+            }
+            // UnaryExpression2 => {
+            //     stats.boolean_seq.not_operator(node.kind_id());
+            // }
+            // BinaryExpression2 => {
+            //     compute_booleans::<language_cpp::Cpp>(node, stats, AMPAMP, PIPEPIPE);
+            // }
+            LambdaExpression => {
+                lambda += 1;
+            }
+            _ => {}
+        }
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
+    }
+}
+
+implement_metric_trait!(Cognitive, PreprocCode, CcommentCode, KotlinCode);
 
 #[cfg(test)]
 mod tests {
@@ -1732,7 +1771,7 @@ mod tests {
                     @r###"
                     {
                       "sum": 1.0,
-                      "average": 1.0,
+                      "average": null,
                       "min": 1.0,
                       "max": 1.0
                     }"###
@@ -1741,79 +1780,91 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn java_multiple_branch_function() {
-    //     check_metrics!(
-    //         "public static void print(Boolean a, Boolean b){  
-    //             if(a){ // +1
-    //               System.out.println(\"test1\");
-    //             }
-    //             if(b){ // +1
-    //               System.out.println(\"test2\");
-    //             }
-    //             else { // +1
-    //                 System.out.println(\"test3\");
-    //             }
-    //           }",
-    //         "foo.java",
-    //         JavaParser,
-    //         cognitive,
-    //         [
-    //             (cognitive_sum, 3, usize),
-    //             (cognitive_min, 3, usize),
-    //             (cognitive_max, 3, usize)
-    //         ],
-    //         []
-    //     );
-    // }
+    #[test]
+    fn java_multiple_branch_function() {
+        check_metrics::<JavaParser>(
+            "public static void print(Boolean a, Boolean b){  
+                if(a){ // +1
+                  System.out.println(\"test1\");
+                }
+                if(b){ // +1
+                  System.out.println(\"test2\");
+                }
+                else { // +1
+                    System.out.println(\"test3\");
+                }
+              }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": null,
+                      "min": 3.0,
+                      "max": 3.0
+                    }"###
+                );
+            },
+        );
+    }
 
-    // #[test]
-    // fn java_compound_conditions() {
-    //     check_metrics!(
-    //         "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
-    //             if(a && b){ // +2
-    //                 System.out.println(\"test1\");
-    //             }
-    //             if(c && d){ // +2
-    //                 System.out.println(\"test2\");
-    //             }
-    //             }",
-    //         "foo.java",
-    //         JavaParser,
-    //         cognitive,
-    //         [
-    //             (cognitive_sum, 4, usize),
-    //             (cognitive_min, 4, usize),
-    //             (cognitive_max, 4, usize)
-    //         ],
-    //         []
-    //     );
-    // }
+    #[test]
+    fn java_compound_conditions() {
+        check_metrics::<JavaParser>(
+            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
+                if(a && b){ // +2
+                    System.out.println(\"test1\");
+                }
+                if(c && d){ // +2
+                    System.out.println(\"test2\");
+                }
+                }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": null,
+                      "min": 4.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
+        );
+    }
 
-    // #[test]
-    // fn java_case_conditions() {
-    //     check_metrics!(
-    //         "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
-    //             switch(expr){
-    //                 case 1:
-    //                     System.out.println(\"test1\");
-    //                     break;
-    //                 case 2:
-    //                 System.out.println(\"test2\");
-    //                     break;
-    //                 default:
-    //                     System.out.println(\"test\");
-    //             }
-    //           }",
-    //         "foo.java",
-    //         JavaParser,
-    //         cognitive,
-    //         [
-    //             (cognitive_sum, 1, usize),
-    //             (cognitive_min, 1, usize),
-    //             (cognitive_max, 1, usize)
-    //         ],
-    //         []
-    //     );
-    // }
+    #[test]
+    fn java_case_conditions() {
+        check_metrics::<JavaParser>(
+            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+                switch(expr){
+                    case 1:
+                        System.out.println(\"test1\");
+                        break;
+                    case 2:
+                    System.out.println(\"test2\");
+                        break;
+                    default:
+                        System.out.println(\"test\");
+                }
+              }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": null,
+                      "min": 1.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
+        );
+    }
 }
