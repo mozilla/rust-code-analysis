@@ -476,9 +476,9 @@ impl Cognitive for JavaCode {
             Else /* else-if also */ => {
                 increment_by_one(stats);
             }
-            // UnaryExpression2 => {
-            //     stats.boolean_seq.not_operator(node.kind_id());
-            // }
+            UnaryExpression => {
+                stats.boolean_seq.not_operator(node.kind_id());
+            }
             BinaryExpression => {
                 compute_booleans::<language_java::Java>(node, stats, AMPAMP, PIPEPIPE);
             }
@@ -1889,6 +1889,30 @@ mod tests {
                       "average": null,
                       "min": 1.0,
                       "max": 1.0
+                    }"###
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn java_not_booleans() {
+        check_metrics::<JavaParser>(
+            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+                if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
+                    printf(\"test\");
+                }
+              }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": null,
+                      "min": 3.0,
+                      "max": 3.0
                     }"###
                 );
             },
