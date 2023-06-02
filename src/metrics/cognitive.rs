@@ -452,7 +452,6 @@ impl Cognitive for TsxCode {
     js_cognitive!(Tsx);
 }
 
-
 impl Cognitive for JavaCode {
     fn compute(
         node: &Node,
@@ -1738,22 +1737,18 @@ mod tests {
 
     #[test]
     fn java_no_cognitive() {
-        check_metrics::<JavaParser>(
-            "int a = 42;",
-            "foo.java",
-            |metric| {
-                insta::assert_json_snapshot!(
-                    metric.cognitive,
-                    @r###"
+        check_metrics::<JavaParser>("int a = 42;", "foo.java", |metric| {
+            insta::assert_json_snapshot!(
+                metric.cognitive,
+                @r###"
                     {
                       "sum": 0.0,
                       "average": null,
                       "min": 0.0,
                       "max": 0.0
                     }"###
-                );
-            },
-        );
+            );
+        });
     }
 
     #[test]
@@ -1867,7 +1862,6 @@ mod tests {
             },
         );
     }
-
 
     #[test]
     fn java_switch_expression() {
