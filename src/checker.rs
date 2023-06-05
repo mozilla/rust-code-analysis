@@ -1,8 +1,12 @@
+use std::sync::OnceLock;
+
 use aho_corasick::AhoCorasick;
-use lazy_static::lazy_static;
 use regex::bytes::Regex;
 
 use crate::*;
+
+static AHO_CORASICK: OnceLock<AhoCorasick> = OnceLock::new();
+static RE: OnceLock<Regex> = OnceLock::new();
 
 macro_rules! check_if_func {
     ($parser: ident, $node: ident) => {
@@ -147,11 +151,10 @@ impl Checker for CcommentCode {
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        lazy_static! {
-            static ref AC: AhoCorasick = AhoCorasick::new(vec![b"<div rustbindgen"]).unwrap();
-        }
         let code = &code[node.start_byte()..node.end_byte()];
-        AC.is_match(code)
+        AHO_CORASICK
+            .get_or_init(|| AhoCorasick::new(vec![b"<div rustbindgen"]).unwrap())
+            .is_match(code)
     }
 
     fn is_func_space(_: &Node) -> bool {
@@ -193,11 +196,10 @@ impl Checker for CppCode {
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        lazy_static! {
-            static ref AC: AhoCorasick = AhoCorasick::new(vec![b"<div rustbindgen"]).unwrap();
-        }
         let code = &code[node.start_byte()..node.end_byte()];
-        AC.is_match(code)
+        AHO_CORASICK
+            .get_or_init(|| AhoCorasick::new(vec![b"<div rustbindgen"]).unwrap())
+            .is_match(code)
     }
 
     fn is_func_space(node: &Node) -> bool {
@@ -267,11 +269,13 @@ impl Checker for PythonCode {
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        lazy_static! {
-            // comment containing coding info are useful
-            static ref RE: Regex = Regex::new(r"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)").unwrap();
-        }
-        node.start_row() <= 1 && RE.is_match(&code[node.start_byte()..node.end_byte()])
+        // comment containing coding info are useful
+        node.start_row() <= 1
+            && RE
+                .get_or_init(|| {
+                    Regex::new(r"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)").unwrap()
+                })
+                .is_match(&code[node.start_byte()..node.end_byte()])
     }
 
     fn is_func_space(node: &Node) -> bool {
