@@ -86,6 +86,13 @@ macro_rules! is_js_func_and_closure_checker {
     };
 }
 
+#[inline(always)]
+fn get_aho_corasick_match(code: &[u8]) -> bool {
+    AHO_CORASICK
+        .get_or_init(|| AhoCorasick::new(vec![b"<div rustbindgen"]).unwrap())
+        .is_match(code)
+}
+
 pub trait Checker {
     fn is_comment(_: &Node) -> bool;
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool;
@@ -151,10 +158,7 @@ impl Checker for CcommentCode {
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        let code = &code[node.start_byte()..node.end_byte()];
-        AHO_CORASICK
-            .get_or_init(|| AhoCorasick::new(vec![b"<div rustbindgen"]).unwrap())
-            .is_match(code)
+        get_aho_corasick_match(&code[node.start_byte()..node.end_byte()])
     }
 
     fn is_func_space(_: &Node) -> bool {
@@ -196,10 +200,7 @@ impl Checker for CppCode {
     }
 
     fn is_useful_comment(node: &Node, code: &[u8]) -> bool {
-        let code = &code[node.start_byte()..node.end_byte()];
-        AHO_CORASICK
-            .get_or_init(|| AhoCorasick::new(vec![b"<div rustbindgen"]).unwrap())
-            .is_match(code)
+        get_aho_corasick_match(&code[node.start_byte()..node.end_byte()])
     }
 
     fn is_func_space(node: &Node) -> bool {
