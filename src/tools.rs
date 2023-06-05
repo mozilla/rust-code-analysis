@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
+use std::sync::OnceLock;
 
-use lazy_static::lazy_static;
 use regex::bytes::Regex;
 use termcolor::{Color, ColorSpec, StandardStreamLock, WriteColor};
 
@@ -133,21 +133,36 @@ fn mode_to_str(mode: &[u8]) -> Option<String> {
     std::str::from_utf8(mode).ok().map(|m| m.to_lowercase())
 }
 
+// comment containing coding info are useful
+static RE1_EMACS: OnceLock<Regex> = OnceLock::new();
+static RE2_EMACS: OnceLock<Regex> = OnceLock::new();
+static RE1_VIM: OnceLock<Regex> = OnceLock::new();
+
+// Regular expressions
+const FIRST_EMACS_EXPRESSION: &str = r"(?i)-\*-.*[^-\w]mode\s*:\s*([^:;\s]+)";
+const SECOND_EMACS_EXPRESSION: &str = r"-\*-\s*([^:;\s]+)\s*-\*-";
+const VIM_EXPRESSION: &str = r"(?i)vim\s*:.*[^\w]ft\s*=\s*([^:\s]+)";
+
+#[inline(always)]
+fn get_regex<'a>(
+    once_lock: &OnceLock<Regex>,
+    line: &'a [u8],
+    regex: &'a str,
+) -> Option<regex::bytes::Captures<'a>> {
+    once_lock
+        .get_or_init(|| Regex::new(regex).unwrap())
+        .captures_iter(line)
+        .next()
+}
+
 fn get_emacs_mode(buf: &[u8]) -> Option<String> {
     // we just try to use the emacs info (if there)
-    lazy_static! {
-        // comment containing coding info are useful
-        static ref RE1_EMACS: Regex = Regex::new(r"(?i)-\*-.*[^-\w]mode\s*:\s*([^:;\s]+)").unwrap();
-        static ref RE2_EMACS: Regex = Regex::new(r"-\*-\s*([^:;\s]+)\s*-\*-").unwrap();
-        static ref RE1_VIM: Regex = Regex::new(r"(?i)vim\s*:.*[^\w]ft\s*=\s*([^:\s]+)").unwrap();
-    }
-
     for (i, line) in buf.splitn(5, |c| *c == b'\n').enumerate() {
-        if let Some(cap) = RE1_EMACS.captures_iter(line).next() {
+        if let Some(cap) = get_regex(&RE1_EMACS, line, FIRST_EMACS_EXPRESSION) {
             return mode_to_str(&cap[1]);
-        } else if let Some(cap) = RE2_EMACS.captures_iter(line).next() {
+        } else if let Some(cap) = get_regex(&RE2_EMACS, line, SECOND_EMACS_EXPRESSION) {
             return mode_to_str(&cap[1]);
-        } else if let Some(cap) = RE1_VIM.captures_iter(line).next() {
+        } else if let Some(cap) = get_regex(&RE1_VIM, line, VIM_EXPRESSION) {
             return mode_to_str(&cap[1]);
         }
         if i == 3 {
@@ -156,7 +171,7 @@ fn get_emacs_mode(buf: &[u8]) -> Option<String> {
     }
 
     for (i, line) in buf.rsplitn(5, |c| *c == b'\n').enumerate() {
-        if let Some(cap) = RE1_VIM.captures_iter(line).next() {
+        if let Some(cap) = get_regex(&RE1_VIM, line, VIM_EXPRESSION) {
             return mode_to_str(&cap[1]);
         }
         if i == 3 {
