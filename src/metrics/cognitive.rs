@@ -1741,12 +1741,13 @@ mod tests {
             insta::assert_json_snapshot!(
                 metric.cognitive,
                 @r###"
-                    {
-                      "sum": 0.0,
-                      "average": null,
-                      "min": 0.0,
-                      "max": 0.0
-                    }"###
+            {
+              "sum": 0.0,
+              "average": null,
+              "min": 0.0,
+              "max": 0.0
+            }
+            "###
             );
         });
     }
@@ -1764,12 +1765,13 @@ mod tests {
                 insta::assert_json_snapshot!(
                     metric.cognitive,
                     @r###"
-                    {
-                      "sum": 1.0,
-                      "average": null,
-                      "min": 1.0,
-                      "max": 1.0
-                    }"###
+                {
+                  "sum": 1.0,
+                  "average": null,
+                  "min": 1.0,
+                  "max": 1.0
+                }
+                "###
                 );
             },
         );
@@ -1794,12 +1796,13 @@ mod tests {
                 insta::assert_json_snapshot!(
                     metric.cognitive,
                     @r###"
-                    {
-                      "sum": 3.0,
-                      "average": null,
-                      "min": 3.0,
-                      "max": 3.0
-                    }"###
+                {
+                  "sum": 3.0,
+                  "average": null,
+                  "min": 3.0,
+                  "max": 3.0
+                }
+                "###
                 );
             },
         );
@@ -1808,14 +1811,15 @@ mod tests {
     #[test]
     fn java_compound_conditions() {
         check_metrics::<JavaParser>(
-            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
-                if(a && b){ // +2
-                    System.out.println(\"test1\");
-                }
-                if(c && d){ // +2
-                    System.out.println(\"test2\");
-                }
-                }",
+            "class X {
+                public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
+                    if(a && b){ // +2
+                        System.out.println(\"test1\");
+                    }
+                    if(c && d){ // +2
+                        System.out.println(\"test2\");
+                    }
+                }}",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1823,8 +1827,8 @@ mod tests {
                     @r###"
                     {
                       "sum": 4.0,
-                      "average": null,
-                      "min": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
                       "max": 4.0
                     }"###
                 );
@@ -1835,7 +1839,8 @@ mod tests {
     #[test]
     fn java_switch_statement() {
         check_metrics::<JavaParser>(
-            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+            "class X {
+            public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
                 switch(expr){ //+1
                     case 1:
                         System.out.println(\"test1\");
@@ -1846,7 +1851,7 @@ mod tests {
                     default:
                         System.out.println(\"test\");
                 }
-              }",
+            }}",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1854,8 +1859,8 @@ mod tests {
                     @r###"
                     {
                       "sum": 1.0,
-                      "average": null,
-                      "min": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
                       "max": 1.0
                     }"###
                 );
@@ -1866,13 +1871,14 @@ mod tests {
     #[test]
     fn java_switch_expression() {
         check_metrics::<JavaParser>(
-            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
-                switch(expr){ // +1
-                    case 1 -> System.out.println(\"test1\");
-                    case 2 -> System.out.println(\"test2\");
-                    default -> System.out.println(\"test\");
-                }
-              }",
+            "class X {
+                public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+                    switch(expr){ // +1
+                        case 1 -> System.out.println(\"test1\");
+                        case 2 -> System.out.println(\"test2\");
+                        default -> System.out.println(\"test\");
+                    }
+                }}",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1880,8 +1886,8 @@ mod tests {
                     @r###"
                     {
                       "sum": 1.0,
-                      "average": null,
-                      "min": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
                       "max": 1.0
                     }"###
                 );
@@ -1892,11 +1898,12 @@ mod tests {
     #[test]
     fn java_not_booleans() {
         check_metrics::<JavaParser>(
-            "public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+            "class X {
+                public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
                 if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
                     printf(\"test\");
                 }
-              }",
+              }}",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1904,8 +1911,8 @@ mod tests {
                     @r###"
                     {
                       "sum": 3.0,
-                      "average": null,
-                      "min": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
                       "max": 3.0
                     }"###
                 );
