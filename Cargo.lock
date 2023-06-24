@@ -1344,7 +1344,6 @@ dependencies = [
  "fxhash",
  "globset",
  "insta",
- "lazy_static",
  "num",
  "num-derive",
  "num-format",
