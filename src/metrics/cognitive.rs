@@ -1768,8 +1768,8 @@ mod tests {
                     @r###"
                 {
                   "sum": 1.0,
-                  "average": null,
-                  "min": 1.0,
+                  "average": 1.0,
+                  "min": 0.0,
                   "max": 1.0
                 }
                 "###
@@ -1801,8 +1801,8 @@ mod tests {
                     @r###"
                 {
                   "sum": 3.0,
-                  "average": null,
-                  "min": 3.0,
+                  "average": 3.0,
+                  "min": 0.0,
                   "max": 3.0
                 }
                 "###
