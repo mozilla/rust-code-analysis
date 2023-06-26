@@ -460,7 +460,6 @@ impl Cognitive for JavaCode {
     ) {
         use Java::*;
 
-        //TODO: Implement macros
         let (mut nesting, depth, mut lambda) = get_nesting_from_map(node, nesting_map);
 
         match node.kind_id().into() {
