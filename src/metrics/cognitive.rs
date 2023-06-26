@@ -1779,7 +1779,7 @@ mod tests {
     #[test]
     fn java_multiple_branch_function() {
         check_metrics::<JavaParser>(
-            "public static void print(Boolean a, Boolean b){  
+            "public static void print(boolean a, boolean b){  
                 if(a){ // +1
                   System.out.println(\"test1\");
                 }
@@ -1811,7 +1811,7 @@ mod tests {
     fn java_compound_conditions() {
         check_metrics::<JavaParser>(
             "class X {
-                public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  
+                public static void print(boolean a, boolean b, boolean c, boolean d){  
                     if(a && b){ // +2
                         System.out.println(\"test1\");
                     }
@@ -1839,7 +1839,7 @@ mod tests {
     fn java_switch_statement() {
         check_metrics::<JavaParser>(
             "class X {
-            public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+            public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
                 switch(expr){ //+1
                     case 1:
                         System.out.println(\"test1\");
@@ -1871,7 +1871,7 @@ mod tests {
     fn java_switch_expression() {
         check_metrics::<JavaParser>(
             "class X {
-                public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+                public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
                     switch(expr){ // +1
                         case 1 -> System.out.println(\"test1\");
                         case 2 -> System.out.println(\"test2\");
@@ -1898,7 +1898,7 @@ mod tests {
     fn java_not_booleans() {
         check_metrics::<JavaParser>(
             "class X {
-                public static void print(Boolean a, Boolean b, Boolean c, Boolean d){  // +1
+                public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
                 if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
                     printf(\"test\");
                 }
