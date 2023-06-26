@@ -1754,11 +1754,13 @@ mod tests {
     #[test]
     fn java_single_branch_function() {
         check_metrics::<JavaParser>(
-            "public static void print(Boolean a){  
+            "class X {
+                public static void print(Boolean a){  
                 if(a){ // +1
                   System.out.println(\"test1\");
                 }
-              }",
+              }
+            }",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1779,7 +1781,8 @@ mod tests {
     #[test]
     fn java_multiple_branch_function() {
         check_metrics::<JavaParser>(
-            "public static void print(boolean a, boolean b){  
+            "class X {
+              public static void print(boolean a, boolean b){  
                 if(a){ // +1
                   System.out.println(\"test1\");
                 }
@@ -1787,9 +1790,10 @@ mod tests {
                   System.out.println(\"test2\");
                 }
                 else { // +1
-                    System.out.println(\"test3\");
+                  System.out.println(\"test3\");
                 }
-              }",
+              }
+            }",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1811,14 +1815,15 @@ mod tests {
     fn java_compound_conditions() {
         check_metrics::<JavaParser>(
             "class X {
-                public static void print(boolean a, boolean b, boolean c, boolean d){  
-                    if(a && b){ // +2
-                        System.out.println(\"test1\");
-                    }
-                    if(c && d){ // +2
-                        System.out.println(\"test2\");
-                    }
-                }}",
+              public static void print(boolean a, boolean b, boolean c, boolean d){  
+                if(a && b){ // +2
+                  System.out.println(\"test1\");
+                }
+                if(c && d){ // +2
+                  System.out.println(\"test2\");
+                }
+              }
+            }",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1839,18 +1844,19 @@ mod tests {
     fn java_switch_statement() {
         check_metrics::<JavaParser>(
             "class X {
-            public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
+              public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
                 switch(expr){ //+1
-                    case 1:
-                        System.out.println(\"test1\");
-                        break;
-                    case 2:
+                  case 1:
+                    System.out.println(\"test1\");
+                    break;
+                  case 2:
                     System.out.println(\"test2\");
-                        break;
-                    default:
-                        System.out.println(\"test\");
+                    break;
+                  default:
+                    System.out.println(\"test\");
                 }
-            }}",
+              }
+            }",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1871,13 +1877,14 @@ mod tests {
     fn java_switch_expression() {
         check_metrics::<JavaParser>(
             "class X {
-                public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
-                    switch(expr){ // +1
-                        case 1 -> System.out.println(\"test1\");
-                        case 2 -> System.out.println(\"test2\");
-                        default -> System.out.println(\"test\");
-                    }
-                }}",
+              public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
+                switch(expr){ // +1
+                  case 1 -> System.out.println(\"test1\");
+                  case 2 -> System.out.println(\"test2\");
+                  default -> System.out.println(\"test\");
+                }
+              }
+            }",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
@@ -1898,11 +1905,12 @@ mod tests {
     fn java_not_booleans() {
         check_metrics::<JavaParser>(
             "class X {
-                public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
+              public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
                 if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
-                    printf(\"test\");
+                  printf(\"test\");
                 }
-              }}",
+              }
+            }",
             "foo.java",
             |metric| {
                 insta::assert_json_snapshot!(
