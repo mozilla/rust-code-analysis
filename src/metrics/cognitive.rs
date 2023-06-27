@@ -1755,7 +1755,7 @@ mod tests {
     fn java_single_branch_function() {
         check_metrics::<JavaParser>(
             "class X {
-                public static void print(Boolean a){  
+                public static void print(boolean a){  
                 if(a){ // +1
                   System.out.println(\"test1\");
                 }
