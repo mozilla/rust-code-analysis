@@ -1906,7 +1906,7 @@ mod tests {
         check_metrics::<JavaParser>(
             "class X {
               public static void print(boolean a, boolean b, boolean c, boolean d){
-                if (a && !(b && c)) { // +1 (+1 &&, +1 &&)
+                if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
                   printf(\"test\");
                 }
               }
