@@ -1844,7 +1844,7 @@ mod tests {
     fn java_switch_statement() {
         check_metrics::<JavaParser>(
             "class X {
-              public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
+              public static void print(boolean a, boolean b, boolean c, boolean d){
                 switch(expr){ //+1
                   case 1:
                     System.out.println(\"test1\");
@@ -1877,7 +1877,7 @@ mod tests {
     fn java_switch_expression() {
         check_metrics::<JavaParser>(
             "class X {
-              public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
+              public static void print(boolean a, boolean b, boolean c, boolean d){
                 switch(expr){ // +1
                   case 1 -> System.out.println(\"test1\");
                   case 2 -> System.out.println(\"test2\");
@@ -1905,8 +1905,8 @@ mod tests {
     fn java_not_booleans() {
         check_metrics::<JavaParser>(
             "class X {
-              public static void print(boolean a, boolean b, boolean c, boolean d){  // +1
-                if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
+              public static void print(boolean a, boolean b, boolean c, boolean d){
+                if (a && !(b && c)) { // +1 (+1 &&, +1 &&)
                   printf(\"test\");
                 }
               }
