@@ -452,7 +452,44 @@ impl Cognitive for TsxCode {
     js_cognitive!(Tsx);
 }
 
-implement_metric_trait!(Cognitive, PreprocCode, CcommentCode, JavaCode, KotlinCode);
+impl Cognitive for JavaCode {
+    fn compute(
+        node: &Node,
+        stats: &mut Stats,
+        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+    ) {
+        use Java::*;
+
+        let (mut nesting, depth, mut lambda) = get_nesting_from_map(node, nesting_map);
+
+        match node.kind_id().into() {
+            IfStatement => {
+                if !Self::is_else_if(node) {
+                    increase_nesting(stats,&mut nesting, depth, lambda);
+                }
+            }
+            ForStatement | WhileStatement | DoStatement | SwitchBlock | CatchClause => {
+                increase_nesting(stats,&mut nesting, depth, lambda);
+            }
+            Else /* else-if also */ => {
+                increment_by_one(stats);
+            }
+            UnaryExpression => {
+                stats.boolean_seq.not_operator(node.kind_id());
+            }
+            BinaryExpression => {
+                compute_booleans::<language_java::Java>(node, stats, AMPAMP, PIPEPIPE);
+            }
+            LambdaExpression => {
+                lambda += 1;
+            }
+            _ => {}
+        }
+        nesting_map.insert(node.id(), (nesting, depth, lambda));
+    }
+}
+
+implement_metric_trait!(Cognitive, PreprocCode, CcommentCode, KotlinCode);
 
 #[cfg(test)]
 mod tests {
@@ -1691,6 +1728,199 @@ mod tests {
                       "average": 4.0,
                       "min": 0.0,
                       "max": 4.0
+                    }"###
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn java_no_cognitive() {
+        check_metrics::<JavaParser>("int a = 42;", "foo.java", |metric| {
+            insta::assert_json_snapshot!(
+                metric.cognitive,
+                @r###"
+            {
+              "sum": 0.0,
+              "average": null,
+              "min": 0.0,
+              "max": 0.0
+            }
+            "###
+            );
+        });
+    }
+
+    #[test]
+    fn java_single_branch_function() {
+        check_metrics::<JavaParser>(
+            "class X {
+                public static void print(boolean a){  
+                if(a){ // +1
+                  System.out.println(\"test1\");
+                }
+              }
+            }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                {
+                  "sum": 1.0,
+                  "average": 1.0,
+                  "min": 0.0,
+                  "max": 1.0
+                }
+                "###
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn java_multiple_branch_function() {
+        check_metrics::<JavaParser>(
+            "class X {
+              public static void print(boolean a, boolean b){  
+                if(a){ // +1
+                  System.out.println(\"test1\");
+                }
+                if(b){ // +1
+                  System.out.println(\"test2\");
+                }
+                else { // +1
+                  System.out.println(\"test3\");
+                }
+              }
+            }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                {
+                  "sum": 3.0,
+                  "average": 3.0,
+                  "min": 0.0,
+                  "max": 3.0
+                }
+                "###
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn java_compound_conditions() {
+        check_metrics::<JavaParser>(
+            "class X {
+              public static void print(boolean a, boolean b, boolean c, boolean d){  
+                if(a && b){ // +2 (+1 &&)
+                  System.out.println(\"test1\");
+                }
+                if(c && d){ // +2 (+1 &&)
+                  System.out.println(\"test2\");
+                }
+              }
+            }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 4.0,
+                      "average": 4.0,
+                      "min": 0.0,
+                      "max": 4.0
+                    }"###
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn java_switch_statement() {
+        check_metrics::<JavaParser>(
+            "class X {
+              public static void print(boolean a, boolean b, boolean c, boolean d){
+                switch(expr){ //+1
+                  case 1:
+                    System.out.println(\"test1\");
+                    break;
+                  case 2:
+                    System.out.println(\"test2\");
+                    break;
+                  default:
+                    System.out.println(\"test\");
+                }
+              }
+            }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn java_switch_expression() {
+        check_metrics::<JavaParser>(
+            "class X {
+              public static void print(boolean a, boolean b, boolean c, boolean d){
+                switch(expr){ // +1
+                  case 1 -> System.out.println(\"test1\");
+                  case 2 -> System.out.println(\"test2\");
+                  default -> System.out.println(\"test\");
+                }
+              }
+            }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 1.0,
+                      "average": 1.0,
+                      "min": 0.0,
+                      "max": 1.0
+                    }"###
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn java_not_booleans() {
+        check_metrics::<JavaParser>(
+            "class X {
+              public static void print(boolean a, boolean b, boolean c, boolean d){
+                if (a && !(b && c)) { // +3 (+1 &&, +1 &&)
+                  printf(\"test\");
+                }
+              }
+            }",
+            "foo.java",
+            |metric| {
+                insta::assert_json_snapshot!(
+                    metric.cognitive,
+                    @r###"
+                    {
+                      "sum": 3.0,
+                      "average": 3.0,
+                      "min": 0.0,
+                      "max": 3.0
                     }"###
                 );
             },
