@@ -1816,10 +1816,10 @@ mod tests {
         check_metrics::<JavaParser>(
             "class X {
               public static void print(boolean a, boolean b, boolean c, boolean d){  
-                if(a && b){ // +2
+                if(a && b){ // +2 (+1 &&)
                   System.out.println(\"test1\");
                 }
-                if(c && d){ // +2
+                if(c && d){ // +2 (+1 &&)
                   System.out.println(\"test2\");
                 }
               }
