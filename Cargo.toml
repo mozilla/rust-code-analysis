@@ -16,7 +16,7 @@ crossbeam = { version = "^0.8", features = ["crossbeam-channel"] }
 fxhash = "0.2"
 globset = "^0.4"
 num = "^0.4"
-num-derive = "^0.3"
+num-derive = "^0.4"
 num-format = "^0.4"
 num-traits = "^0.2"
 petgraph = "^0.6"
