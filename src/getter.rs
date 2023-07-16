@@ -490,7 +490,9 @@ impl Getter for CppCode {
 
 impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
+
 impl Getter for JavaCode {
+
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Java::*;
 
@@ -537,7 +539,18 @@ impl Getter for JavaCode {
         }
     }
 
-    get_operator!(Java);
+    fn get_operator_id_as_str(id: u16) -> &'static str {
+        let typ = id.into();
+        match typ {
+            Java::LPAREN => "()",
+            Java::LBRACK => "[]",
+            Java::LBRACE => "{}",
+            Java::VoidType => "void",
+            Java::IntegralType => "int",
+            _ => typ.into(),
+        }
+    }
+    //get_operator!(Java);
 }
 
 impl Getter for KotlinCode {}
