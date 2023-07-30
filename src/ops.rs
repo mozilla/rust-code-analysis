@@ -663,7 +663,7 @@ mod tests {
                 }",
             "foo.java",
             &mut vec![
-                "{}", "void", "()", "[]", "String", ",", ";", "int", "=", "+", "/", "format",
+                "{}", "void", "()", "[]", ",", ";", "int", "=", "+", "/",
             ],
             &mut vec![
                 "Main",
@@ -677,7 +677,7 @@ mod tests {
                 "3",
                 "MessageFormat",
                 "format",
-                "0",
+                "\"{0}\"",
             ],
         );
     }
