@@ -654,7 +654,7 @@ mod tests {
         check_ops(
             LANG::Java,
             "public class Main {
-                public static void main(String args[]) {
+                public static void main(string args[]) {
                       int a, b, c, avg;
                       a = 5; b = 5; c = 5;
                       avg = (a + b + c) / 3;
