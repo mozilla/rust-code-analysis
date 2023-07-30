@@ -492,7 +492,6 @@ impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
 
 impl Getter for JavaCode {
-
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Java::*;
 
