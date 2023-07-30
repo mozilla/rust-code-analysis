@@ -662,8 +662,8 @@ mod tests {
                     }
                 }",
             "foo.java",
-            &mut vec!["{}", "void", "()", "[]", ",", ";", "int", "=", "+", "/"],
-            &mut vec![
+            &mut ["{}", "void", "()", "[]", ",", ";", "int", "=", "+", "/"],
+            &mut [
                 "Main",
                 "main",
                 "args",
