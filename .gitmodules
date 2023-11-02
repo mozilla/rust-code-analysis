@@ -1,6 +1,6 @@
 [submodule "tests/repositories/rca-output"]
 	path = tests/repositories/rca-output
-	url = https://github.com/SoftengPoliTo/rca-output
+	url = https://github.com/mozilla/rust-code-analysis-output
 [submodule "tests/repositories/DeepSpeech"]
 	path = tests/repositories/DeepSpeech
 	url = https://github.com/mozilla/DeepSpeech
