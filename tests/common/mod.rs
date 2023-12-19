@@ -44,7 +44,8 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
                 .join(path.strip_prefix(Path::new(REPO)).unwrap())
                 .parent()
                 .unwrap(),
-                prepend_module_to_snapshot => false
+                prepend_module_to_snapshot => false,
+                sort_maps => true,
     }, {
         insta::assert_yaml_snapshot!(
             path.file_name().unwrap().to_string_lossy().as_ref(),
