@@ -434,6 +434,10 @@ impl Getter for CppCode {
                                 | Cpp::FieldIdentifier
                                 | Cpp::DestructorName
                                 | Cpp::OperatorName
+                                | Cpp::QualifiedIdentifier
+                                | Cpp::QualifiedIdentifier2
+                                | Cpp::QualifiedIdentifier3
+                                | Cpp::QualifiedIdentifier4
                                 | Cpp::TemplateFunction
                                 | Cpp::TemplateMethod => {
                                     let code = &code[first.start_byte()..first.end_byte()];
