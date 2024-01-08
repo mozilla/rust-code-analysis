@@ -1,5 +1,6 @@
+use std::collections::HashSet;
+
 use crate::checker::Checker;
-use fxhash::FxHashSet;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
@@ -73,7 +74,7 @@ impl Sloc {
 /// The `PLoc` metric suite.
 #[derive(Debug, Clone)]
 pub struct Ploc {
-    lines: FxHashSet<usize>,
+    lines: HashSet<usize>,
     ploc_min: usize,
     ploc_max: usize,
 }
@@ -81,7 +82,7 @@ pub struct Ploc {
 impl Default for Ploc {
     fn default() -> Self {
         Self {
-            lines: FxHashSet::default(),
+            lines: HashSet::default(),
             ploc_min: usize::MAX,
             ploc_max: 0,
         }

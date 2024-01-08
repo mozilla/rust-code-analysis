@@ -1,4 +1,5 @@
-use fxhash::FxHashMap;
+use std::collections::HashMap;
+
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
@@ -127,7 +128,7 @@ where
     fn compute(
         node: &Node,
         stats: &mut Stats,
-        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+        nesting_map: &mut HashMap<usize, (usize, usize, usize)>,
     );
 }
 
@@ -192,7 +193,7 @@ fn increment_by_one(stats: &mut Stats) {
 
 fn get_nesting_from_map(
     node: &Node,
-    nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+    nesting_map: &mut HashMap<usize, (usize, usize, usize)>,
 ) -> (usize, usize, usize) {
     if let Some(parent) = node.parent() {
         if let Some(n) = nesting_map.get(&parent.id()) {
@@ -233,7 +234,7 @@ impl Cognitive for PythonCode {
     fn compute(
         node: &Node,
         stats: &mut Stats,
-        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+        nesting_map: &mut HashMap<usize, (usize, usize, usize)>,
     ) {
         use Python::*;
 
@@ -307,7 +308,7 @@ impl Cognitive for RustCode {
     fn compute(
         node: &Node,
         stats: &mut Stats,
-        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+        nesting_map: &mut HashMap<usize, (usize, usize, usize)>,
     ) {
         use Rust::*;
         //TODO: Implement macros
@@ -357,7 +358,7 @@ impl Cognitive for CppCode {
     fn compute(
         node: &Node,
         stats: &mut Stats,
-        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+        nesting_map: &mut HashMap<usize, (usize, usize, usize)>,
     ) {
         use Cpp::*;
 
@@ -393,7 +394,7 @@ impl Cognitive for CppCode {
 
 macro_rules! js_cognitive {
     ($lang:ident) => {
-        fn compute(node: &Node, stats: &mut Stats, nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>) {
+        fn compute(node: &Node, stats: &mut Stats, nesting_map: &mut HashMap<usize, (usize, usize, usize)>) {
             use $lang::*;
             let (mut nesting, mut depth, mut lambda) = get_nesting_from_map(node, nesting_map);
 
@@ -456,7 +457,7 @@ impl Cognitive for JavaCode {
     fn compute(
         node: &Node,
         stats: &mut Stats,
-        nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,
+        nesting_map: &mut HashMap<usize, (usize, usize, usize)>,
     ) {
         use Java::*;
 
