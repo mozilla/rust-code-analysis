@@ -1,4 +1,5 @@
-use fxhash::FxHashMap;
+use std::collections::HashMap;
+
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use std::fmt;
@@ -30,15 +31,15 @@ pub enum HalsteadType {
 
 #[derive(Debug, Default, Clone)]
 pub struct HalsteadMaps<'a> {
-    pub(crate) operators: FxHashMap<u16, u64>,
-    pub(crate) operands: FxHashMap<&'a [u8], u64>,
+    pub(crate) operators: HashMap<u16, u64>,
+    pub(crate) operands: HashMap<&'a [u8], u64>,
 }
 
 impl<'a> HalsteadMaps<'a> {
     pub(crate) fn new() -> Self {
         HalsteadMaps {
-            operators: FxHashMap::default(),
-            operands: FxHashMap::default(),
+            operators: HashMap::default(),
+            operands: HashMap::default(),
         }
     }
 

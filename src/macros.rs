@@ -24,7 +24,7 @@ macro_rules! implement_metric_trait {
     (Cognitive, $($code:ident),+) => (
         $(
            impl Cognitive for $code {
-               fn compute(_node: &Node, _stats: &mut Stats, _nesting_map: &mut FxHashMap<usize, (usize, usize, usize)>,) {}
+               fn compute(_node: &Node, _stats: &mut Stats, _nesting_map: &mut HashMap<usize, (usize, usize, usize)>,) {}
            }
         )+
     );

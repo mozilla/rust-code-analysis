@@ -1,4 +1,5 @@
-use fxhash::FxHashMap;
+use std::collections::HashMap;
+
 use serde::Serialize;
 use std::fmt;
 use std::path::{Path, PathBuf};
@@ -292,7 +293,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
     let mut last_level = 0;
     // Initialize nesting_map used for storing nesting information for cognitive
     // Three type of nesting info: conditionals, functions and lambdas
-    let mut nesting_map = FxHashMap::<usize, (usize, usize, usize)>::default();
+    let mut nesting_map = HashMap::<usize, (usize, usize, usize)>::default();
     nesting_map.insert(node.id(), (0, 0, 0));
     stack.push((node, 0));
 
