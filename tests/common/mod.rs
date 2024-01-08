@@ -44,21 +44,20 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
                 .join(path.strip_prefix(Path::new(REPO)).unwrap())
                 .parent()
                 .unwrap(),
-                prepend_module_to_snapshot => false
+                prepend_module_to_snapshot => false,
+                sort_maps => true,
     }, {
-        // Redact away the name since paths are different on windows.
-        let value = format!(
-            "{:#.3?}",
-            FuncSpace {
-                name: None,
-                ..funcspace_struct
-            }
-        );
-
-        insta::assert_snapshot!(
+        insta::assert_yaml_snapshot!(
             path.file_name().unwrap().to_string_lossy().as_ref(),
-            value,
-            "funcspace_struct"
+            funcspace_struct,
+            {
+                // Round floating point values to three decimal places since the can differ from
+                // system to system.
+                ".spaces[].**.metrics.*.*" => insta::rounded_redaction(3),
+                ".metrics.*.*" => insta::rounded_redaction(3),
+                // Redact away the name since paths are different on different systems.
+                ".name" => "[filepath]",
+            }
         );
 
     });
