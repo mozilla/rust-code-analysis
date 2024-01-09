@@ -80,6 +80,11 @@ cargo insta test --review
 
 Will run the tests, generate the new snapshot references and let you review them.
 
+### Updating grammars
+Have a look at
+<a href="https://mozilla.github.io/rust-code-analysis/developers/update-grammars.html" target="_blank">Update grammars guide</a>
+to learn how to update languages grammars.
+
 # Contributing
 
 If you want to contribute to the development of this software, have a look at the
