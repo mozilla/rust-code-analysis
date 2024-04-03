@@ -665,7 +665,7 @@ mod tests {
     fn java_operators_and_operands() {
         check_metrics::<JavaParser>(
             "public class Main {
-            public static void main(String args[]) {
+            public static void main(string args[]) {
                   int a, b, c, avg;
                   a = 5; b = 5; c = 5;
                   avg = (a + b + c) / 3;
@@ -680,20 +680,20 @@ mod tests {
                     metric.halstead,
                     @r###"
                     {
-                      "n1": 16.0,
-                      "N1": 34.0,
+                      "n1": 10.0,
+                      "N1": 25.0,
                       "n2": 12.0,
                       "N2": 22.0,
-                      "length": 56.0,
-                      "estimated_program_length": 107.01955000865388,
-                      "purity_ratio": 1.9110633930116765,
-                      "vocabulary": 28.0,
-                      "volume": 269.2118756352258,
-                      "difficulty": 14.666666666666666,
-                      "level": 0.06818181818181819,
-                      "effort": 3948.440842649978,
-                      "time": 219.35782459166546,
-                      "bugs": 0.08327139413010551
+                      "length": 47.0,
+                      "estimated_program_length": 76.2388309575275,
+                      "purity_ratio": 1.6221027863303723,
+                      "vocabulary": 22.0,
+                      "volume": 209.59328607595296,
+                      "difficulty": 9.166666666666666,
+                      "level": 0.1090909090909091,
+                      "effort": 1921.2717890295687,
+                      "time": 106.73732161275382,
+                      "bugs": 0.05151550353617788
                     }"###
                 );
             },

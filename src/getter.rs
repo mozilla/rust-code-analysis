@@ -494,6 +494,7 @@ impl Getter for CppCode {
 
 impl Getter for PreprocCode {}
 impl Getter for CcommentCode {}
+
 impl Getter for JavaCode {
     fn get_space_kind(node: &Node) -> SpaceKind {
         use Java::*;
@@ -514,26 +515,27 @@ impl Getter for JavaCode {
         // https://www.geeksforgeeks.org/software-engineering-halsteads-software-metrics/?msclkid=5e181114abef11ecbb03527e95a34828
         match node.kind_id().into() {
             // Operator: function calls
-            MethodInvocation
+            //MethodInvocation
             // Operator: control flow
             | If | Else | Switch | Case | Try | Catch | Throw | Throws | Throws2 | For | While | Continue | Break | Do | Finally
             // Operator: keywords
             | New | Return | Default | Abstract | Assert | Instanceof | Extends | Final | Implements | Transient | Synchronized | Super | This | VoidType
             // Operator: brackets and comma and terminators (separators)
-            | SEMI | COMMA | COLONCOLON | LBRACE | LBRACK | LPAREN | RBRACE | RBRACK | RPAREN | DOTDOTDOT | DOT
+            | SEMI | COMMA | COLONCOLON | LBRACE | LBRACK | LPAREN // | RBRACE | RBRACK | RPAREN | DOTDOTDOT | DOT
             // Operator: operators
             | EQ | LT | GT | BANG | TILDE | QMARK | COLON // no grammar for lambda operator ->
             | EQEQ | LTEQ | GTEQ | BANGEQ | AMPAMP | PIPEPIPE | PLUSPLUS | DASHDASH
             | PLUS | DASH | STAR | SLASH | AMP | PIPE | CARET | PERCENT| LTLT | GTGT | GTGTGT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | AMPEQ | PIPEEQ | CARETEQ | PERCENTEQ | LTLTEQ | GTGTEQ | GTGTGTEQ
             // type identifier
-            | TypeIdentifier | IntegralType | FloatingPointType | BooleanType
+            //| TypeIdentifier  | BooleanType| IntegralType | FloatingPointType
+            // primitive types
+            | Int | Float
             => {
                 HalsteadType::Operator
             },
             // Operands: variables, constants, literals
-            Identifier | NullLiteral | ClassLiteral | StringLiteral | CharacterLiteral | HexIntegerLiteral | OctalIntegerLiteral
-            | BinaryIntegerLiteral | DecimalIntegerLiteral | HexFloatingPointLiteral | DecimalFloatingPointLiteral  => {
+            Identifier | NullLiteral | ClassLiteral | StringLiteral | CharacterLiteral | HexIntegerLiteral | OctalIntegerLiteral | BinaryIntegerLiteral | DecimalIntegerLiteral | HexFloatingPointLiteral | DecimalFloatingPointLiteral  => {
                 HalsteadType::Operand
             },
             _ => {
@@ -542,7 +544,17 @@ impl Getter for JavaCode {
         }
     }
 
-    get_operator!(Java);
+    fn get_operator_id_as_str(id: u16) -> &'static str {
+        let typ = id.into();
+        match typ {
+            Java::LPAREN => "()",
+            Java::LBRACK => "[]",
+            Java::LBRACE => "{}",
+            Java::VoidType => "void",
+            _ => typ.into(),
+        }
+    }
+    //get_operator!(Java);
 }
 
 impl Getter for KotlinCode {}
