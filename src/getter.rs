@@ -514,8 +514,6 @@ impl Getter for JavaCode {
         // keywords, operators, literals: https://docs.oracle.com/javase/specs/jls/se18/html/jls-3.html#jls-3.12
         // https://www.geeksforgeeks.org/software-engineering-halsteads-software-metrics/?msclkid=5e181114abef11ecbb03527e95a34828
         match node.kind_id().into() {
-            // Operator: function calls
-            //MethodInvocation
             // Operator: control flow
             | If | Else | Switch | Case | Try | Catch | Throw | Throws | Throws2 | For | While | Continue | Break | Do | Finally
             // Operator: keywords
@@ -527,8 +525,6 @@ impl Getter for JavaCode {
             | EQEQ | LTEQ | GTEQ | BANGEQ | AMPAMP | PIPEPIPE | PLUSPLUS | DASHDASH
             | PLUS | DASH | STAR | SLASH | AMP | PIPE | CARET | PERCENT| LTLT | GTGT | GTGTGT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | AMPEQ | PIPEEQ | CARETEQ | PERCENTEQ | LTLTEQ | GTGTEQ | GTGTGTEQ
-            // type identifier
-            //| TypeIdentifier  | BooleanType| IntegralType | FloatingPointType
             // primitive types
             | Int | Float
             => {
@@ -554,7 +550,6 @@ impl Getter for JavaCode {
             _ => typ.into(),
         }
     }
-    //get_operator!(Java);
 }
 
 impl Getter for KotlinCode {}
