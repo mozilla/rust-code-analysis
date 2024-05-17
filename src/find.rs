@@ -38,6 +38,7 @@ pub fn find<'a, T: ParserTrait>(parser: &'a T, filters: &[String]) -> Option<Vec
 
 /// Configuration options for finding different
 /// types of nodes in a code.
+#[derive(Debug)]
 pub struct FindCfg {
     /// Path to the file containing the code
     pub path: PathBuf,

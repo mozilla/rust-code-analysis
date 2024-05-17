@@ -5,7 +5,7 @@ use tree_sitter::{Parser, TreeCursor};
 use crate::checker::Checker;
 use crate::traits::{LanguageInfo, Search};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct Tree(OtherTree);
 
 impl Tree {
@@ -24,7 +24,7 @@ impl Tree {
 }
 
 /// An `AST` node.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Node<'a>(OtherNode<'a>);
 
 impl<'a> Node<'a> {

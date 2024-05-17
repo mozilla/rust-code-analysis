@@ -32,12 +32,14 @@ pub struct WebCommentInfo {
 }
 
 /// Server request configuration.
+#[derive(Debug)]
 pub struct WebCommentCfg {
     /// Request identifier.
     pub id: String,
 }
 
 /// Unit structure to implement the `Callback` trait.
+#[derive(Debug)]
 pub struct WebCommentCallback;
 
 impl Callback for WebCommentCallback {

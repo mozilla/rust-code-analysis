@@ -6,7 +6,7 @@ use std::path::Path;
 use crate::common::*;
 use crate::languages::*;
 
-#[derive(Template)]
+#[derive(Debug, Template)]
 #[template(path = "go.go", escape = "none")]
 struct GoTemplate {
     c_name: String,
