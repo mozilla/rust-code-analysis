@@ -113,6 +113,7 @@ fn dump_spans(mut spans: Vec<FunctionSpan>, path: PathBuf) -> std::io::Result<()
 
 /// Configuration options for detecting the span of
 /// each function in a code.
+#[derive(Debug)]
 pub struct FunctionCfg {
     /// Path to the file containing the code
     pub path: PathBuf,

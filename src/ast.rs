@@ -128,6 +128,7 @@ pub struct AstCallback {
 }
 
 /// Configuration options for retrieving the nodes of an `AST`.
+#[derive(Debug)]
 pub struct AstCfg {
     /// The id associated to a request for an `AST`
     pub id: String,

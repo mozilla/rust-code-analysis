@@ -31,6 +31,7 @@ pub struct WebFunctionInfo {
 }
 
 /// Server request configuration.
+#[derive(Debug)]
 pub struct WebFunctionCfg {
     /// Request identifier.
     pub id: String,

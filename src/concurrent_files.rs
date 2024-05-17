@@ -18,6 +18,7 @@ type ProcPathFunction<Config> = dyn Fn(&Path, &Config) + Send + Sync;
 fn null_proc_dir_paths<Config>(_: &mut HashMap<String, Vec<PathBuf>>, _: &Path, _: &Config) {}
 fn null_proc_path<Config>(_: &Path, _: &Config) {}
 
+#[derive(Debug)]
 struct JobItem<Config> {
     path: PathBuf,
     cfg: Arc<Config>,
@@ -141,6 +142,7 @@ pub enum ConcurrentErrors {
 }
 
 /// Data related to files.
+#[derive(Debug)]
 pub struct FilesData {
     /// Kind of files included in a search.
     pub include: GlobSet,

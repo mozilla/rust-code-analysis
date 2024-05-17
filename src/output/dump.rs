@@ -158,6 +158,7 @@ fn dump_tree_helper(
 }
 
 /// Configuration options for dumping the `AST` of a code.
+#[derive(Debug)]
 pub struct DumpCfg {
     /// The first line of code to dump
     ///

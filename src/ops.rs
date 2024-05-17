@@ -223,6 +223,7 @@ pub fn operands_and_operators<'a, T: ParserTrait>(parser: &'a T, path: &'a Path)
 
 /// Configuration options for retrieving
 /// all the operands and operators in a code.
+#[derive(Debug)]
 pub struct OpsCfg {
     /// Path to the file containing the code.
     pub path: PathBuf,
