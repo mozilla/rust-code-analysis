@@ -25,6 +25,7 @@ use crate::node::{Node, Tree};
 use crate::preproc::{get_macros, PreprocResults};
 use crate::traits::*;
 
+#[derive(Debug)]
 pub struct Parser<
     T: LanguageInfo
         + Alterator

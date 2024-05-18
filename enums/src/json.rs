@@ -6,7 +6,7 @@ use std::path::Path;
 use crate::common::*;
 use crate::languages::*;
 
-#[derive(Template)]
+#[derive(Debug, Template)]
 #[template(path = "json.json", escape = "none")]
 struct JsonTemplate {
     names: Vec<(String, bool, String)>,

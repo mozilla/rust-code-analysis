@@ -9,7 +9,7 @@ use crate::languages::*;
 
 const MACROS_DEFINITION_DIR: &str = "data";
 
-#[derive(Template)]
+#[derive(Debug, Template)]
 #[template(path = "rust.rs", escape = "none")]
 struct RustTemplate {
     c_name: String,
@@ -36,7 +36,7 @@ pub fn generate_rust(output: &Path, file_template: &str) -> std::io::Result<()> 
     Ok(())
 }
 
-#[derive(Template)]
+#[derive(Debug, Template)]
 #[template(path = "c_macros.rs", escape = "none")]
 struct CMacrosTemplate {
     u_name: String,

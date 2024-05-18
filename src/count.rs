@@ -38,6 +38,7 @@ pub fn count<T: ParserTrait>(parser: &T, filters: &[String]) -> (usize, usize) {
 
 /// Configuration options for counting different
 /// types of nodes in a code.
+#[derive(Debug)]
 pub struct CountCfg {
     /// Types of nodes to count
     pub filters: Vec<String>,
