@@ -12,7 +12,7 @@ impl Tree {
     pub(crate) fn new<T: LanguageInfo>(code: &[u8]) -> Self {
         let mut parser = Parser::new();
         parser
-            .set_language(T::get_lang().get_ts_language())
+            .set_language(&T::get_lang().get_ts_language())
             .unwrap();
 
         Self(parser.parse(code, None).unwrap())

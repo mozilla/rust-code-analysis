@@ -370,18 +370,19 @@ mod tests {
                 insta::assert_json_snapshot!(
                     metric.nom,
                     @r###"
-                    {
-                      "functions": 3.0,
-                      "closures": 1.0,
-                      "functions_average": 0.6,
-                      "closures_average": 0.2,
-                      "total": 4.0,
-                      "average": 0.8,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 1.0
-                    }"###
+                {
+                  "functions": 3.0,
+                  "closures": 3.0,
+                  "functions_average": 0.42857142857142855,
+                  "closures_average": 0.42857142857142855,
+                  "total": 6.0,
+                  "average": 0.8571428571428571,
+                  "functions_min": 0.0,
+                  "functions_max": 1.0,
+                  "closures_min": 0.0,
+                  "closures_max": 1.0
+                }
+                "###
                 );
             },
         );
@@ -400,18 +401,19 @@ mod tests {
                 insta::assert_json_snapshot!(
                     metric.nom,
                     @r###"
-                    {
-                      "functions": 1.0,
-                      "closures": 0.0,
-                      "functions_average": 0.5,
-                      "closures_average": 0.0,
-                      "total": 1.0,
-                      "average": 0.5,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 0.0
-                    }"###
+                {
+                  "functions": 0.0,
+                  "closures": 1.0,
+                  "functions_average": 0.0,
+                  "closures_average": 0.5,
+                  "total": 1.0,
+                  "average": 0.5,
+                  "functions_min": 0.0,
+                  "functions_max": 0.0,
+                  "closures_min": 0.0,
+                  "closures_max": 1.0
+                }
+                "###
                 );
             },
         );

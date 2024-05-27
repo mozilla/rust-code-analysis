@@ -329,7 +329,7 @@ impl Cognitive for RustCode {
             }
             BreakExpression | ContinueExpression => {
                 if let Some(label_child) = node.child(1) {
-                    if let LoopLabel = label_child.kind_id().into() {
+                    if let Label = label_child.kind_id().into() {
                         increment_by_one(stats);
                     }
                 }
@@ -1724,12 +1724,13 @@ mod tests {
                 insta::assert_json_snapshot!(
                     metric.cognitive,
                     @r###"
-                    {
-                      "sum": 4.0,
-                      "average": 4.0,
-                      "min": 0.0,
-                      "max": 4.0
-                    }"###
+                {
+                  "sum": 4.0,
+                  "average": 2.0,
+                  "min": 0.0,
+                  "max": 4.0
+                }
+                "###
                 );
             },
         );

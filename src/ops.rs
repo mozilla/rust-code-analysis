@@ -371,8 +371,7 @@ mod tests {
               println!(\"{}\", avg);
             }",
             "foo.rs",
-            // FIXME tree-sitter-rust does not parse the comma inside the println! macro
-            &mut ["fn", "()", "{}", "let", "=", "+", "/", ";", "!"],
+            &mut ["fn", "()", "{}", "let", "=", "+", "/", ";", "!", ","],
             &mut ["main", "a", "b", "c", "avg", "5", "3", "println", "\"{}\""],
         );
     }
@@ -388,20 +387,7 @@ mod tests {
              console.log(\"{}\", avg);",
             "foo.js",
             &mut ["()", "var", "let", "=", "+", "/", ",", ".", ";"],
-            &mut [
-                "a",
-                "b",
-                "c",
-                "avg",
-                "x",
-                "1",
-                "3",
-                "5",
-                "console.log",
-                "console",
-                "log",
-                "\"{}\"",
-            ],
+            &mut ["a", "b", "c", "avg", "x", "1", "3", "5", "console", "log"],
         );
     }
 
@@ -421,19 +407,7 @@ mod tests {
                 "function", "()", "{}", "var", "let", "=", "+", "/", ",", ".", ";",
             ],
             &mut [
-                "main",
-                "a",
-                "b",
-                "c",
-                "avg",
-                "x",
-                "1",
-                "3",
-                "5",
-                "console.log",
-                "console",
-                "log",
-                "\"{}\"",
+                "main", "a", "b", "c", "avg", "x", "1", "3", "5", "console", "log",
             ],
         );
     }
@@ -598,14 +572,12 @@ mod tests {
                 "name",
                 "isUpdated",
                 "32",
-                "\"John\"",
                 "true",
                 "3",
                 "5",
                 "console.log",
                 "console",
                 "log",
-                "\"{}\"",
             ],
         );
     }
@@ -637,14 +609,43 @@ mod tests {
                 "name",
                 "isUpdated",
                 "32",
-                "\"John\"",
                 "true",
                 "3",
                 "5",
                 "console.log",
                 "console",
                 "log",
-                "\"{}\"",
+            ],
+        );
+    }
+
+    #[test]
+    fn java_ops() {
+        check_ops(
+            LANG::Java,
+            "public class Main {
+                public static void main(string args[]) {
+                      int a, b, c, avg;
+                      a = 5; b = 5; c = 5;
+                      avg = (a + b + c) / 3;
+                      MessageFormat.format(\"{0}\", avg);
+                    }
+                }",
+            "foo.java",
+            &mut ["{}", "void", "()", "[]", ",", ";", "int", "=", "+", "/"],
+            &mut [
+                "Main",
+                "main",
+                "args",
+                "a",
+                "b",
+                "c",
+                "avg",
+                "5",
+                "3",
+                "MessageFormat",
+                "format",
+                "\"{0}\"",
             ],
         );
     }

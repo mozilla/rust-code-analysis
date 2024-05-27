@@ -19,7 +19,7 @@
 //!     }
 //! "#;
 //! let mut parser = Parser::new();
-//! parser.set_language(tree_sitter_mozcpp::language()).expect("Error loading Mozcpp grammar");
+//! parser.set_language(&tree_sitter_mozcpp::language()).expect("Error loading Mozcpp grammar");
 //! let parsed = parser.parse(code, None);
 //! # let parsed = parsed.unwrap();
 //! # let root = parsed.root_node();
@@ -58,7 +58,7 @@ mod tests {
     fn can_load_grammar() {
         let mut parser = tree_sitter::Parser::new();
         parser
-            .set_language(super::language())
+            .set_language(&super::language())
             .expect("Error loading Mozcpp grammar");
     }
 }
