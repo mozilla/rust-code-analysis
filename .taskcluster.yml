@@ -37,11 +37,11 @@ tasks:
         workerType: ci
         payload:
           maxRunTime: 3600
-          image: "rust:buster"
+          image: "rust:bookworm"
           command:
             - "/bin/bash"
             - "-cx"
-            - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
+            - "apt update && apt install -y python3-full &&
                rustup component add clippy rustfmt &&
                rustup toolchain install nightly &&
                curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.35/cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2 &&
@@ -50,6 +50,8 @@ tasks:
                cd rust-code-analysis &&
                git -c advice.detachedHead=false checkout ${head_rev} &&
                git submodule update --init &&
+               python3 -m venv myenv &&
+               . myenv/bin/activate &&
                pip3 install --quiet pre-commit &&
                pre-commit run -a --show-diff-on-failure &&
                pre-commit run --show-diff-on-failure -c .pre-commit-audit-config.yaml &&
@@ -69,7 +71,7 @@ tasks:
         workerType: ci
         payload:
           maxRunTime: 3600
-          image: "rust:buster"
+          image: "rust:bookworm"
           command:
             - "/bin/bash"
             - "-cx"
@@ -99,7 +101,7 @@ tasks:
         workerType: ci
         payload:
           maxRunTime: 3600
-          image: "rust:buster"
+          image: "rust:bookworm"
           env:
             CODECOV_TOKEN: 4df01912-087e-489a-be28-25aa911cb9d2
             CARGO_INCREMENTAL: "0"
