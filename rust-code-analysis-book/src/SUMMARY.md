@@ -10,3 +10,4 @@
 - [Developers Guide](developers/README.md)
     - [How-to: Add a new language](developers/new-language.md)
     - [How-to: Implement LoC](developers/loc.md)
+    - [How-to: Update grammars](developers/update-grammars.md)
