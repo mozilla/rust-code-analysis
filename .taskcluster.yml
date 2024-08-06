@@ -41,7 +41,7 @@ tasks:
           command:
             - "/bin/bash"
             - "-cx"
-            - "apt update && apt install python3-full &&
+            - "apt update && apt install -y python3-full &&
                rustup component add clippy rustfmt &&
                rustup toolchain install nightly &&
                curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.35/cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2 &&
