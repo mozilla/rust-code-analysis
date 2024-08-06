@@ -358,6 +358,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
 
 /// Configuration options for computing
 /// the metrics of a code.
+#[derive(Debug)]
 pub struct MetricsCfg {
     /// Path to the file containing the code
     pub path: PathBuf,

@@ -62,6 +62,7 @@ fn remove_from_code(code: &[u8], mut spans: Vec<(usize, usize, usize)>) -> Vec<u
 }
 
 /// Configuration options for removing comments from a code.
+#[derive(Debug)]
 pub struct CommentRmCfg {
     /// If `true`, the modified code is saved on a file
     pub in_place: bool,

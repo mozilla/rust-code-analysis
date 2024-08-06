@@ -44,6 +44,7 @@ pub struct WebMetricsInfo {
 }
 
 /// Server request configuration.
+#[derive(Debug)]
 pub struct WebMetricsCfg {
     /// Request identifier.
     pub id: String,
