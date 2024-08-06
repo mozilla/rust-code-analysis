@@ -40,22 +40,24 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py &&
-               rustup component add clippy rustfmt &&
-               rustup toolchain install nightly &&
-               curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.35/cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2 &&
-               curl -L https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.16.0/cargo-audit-x86_64-unknown-linux-musl-v0.16.0.tgz | tar xzv -C /usr/local/cargo/bin --strip-components 1 &&
-               git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               git submodule update --init &&
-               pip3 install --quiet pre-commit &&
-               pre-commit run -a --show-diff-on-failure &&
-               pre-commit run --show-diff-on-failure -c .pre-commit-audit-config.yaml &&
-               cargo test --workspace --verbose --all-features --no-fail-fast -- --nocapture &&
-               cd enums &&
-               cargo build --verbose --all-features"
+            - "-cxe"
+            - |-
+              curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+              python3 get-pip.py
+              rustup component add clippy rustfmt
+              rustup toolchain install nightly
+              curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.35/cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2
+              curl -L https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.16.0/cargo-audit-x86_64-unknown-linux-musl-v0.16.0.tgz | tar xzv -C /usr/local/cargo/bin --strip-components 1
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              git submodule update --init
+              pip3 install --quiet pre-commit
+              pre-commit run -a --show-diff-on-failure
+              pre-commit run --show-diff-on-failure -c .pre-commit-audit-config.yaml
+              cargo test --workspace --verbose --all-features --no-fail-fast -- --nocapture
+              cd enums
+              cargo build --verbose --all-features
         metadata:
           name: rust-code-analysis lint and test
           description: rust-code-analysis lint and test
@@ -72,15 +74,16 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               cargo install mdbook --no-default-features --features output --vers \"^0.1.0\" &&
-               cargo doc --release &&
-               cd rust-code-analysis-book &&
-               mdbook build &&
-               tar -zvcf /book.tar.gz book/"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              cargo install mdbook --no-default-features --features output --vers "^0.1.0"
+              cargo doc --release
+              cd rust-code-analysis-book
+              mdbook build
+              tar -zvcf /book.tar.gz book/
           artifacts:
             public/book.tar.gz:
               expires: {$fromNow: '2 weeks'}
@@ -108,18 +111,19 @@ tasks:
             LLVM_PROFILE_FILE: rust-code-analysis-%p-%m.profraw
           command:
             - "/bin/bash"
-            - "-cx"
-            - "apt-get -qq update &&
-               apt-get -qq install -y zip &&
-               curl -L https://github.com/mozilla/grcov/releases/download/v0.8.6/grcov-v0.8.6-x86_64-unknown-linux-gnu.tar.gz | tar xz &&
-               rustup component add llvm-tools-preview &&
-               git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               git submodule update --init &&
-               cargo test --workspace --verbose --all-features --target x86_64-unknown-linux-gnu &&
-               ../grcov . --binary-path ./target/ -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info &&
-               bash <(curl -s https://codecov.io/bash) -f lcov.info"
+            - "-cxe"
+            - |-
+              apt-get -qq update
+              apt-get -qq install -y zip
+              curl -L https://github.com/mozilla/grcov/releases/download/v0.8.6/grcov-v0.8.6-x86_64-unknown-linux-gnu.tar.gz | tar xz
+              rustup component add llvm-tools-preview
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              git submodule update --init
+              cargo test --workspace --verbose --all-features --target x86_64-unknown-linux-gnu
+              ../grcov . --binary-path ./target/ -s . -t lcov --llvm --branch --ignore-not-existing --ignore '/*' -o lcov.info
+              bash <(curl -s https://codecov.io/bash) -f lcov.info
         metadata:
           name: rust-code-analysis grcov test
           description: rust-code-analysis grcov test
@@ -173,11 +177,12 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh tree-sitter-mozcpp"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              ./check-grammars-crates.sh tree-sitter-mozcpp
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
@@ -186,7 +191,7 @@ tasks:
               path: /tmp/json-diffs-and-minimal-tests-mozcpp.tar.gz
               type: file
         scopes:
-          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+          - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
           name: rust-code-analysis check tree-sitter-mozcpp
           description: rust-code-analysis check tree-sitter-mozcpp grammar
@@ -206,11 +211,12 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh tree-sitter-mozjs"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              ./check-grammars-crates.sh tree-sitter-mozjs
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
@@ -219,7 +225,7 @@ tasks:
               path: /tmp/json-diffs-and-minimal-tests-mozjs.tar.gz
               type: file
         scopes:
-          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+          - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
           name: rust-code-analysis check tree-sitter-mozjs
           description: rust-code-analysis check tree-sitter-mozjs grammar
@@ -239,11 +245,12 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh tree-sitter-rust"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              ./check-grammars-crates.sh tree-sitter-rust
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
@@ -252,7 +259,7 @@ tasks:
               path: /tmp/json-diffs-and-minimal-tests-rust.tar.gz
               type: file
         scopes:
-          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+          - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
           name: rust-code-analysis check tree-sitter-rust
           description: rust-code-analysis check tree-sitter-rust grammar
@@ -272,11 +279,12 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh tree-sitter-java"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              ./check-grammars-crates.sh tree-sitter-java
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
@@ -285,7 +293,7 @@ tasks:
               path: /tmp/json-diffs-and-minimal-tests-java.tar.gz
               type: file
         scopes:
-          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+          - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
           name: rust-code-analysis check tree-sitter-java
           description: rust-code-analysis check tree-sitter-java grammar
@@ -305,11 +313,12 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh tree-sitter-kotlin"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              ./check-grammars-crates.sh tree-sitter-kotlin
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
@@ -318,7 +327,7 @@ tasks:
               path: /tmp/json-diffs-and-minimal-tests-kotlin.tar.gz
               type: file
         scopes:
-          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+          - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
           name: rust-code-analysis check tree-sitter-kotlin
           description: rust-code-analysis check tree-sitter-kotlin grammar
@@ -338,11 +347,12 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh tree-sitter-python"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              ./check-grammars-crates.sh tree-sitter-python
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
@@ -351,7 +361,7 @@ tasks:
               path: /tmp/json-diffs-and-minimal-tests-python.tar.gz
               type: file
         scopes:
-          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+          - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
           name: rust-code-analysis check tree-sitter-python
           description: rust-code-analysis check tree-sitter-python grammar
@@ -371,11 +381,12 @@ tasks:
           image: "rust:buster"
           command:
             - "/bin/bash"
-            - "-cx"
-            - "git clone --quiet ${repository} &&
-               cd rust-code-analysis &&
-               git -c advice.detachedHead=false checkout ${head_rev} &&
-               ./check-grammars-crates.sh tree-sitter-typescript"
+            - "-cxe"
+            - |-
+              git clone --quiet ${repository}
+              cd rust-code-analysis
+              git -c advice.detachedHead=false checkout ${head_rev}
+              ./check-grammars-crates.sh tree-sitter-typescript
           cache:
             rust-code-analysis-mozilla-central-repository: /cache
           artifacts:
@@ -384,7 +395,7 @@ tasks:
               path: /tmp/json-diffs-and-minimal-tests-typescript.tar.gz
               type: file
         scopes:
-          - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+          - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
         metadata:
           name: rust-code-analysis check tree-sitter-typescript
           description: rust-code-analysis check tree-sitter-typescript grammar
@@ -406,21 +417,24 @@ tasks:
             image: "rust:buster"
             command:
               - "/bin/bash"
-              - "-cx"
-              - "git clone --quiet ${repository} &&
-                 [ ! -d \"/cache/gecko-dev\" ] &&
-                 git clone --quiet https://github.com/mozilla/gecko-dev.git /cache/gecko-dev || true &&
-                 pushd /cache/gecko-dev && git pull origin master && popd &&
-                 mkdir -p /tmp/mozilla_central_output &&
-                 cd rust-code-analysis &&
-                 git -c advice.detachedHead=false checkout ${head_rev} &&
-                 cargo build --release --workspace --all-features &&
-                 cargo run --release -p rust-code-analysis-cli -- -p /cache/gecko-dev \
-                                     -j4 --metrics -O json -o /tmp/mozilla_central_output"
+              - "-cxe"
+              - |-
+                git clone --quiet ${repository}
+                [ ! -d "/cache/gecko-dev" ]
+                git clone --quiet https://github.com/mozilla/gecko-dev.git /cache/gecko-dev || true
+                pushd /cache/gecko-dev
+                git pull origin master
+                popd
+                mkdir -p /tmp/mozilla_central_output
+                cd rust-code-analysis
+                git -c advice.detachedHead=false checkout ${head_rev}
+                cargo build --release --workspace --all-features
+                cargo run --release -p rust-code-analysis-cli -- -p /cache/gecko-dev \
+                    -j4 --metrics -O json -o /tmp/mozilla_central_output
             cache:
               rust-code-analysis-mozilla-central-repository: /cache
           scopes:
-            - "docker-worker:cache:rust-code-analysis-mozilla-central-repository"
+            - "generic-worker:cache:rust-code-analysis-mozilla-central-repository"
           metadata:
             name: rust-code-analysis mozilla-central test
             description: rust-code-analysis-cli tested on mozilla-central
@@ -448,18 +462,19 @@ tasks:
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
                 - "/bin/sh"
-                - "-cx"
-                - "git config --global user.email moz-tools-bot@moz.tools &&
-                   git config --global user.name moz.tools Bot &&
-                   git clone --quiet ${repository} &&
-                   cd rust-code-analysis &&
-                   cd tree-sitter-ccomment && taskboot cargo-publish --ignore-published && cd .. &&
-                   cd tree-sitter-preproc && taskboot cargo-publish --ignore-published && cd .. &&
-                   cd tree-sitter-mozjs && taskboot cargo-publish --ignore-published && cd .. &&
-                   cd tree-sitter-mozcpp && taskboot cargo-publish --ignore-published && cd .. &&
-                   taskboot cargo-publish --ignore-published &&
-                   cd rust-code-analysis-cli && taskboot cargo-publish --ignore-published && cd .. &&
-                   cd rust-code-analysis-web && taskboot cargo-publish --ignore-published"
+                - "-cxe"
+                - |-
+                  git config --global user.email moz-tools-bot@moz.tools
+                  git config --global user.name moz.tools Bot
+                  git clone --quiet ${repository}
+                  cd rust-code-analysis
+                  cd tree-sitter-ccomment && taskboot cargo-publish --ignore-published && cd ..
+                  cd tree-sitter-preproc && taskboot cargo-publish --ignore-published && cd ..
+                  cd tree-sitter-mozjs && taskboot cargo-publish --ignore-published && cd ..
+                  cd tree-sitter-mozcpp && taskboot cargo-publish --ignore-published && cd ..
+                  taskboot cargo-publish --ignore-published
+                  cd rust-code-analysis-cli && taskboot cargo-publish --ignore-published && cd ..
+                  cd rust-code-analysis-web && taskboot cargo-publish --igoure-published
             metadata:
               name: "rust-code-analysis crates publishing on crates.io ${head_branch[10:]}"
               description: rust-code-analysis crates publishing on crates.io
@@ -480,18 +495,19 @@ tasks:
             image: "rust:buster"
             command:
               - "/bin/bash"
-              - "-cx"
-              - "git clone --quiet ${repository} &&
-                 cd rust-code-analysis &&
-                 git -c advice.detachedHead=false checkout ${head_rev} &&
-                 cargo update &&
-                 cargo build --workspace --release &&
-                 cargo package --all-features &&
-                 pushd rust-code-analysis-cli && cargo package --all-features && popd &&
-                 pushd rust-code-analysis-web && cargo package --all-features && popd &&
-                 cd target/release &&
-                 tar -zvcf /rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli &&
-                 tar -zvcf /rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web"
+              - "-cxe"
+              - |-
+                git clone --quiet ${repository}
+                cd rust-code-analysis
+                git -c advice.detachedHead=false checkout ${head_rev}
+                cargo update
+                cargo build --workspace --release
+                cargo package --all-features
+                pushd rust-code-analysis-cli && cargo package --all-features && popd
+                pushd rust-code-analysis-web && cargo package --all-features && popd
+                cd target/release
+                tar -zvcf /rust-code-analysis-linux-cli-x86_64.tar.gz rust-code-analysis-cli
+                tar -zvcf /rust-code-analysis-linux-web-x86_64.tar.gz rust-code-analysis-web
             artifacts:
               public/rust-code-analysis-linux-cli-x86_64.tar.gz:
                 expires: {$fromNow: '2 weeks'}
@@ -588,17 +604,18 @@ tasks:
                 TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
               command:
                 - "/bin/sh"
-                - "-cx"
-                - "git config --global user.email moz-tools-bot@moz.tools &&
-                   git config --global user.name moz.tools Bot &&
-                   git clone --quiet ${repository} &&
-                   cd rust-code-analysis &&
-                   taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz &&
-                   tar xfz book.tar.gz -C rust-code-analysis-book &&
-                   ./rust-code-analysis-book/deploy-to-GitHub-Pages &&
-                   taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages &&
-                   taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset Cargo.lock:public/Cargo.lock ${linux_cli}:public/${linux_cli} ${linux_web}:public/${linux_web} ${win_cli}:public/${win_cli} ${win_web}:public/${win_web} &&
-                   rm -rf book.tar.gz"
+                - "-cxe"
+                - |-
+                  git config --global user.email moz-tools-bot@moz.tools
+                  git config --global user.name moz.tools Bot
+                  git clone --quiet ${repository}
+                  cd rust-code-analysis
+                  taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz
+                  tar xfz book.tar.gz -C rust-code-analysis-book
+                  ./rust-code-analysis-book/deploy-to-GitHub-Pages
+                  taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages
+                  taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset Cargo.lock:public/Cargo.lock ${linux_cli}:public/${linux_cli} ${linux_web}:public/${linux_web} ${win_cli}:public/${win_cli} ${win_web}:public/${win_web}
+                  rm -rf book.tar.gz
             metadata:
               name: "rust-code-analysis release publication ${head_branch[10:]}"
               description: rust-code-analysis release publication on Github
