@@ -569,7 +569,7 @@ impl Loc for PythonCode {
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            DQUOTE | DQUOTE2 | Block | Module => {}
+            Block | Module => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
             }
