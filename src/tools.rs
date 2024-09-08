@@ -340,7 +340,7 @@ pub(crate) fn guess_file<S: ::std::hash::BuildHasher>(
             new_possibilities.clear();
         }
 
-        let mut dist_min = std::usize::MAX;
+        let mut dist_min = usize::MAX;
         let mut path_min = Vec::new();
         for p in possibilities.iter() {
             if current_path == p {
