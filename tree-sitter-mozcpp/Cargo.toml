@@ -27,7 +27,7 @@ tree-sitter = "=0.22.6"
 cc = "^1.0"
 # This dependency is not used at all for this crate, but it is here so that
 # dependabot can send notifications when there are updates for this grammar
-tree-sitter-cpp = "0.22.3"
+tree-sitter-cpp = "0.23.0"
 
 [package.metadata.cargo-udeps.ignore]
 build = ["tree-sitter-cpp"]
