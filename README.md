@@ -1,5 +1,6 @@
 # rust-code-analysis
 
+[![Crates.io](https://img.shields.io/crates/v/rust-code-analysis.svg)](https://crates.io/crates/rust-code-analysis)
 [![Task Status](https://community-tc.services.mozilla.com/api/github/v1/repository/mozilla/rust-code-analysis/master/badge.svg)](https://community-tc.services.mozilla.com/api/github/v1/repository/mozilla/rust-code-analysis/master/latest)
 [![codecov](https://codecov.io/gh/mozilla/rust-code-analysis/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/rust-code-analysis)
 <a href="https://chat.mozilla.org/#/room/#rust-code-analysis:mozilla.org" target="_blank">
