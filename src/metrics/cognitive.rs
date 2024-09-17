@@ -9,7 +9,7 @@ use crate::macros::implement_metric_trait;
 use crate::*;
 
 // TODO: Find a way to increment the cognitive complexity value
-// for recursive code. For some kind of langauges, such as C++, it is pretty
+// for recursive code. For some kind of languages, such as C++, it is pretty
 // hard to detect, just parsing the code, if a determined function is recursive
 // because the call graph of a function is solved at runtime.
 // So a possible solution could be searching for a crate which implements
@@ -1627,7 +1627,7 @@ mod tests {
                  return bar(foo(a))(a)",
             "foo.py",
             |metric| {
-                // 2 functions + 2 lamdas = 4
+                // 2 functions + 2 lambdas = 4
                 insta::assert_json_snapshot!(
                     metric.cognitive,
                     @r###"

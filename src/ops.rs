@@ -18,7 +18,7 @@ use crate::traits::*;
 pub struct Ops {
     /// The name of a function space.
     ///
-    /// If `None`, an error is occured in parsing
+    /// If `None`, an error is occurred in parsing
     /// the name of a function space.
     pub name: Option<String>,
     /// The first line of a function space.
