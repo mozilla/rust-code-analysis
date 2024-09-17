@@ -348,7 +348,7 @@ pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<Func
         }
     }
 
-    finalize::<T>(&mut state_stack, std::usize::MAX);
+    finalize::<T>(&mut state_stack, usize::MAX);
 
     state_stack.pop().map(|mut state| {
         state.space.name = path.to_str().map(|name| name.to_string());

@@ -213,7 +213,7 @@ pub fn operands_and_operators<'a, T: ParserTrait>(parser: &'a T, path: &'a Path)
         }
     }
 
-    finalize::<T>(&mut state_stack, std::usize::MAX);
+    finalize::<T>(&mut state_stack, usize::MAX);
 
     state_stack.pop().map(|mut state| {
         state.ops.name = path.to_str().map(|name| name.to_string());
