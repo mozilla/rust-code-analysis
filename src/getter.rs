@@ -422,7 +422,7 @@ impl Getter for CppCode {
                 // we're in a function_definition so need to get the declarator
                 if let Some(declarator) = node.child_by_field_name("declarator") {
                     let declarator_node = declarator;
-                    if let Some(fd) = declarator_node.first_occurence(|id| {
+                    if let Some(fd) = declarator_node.first_occurrence(|id| {
                         Cpp::FunctionDeclarator == id
                             || Cpp::FunctionDeclarator2 == id
                             || Cpp::FunctionDeclarator3 == id

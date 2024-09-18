@@ -18,7 +18,7 @@ use crate::traits::*;
 pub struct Ops {
     /// The name of a function space.
     ///
-    /// If `None`, an error is occured in parsing
+    /// If `None`, an error is occurred in parsing
     /// the name of a function space.
     pub name: Option<String>,
     /// The first line of a function space.
@@ -213,7 +213,7 @@ pub fn operands_and_operators<'a, T: ParserTrait>(parser: &'a T, path: &'a Path)
         }
     }
 
-    finalize::<T>(&mut state_stack, std::usize::MAX);
+    finalize::<T>(&mut state_stack, usize::MAX);
 
     state_stack.pop().map(|mut state| {
         state.ops.name = path.to_str().map(|name| name.to_string());
