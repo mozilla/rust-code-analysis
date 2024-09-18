@@ -416,7 +416,7 @@ mod tests {
         );
     }
 
-    /// Test to handle the case of min and max when merge happen before the final value of one module are setted.
+    /// Test to handle the case of min and max when merge happen before the final value of one module are set.
     /// In this case the min value should be 3 because the unit space has 2 branches and a complexity of 3
     /// while the function sumOfPrimes has a complexity of 4.
     #[test]

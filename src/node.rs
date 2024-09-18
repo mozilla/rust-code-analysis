@@ -205,7 +205,7 @@ impl<'a> Cursor<'a> {
 }
 
 impl<'a> Search<'a> for Node<'a> {
-    fn first_occurence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
+    fn first_occurrence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>> {
         let mut cursor = self.cursor();
         let mut stack = Vec::new();
         let mut children = Vec::new();
