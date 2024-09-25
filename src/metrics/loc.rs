@@ -569,7 +569,7 @@ impl Loc for PythonCode {
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            Block | Module => {}
+            StringStart | StringEnd | StringContent | Block | Module => {}
             Comment => {
                 add_cloc_lines(stats, start, end);
             }
@@ -1063,10 +1063,10 @@ mod tests {
                       "lloc_average": 3.0,
                       "cloc_average": 2.0,
                       "blank_average": 0.5,
-                      "sloc_min": 9.0,
-                      "sloc_max": 9.0,
-                      "cloc_min": 2.0,
-                      "cloc_max": 2.0,
+                      "sloc_min": 10.0,
+                      "sloc_max": 10.0,
+                      "cloc_min": 4.0,
+                      "cloc_max": 4.0,
                       "ploc_min": 7.0,
                       "ploc_max": 7.0,
                       "lloc_min": 6.0,
@@ -1110,10 +1110,10 @@ mod tests {
                       "lloc_average": 3.0,
                       "cloc_average": 2.0,
                       "blank_average": 0.0,
-                      "sloc_min": 8.0,
-                      "sloc_max": 8.0,
-                      "cloc_min": 2.0,
-                      "cloc_max": 2.0,
+                      "sloc_min": 9.0,
+                      "sloc_max": 9.0,
+                      "cloc_min": 4.0,
+                      "cloc_max": 4.0,
                       "ploc_min": 7.0,
                       "ploc_max": 7.0,
                       "lloc_min": 6.0,
@@ -1158,10 +1158,10 @@ mod tests {
                       "lloc_average": 3.0,
                       "cloc_average": 2.5,
                       "blank_average": 0.5,
-                      "sloc_min": 9.0,
-                      "sloc_max": 9.0,
-                      "cloc_min": 3.0,
-                      "cloc_max": 3.0,
+                      "sloc_min": 10.0,
+                      "sloc_max": 10.0,
+                      "cloc_min": 5.0,
+                      "cloc_max": 5.0,
                       "ploc_min": 7.0,
                       "ploc_max": 7.0,
                       "lloc_min": 6.0,
