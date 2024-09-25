@@ -164,7 +164,7 @@ impl Getter for JavascriptCode {
         use Javascript::*;
 
         match node.kind_id().into() {
-            Function
+            FunctionExpression
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
@@ -216,10 +216,10 @@ impl Getter for JavascriptCode {
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
             | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
-            | Function | SEMI => HalsteadType::Operator,
-            Identifier | Identifier2 | MemberExpression | PropertyIdentifier | String | Number
-            | True | False | Null | Void | This | Super | Undefined | Set | Get | Typeof
-            | Instanceof => HalsteadType::Operand,
+            | Function | FunctionExpression | SEMI => HalsteadType::Operator,
+            Identifier | Identifier2 | MemberExpression | MemberExpression2
+            | PropertyIdentifier | String | String2 | Number | True | False | Null | Void
+            | This | Super | Undefined | Set | Get | Typeof | Instanceof => HalsteadType::Operand,
             _ => HalsteadType::Unknown,
         }
     }

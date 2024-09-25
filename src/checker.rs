@@ -433,7 +433,7 @@ impl Checker for JavascriptCode {
         matches!(
             node.kind_id().into(),
             Javascript::Program
-                | Javascript::Function
+                | Javascript::FunctionExpression
                 | Javascript::Class
                 | Javascript::GeneratorFunction
                 | Javascript::FunctionDeclaration
