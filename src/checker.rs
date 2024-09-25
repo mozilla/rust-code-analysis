@@ -52,7 +52,7 @@ macro_rules! is_js_func {
     ($parser: ident, $node: ident) => {
         match $node.kind_id().into() {
             FunctionDeclaration | MethodDefinition => true,
-            Function => check_if_func!($parser, $node),
+            FunctionExpression => check_if_func!($parser, $node),
             ArrowFunction => check_if_arrow_func!($parser, $node),
             _ => false,
         }
@@ -63,7 +63,7 @@ macro_rules! is_js_closure {
     ($parser: ident, $node: ident) => {
         match $node.kind_id().into() {
             GeneratorFunction | GeneratorFunctionDeclaration => true,
-            Function => !check_if_func!($parser, $node),
+            FunctionExpression => !check_if_func!($parser, $node),
             ArrowFunction => !check_if_arrow_func!($parser, $node),
             _ => false,
         }
@@ -376,7 +376,7 @@ impl Checker for MozjsCode {
         matches!(
             node.kind_id().into(),
             Mozjs::Program
-                | Mozjs::Function
+                | Mozjs::FunctionExpression
                 | Mozjs::Class
                 | Mozjs::GeneratorFunction
                 | Mozjs::FunctionDeclaration
