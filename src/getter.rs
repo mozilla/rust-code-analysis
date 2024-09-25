@@ -232,7 +232,7 @@ impl Getter for TypescriptCode {
         use Typescript::*;
 
         match node.kind_id().into() {
-            Function
+            FunctionExpression
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
@@ -285,7 +285,7 @@ impl Getter for TypescriptCode {
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
             | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
-            | Function | SEMI => HalsteadType::Operator,
+            | Function | FunctionExpression | SEMI => HalsteadType::Operator,
             Identifier | NestedIdentifier | MemberExpression | PropertyIdentifier | String
             | Number | True | False | Null | Void | This | Super | Undefined | Set | Get
             | Typeof | Instanceof => HalsteadType::Operand,
@@ -301,7 +301,7 @@ impl Getter for TsxCode {
         use Tsx::*;
 
         match node.kind_id().into() {
-            Function
+            FunctionExpression
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
@@ -354,10 +354,10 @@ impl Getter for TsxCode {
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
             | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
-            | Function | SEMI => HalsteadType::Operator,
+            | Function | FunctionExpression | SEMI => HalsteadType::Operator,
             Identifier | NestedIdentifier | MemberExpression | PropertyIdentifier | String
-            | Number | True | False | Null | Void | This | Super | Undefined | Set | Get
-            | Typeof | Instanceof => HalsteadType::Operand,
+            | String2 | Number | True | False | Null | Void | This | Super | Undefined | Set
+            | Get | Typeof | Instanceof => HalsteadType::Operand,
             _ => HalsteadType::Unknown,
         }
     }

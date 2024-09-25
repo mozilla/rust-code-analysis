@@ -491,7 +491,7 @@ impl Checker for TypescriptCode {
         matches!(
             node.kind_id().into(),
             Typescript::Program
-                | Typescript::Function
+                | Typescript::FunctionExpression
                 | Typescript::Class
                 | Typescript::GeneratorFunction
                 | Typescript::FunctionDeclaration
@@ -550,7 +550,7 @@ impl Checker for TsxCode {
         matches!(
             node.kind_id().into(),
             Tsx::Program
-                | Tsx::Function
+                | Tsx::FunctionExpression
                 | Tsx::Class
                 | Tsx::GeneratorFunction
                 | Tsx::FunctionDeclaration
