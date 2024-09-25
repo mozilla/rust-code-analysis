@@ -22,10 +22,10 @@ tree-sitter-java = "x.xx.x"
 ```
 where `x` represents a digit.
 
-Run `./recreate-grammars` to recreate and refresh all grammars structures and data
+Run `./recreate-grammars.sh` to recreate and refresh all grammars structures and data
 
 ```bash
-./recreate-grammars
+./recreate-grammars.sh
 ```
 
 Once the script above has finished its execution, you need to fix, if there are any, all failed tests and problems
@@ -46,12 +46,27 @@ Open the `Cargo.toml` file of the chosen grammar and:
  - Set its version to the **same** value present in the main `Cargo.toml` file
  - Increase the `tree-sitter` version to the most recent one
 
-Run `./generate-grammars/generate-grammar.sh` which updates the grammar recreating and refreshing every file and script.
-This script requires the name of the grammar as mandatory argument.
+Run the appropriate script to update the grammar by recreating and refreshing every file and script.
+
+For `tree-sitter-ccomment` and `tree-sitter-preproc` run `./generate-grammars/generate-grammar.sh` followed by the name of the grammar.
 Below an example always using the `tree-sitter-ccomment` grammar
 
 ```bash
 ./generate-grammars/generate-grammar.sh tree-sitter-ccomment
+```
+
+Instead, for `tree-sitter-mozcpp` and `tree-sitter-mozjs`, use their specific scripts.
+
+For `tree-sitter-mozcpp`, run
+
+```bash
+./generate-grammars/generate-mozcpp.sh
+```
+
+For `tree-sitter-mozjs`, run
+
+```bash
+./generate-grammars/generate-mozjs.sh
 ```
 
 Once the script above has finished its execution, you need to fix, if there are any, all failed tests and problems
