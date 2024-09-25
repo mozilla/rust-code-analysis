@@ -725,7 +725,15 @@ impl Loc for RustCode {
         let (start, end) = init(node, stats, is_func_space, is_unit);
 
         match node.kind_id().into() {
-            StringLiteral | RawStringLiteral | Block | SourceFile => {}
+            StringLiteral
+            | RawStringLiteral
+            | Block
+            | SourceFile
+            | SLASHSLASH
+            | SLASHSTAR
+            | STARSLASH
+            | OuterDocCommentMarker2
+            | DocComment => {}
             LineComment | BlockComment => {
                 add_cloc_lines(stats, start, end);
             }
