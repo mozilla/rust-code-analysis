@@ -1,39 +1,22 @@
 # rust-code-analysis-web
 
-`rust-code-analysis-web` is a web server that facilitates the analysis of source code through a RESTful API. It is part of the rust-code-analysis suite and allows developers to remotely interact with the code analysis features provided by the library.
+`rust-code-analysis-web` is a web server that provides source code analysis capabilities via a RESTful API. It enables developers to interact with the code analysis functionality from the rust-code-analysis suite through HTTP requests.
 
 ## Features
 
-- **Comment Removal**: Removes comments from source code to produce a clean version.
-- **Function Spans**: Retrieves the start and end lines of functions in the provided source code.
-- **Metrics Calculation**: Computes various static analysis metrics for the source code.
+- **Comment Removal**: Removes comments from source code to provide a cleaner version of the code.
+- **Function Spans**: Retrieves the start and end lines of functions in the given source code.
+- **Metrics Calculation**: Computes static analysis metrics for the source code.
 
-## Project Structure
-
-```sh
-rust-code-analysis-web
-├── Cargo.toml      # Project metadata, dependencies, and build configuration
-└── src
-    ├── bin/
-    │   └── rust-code-analysis-web.rs  # Entry point for running the web server with CLI options
-    ├── web/
-    │   ├── comment.rs    # Logic for handling requests related to removing comments from source code
-    │   ├── function.rs   # Logic for extracting and returning function spans from the source code
-    │   ├── metrics.rs    # Logic for computing and returning code metrics based on the source code
-    │   ├── mod.rs        # Module declarations and routing between web modules
-    │   └── server.rs     # Actix web server setup, route definitions, and main server handler logic
-    └── lib.rs            # Main library file, sets up the module imports and starts the server
-```
+Refer to the REST API documentation for detailed information about the available endpoints and parameters.
 
 ## Installation
 
-To use `rust-code-analysis-web`, you need to have Rust installed on your system.
-
-Clone the repository and run the following command:
+Clone the repository and build the project:
 
 ```sh
 cd rust-code-analysis-web/
-cargo build --debug # or cargo build --release
+cargo build
 ```
 
 ## Usage
@@ -41,7 +24,7 @@ cargo build --debug # or cargo build --release
 Run the server by specifying the host and port:
 
 ```sh
-cargo run -- [OPTIONS]
+rust-code-analysis-web [OPTIONS]
 ```
 
 ### Available Options
@@ -52,10 +35,10 @@ cargo run -- [OPTIONS]
 - `-h, --help`: Show help information.
 - `-v, --version`: Show version information.
 
-# Examples
+## Examples
 
 To start the server on a specific host and port:
 
 ```sh
-cargo run -- --host <HOST> --port <PORT> -j <NUM_JOBS>
+rust-code-analysis-web --host <HOST> --port <PORT> -j <NUM_JOBS>
 ```
