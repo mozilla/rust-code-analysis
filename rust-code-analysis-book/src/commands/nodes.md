@@ -1,13 +1,13 @@
 # Nodes
 
-The rust-code-analysis-cli provides commands to analyze and extract information from the nodes in the **AST** of a source file.
+The `rust-code-analysis-cli` provides commands to analyze and extract information from the nodes in the **Abstract Syntax Tree (AST)** of a source file.
 
 ## Error Detection
 
 To detect syntactic errors in your code, run:
 
-```bash
-rust-code-analysis-cli -p /path/to/file/or/directory -I "*.ext" -f error
+```console
+rust-code-analysis-cli -p /path/to/your/file/or/directory -I "*.ext" -f error
 ```
 
 - `-p`: Path to a file or directory (analyzes all files in the directory).
@@ -20,17 +20,17 @@ This command will find and list all syntax errors in the specified code.
 
 You can count the number of specific node types in your code by using the `--count` flag:
 
-```bash
-rust-code-analysis-cli -p /path/to/file/or/directory -I "*.ext" --count <NODE_TYPE>
+```console
+rust-code-analysis-cli -p /path/to/your/file/or/directory -I "*.ext" --count <NODE_TYPE>
 ```
 This counts how many nodes of the specified type exist in the analyzed files.
 
 ## Printing the AST
 
-To visualize the AST of a source file, use the `--dump` flag:
+To visualize the AST of a source file, use the `-d` flag:
 
-```bash
-rust-code-analysis-cli -p /path/to/file/or/directory -I "*.ext" --dump
+```console
+rust-code-analysis-cli -p /path/to/your/file/or/directory -d
 ```
 The `-d` flag prints the entire AST, allowing you to inspect the code's syntactic structure.
 
@@ -38,8 +38,8 @@ The `-d` flag prints the entire AST, allowing you to inspect the code's syntacti
 
 To analyze only a specific part of the code, use the `--ls` (line start) and `--le` (line end) options:
 
-```bash
-rust-code-analysis-cli -p /path/to/file/or/directory -d --ls 5 --le 10
+```console
+rust-code-analysis-cli -p /path/to/your/file/or/directory -d --ls 5 --le 10
 ```
 
 This prints the AST of the code between lines 5 and 10, useful for analyzing specific functions or blocks.
