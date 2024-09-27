@@ -14,7 +14,6 @@ rust-code-analysis-cli -p /path/to/your/file/or/directory -I "*.ext" -f error
 - `-I`: Glob filter for selecting files by extension (e.g., `*.js`, `*.rs`).
 - `-f`: Flag to search for nodes of a specific type (e.g., errors).
 
-This command will find and list all syntax errors in the specified code.
 
 ## Counting Nodes
 
@@ -36,10 +35,9 @@ The `-d` flag prints the entire AST, allowing you to inspect the code's syntacti
 
 ## Analyzing Code Portions
 
-To analyze only a specific part of the code, use the `--ls` (line start) and `--le` (line end) options:
+To analyze only a specific part of the code, use the `--ls` (line start) and `--le` (line end) options.
+For example, if we want to print the AST of a single function which starts at line 5 and ends at line 10:
 
 ```console
 rust-code-analysis-cli -p /path/to/your/file/or/directory -d --ls 5 --le 10
 ```
-
-This prints the AST of the code between lines 5 and 10, useful for analyzing specific functions or blocks.
