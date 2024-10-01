@@ -1,13 +1,21 @@
 use crate::*;
 
+/// A trait to create a richer `AST` node for a programming language, mainly
+/// thought to be sent on the network.
 pub trait Alterator
 where
     Self: Checker,
 {
+    /// Creates a new `AST` node containing the code associated to the node,
+    /// its span, and its children.
+    ///
+    /// This function can be overloaded according to the needs of each
+    /// programming language.
     fn alterate(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
         Self::get_default(node, code, span, children)
     }
 
+    /// Gets the code as text and the span associated to a node.
     fn get_text_span(node: &Node, code: &[u8], span: bool, text: bool) -> (String, Span) {
         let text = if text {
             String::from_utf8(code[node.start_byte()..node.end_byte()].to_vec()).unwrap()
@@ -26,11 +34,15 @@ where
         }
     }
 
+    /// Gets a default `AST` node containing the code associated to the node,
+    /// its span, and its children.
     fn get_default(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
         let (text, span) = Self::get_text_span(node, code, span, node.child_count() == 0);
         AstNode::new(node.kind(), text, span, children)
     }
 
+    /// Gets a new `AST` node if and only if the code is not a comment,
+    /// otherwise [`None`] is returned.
     fn get_ast_node(
         node: &Node,
         code: &[u8],
