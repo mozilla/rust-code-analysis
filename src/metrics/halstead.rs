@@ -429,27 +429,26 @@ mod tests {
             }",
             "foo.rs",
             |metric| {
-                // FIXME tree-sitter-rust does not parse the comma inside the println! macro
-                // unique operators: fn, (), {}, let, =, +, /, ;, !
+                // unique operators: fn, (), {}, let, =, +, /, ;, !, ,
                 // unique operands: main, a, b, c, avg, 5, 3, println, "{}"
                 insta::assert_json_snapshot!(
                     metric.halstead,
                     @r###"
                     {
-                      "n1": 9.0,
-                      "N1": 22.0,
+                      "n1": 10.0,
+                      "N1": 23.0,
                       "n2": 9.0,
                       "N2": 15.0,
-                      "length": 37.0,
-                      "estimated_program_length": 57.05865002596162,
-                      "purity_ratio": 1.542125676377341,
-                      "vocabulary": 18.0,
-                      "volume": 154.28722505336555,
-                      "difficulty": 7.5,
-                      "level": 0.13333333333333333,
-                      "effort": 1157.1541879002416,
-                      "time": 64.28634377223564,
-                      "bugs": 0.03674003504721376
+                      "length": 38.0,
+                      "estimated_program_length": 61.74860596185444,
+                      "purity_ratio": 1.624963314785643,
+                      "vocabulary": 19.0,
+                      "volume": 161.42124551085624,
+                      "difficulty": 8.333333333333334,
+                      "level": 0.12,
+                      "effort": 1345.177045923802,
+                      "time": 74.7320581068779,
+                      "bugs": 0.040619232256751396
                     }"###
                 );
             },
