@@ -54,10 +54,6 @@
         "named": true
       },
       {
-        "type": "jsx_fragment",
-        "named": true
-      },
-      {
         "type": "jsx_self_closing_element",
         "named": true
       },
@@ -146,7 +142,7 @@
         "named": true
       },
       {
-        "type": "function",
+        "type": "function_expression",
         "named": true
       },
       {
@@ -155,10 +151,6 @@
       },
       {
         "type": "identifier",
-        "named": true
-      },
-      {
-        "type": "import",
         "named": true
       },
       {
@@ -612,6 +604,10 @@
           {
             "type": "expression",
             "named": true
+          },
+          {
+            "type": "private_property_identifier",
+            "named": true
           }
         ]
       },
@@ -774,6 +770,10 @@
           {
             "type": "expression",
             "named": true
+          },
+          {
+            "type": "import",
+            "named": true
           }
         ]
       },
@@ -878,6 +878,10 @@
         "required": false,
         "types": [
           {
+            "type": "class_static_block",
+            "named": true
+          },
+          {
             "type": "field_definition",
             "named": true
           },
@@ -958,6 +962,22 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "class_static_block",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "statement_block",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -1091,6 +1111,10 @@
           {
             "type": "identifier",
             "named": true
+          },
+          {
+            "type": "string",
+            "named": true
           }
         ]
       },
@@ -1100,6 +1124,10 @@
         "types": [
           {
             "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "string",
             "named": true
           }
         ]
@@ -1374,15 +1402,23 @@
         ]
       },
       "condition": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
+          {
+            "type": ";",
+            "named": false
+          },
           {
             "type": "empty_statement",
             "named": true
           },
           {
-            "type": "expression_statement",
+            "type": "expression",
+            "named": true
+          },
+          {
+            "type": "sequence_expression",
             "named": true
           }
         ]
@@ -1410,11 +1446,15 @@
             "named": true
           },
           {
-            "type": "expression_statement",
+            "type": "expression",
             "named": true
           },
           {
             "type": "lexical_declaration",
+            "named": true
+          },
+          {
+            "type": "sequence_expression",
             "named": true
           },
           {
@@ -1445,7 +1485,7 @@
     }
   },
   {
-    "type": "function",
+    "type": "function_declaration",
     "named": true,
     "fields": {
       "body": {
@@ -1460,7 +1500,7 @@
       },
       "name": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
             "type": "identifier",
@@ -1481,7 +1521,7 @@
     }
   },
   {
-    "type": "function_declaration",
+    "type": "function_expression",
     "named": true,
     "fields": {
       "body": {
@@ -1496,7 +1536,7 @@
       },
       "name": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "identifier",
@@ -1589,16 +1629,6 @@
     }
   },
   {
-    "type": "glimmer_closing_tag",
-    "named": true,
-    "fields": {}
-  },
-  {
-    "type": "glimmer_opening_tag",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "glimmer_template",
     "named": true,
     "fields": {
@@ -1666,6 +1696,21 @@
     "fields": {}
   },
   {
+    "type": "import_attribute",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "object",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "import_clause",
     "named": true,
     "fields": {},
@@ -1709,6 +1754,10 @@
           {
             "type": "identifier",
             "named": true
+          },
+          {
+            "type": "string",
+            "named": true
           }
         ]
       }
@@ -1730,9 +1779,13 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "import_attribute",
+          "named": true
+        },
         {
           "type": "import_clause",
           "named": true
@@ -1754,10 +1807,6 @@
         },
         {
           "type": "jsx_expression",
-          "named": true
-        },
-        {
-          "type": "jsx_fragment",
           "named": true
         },
         {
@@ -1785,7 +1834,7 @@
     "fields": {
       "name": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "identifier",
@@ -1796,7 +1845,7 @@
             "named": true
           },
           {
-            "type": "nested_identifier",
+            "type": "member_expression",
             "named": true
           }
         ]
@@ -1833,15 +1882,15 @@
       "required": false,
       "types": [
         {
+          "type": "html_character_reference",
+          "named": true
+        },
+        {
           "type": "jsx_element",
           "named": true
         },
         {
           "type": "jsx_expression",
-          "named": true
-        },
-        {
-          "type": "jsx_fragment",
           "named": true
         },
         {
@@ -1873,37 +1922,6 @@
         },
         {
           "type": "spread_element",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "jsx_fragment",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "jsx_element",
-          "named": true
-        },
-        {
-          "type": "jsx_expression",
-          "named": true
-        },
-        {
-          "type": "jsx_fragment",
-          "named": true
-        },
-        {
-          "type": "jsx_self_closing_element",
-          "named": true
-        },
-        {
-          "type": "jsx_text",
           "named": true
         }
       ]
@@ -1944,7 +1962,7 @@
       },
       "name": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "identifier",
@@ -1955,7 +1973,7 @@
             "named": true
           },
           {
-            "type": "nested_identifier",
+            "type": "member_expression",
             "named": true
           }
         ]
@@ -1993,7 +2011,7 @@
             "named": true
           },
           {
-            "type": "nested_identifier",
+            "type": "member_expression",
             "named": true
           }
         ]
@@ -2066,6 +2084,10 @@
         "types": [
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "import",
             "named": true
           }
         ]
@@ -2189,6 +2211,10 @@
         {
           "type": "identifier",
           "named": true
+        },
+        {
+          "type": "string",
+          "named": true
         }
       ]
     }
@@ -2203,25 +2229,6 @@
       "types": [
         {
           "type": "identifier",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "nested_identifier",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "nested_identifier",
           "named": true
         }
       ]
@@ -2554,31 +2561,16 @@
   {
     "type": "sequence_expression",
     "named": true,
-    "fields": {
-      "left": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      },
-      "right": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          },
-          {
-            "type": "sequence_expression",
-            "named": true
-          }
-        ]
-      }
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -2621,6 +2613,10 @@
       "types": [
         {
           "type": "escape_sequence",
+          "named": true
+        },
+        {
+          "type": "html_character_reference",
           "named": true
         },
         {
@@ -2771,6 +2767,10 @@
       "types": [
         {
           "type": "escape_sequence",
+          "named": true
+        },
+        {
+          "type": "string_fragment",
           "named": true
         },
         {
@@ -3203,6 +3203,10 @@
     "named": false
   },
   {
+    "type": "/>",
+    "named": false
+  },
+  {
     "type": ":",
     "named": false
   },
@@ -3215,7 +3219,7 @@
     "named": false
   },
   {
-    "type": "</template>",
+    "type": "</",
     "named": false
   },
   {
@@ -3228,10 +3232,6 @@
   },
   {
     "type": "<=",
-    "named": false
-  },
-  {
-    "type": "<template>",
     "named": false
   },
   {
@@ -3407,7 +3407,23 @@
     "named": false
   },
   {
+    "type": "glimmer_closing_tag",
+    "named": true
+  },
+  {
+    "type": "glimmer_opening_tag",
+    "named": true
+  },
+  {
     "type": "hash_bang_line",
+    "named": true
+  },
+  {
+    "type": "html_character_reference",
+    "named": true
+  },
+  {
+    "type": "html_comment",
     "named": true
   },
   {
@@ -3436,6 +3452,10 @@
   },
   {
     "type": "let",
+    "named": false
+  },
+  {
+    "type": "meta",
     "named": false
   },
   {
@@ -3500,6 +3520,10 @@
   },
   {
     "type": "static",
+    "named": false
+  },
+  {
+    "type": "static get",
     "named": false
   },
   {

@@ -18,7 +18,7 @@ use crate::traits::*;
 pub struct Ops {
     /// The name of a function space.
     ///
-    /// If `None`, an error is occured in parsing
+    /// If `None`, an error is occurred in parsing
     /// the name of a function space.
     pub name: Option<String>,
     /// The first line of a function space.
@@ -213,7 +213,7 @@ pub fn operands_and_operators<'a, T: ParserTrait>(parser: &'a T, path: &'a Path)
         }
     }
 
-    finalize::<T>(&mut state_stack, std::usize::MAX);
+    finalize::<T>(&mut state_stack, usize::MAX);
 
     state_stack.pop().map(|mut state| {
         state.ops.name = path.to_str().map(|name| name.to_string());
@@ -356,7 +356,6 @@ mod tests {
             LANG::Rust,
             "let: usize a = 5; let b: f32 = 7.0; let c: i32 = 3;",
             "foo.rs",
-            // FIXME tree-sitter-rust does not parse the comma inside the println! macro
             &mut ["let", "usize", "=", ";", "f32", "i32"],
             &mut ["a", "b", "c", "5", "7.0", "3"],
         );
@@ -372,8 +371,7 @@ mod tests {
               println!(\"{}\", avg);
             }",
             "foo.rs",
-            // FIXME tree-sitter-rust does not parse the comma inside the println! macro
-            &mut ["fn", "()", "{}", "let", "=", "+", "/", ";", "!"],
+            &mut ["fn", "()", "{}", "let", "=", "+", "/", ";", "!", ","],
             &mut ["main", "a", "b", "c", "avg", "5", "3", "println", "\"{}\""],
         );
     }

@@ -96,7 +96,7 @@ impl Getter for MozjsCode {
         use Mozjs::*;
 
         match node.kind_id().into() {
-            Function
+            FunctionExpression
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
@@ -148,10 +148,10 @@ impl Getter for MozjsCode {
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
             | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
-            | Function | Function2 | SEMI => HalsteadType::Operator,
-            Identifier | Identifier2 | MemberExpression | PropertyIdentifier | String | Number
-            | True | False | Null | Void | This | Super | Undefined | Set | Get | Typeof
-            | Instanceof => HalsteadType::Operand,
+            | Function | FunctionExpression | SEMI => HalsteadType::Operator,
+            Identifier | Identifier2 | MemberExpression | MemberExpression2
+            | PropertyIdentifier | String | String2 | Number | True | False | Null | Void
+            | This | Super | Undefined | Set | Get | Typeof | Instanceof => HalsteadType::Operand,
             _ => HalsteadType::Unknown,
         }
     }
@@ -164,7 +164,7 @@ impl Getter for JavascriptCode {
         use Javascript::*;
 
         match node.kind_id().into() {
-            Function
+            FunctionExpression
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
@@ -216,10 +216,10 @@ impl Getter for JavascriptCode {
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
             | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
-            | Function | SEMI => HalsteadType::Operator,
-            Identifier | Identifier2 | MemberExpression | PropertyIdentifier | String | Number
-            | True | False | Null | Void | This | Super | Undefined | Set | Get | Typeof
-            | Instanceof => HalsteadType::Operand,
+            | Function | FunctionExpression | SEMI => HalsteadType::Operator,
+            Identifier | Identifier2 | MemberExpression | MemberExpression2
+            | PropertyIdentifier | String | String2 | Number | True | False | Null | Void
+            | This | Super | Undefined | Set | Get | Typeof | Instanceof => HalsteadType::Operand,
             _ => HalsteadType::Unknown,
         }
     }
@@ -232,7 +232,7 @@ impl Getter for TypescriptCode {
         use Typescript::*;
 
         match node.kind_id().into() {
-            Function
+            FunctionExpression
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
@@ -285,7 +285,7 @@ impl Getter for TypescriptCode {
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
             | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
-            | Function | SEMI => HalsteadType::Operator,
+            | Function | FunctionExpression | SEMI => HalsteadType::Operator,
             Identifier | NestedIdentifier | MemberExpression | PropertyIdentifier | String
             | Number | True | False | Null | Void | This | Super | Undefined | Set | Get
             | Typeof | Instanceof => HalsteadType::Operand,
@@ -301,7 +301,7 @@ impl Getter for TsxCode {
         use Tsx::*;
 
         match node.kind_id().into() {
-            Function
+            FunctionExpression
             | MethodDefinition
             | GeneratorFunction
             | FunctionDeclaration
@@ -354,10 +354,10 @@ impl Getter for TsxCode {
             | GT | PLUSEQ | BANG | BANGEQEQ | EQEQEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ
             | STARSTAREQ | GTGTEQ | GTGTGTEQ | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ
             | Yield | LBRACK | LBRACE | Await | QMARK | QMARKQMARK | New | Let | Var | Const
-            | Function | SEMI => HalsteadType::Operator,
+            | Function | FunctionExpression | SEMI => HalsteadType::Operator,
             Identifier | NestedIdentifier | MemberExpression | PropertyIdentifier | String
-            | Number | True | False | Null | Void | This | Super | Undefined | Set | Get
-            | Typeof | Instanceof => HalsteadType::Operand,
+            | String2 | Number | True | False | Null | Void | This | Super | Undefined | Set
+            | Get | Typeof | Instanceof => HalsteadType::Operand,
             _ => HalsteadType::Unknown,
         }
     }
@@ -422,7 +422,7 @@ impl Getter for CppCode {
                 // we're in a function_definition so need to get the declarator
                 if let Some(declarator) = node.child_by_field_name("declarator") {
                     let declarator_node = declarator;
-                    if let Some(fd) = declarator_node.first_occurence(|id| {
+                    if let Some(fd) = declarator_node.first_occurrence(|id| {
                         Cpp::FunctionDeclarator == id
                             || Cpp::FunctionDeclarator2 == id
                             || Cpp::FunctionDeclarator3 == id

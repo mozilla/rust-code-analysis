@@ -1,0 +1,12 @@
+# See https://github.com/crate-ci/typos/blob/master/docs/reference.md to configure typos
+
+[default.extend-identifiers]
+
+[default.extend-words]
+
+[files]
+extend-exclude = [
+    "enums/data/",
+    "tree-sitter-*/examples/",
+    "src/c_langs_macros/c_macros.rs",
+]

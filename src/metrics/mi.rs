@@ -27,7 +27,7 @@ impl Serialize for Stats {
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("maintanability_index", 3)?;
+        let mut st = serializer.serialize_struct("maintainability_index", 3)?;
         st.serialize_field("mi_original", &self.mi_original())?;
         st.serialize_field("mi_sei", &self.mi_sei())?;
         st.serialize_field("mi_visual_studio", &self.mi_visual_studio())?;
