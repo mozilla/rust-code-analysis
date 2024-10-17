@@ -1,51 +1,42 @@
 # Nodes
 
-**rust-code-analysis-cli** allows to extract some information from the nodes
-which compose the *Abstract Syntax Tree (AST)* of a source code.
+The `rust-code-analysis-cli` provides commands to analyze and extract information from the nodes in the **Abstract Syntax Tree (AST)** of a source file.
 
-## Find Errors
+## Error Detection
 
-To know if there are some syntactic errors in your code, run:
-
-```console
-rust-code-analysis-cli -p /path/to/your/file/or/directory -I "*.ext" -f -error
-```
-
-The `-p` option represents the path to a file or a directory. If a directory is
-passed as input, **rust-code-analysis-cli** computes the metrics for each file
-contained in it.
-The `-I` option is a glob filter used to consider only the files written in
-the language defined by the extension of the file.
-The `-f` option instead searches all nodes of a certain type.
-In the case above, we are looking for all the erroneous nodes present in the
-code.
-
-## Count Errors
-
-It is also possible to count the number of nodes of a certain type using the
-`--count` option:
+To detect syntactic errors in your code, run:
 
 ```console
-rust-code-analysis-cli -p /path/to/your/file/or/directory -I "*.ext" --count -error
+rust-code-analysis-cli -p /path/to/your/file/or/directory -I "*.ext" -f error
 ```
 
-## Print AST
+- `-p`: Path to a file or directory (analyzes all files in the directory).
+- `-I`: Glob filter for selecting files by extension (e.g., `*.js`, `*.rs`).
+- `-f`: Flag to search for nodes of a specific type (e.g., errors).
 
-If you want to print the AST of a source code, run the following command:
+
+## Counting Nodes
+
+You can count the number of specific node types in your code by using the `--count` flag:
+
+```console
+rust-code-analysis-cli -p /path/to/your/file/or/directory -I "*.ext" --count <NODE_TYPE>
+```
+This counts how many nodes of the specified type exist in the analyzed files.
+
+## Printing the AST
+
+To visualize the AST of a source file, use the `-d` flag:
 
 ```console
 rust-code-analysis-cli -p /path/to/your/file/or/directory -d
 ```
+The `-d` flag prints the entire AST, allowing you to inspect the code's syntactic structure.
 
-The `-d` option prints the entire AST on the shell.
+## Analyzing Code Portions
 
-## Code Splitting
-
-Commands can be run on a single portion of the code using the `--ls`
-and `--le` options. The former represents the starting line of the code to be
-considered, while the latter its ending line.
-For example, if we want to print the AST of a single function which starts at
-line 5 and ends at line 10, we need to launch this command:
+To analyze only a specific part of the code, use the `--ls` (line start) and `--le` (line end) options.
+For example, if we want to print the AST of a single function which starts at line 5 and ends at line 10:
 
 ```console
 rust-code-analysis-cli -p /path/to/your/file/or/directory -d --ls 5 --le 10
