@@ -46,10 +46,6 @@
         "named": true
       },
       {
-        "type": "glimmer_template",
-        "named": true
-      },
-      {
         "type": "jsx_element",
         "named": true
       },
@@ -890,16 +886,6 @@
             "named": true
           }
         ]
-      },
-      "template": {
-        "multiple": true,
-        "required": false,
-        "types": [
-          {
-            "type": "glimmer_template",
-            "named": true
-          }
-        ]
       }
     }
   },
@@ -1622,32 +1608,6 @@
         "types": [
           {
             "type": "formal_parameters",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
-    "type": "glimmer_template",
-    "named": true,
-    "fields": {
-      "close_tag": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "glimmer_closing_tag",
-            "named": true
-          }
-        ]
-      },
-      "open_tag": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "glimmer_opening_tag",
             "named": true
           }
         ]
@@ -2462,6 +2422,7 @@
   {
     "type": "program",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -3340,7 +3301,8 @@
   },
   {
     "type": "comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "const",
@@ -3407,14 +3369,6 @@
     "named": false
   },
   {
-    "type": "glimmer_closing_tag",
-    "named": true
-  },
-  {
-    "type": "glimmer_opening_tag",
-    "named": true
-  },
-  {
     "type": "hash_bang_line",
     "named": true
   },
@@ -3424,7 +3378,8 @@
   },
   {
     "type": "html_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "identifier",

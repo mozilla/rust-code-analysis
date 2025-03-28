@@ -1,5 +1,7 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "mozjs",
+  "inherits": "javascript",
   "word": "identifier",
   "rules": {
     "program": {
@@ -1731,10 +1733,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "glimmer_template"
-        },
-        {
-          "type": "SYMBOL",
           "name": "_jsx_element"
         },
         {
@@ -2404,76 +2402,6 @@
           "value": "]"
         }
       ]
-    },
-    "glimmer_template": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "FIELD",
-              "name": "open_tag",
-              "content": {
-                "type": "SYMBOL",
-                "name": "glimmer_opening_tag"
-              }
-            },
-            {
-              "type": "FIELD",
-              "name": "content",
-              "content": {
-                "type": "REPEAT",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "_glimmer_template_content"
-                }
-              }
-            },
-            {
-              "type": "FIELD",
-              "name": "close_tag",
-              "content": {
-                "type": "SYMBOL",
-                "name": "glimmer_closing_tag"
-              }
-            }
-          ]
-        },
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "FIELD",
-              "name": "open_tag",
-              "content": {
-                "type": "SYMBOL",
-                "name": "glimmer_opening_tag"
-              }
-            },
-            {
-              "type": "FIELD",
-              "name": "close_tag",
-              "content": {
-                "type": "SYMBOL",
-                "name": "glimmer_closing_tag"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    "_glimmer_template_content": {
-      "type": "PATTERN",
-      "value": ".{1,}"
-    },
-    "glimmer_opening_tag": {
-      "type": "STRING",
-      "value": "<template>"
-    },
-    "glimmer_closing_tag": {
-      "type": "STRING",
-      "value": "</template>"
     },
     "_jsx_element": {
       "type": "CHOICE",
@@ -3465,17 +3393,42 @@
                 "type": "FIELD",
                 "name": "arguments",
                 "content": {
+                  "type": "SYMBOL",
+                  "name": "arguments"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "PREC",
+          "value": "template_call",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "FIELD",
+                "name": "function",
+                "content": {
                   "type": "CHOICE",
                   "members": [
                     {
                       "type": "SYMBOL",
-                      "name": "arguments"
+                      "name": "primary_expression"
                     },
                     {
                       "type": "SYMBOL",
-                      "name": "template_string"
+                      "name": "new_expression"
                     }
                   ]
+                }
+              },
+              {
+                "type": "FIELD",
+                "name": "arguments",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "template_string"
                 }
               }
             ]
@@ -6200,14 +6153,6 @@
                 }
               },
               {
-                "type": "FIELD",
-                "name": "template",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "glimmer_template"
-                }
-              },
-              {
                 "type": "STRING",
                 "value": ";"
               }
@@ -6771,6 +6716,10 @@
       },
       {
         "type": "STRING",
+        "value": "template_call"
+      },
+      {
+        "type": "STRING",
         "value": "call"
       },
       {
@@ -6856,6 +6805,10 @@
       {
         "type": "STRING",
         "value": "member"
+      },
+      {
+        "type": "STRING",
+        "value": "template_call"
       },
       {
         "type": "STRING",
@@ -6991,6 +6944,6 @@
     "expression",
     "primary_expression",
     "pattern"
-  ]
+  ],
+  "reserved": {}
 }
-
