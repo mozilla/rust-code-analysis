@@ -2972,7 +2972,7 @@ mod tests {
 
     #[test]
     fn java_foreach_lloc() {
-        check_metrics::<JavascriptParser>(
+        check_metrics::<JavaParser>(
             "
             int arr[]={12,13,14,44}; // +1
             for (int i:arr) { // +1
@@ -2987,12 +2987,12 @@ mod tests {
                     {
                       "sloc": 4.0,
                       "ploc": 4.0,
-                      "lloc": 1.0,
+                      "lloc": 3.0,
                       "cloc": 3.0,
                       "blank": 0.0,
                       "sloc_average": 4.0,
                       "ploc_average": 4.0,
-                      "lloc_average": 1.0,
+                      "lloc_average": 3.0,
                       "cloc_average": 3.0,
                       "blank_average": 0.0,
                       "sloc_min": 4.0,
@@ -3001,8 +3001,8 @@ mod tests {
                       "cloc_max": 3.0,
                       "ploc_min": 4.0,
                       "ploc_max": 4.0,
-                      "lloc_min": 1.0,
-                      "lloc_max": 1.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
                       "blank_min": 0.0,
                       "blank_max": 0.0
                     }"###

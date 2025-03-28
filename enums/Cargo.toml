@@ -9,7 +9,7 @@ clap = { version = "^4.0", features = ["derive"] }
 askama = "^0.12"
 
 tree-sitter = "=0.25.3"
-tree-sitter-java = "=0.21.0"
+tree-sitter-java = "=0.23.5"
 tree-sitter-kotlin = "0.3.6"
 tree-sitter-typescript = "=0.21.2"
 tree-sitter-javascript = "=0.21.4"
