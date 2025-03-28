@@ -9,7 +9,7 @@ macro_rules! get_language {
         tree_sitter_typescript::language_tsx()
     };
     ($name:ident) => {
-        $name::language()
+        $name::LANGUAGE.into()
     };
 }
 
