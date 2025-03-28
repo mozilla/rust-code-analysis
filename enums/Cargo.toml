@@ -15,7 +15,7 @@ tree-sitter-typescript = "=0.23.2"
 tree-sitter-javascript = "=0.23.1"
 tree-sitter-python = "=0.23.6"
 tree-sitter-rust = "=0.23.2"
-tree-sitter-preproc = { path = "../tree-sitter-preproc", version = "=0.20.2" }
+tree-sitter-preproc = { path = "./tree-sitter-preproc", version = "=0.20.3" }
 tree-sitter-ccomment = { path = "../tree-sitter-ccomment", version = "=0.20.2" }
 tree-sitter-mozcpp = { path = "../tree-sitter-mozcpp", version = "=0.20.3" }
 tree-sitter-mozjs = { path = "../tree-sitter-mozjs", version = "=0.20.2" }

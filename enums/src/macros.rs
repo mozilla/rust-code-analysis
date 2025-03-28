@@ -26,7 +26,7 @@ macro_rules! mk_get_language {
                 Lang::Javascript => tree_sitter_javascript::LANGUAGE.into(),
                 Lang::Python => tree_sitter_python::LANGUAGE.into(),
                 Lang::Rust => tree_sitter_rust::LANGUAGE.into(),
-                Lang::Preproc => tree_sitter_preproc::language(),
+                Lang::Preproc => tree_sitter_preproc::LANGUAGE.into(),
                 Lang::Ccomment => tree_sitter_ccomment::language(),
                 Lang::Cpp => tree_sitter_mozcpp::language(),
                 Lang::Mozjs => tree_sitter_mozjs::language(),
