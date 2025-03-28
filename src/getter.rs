@@ -492,13 +492,17 @@ impl Getter for CppCode {
         match node.kind_id().into() {
             DOT | LPAREN | LPAREN2 | COMMA | STAR | GTGT | COLON | SEMI | Return | Break
             | Continue | If | Else | Switch | Case | Default | For | While | Goto | Do | Delete
-            | New | Try | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | DASHDASH | DASHGT
+            | New | Try | Try2 | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | DASHDASH | DASHGT
             | PLUS | PLUSPLUS | SLASH | PERCENT | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ
             | BANGEQ | GTEQ | GT | GT2 | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ | GTGTEQ
             | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ | LBRACK | LBRACE | QMARK | COLONCOLON
             | PrimitiveType | TypeSpecifier | Sizeof => HalsteadType::Operator,
             Identifier | TypeIdentifier | FieldIdentifier | RawStringLiteral | StringLiteral
-            | NumberLiteral | True | False | Null | Nullptr | DOTDOTDOT => HalsteadType::Operand,
+            | NumberLiteral | True | False | Null | DOTDOTDOT => HalsteadType::Operand,
+            NamespaceIdentifier => match node.parent() {
+                Some(parent) if matches!(parent.kind_id().into(), NamespaceDefinition) => HalsteadType::Operand,
+                _ => HalsteadType::Unknown,
+            },
             _ => HalsteadType::Unknown,
         }
     }

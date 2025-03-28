@@ -53,8 +53,14 @@ npm install -y
 # Exit tree-sitter-cpp directory
 popd
 
-# Copy tree-sitter-cpp `scanner.cc` functions into the `src` directory
-cp --verbose $TS_CPP_CRATE/src/scanner.cc ./src/scanner.cc
+# Copy tree-sitter-cpp `scanner.c` functions into the `src` directory
+cp --verbose $TS_CPP_CRATE/src/scanner.c ./src/scanner.c
+
+# Since the tree-sitter-mozcpp `scanner.c` file contains the very same functions
+# present in the tree-sitter-cpp `scanner.c` file, to avoid having a
+# multiple symbol definition error during the linking phase,
+# those functions will be assigned a new prefix.
+sed -i 's/tree_sitter_cpp/tree_sitter_mozcpp/g' ./src/scanner.c
 
 # Exit tree-sitter-mozcpp directory
 popd

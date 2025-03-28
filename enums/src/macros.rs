@@ -28,7 +28,7 @@ macro_rules! mk_get_language {
                 Lang::Rust => tree_sitter_rust::LANGUAGE.into(),
                 Lang::Preproc => tree_sitter_preproc::LANGUAGE.into(),
                 Lang::Ccomment => tree_sitter_ccomment::LANGUAGE.into(),
-                Lang::Cpp => tree_sitter_mozcpp::language(),
+                Lang::Cpp => tree_sitter_mozcpp::LANGUAGE.into(),
                 Lang::Mozjs => tree_sitter_mozjs::language(),
             }
         }

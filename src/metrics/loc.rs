@@ -778,8 +778,8 @@ impl Loc for CppCode {
             }
             WhileStatement | SwitchStatement | CaseStatement | IfStatement | ForStatement
             | ReturnStatement | BreakStatement | ContinueStatement | GotoStatement
-            | ThrowStatement | TryStatement | ExpressionStatement | LabeledStatement
-            | StatementIdentifier => {
+            | ThrowStatement | TryStatement | TryStatement2 | ExpressionStatement
+            | ExpressionStatement2 | LabeledStatement | StatementIdentifier => {
                 stats.lloc.logical_lines += 1;
             }
             Declaration => {
@@ -799,6 +799,15 @@ impl Loc for CppCode {
             _ => {
                 check_comment_ends_on_code_line(stats, start);
                 stats.ploc.lines.insert(start);
+
+                // As reported here: https://github.com/tree-sitter/tree-sitter-cpp/issues/276
+                // `tree-sitter-cpp` doesn't expand macros, providing a single `PreprocArg` node for the entire macro argument.
+                // Therefore, all lines from `start_row` to `end_row` must be added to PLOC to account for the unexpanded macro content
+                if let PreprocArg = node.kind_id().into() {
+                    (node.start_row() + 1..=node.end_row()).for_each(|line| {
+                        stats.ploc.lines.insert(line);
+                    });
+                }
             }
         }
     }
