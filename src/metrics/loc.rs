@@ -729,12 +729,23 @@ impl Loc for RustCode {
             | RawStringLiteral
             | Block
             | SourceFile
+            | SLASH
             | SLASHSLASH
             | SLASHSTAR
             | STARSLASH
+            | OuterDocCommentMarker
             | OuterDocCommentMarker2
-            | DocComment => {}
-            LineComment | BlockComment => {
+            | DocComment
+            | InnerDocCommentMarker
+            | BANG => {}
+            | BlockComment => {
+                add_cloc_lines(stats, start, end);
+            }
+            LineComment => {
+                // Exclude the last line for `LineComment` containing a `DocComment`,
+                // since the `DocComment` includes the newline,
+                // as explained here: https://github.com/tree-sitter/tree-sitter-rust/blob/2eaf126458a4d6a69401089b6ba78c5e5d6c1ced/src/scanner.c#L194-L195
+                let end = if node.is_child(DocComment as u16) { end - 1 } else { end };
                 add_cloc_lines(stats, start, end);
             }
             Statement
