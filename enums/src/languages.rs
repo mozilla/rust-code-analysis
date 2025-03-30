@@ -3,7 +3,7 @@ use tree_sitter::Language;
 mk_langs!(
     // 1) Name for enum
     // 2) tree-sitter function to call to get a Language
-    (Kotlin, tree_sitter_kotlin),
+    (Kotlin, tree_sitter_kotlin_ng),
     (Java, tree_sitter_java),
     (Rust, tree_sitter_rust),
     (Cpp, tree_sitter_cpp),

@@ -12,7 +12,7 @@ TS_JS_CRATE="tree-sitter-javascript"
 JSON_CRATE_FILENAME=".cargo_vcs_info.json"
 
 # Get the current tree-sitter-javascript crate version
-TS_JS_VERSION=`grep $TS_JS_CRATE Cargo.toml | cut -f2 -d "=" | tr -d ' ' | tr -d \"`
+TS_JS_VERSION=`grep -m 1 $TS_JS_CRATE tree-sitter-mozjs/Cargo.toml | cut -f2 -d "," | cut -f2 -d "=" | tr -d ' ' | tr -d } | tr -d \"`
 
 # Name assigned to the compressed binary crate downloaded from crates.io
 CRATE_OUTPUT="$TS_JS_CRATE-download.gz"
@@ -50,13 +50,14 @@ git checkout FETCH_HEAD
 # Exit tree-sitter-javascript directory
 popd
 
-# Since the tree-sitter-mozjs `scanner.cc` file contains the very same functions
-# present in the tree-sitter-javascript `scanner.cc` file, to avoid having a
-# multiple symbols definitions error during the linking phase,
-# to those functions will be assigned a new prefix and the relative
-# output file will be saved into the `src` directory.
-SED_PATTERN="s/tree_sitter_javascript_external_scanner_/tree_sitter_javascript_external_scanner_mozjs_/g"
-sed $SED_PATTERN $TS_JS_CRATE/src/scanner.c > ./src/tree_sitter_javascript_scanner.c
+# Copy tree-sitter-cpp `scanner.c` functions into the `src` directory
+cp --verbose $TS_JS_CRATE/src/scanner.c ./src/scanner.c
+
+# Since the tree-sitter-mozjs `scanner.c` file contains the very same functions
+# present in the tree-sitter-javascript `scanner.c` file, to avoid having a
+# multiple symbol definition error during the linking phase,
+# those functions will be assigned a new prefix.
+sed -i 's/tree_sitter_javascript/tree_sitter_mozjs/g' ./src/scanner.c
 
 # Exit tree-sitter-mozjs directory
 popd

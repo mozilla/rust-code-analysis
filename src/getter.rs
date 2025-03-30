@@ -396,10 +396,24 @@ impl Getter for RustCode {
         use Rust::*;
 
         match node.kind_id().into() {
+            // `||` is treated as an operator only if it's part of a binary expression.
+            // This prevents misclassification inside macros where closures without arguments (e.g., `let closure = || { /* ... */ };`)
+            // are not recognized as `ClosureExpression` and their `||` node is identified as `PIPEPIPE` instead of `ClosureParameters`.
+            //
+            // Similarly, exclude `/` when it corresponds to the third slash in `///` (`OuterDocCommentMarker`)
+            PIPEPIPE | SLASH => match node.parent() {
+                Some(parent) if matches!(parent.kind_id().into(), BinaryExpression) => HalsteadType::Operator,
+                _ => HalsteadType::Unknown
+            }
+            // Ensure `!` is counted as an operator unless it belongs to an `InnerDocCommentMarker` `//!`
+            BANG => match node.parent() {
+                Some(parent) if !matches!(parent.kind_id().into(), InnerDocCommentMarker) => HalsteadType::Operator,
+                _ => HalsteadType::Unknown
+            }
             LPAREN | LBRACE | LBRACK | EQGT | PLUS | STAR | Async | Await | Continue | For | If
-            | Let | Loop | Match | Return | Unsafe | While | BANG | EQ | COMMA | DASHGT | QMARK
-            | LT | GT | AMP | MutableSpecifier | DOTDOT | DOTDOTEQ | DASH | AMPAMP | PIPEPIPE
-            | PIPE | CARET | EQEQ | BANGEQ | LTEQ | GTEQ | LTLT | GTGT | SLASH | PERCENT
+            | Let | Loop | Match | Return | Unsafe | While | EQ | COMMA | DASHGT | QMARK
+            | LT | GT | AMP | MutableSpecifier | DOTDOT | DOTDOTEQ | DASH | AMPAMP
+            | PIPE | CARET | EQEQ | BANGEQ | LTEQ | GTEQ | LTLT | GTGT | PERCENT
             | PLUSEQ | DASHEQ | STAREQ | SLASHEQ | PERCENTEQ | AMPEQ | PIPEEQ | CARETEQ
             | LTLTEQ | GTGTEQ | Move | DOT | PrimitiveType | Fn | SEMI => HalsteadType::Operator,
             Identifier | StringLiteral | RawStringLiteral | IntegerLiteral | FloatLiteral
@@ -478,13 +492,17 @@ impl Getter for CppCode {
         match node.kind_id().into() {
             DOT | LPAREN | LPAREN2 | COMMA | STAR | GTGT | COLON | SEMI | Return | Break
             | Continue | If | Else | Switch | Case | Default | For | While | Goto | Do | Delete
-            | New | Try | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | DASHDASH | DASHGT
+            | New | Try | Try2 | Catch | Throw | EQ | AMPAMP | PIPEPIPE | DASH | DASHDASH | DASHGT
             | PLUS | PLUSPLUS | SLASH | PERCENT | PIPE | AMP | LTLT | TILDE | LT | LTEQ | EQEQ
             | BANGEQ | GTEQ | GT | GT2 | PLUSEQ | BANG | STAREQ | SLASHEQ | PERCENTEQ | GTGTEQ
             | LTLTEQ | AMPEQ | CARET | CARETEQ | PIPEEQ | LBRACK | LBRACE | QMARK | COLONCOLON
             | PrimitiveType | TypeSpecifier | Sizeof => HalsteadType::Operator,
             Identifier | TypeIdentifier | FieldIdentifier | RawStringLiteral | StringLiteral
-            | NumberLiteral | True | False | Null | Nullptr | DOTDOTDOT => HalsteadType::Operand,
+            | NumberLiteral | True | False | Null | DOTDOTDOT => HalsteadType::Operand,
+            NamespaceIdentifier => match node.parent() {
+                Some(parent) if matches!(parent.kind_id().into(), NamespaceDefinition) => HalsteadType::Operand,
+                _ => HalsteadType::Unknown,
+            },
             _ => HalsteadType::Unknown,
         }
     }

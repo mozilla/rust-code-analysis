@@ -1,6 +1,6 @@
 # tree-sitter-mozjs
 
-This crate provides a Mozjs grammar for the [tree-sitter][] parsing library.  To
+This crate provides a Mozjs grammar for the [tree-sitter][] parsing library. To
 use this crate, add it to the `[dependencies]` section of your `Cargo.toml`
 file.  (Note that you will probably also need to depend on the
 [`tree-sitter`][tree-sitter crate] crate to use the parsed result in any useful
@@ -8,8 +8,8 @@ way.)
 
 ``` toml
 [dependencies]
-tree-sitter = "0.17"
-tree-sitter-mozjs = "0.16"
+tree-sitter = "0.25.3"
+tree-sitter-mozjs = "0.20.3"
 ```
 
 Typically, you will use the [language][language func] function to add this
@@ -22,15 +22,18 @@ let code = r#"
     }
 "#;
 let mut parser = Parser::new();
-parser.set_language(tree_sitter_mozjs::language()).expect("Error loading Mozjs grammar");
-let parsed = parser.parse(code, None);
+let language = tree_sitter_mozjs::LANGUAGE;
+parser
+    .set_language(&language.into())
+    .expect("Error loading Mozjs parser");
+let tree = parser.parse(code, None).unwrap();
+assert!(!tree.root_node().has_error());
 ```
 
 If you have any questions, please reach out to us in the [tree-sitter
 discussions] page.
 
 [Language]: https://docs.rs/tree-sitter/*/tree_sitter/struct.Language.html
-[language func]: https://docs.rs/tree-sitter-mozjs/*/tree_sitter_mozjs/fn.language.html
 [Parser]: https://docs.rs/tree-sitter/*/tree_sitter/struct.Parser.html
 [tree-sitter]: https://tree-sitter.github.io/
 [tree-sitter crate]: https://crates.io/crates/tree-sitter

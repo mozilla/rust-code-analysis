@@ -1,7 +1,7 @@
 const CPP = require("./tree-sitter-cpp/grammar.js")
 
 module.exports = grammar(CPP, {
-  name: 'cpp',
+  name: 'mozcpp',
 
   rules: {
 
@@ -92,14 +92,12 @@ module.exports = grammar(CPP, {
         '(',
         $.parameter_declaration,
         ',',
-        commaSep(choice($._expression, $.initializer_list)),
+        commaSep(choice($._expression_not_binary, $.initializer_list)),
         ')',
       )),
     ),
 
-    macro_statement: $ => choice(
-      'MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER'
-    ),
+    macro_statement: $ => 'MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER',
     
     macro_annotation: $ => choice(
       'MOZ_ALLOCATOR',
@@ -368,11 +366,6 @@ module.exports = grammar(CPP, {
       ...[8, 16, 32, 64].map(n => `uint_fast${n}_t`),
       ...[8, 16, 32, 64].map(n => `uint_least${n}_t`),
     )),
-
-    concatenated_string: $ => seq(
-      choice($.raw_string_literal, $.string_literal),
-      repeat1(choice($.raw_string_literal, $.string_literal, $.identifier))
-    ),
   }
 });
 

@@ -1,15 +1,15 @@
 macro_rules! get_language {
     (tree_sitter_cpp) => {
-        tree_sitter_mozcpp::language()
+        tree_sitter_mozcpp::LANGUAGE.into()
     };
     (tree_sitter_typescript) => {
-        tree_sitter_typescript::language_typescript()
+        tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into()
     };
     (tree_sitter_tsx) => {
-        tree_sitter_typescript::language_tsx()
+        tree_sitter_typescript::LANGUAGE_TSX.into()
     };
     ($name:ident) => {
-        $name::language()
+        $name::LANGUAGE.into()
     };
 }
 

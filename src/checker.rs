@@ -253,7 +253,7 @@ impl Checker for CppCode {
             return false;
         }
         if let Some(parent) = node.parent() {
-            return node.kind_id() == Cpp::IfStatement && parent.kind_id() == Cpp::IfStatement;
+            return parent.kind_id() == Cpp::ElseClause;
         }
         false
     }

@@ -19,17 +19,17 @@ macro_rules! mk_get_language {
     ( $( ($camel:ident, $name:ident) ),* ) => {
         pub fn get_language(lang: &Lang) -> Language {
             match lang {
-                Lang::Kotlin => tree_sitter_kotlin::language(),
-                Lang::Java => tree_sitter_java::language(),
-                Lang::Typescript => tree_sitter_typescript::language_typescript(),
-                Lang::Tsx => tree_sitter_typescript::language_tsx(),
-                Lang::Javascript => tree_sitter_javascript::language(),
-                Lang::Python => tree_sitter_python::language(),
-                Lang::Rust => tree_sitter_rust::language(),
-                Lang::Preproc => tree_sitter_preproc::language(),
-                Lang::Ccomment => tree_sitter_ccomment::language(),
-                Lang::Cpp => tree_sitter_mozcpp::language(),
-                Lang::Mozjs => tree_sitter_mozjs::language(),
+                Lang::Kotlin => tree_sitter_kotlin_ng::LANGUAGE.into(),
+                Lang::Java => tree_sitter_java::LANGUAGE.into(),
+                Lang::Typescript => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
+                Lang::Tsx => tree_sitter_typescript::LANGUAGE_TSX.into(),
+                Lang::Javascript => tree_sitter_javascript::LANGUAGE.into(),
+                Lang::Python => tree_sitter_python::LANGUAGE.into(),
+                Lang::Rust => tree_sitter_rust::LANGUAGE.into(),
+                Lang::Preproc => tree_sitter_preproc::LANGUAGE.into(),
+                Lang::Ccomment => tree_sitter_ccomment::LANGUAGE.into(),
+                Lang::Cpp => tree_sitter_mozcpp::LANGUAGE.into(),
+                Lang::Mozjs => tree_sitter_mozjs::LANGUAGE.into(),
             }
         }
     };

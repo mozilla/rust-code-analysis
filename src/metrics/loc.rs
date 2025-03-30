@@ -729,12 +729,23 @@ impl Loc for RustCode {
             | RawStringLiteral
             | Block
             | SourceFile
+            | SLASH
             | SLASHSLASH
             | SLASHSTAR
             | STARSLASH
+            | OuterDocCommentMarker
             | OuterDocCommentMarker2
-            | DocComment => {}
-            LineComment | BlockComment => {
+            | DocComment
+            | InnerDocCommentMarker
+            | BANG => {}
+            | BlockComment => {
+                add_cloc_lines(stats, start, end);
+            }
+            LineComment => {
+                // Exclude the last line for `LineComment` containing a `DocComment`,
+                // since the `DocComment` includes the newline,
+                // as explained here: https://github.com/tree-sitter/tree-sitter-rust/blob/2eaf126458a4d6a69401089b6ba78c5e5d6c1ced/src/scanner.c#L194-L195
+                let end = if node.is_child(DocComment as u16) { end - 1 } else { end };
                 add_cloc_lines(stats, start, end);
             }
             Statement
@@ -767,8 +778,8 @@ impl Loc for CppCode {
             }
             WhileStatement | SwitchStatement | CaseStatement | IfStatement | ForStatement
             | ReturnStatement | BreakStatement | ContinueStatement | GotoStatement
-            | ThrowStatement | TryStatement | ExpressionStatement | LabeledStatement
-            | StatementIdentifier => {
+            | ThrowStatement | TryStatement | TryStatement2 | ExpressionStatement
+            | ExpressionStatement2 | LabeledStatement | StatementIdentifier => {
                 stats.lloc.logical_lines += 1;
             }
             Declaration => {
@@ -788,6 +799,15 @@ impl Loc for CppCode {
             _ => {
                 check_comment_ends_on_code_line(stats, start);
                 stats.ploc.lines.insert(start);
+
+                // As reported here: https://github.com/tree-sitter/tree-sitter-cpp/issues/276
+                // `tree-sitter-cpp` doesn't expand macros, providing a single `PreprocArg` node for the entire macro argument.
+                // Therefore, all lines from `start_row` to `end_row` must be added to PLOC to account for the unexpanded macro content
+                if let PreprocArg = node.kind_id().into() {
+                    (node.start_row() + 1..=node.end_row()).for_each(|line| {
+                        stats.ploc.lines.insert(line);
+                    });
+                }
             }
         }
     }
@@ -2972,7 +2992,7 @@ mod tests {
 
     #[test]
     fn java_foreach_lloc() {
-        check_metrics::<JavascriptParser>(
+        check_metrics::<JavaParser>(
             "
             int arr[]={12,13,14,44}; // +1
             for (int i:arr) { // +1
@@ -2987,12 +3007,12 @@ mod tests {
                     {
                       "sloc": 4.0,
                       "ploc": 4.0,
-                      "lloc": 1.0,
+                      "lloc": 3.0,
                       "cloc": 3.0,
                       "blank": 0.0,
                       "sloc_average": 4.0,
                       "ploc_average": 4.0,
-                      "lloc_average": 1.0,
+                      "lloc_average": 3.0,
                       "cloc_average": 3.0,
                       "blank_average": 0.0,
                       "sloc_min": 4.0,
@@ -3001,8 +3021,8 @@ mod tests {
                       "cloc_max": 3.0,
                       "ploc_min": 4.0,
                       "ploc_max": 4.0,
-                      "lloc_min": 1.0,
-                      "lloc_max": 1.0,
+                      "lloc_min": 3.0,
+                      "lloc_max": 3.0,
                       "blank_min": 0.0,
                       "blank_max": 0.0
                     }"###
