@@ -2,7 +2,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process;
 
-use globset::GlobSet;
 use globset::{Glob, GlobSetBuilder};
 
 use rust_code_analysis::LANG;
@@ -66,7 +65,7 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
 }
 
 /// Produces metrics runtime and compares them with previously generated json files
-pub fn compare_rca_output_with_files(repo_name: &str, include: &[&str]) {
+pub fn compare_rca_output_with_files(repo_name: &str, include: &[&str], exclude: &[&str]) {
     let num_jobs = 4;
 
     let cfg = Config { language: None };
@@ -76,9 +75,14 @@ pub fn compare_rca_output_with_files(repo_name: &str, include: &[&str]) {
         gsbi.add(Glob::new(file).unwrap());
     }
 
+    let mut gsbe = GlobSetBuilder::new();
+    for file in exclude {
+        gsbe.add(Glob::new(file).unwrap());
+    }
+
     let files_data = FilesData {
         include: gsbi.build().unwrap(),
-        exclude: GlobSet::empty(),
+        exclude: gsbe.build().unwrap(),
         paths: vec![Path::new(REPO).join(repo_name)],
     };
 
