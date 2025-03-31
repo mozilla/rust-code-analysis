@@ -44,7 +44,7 @@ tasks:
             - "apt update && apt install -y python3-full &&
                rustup component add clippy rustfmt &&
                rustup toolchain install nightly &&
-               curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.35/cargo-udeps-v0.1.35-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2 &&
+               curl -L https://github.com/est31/cargo-udeps/releases/download/v0.1.55/cargo-udeps-v0.1.55-x86_64-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/cargo/bin --strip-components 2 &&
                curl -L https://github.com/rustsec/rustsec/releases/download/cargo-audit%2Fv0.16.0/cargo-audit-x86_64-unknown-linux-musl-v0.16.0.tgz | tar xzv -C /usr/local/cargo/bin --strip-components 1 &&
                git clone --quiet ${repository} &&
                cd rust-code-analysis &&
