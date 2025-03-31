@@ -264,9 +264,9 @@ fn java_inspect_container(container_node: &Node, conditions: &mut f64) {
     // Initializes the flag to true if the container is known to contain a boolean value
     let mut has_boolean_content = match node.parent().unwrap().kind_id().into() {
         BinaryExpression | IfStatement | WhileStatement | DoStatement | ForStatement => true,
-        TernaryExpression => node.previous_sibling().map_or(true, |prev_node| {
-            !matches!(prev_node.kind_id().into(), QMARK | COLON)
-        }),
+        TernaryExpression => node
+            .previous_sibling()
+            .is_none_or(|prev_node| !matches!(prev_node.kind_id().into(), QMARK | COLON)),
         _ => false,
     };
 

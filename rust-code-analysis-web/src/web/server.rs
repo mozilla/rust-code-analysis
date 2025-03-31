@@ -149,10 +149,7 @@ async fn metrics_plain(
         let cfg = WebMetricsCfg {
             id: "".to_string(),
             path,
-            unit: info
-                .unit
-                .as_ref()
-                .map_or(false, |s| s == "1" || s == "true"),
+            unit: info.unit.as_ref().is_some_and(|s| s == "1" || s == "true"),
             language: name.to_string(),
         };
         Ok(HttpResponse::Ok().json(action::<WebMetricsCallback>(
