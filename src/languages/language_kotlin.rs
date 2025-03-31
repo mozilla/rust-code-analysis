@@ -616,4 +616,3 @@ impl PartialEq<Kotlin> for u16 {
         *x == *self
     }
 }
-
