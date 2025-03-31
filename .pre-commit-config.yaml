@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
     -   id: check-executables-have-shebangs
     -   id: check-merge-conflict
@@ -9,7 +9,7 @@ repos:
     -   id: check-json
         exclude: enums/templates/json.json
 -   repo: https://github.com/marco-c/taskcluster_yml_validator
-    rev: v0.0.11
+    rev: v0.0.12
     hooks:
       - id: taskcluster_yml
 -   repo: local
