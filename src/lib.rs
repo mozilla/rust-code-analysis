@@ -52,7 +52,7 @@ mod getter;
 mod macros;
 
 mod alterator;
-pub(crate) use alterator::*;
+pub use alterator::*;
 
 mod node;
 pub use crate::node::*;
