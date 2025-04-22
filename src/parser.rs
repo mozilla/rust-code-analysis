@@ -22,7 +22,7 @@ use crate::getter::Getter;
 use crate::c_macro;
 use crate::langs::*;
 use crate::node::{Node, Tree};
-use crate::preproc::{get_macros, PreprocResults};
+use crate::preproc::{PreprocResults, get_macros};
 use crate::traits::*;
 
 #[derive(Debug)]
@@ -95,24 +95,24 @@ fn get_fake_code<T: LanguageInfo>(
 }
 
 impl<
-        T: 'static
-            + LanguageInfo
-            + Alterator
-            + Checker
-            + Getter
-            + Abc
-            + Cognitive
-            + Cyclomatic
-            + Exit
-            + Halstead
-            + Loc
-            + Mi
-            + NArgs
-            + Nom
-            + Npa
-            + Npm
-            + Wmc,
-    > ParserTrait for Parser<T>
+    T: 'static
+        + LanguageInfo
+        + Alterator
+        + Checker
+        + Getter
+        + Abc
+        + Cognitive
+        + Cyclomatic
+        + Exit
+        + Halstead
+        + Loc
+        + Mi
+        + NArgs
+        + Nom
+        + Npa
+        + Npm
+        + Wmc,
+> ParserTrait for Parser<T>
 {
     type Checker = T;
     type Getter = T;

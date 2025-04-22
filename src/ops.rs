@@ -250,7 +250,7 @@ impl Callback for OpsCode {
 mod tests {
     use std::path::PathBuf;
 
-    use crate::{get_ops, LANG};
+    use crate::{LANG, get_ops};
 
     #[inline(always)]
     fn check_ops(

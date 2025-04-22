@@ -1,4 +1,4 @@
-use std::fs::{create_dir_all, File};
+use std::fs::{File, create_dir_all};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -94,11 +94,7 @@ fn handle_path(path: PathBuf, output_path: &Path, extension: &str) -> PathBuf {
         .iter()
         .map(|os_str| {
             let s_str = os_str.to_str().unwrap();
-            if s_str == ".." {
-                "."
-            } else {
-                s_str
-            }
+            if s_str == ".." { "." } else { s_str }
         })
         .collect();
 

@@ -1,7 +1,6 @@
 use actix_web::{
-    guard, http,
+    App, HttpRequest, HttpResponse, HttpServer, guard, http,
     web::{self, BytesMut, Query},
-    App, HttpRequest, HttpResponse, HttpServer,
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -11,7 +10,7 @@ use super::comment::{WebCommentCallback, WebCommentCfg, WebCommentInfo, WebComme
 use super::function::{WebFunctionCallback, WebFunctionCfg, WebFunctionInfo, WebFunctionPayload};
 use super::metrics::{WebMetricsCallback, WebMetricsCfg, WebMetricsInfo, WebMetricsPayload};
 
-use rust_code_analysis::{action, guess_language, AstCallback, AstCfg, AstPayload, LANG};
+use rust_code_analysis::{AstCallback, AstCfg, AstPayload, LANG, action, guess_language};
 
 const INVALID_LANGUAGE: &str = "The file extension doesn't correspond to a valid language";
 
@@ -300,7 +299,7 @@ pub async fn run(host: &str, port: u16, n_threads: usize) -> std::io::Result<()>
 #[cfg(test)]
 mod tests {
     use actix_web::web::Bytes;
-    use actix_web::{http::header::ContentType, http::StatusCode, test};
+    use actix_web::{http::StatusCode, http::header::ContentType, test};
     use pretty_assertions::assert_eq;
     use serde_json::json;
     use serde_json::value::Value;

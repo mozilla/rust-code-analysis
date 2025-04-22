@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
 
-use rust_code_analysis::{function, Callback, FunctionSpan, ParserTrait};
+use rust_code_analysis::{Callback, FunctionSpan, ParserTrait, function};
 
 /// Payload containing source code with function spans to be retrieved.
 #[derive(Debug, Deserialize, Serialize)]

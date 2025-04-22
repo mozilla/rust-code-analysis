@@ -373,17 +373,16 @@ impl Callback for Metrics {
     type Cfg = MetricsCfg;
 
     fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
-        if let Some(space) = metrics(parser, &cfg.path) {
-            dump_root(&space)
-        } else {
-            Ok(())
+        match metrics(parser, &cfg.path) {
+            Some(space) => dump_root(&space),
+            _ => Ok(()),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{check_func_space, CppParser};
+    use crate::{CppParser, check_func_space};
 
     #[test]
     fn c_scope_resolution_operator() {

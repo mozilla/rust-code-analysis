@@ -2,7 +2,7 @@
 name = "rust-code-analysis"
 version = "0.0.25"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/mozilla/rust-code-analysis"
 documentation = "https://docs.rs/rust-code-analysis/"
 readme = "README.md"

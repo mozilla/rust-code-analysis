@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use crate::checker::Checker;
-use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
+use serde::ser::{SerializeStruct, Serializer};
 use std::fmt;
 
 use crate::macros::implement_metric_trait;

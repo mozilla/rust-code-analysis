@@ -1,8 +1,8 @@
-use std::collections::{hash_map, HashMap, HashSet};
+use std::collections::{HashMap, HashSet, hash_map};
 use std::path::{Path, PathBuf};
 
 use petgraph::{
-    algo::kosaraju_scc, graph::NodeIndex, stable_graph::StableGraph, visit::Dfs, Direction,
+    Direction, algo::kosaraju_scc, graph::NodeIndex, stable_graph::StableGraph, visit::Dfs,
 };
 use serde::{Deserialize, Serialize};
 

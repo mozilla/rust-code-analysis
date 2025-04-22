@@ -1,5 +1,5 @@
-use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
+use serde::ser::{SerializeStruct, Serializer};
 use std::fmt;
 
 use crate::checker::Checker;

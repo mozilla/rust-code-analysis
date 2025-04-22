@@ -14,12 +14,13 @@ repos:
       - id: taskcluster_yml
 -   repo: local
     hooks:
-      - id: fmt
-        name: fmt
-        language: system
-        files: '\.rs$'
-        exclude: '.*/templates/.*\.rs$'
-        entry: cargo fmt -- --check --verbose
+      # FIXME: Uncomment when fmt is fixed
+      # - id: fmt
+      #   name: fmt
+      #   language: system
+      #   files: '\.rs$'
+      #   exclude: '.*/templates/.*\.rs$'
+      #   entry: cargo fmt -- --check --verbose
 
       - id: clippy
         name: clippy

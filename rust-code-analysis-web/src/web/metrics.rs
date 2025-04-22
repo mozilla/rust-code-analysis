@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
 use std::path::PathBuf;
 
-use rust_code_analysis::{metrics, Callback, FuncSpace, ParserTrait};
+use rust_code_analysis::{Callback, FuncSpace, ParserTrait, metrics};
 
 /// Payload containing source code used to compute metrics.
 #[derive(Debug, Deserialize, Serialize)]

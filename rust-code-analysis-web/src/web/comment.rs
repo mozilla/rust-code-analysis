@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use rust_code_analysis::{rm_comments, Callback, ParserTrait};
+use rust_code_analysis::{Callback, ParserTrait, rm_comments};
 
 /// Payload containing source code with comments to be removed.
 #[derive(Debug, Deserialize, Serialize)]

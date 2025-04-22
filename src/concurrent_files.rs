@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::thread;
 
-use crossbeam::channel::{unbounded, Receiver, Sender};
+use crossbeam::channel::{Receiver, Sender, unbounded};
 use globset::GlobSet;
 use walkdir::{DirEntry, WalkDir};
 
@@ -256,7 +256,7 @@ impl<Config: 'static + Send + Sync> ConcurrentRunner<Config> {
             Err(_) => {
                 return Err(ConcurrentErrors::Producer(
                     "Child thread panicked".to_owned(),
-                ))
+                ));
             }
         };
 

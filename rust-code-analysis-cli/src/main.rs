@@ -1,14 +1,14 @@
 mod formats;
 
 use std::cmp::Ordering;
-use std::collections::{hash_map, HashMap};
+use std::collections::{HashMap, hash_map};
 use std::path::{Path, PathBuf};
 use std::process;
 use std::sync::{Arc, Mutex};
 use std::thread::available_parallelism;
 
-use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::Parser;
+use clap::builder::{PossibleValuesParser, TypedValueParser};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
 use formats::Format;
