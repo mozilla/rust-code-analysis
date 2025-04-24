@@ -450,15 +450,22 @@ tasks:
           taskId: {$eval: as_slugid("deploy_documentation")}
           dependencies:
             - {$eval: as_slugid("build_documentation")}
+            - {$eval: as_slugid("lint_test_task")}
+            - {$eval: as_slugid("ccov_test_task")}
+            - {$eval: as_slugid("windows_test_task")}
           created: {$fromNow: ''}
           deadline: {$fromNow: '2 hour'}
           provisionerId: proj-relman
           workerType: ci
+          scopes:
+              - secrets:get:project/relman/rust-code-analysis/deploy
           payload:
             features:
               taskclusterProxy: true
             maxRunTime: 3600
             image: "${taskboot_image}"
+            env:
+                TASKCLUSTER_SECRET: project/relman/rust-code-analysis/deploy
             command:
               - "/bin/sh"
               - "-cxe"
@@ -473,8 +480,8 @@ tasks:
                 taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages
                 rm -rf book.tar.gz
           metadata:
-            name: "rust-code-analysis-book deploy on GitHub pages"
-            description: rust-code-analysis-book deploy on GitHub pages
+            name: "rust-code-analysis book deployment"
+            description: rust-code-analysis book deployment on GitHub Pages
             owner: cdenizet@mozilla.com
             source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
