@@ -83,7 +83,7 @@ tasks:
               git clone --quiet ${repository}
               cd rust-code-analysis
               git -c advice.detachedHead=false checkout ${head_rev}
-              cargo install mdbook --no-default-features --features output --vers "^0.1.0"
+              cargo install mdbook
               cargo doc --release
               cd rust-code-analysis-book
               mdbook build
@@ -445,12 +445,45 @@ tasks:
             owner: cdenizet@mozilla.com
             source: ${repository}/raw/${head_rev}/.taskcluster.yml
 
+      - $if: 'tasks_for == "github-push" && head_branch == "refs/heads/master"'
+        then:
+          taskId: {$eval: as_slugid("deploy_documentation")}
+          dependencies:
+            - {$eval: as_slugid("build_documentation")}
+          created: {$fromNow: ''}
+          deadline: {$fromNow: '2 hour'}
+          provisionerId: proj-relman
+          workerType: ci
+          payload:
+            features:
+              taskclusterProxy: true
+            maxRunTime: 3600
+            image: "${taskboot_image}"
+            command:
+              - "/bin/sh"
+              - "-cxe"
+              - |-
+                git config --global user.email moz-tools-bot@moz.tools
+                git config --global user.name moz.tools Bot
+                git clone --quiet ${repository}
+                cd rust-code-analysis
+                taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz
+                tar xfz book.tar.gz -C rust-code-analysis-book
+                ./rust-code-analysis-book/deploy-to-GitHub-Pages
+                taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages
+                rm -rf book.tar.gz
+          metadata:
+            name: "rust-code-analysis-book deploy on GitHub pages"
+            description: rust-code-analysis-book deploy on GitHub pages
+            owner: cdenizet@mozilla.com
+            source: ${repository}/raw/${head_rev}/.taskcluster.yml
+
       - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
         then:
             taskId: {$eval: as_slugid("publish_crates")}
             dependencies:
               - {$eval: as_slugid("test_mozilla_central")}
-              - {$eval: as_slugid("build_documentation")}
+              - {$eval: as_slugid("deploy_documentation")}
             created: {$fromNow: ''}
             deadline: {$fromNow: '2 hour'}
             provisionerId: proj-relman
@@ -592,7 +625,7 @@ tasks:
               - {$eval: as_slugid("build_linux_release")}
               - {$eval: as_slugid("build_windows_release")}
               - {$eval: as_slugid("test_mozilla_central")}
-              - {$eval: as_slugid("build_documentation")}
+              - {$eval: as_slugid("deploy_documentation")}
             created: {$fromNow: ''}
             deadline: {$fromNow: '2 hour'}
             provisionerId: proj-relman
@@ -610,16 +643,7 @@ tasks:
                 - "/bin/sh"
                 - "-cxe"
                 - |-
-                  git config --global user.email moz-tools-bot@moz.tools
-                  git config --global user.name moz.tools Bot
-                  git clone --quiet ${repository}
-                  cd rust-code-analysis
-                  taskboot retrieve-artifact --output-path=. --artifacts=public/book.tar.gz
-                  tar xfz book.tar.gz -C rust-code-analysis-book
-                  ./rust-code-analysis-book/deploy-to-GitHub-Pages
-                  taskboot git-push --force-push github.com/mozilla/rust-code-analysis moz-tools-bot gh-pages
                   taskboot github-release mozilla/rust-code-analysis ${head_branch[10:]} --asset Cargo.lock:public/Cargo.lock ${linux_cli}:public/${linux_cli} ${linux_web}:public/${linux_web} ${win_cli}:public/${win_cli} ${win_web}:public/${win_web}
-                  rm -rf book.tar.gz
             metadata:
               name: "rust-code-analysis release publication ${head_branch[10:]}"
               description: rust-code-analysis release publication on Github
