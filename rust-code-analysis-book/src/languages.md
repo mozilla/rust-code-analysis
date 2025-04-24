@@ -3,13 +3,14 @@
 This is the list of programming languages parsed by
 **rust-code-analysis**.
 
+- [x] C
 - [x] C++
+- [x] Mozcpp
+- [x] Ccomment
+- [x] Preproc
 - [x] Java
 - [x] JavaScript
-- [x] The JavaScript used in Firefox internal
-- [ ] Kotlin
+- [x] Mozjs
 - [x] Python
 - [x] Rust
 - [x] Typescript
-
-A check indicates which languages have metrics implemented.

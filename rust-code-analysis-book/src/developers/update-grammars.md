@@ -35,6 +35,8 @@ Commit your changes and create a new pull request
 
 ## Internal grammars
 
+Update the version of `tree-sitter-cli` in the `package.json` file of the internal grammar and then install the updated version.
+
 Update dependency `version` field in `Cargo.toml` and `enums/Cargo.toml`. Below an example for the `tree-sitter-ccomment` grammar
 
 ```toml
