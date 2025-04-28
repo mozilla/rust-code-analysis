@@ -6,7 +6,7 @@ edition = "2024"
 
 [dependencies]
 clap = { version = "^4.0", features = ["derive"] }
-askama = "^0.13"
+askama = "^0.14"
 
 tree-sitter = "=0.25.3"
 tree-sitter-java = "=0.23.5"
