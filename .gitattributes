@@ -1,0 +1,5 @@
+# Exclude internal tree-sitter grammars from language statistics
+tree-sitter-ccomment/** linguist-vendored
+tree-sitter-mozcpp/** linguist-vendored
+tree-sitter-mozjs/** linguist-vendored
+tree-sitter-preproc/** linguist-vendored
