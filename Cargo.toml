@@ -24,7 +24,7 @@ serde = { version = "^1.0", features = ["derive"] }
 termcolor = "^1.2"
 walkdir = "^2.3"
 
-tree-sitter = "=0.25.3"
+tree-sitter = "=0.25.4"
 tree-sitter-java = "=0.23.5"
 tree-sitter-kotlin-ng = "1.1.0"
 tree-sitter-typescript = "=0.23.2"
