@@ -83,11 +83,9 @@ impl<'a> Node<'a> {
     #[inline(always)]
     pub(crate) fn has_sibling(&self, id: u16) -> bool {
         self.0.parent().is_some_and(|parent| {
-            let has_child = self
-                .0
+            self.0
                 .children(&mut parent.walk())
-                .any(|child| child.kind_id() == id);
-            has_child
+                .any(|child| child.kind_id() == id)
         })
     }
 
@@ -101,11 +99,9 @@ impl<'a> Node<'a> {
 
     #[inline(always)]
     pub(crate) fn is_child(&self, id: u16) -> bool {
-        let is_child = self
-            .0
+        self.0
             .children(&mut self.0.walk())
-            .any(|child| child.kind_id() == id);
-        is_child
+            .any(|child| child.kind_id() == id)
     }
 
     pub(crate) fn child_count(&self) -> usize {
