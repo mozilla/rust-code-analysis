@@ -2,3 +2,4 @@ target
 enums/target
 *~
 Cargo.lock
+.claude/

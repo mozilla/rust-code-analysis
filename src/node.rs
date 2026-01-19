@@ -24,8 +24,11 @@ impl Tree {
 }
 
 /// An `AST` node.
+///
+/// The inner `tree_sitter::Node` is exposed for advanced use cases
+/// where direct access to the underlying tree-sitter API is needed.
 #[derive(Clone, Copy, Debug)]
-pub struct Node<'a>(OtherNode<'a>);
+pub struct Node<'a>(pub OtherNode<'a>);
 
 impl<'a> Node<'a> {
     /// Checks if a node represents a syntax error or contains any syntax errors
@@ -34,49 +37,60 @@ impl<'a> Node<'a> {
         self.0.has_error()
     }
 
-    pub(crate) fn id(&self) -> usize {
+    /// Returns a numeric id for this node that is unique within its tree.
+    pub fn id(&self) -> usize {
         self.0.id()
     }
 
-    pub(crate) fn kind(&self) -> &'static str {
+    /// Returns the node's type as a string.
+    pub fn kind(&self) -> &'static str {
         self.0.kind()
     }
 
-    pub(crate) fn kind_id(&self) -> u16 {
+    /// Returns the node's type as a numeric id.
+    pub fn kind_id(&self) -> u16 {
         self.0.kind_id()
     }
 
-    pub(crate) fn utf8_text(&self, data: &'a [u8]) -> Option<&'a str> {
+    /// Returns the node's text as a UTF-8 string, if valid.
+    pub fn utf8_text(&self, data: &'a [u8]) -> Option<&'a str> {
         self.0.utf8_text(data).ok()
     }
 
-    pub(crate) fn start_byte(&self) -> usize {
+    /// Returns the byte offset where this node starts.
+    pub fn start_byte(&self) -> usize {
         self.0.start_byte()
     }
 
-    pub(crate) fn end_byte(&self) -> usize {
+    /// Returns the byte offset where this node ends.
+    pub fn end_byte(&self) -> usize {
         self.0.end_byte()
     }
 
-    pub(crate) fn start_position(&self) -> (usize, usize) {
+    /// Returns the (row, column) position where this node starts.
+    pub fn start_position(&self) -> (usize, usize) {
         let temp = self.0.start_position();
         (temp.row, temp.column)
     }
 
-    pub(crate) fn end_position(&self) -> (usize, usize) {
+    /// Returns the (row, column) position where this node ends.
+    pub fn end_position(&self) -> (usize, usize) {
         let temp = self.0.end_position();
         (temp.row, temp.column)
     }
 
-    pub(crate) fn start_row(&self) -> usize {
+    /// Returns the row number where this node starts.
+    pub fn start_row(&self) -> usize {
         self.0.start_position().row
     }
 
-    pub(crate) fn end_row(&self) -> usize {
+    /// Returns the row number where this node ends.
+    pub fn end_row(&self) -> usize {
         self.0.end_position().row
     }
 
-    pub(crate) fn parent(&self) -> Option<Node<'a>> {
+    /// Returns this node's parent, if any.
+    pub fn parent(&self) -> Option<Node<'a>> {
         self.0.parent().map(Node)
     }
 
@@ -180,6 +194,21 @@ impl<'a> Node<'a> {
         }
         res
     }
+
+    /// Checks if this node has any ancestor that meets the given predicate.
+    ///
+    /// Traverses up the tree from this node's parent to the root,
+    /// returning true if any ancestor satisfies the predicate.
+    pub fn has_ancestor<F: Fn(&Node) -> bool>(&self, pred: F) -> bool {
+        let mut node = *self;
+        while let Some(parent) = node.parent() {
+            if pred(&parent) {
+                return true;
+            }
+            node = parent;
+        }
+        false
+    }
 }
 
 /// An `AST` cursor.
@@ -231,6 +260,35 @@ impl<'a> Search<'a> for Node<'a> {
         }
 
         None
+    }
+
+    fn all_occurrences(&self, pred: fn(u16) -> bool) -> Vec<Node<'a>> {
+        let mut cursor = self.cursor();
+        let mut stack = Vec::new();
+        let mut children = Vec::new();
+        let mut results = Vec::new();
+
+        stack.push(*self);
+
+        while let Some(node) = stack.pop() {
+            if pred(node.kind_id()) {
+                results.push(node);
+            }
+            cursor.reset(&node);
+            if cursor.goto_first_child() {
+                loop {
+                    children.push(cursor.node());
+                    if !cursor.goto_next_sibling() {
+                        break;
+                    }
+                }
+                for child in children.drain(..).rev() {
+                    stack.push(child);
+                }
+            }
+        }
+
+        results
     }
 
     fn act_on_node(&self, action: &mut dyn FnMut(&Node<'a>)) {
