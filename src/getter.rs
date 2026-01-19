@@ -75,11 +75,11 @@ impl Getter for PythonCode {
             String => {
                 let mut operator = HalsteadType::Unknown;
                 // check if we've a documentation string or a multiline comment
-                if let Some(parent) = node.parent() {
-                    if parent.kind_id() != ExpressionStatement || parent.child_count() != 1 {
-                        operator = HalsteadType::Operand;
-                    };
-                }
+                if let Some(parent) = node.parent()
+                    && (parent.kind_id() != ExpressionStatement || parent.child_count() != 1)
+                {
+                    operator = HalsteadType::Operand;
+                };
                 operator
             }
             _ => HalsteadType::Unknown,
@@ -444,25 +444,24 @@ impl Getter for CppCode {
                         Cpp::FunctionDeclarator == id
                             || Cpp::FunctionDeclarator2 == id
                             || Cpp::FunctionDeclarator3 == id
-                    }) {
-                        if let Some(first) = fd.child(0) {
-                            match first.kind_id().into() {
-                                Cpp::TypeIdentifier
-                                | Cpp::Identifier
-                                | Cpp::FieldIdentifier
-                                | Cpp::DestructorName
-                                | Cpp::OperatorName
-                                | Cpp::QualifiedIdentifier
-                                | Cpp::QualifiedIdentifier2
-                                | Cpp::QualifiedIdentifier3
-                                | Cpp::QualifiedIdentifier4
-                                | Cpp::TemplateFunction
-                                | Cpp::TemplateMethod => {
-                                    let code = &code[first.start_byte()..first.end_byte()];
-                                    return std::str::from_utf8(code).ok();
-                                }
-                                _ => {}
+                    }) && let Some(first) = fd.child(0)
+                    {
+                        match first.kind_id().into() {
+                            Cpp::TypeIdentifier
+                            | Cpp::Identifier
+                            | Cpp::FieldIdentifier
+                            | Cpp::DestructorName
+                            | Cpp::OperatorName
+                            | Cpp::QualifiedIdentifier
+                            | Cpp::QualifiedIdentifier2
+                            | Cpp::QualifiedIdentifier3
+                            | Cpp::QualifiedIdentifier4
+                            | Cpp::TemplateFunction
+                            | Cpp::TemplateMethod => {
+                                let code = &code[first.start_byte()..first.end_byte()];
+                                return std::str::from_utf8(code).ok();
                             }
+                            _ => {}
                         }
                     }
                 }

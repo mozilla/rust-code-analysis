@@ -152,7 +152,7 @@ impl<
     }
 
     #[inline(always)]
-    fn get_root(&self) -> Node {
+    fn get_root(&self) -> Node<'_> {
         self.tree.get_root()
     }
 

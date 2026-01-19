@@ -553,12 +553,13 @@ fn add_cloc_lines(stats: &mut Stats, start: usize, end: usize) {
 // This difference is necessary in order to avoid having
 // a wrong count for the blank metric.
 fn check_comment_ends_on_code_line(stats: &mut Stats, start_code_line: usize) {
-    if let Some(end) = stats.cloc.comment_line_end {
-        if end == start_code_line && !stats.ploc.lines.contains(&start_code_line) {
-            // Comment entirely *before* a code line
-            stats.cloc.only_comment_lines -= 1;
-            stats.cloc.code_comment_lines += 1;
-        }
+    if let Some(end) = stats.cloc.comment_line_end
+        && end == start_code_line
+        && !stats.ploc.lines.contains(&start_code_line)
+    {
+        // Comment entirely *before* a code line
+        stats.cloc.only_comment_lines -= 1;
+        stats.cloc.code_comment_lines += 1;
     }
 }
 

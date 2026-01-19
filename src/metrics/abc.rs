@@ -404,10 +404,10 @@ impl Abc for JavaCode {
             }
             GT | LT => {
                 // Excludes `<` and `>` used for generic types
-                if let Some(parent) = node.parent() {
-                    if !matches!(parent.kind_id().into(), TypeArguments) {
-                        stats.conditions += 1.;
-                    }
+                if let Some(parent) = node.parent()
+                    && !matches!(parent.kind_id().into(), TypeArguments)
+                {
+                    stats.conditions += 1.;
                 }
             }
             // Counts unary conditions in elements separated by `&&` or `||` boolean operators
@@ -423,31 +423,31 @@ impl Abc for JavaCode {
             // Counts unary conditions inside assignments
             VariableDeclarator | AssignmentExpression => {
                 // The child node of index 2 contains the right operand of an assignment operation
-                if let Some(right_operand) = node.child(2) {
-                    if matches!(
+                if let Some(right_operand) = node.child(2)
+                    && matches!(
                         right_operand.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
-                    ) {
-                        java_inspect_container(&right_operand, &mut stats.conditions);
-                    }
+                    )
+                {
+                    java_inspect_container(&right_operand, &mut stats.conditions);
                 }
             }
             // Counts unary conditions inside if and while statements
             IfStatement | WhileStatement => {
                 // The child node of index 1 contains the condition
-                if let Some(condition) = node.child(1) {
-                    if matches!(condition.kind_id().into(), ParenthesizedExpression) {
-                        java_inspect_container(&condition, &mut stats.conditions);
-                    }
+                if let Some(condition) = node.child(1)
+                    && matches!(condition.kind_id().into(), ParenthesizedExpression)
+                {
+                    java_inspect_container(&condition, &mut stats.conditions);
                 }
             }
             // Counts unary conditions do-while statements
             DoStatement => {
                 // The child node of index 3 contains the condition
-                if let Some(condition) = node.child(3) {
-                    if matches!(condition.kind_id().into(), ParenthesizedExpression) {
-                        java_inspect_container(&condition, &mut stats.conditions);
-                    }
+                if let Some(condition) = node.child(3)
+                    && matches!(condition.kind_id().into(), ParenthesizedExpression)
+                {
+                    java_inspect_container(&condition, &mut stats.conditions);
                 }
             }
             // Counts unary conditions inside for statements
@@ -487,25 +487,25 @@ impl Abc for JavaCode {
             // Counts unary conditions inside return statements
             ReturnStatement => {
                 // The child node of index 1 contains the return value
-                if let Some(value) = node.child(1) {
-                    if matches!(
+                if let Some(value) = node.child(1)
+                    && matches!(
                         value.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
-                    ) {
-                        java_inspect_container(&value, &mut stats.conditions)
-                    }
+                    )
+                {
+                    java_inspect_container(&value, &mut stats.conditions)
                 }
             }
             // Counts unary conditions inside implicit return statements in lambda expressions
             LambdaExpression => {
                 // The child node of index 2 contains the return value
-                if let Some(value) = node.child(2) {
-                    if matches!(
+                if let Some(value) = node.child(2)
+                    && matches!(
                         value.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
-                    ) {
-                        java_inspect_container(&value, &mut stats.conditions)
-                    }
+                    )
+                {
+                    java_inspect_container(&value, &mut stats.conditions)
                 }
             }
             // Counts unary conditions inside ternary expressions
@@ -523,22 +523,22 @@ impl Abc for JavaCode {
                     }
                 }
                 // The child node of index 2 contains the first expression
-                if let Some(expression) = node.child(2) {
-                    if matches!(
+                if let Some(expression) = node.child(2)
+                    && matches!(
                         expression.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
-                    ) {
-                        java_inspect_container(&expression, &mut stats.conditions);
-                    }
+                    )
+                {
+                    java_inspect_container(&expression, &mut stats.conditions);
                 }
                 // The child node of index 4 contains the second expression
-                if let Some(expression) = node.child(4) {
-                    if matches!(
+                if let Some(expression) = node.child(4)
+                    && matches!(
                         expression.kind_id().into(),
                         ParenthesizedExpression | UnaryExpression
-                    ) {
-                        java_inspect_container(&expression, &mut stats.conditions);
-                    }
+                    )
+                {
+                    java_inspect_container(&expression, &mut stats.conditions);
                 }
             }
             _ => {}

@@ -61,7 +61,7 @@ pub trait ParserTrait {
 
     fn new(code: Vec<u8>, path: &Path, pr: Option<Arc<PreprocResults>>) -> Self;
     fn get_language(&self) -> LANG;
-    fn get_root(&self) -> Node;
+    fn get_root(&self) -> Node<'_>;
     fn get_code(&self) -> &[u8];
     fn get_filters(&self, filters: &[String]) -> Filter;
 }

@@ -33,4 +33,4 @@ tree-sitter-cpp = "0.23.4"
 build = ["tree-sitter-cpp"]
 
 [dev-dependencies]
-tree-sitter = "=0.25.3"
+tree-sitter = "=0.26.3"
