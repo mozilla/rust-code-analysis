@@ -70,10 +70,10 @@ impl Alterator for CppCode {
                 AstNode::new(node.kind(), text, span, Vec::new())
             }
             Cpp::PreprocDef | Cpp::PreprocFunctionDef | Cpp::PreprocCall => {
-                if let Some(last) = children.last() {
-                    if last.r#type == "\n" {
-                        children.pop();
-                    }
+                if let Some(last) = children.last()
+                    && last.r#type == "\n"
+                {
+                    children.pop();
                 }
                 Self::get_default(node, code, span, children)
             }

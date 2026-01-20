@@ -250,7 +250,7 @@ pub(crate) fn remove_blank_lines(data: &mut Vec<u8>) {
     let count_trailing = data
         .iter()
         .rev()
-        .take_while(|&c| (*c == b'\n' || *c == b'\r'))
+        .take_while(|&c| *c == b'\n' || *c == b'\r')
         .count();
     if count_trailing > 0 {
         data.truncate(data.len() - count_trailing);

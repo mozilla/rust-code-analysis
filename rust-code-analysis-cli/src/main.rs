@@ -139,15 +139,15 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
         };
         action::<Count>(&language, source, &path, pr, cfg)
     } else if cfg.preproc_lock.is_some() {
-        if let Some(language) = guess_language(&source, &path).0 {
-            if language == LANG::Cpp {
-                let mut results = cfg.preproc_lock.as_ref().unwrap().lock().unwrap();
-                preprocess(
-                    &PreprocParser::new(source, &path, None),
-                    &path,
-                    &mut results,
-                );
-            }
+        if let Some(language) = guess_language(&source, &path).0
+            && language == LANG::Cpp
+        {
+            let mut results = cfg.preproc_lock.as_ref().unwrap().lock().unwrap();
+            preprocess(
+                &PreprocParser::new(source, &path, None),
+                &path,
+                &mut results,
+            );
         }
         Ok(())
     } else {

@@ -18,14 +18,17 @@ impl Tree {
         Self(parser.parse(code, None).unwrap())
     }
 
-    pub(crate) fn get_root(&self) -> Node {
+    pub(crate) fn get_root(&self) -> Node<'_> {
         Node(self.0.root_node())
     }
 }
 
 /// An `AST` node.
+///
+/// The inner `tree_sitter::Node` is exposed for advanced use cases
+/// where direct access to the underlying tree-sitter API is needed.
 #[derive(Clone, Copy, Debug)]
-pub struct Node<'a>(OtherNode<'a>);
+pub struct Node<'a>(pub OtherNode<'a>);
 
 impl<'a> Node<'a> {
     /// Checks if a node represents a syntax error or contains any syntax errors
@@ -108,7 +111,7 @@ impl<'a> Node<'a> {
         self.0.child_count()
     }
 
-    pub(crate) fn child_by_field_name(&self, name: &str) -> Option<Node> {
+    pub(crate) fn child_by_field_name(&self, name: &str) -> Option<Node<'_>> {
         self.0.child_by_field_name(name).map(Node)
     }
 
@@ -168,15 +171,15 @@ impl<'a> Node<'a> {
     pub(crate) fn has_ancestors(&self, typ: fn(&Node) -> bool, typs: fn(&Node) -> bool) -> bool {
         let mut res = false;
         let mut node = *self;
-        if let Some(parent) = node.parent() {
-            if typ(&parent) {
-                node = parent;
-            }
+        if let Some(parent) = node.parent()
+            && typ(&parent)
+        {
+            node = parent;
         }
-        if let Some(parent) = node.parent() {
-            if typs(&parent) {
-                res = true;
-            }
+        if let Some(parent) = node.parent()
+            && typs(&parent)
+        {
+            res = true;
         }
         res
     }

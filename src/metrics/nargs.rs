@@ -220,11 +220,11 @@ impl NArgs for CppCode {
             return;
         }
 
-        if Self::is_closure(node) {
-            if let Some(declarator) = node.child_by_field_name("declarator") {
-                let new_node = declarator;
-                compute_args::<Self>(&new_node, &mut stats.closure_nargs);
-            }
+        if Self::is_closure(node)
+            && let Some(declarator) = node.child_by_field_name("declarator")
+        {
+            let new_node = declarator;
+            compute_args::<Self>(&new_node, &mut stats.closure_nargs);
         }
     }
 }

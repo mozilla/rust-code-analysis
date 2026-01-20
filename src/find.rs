@@ -65,14 +65,14 @@ impl Callback for Find {
     type Cfg = FindCfg;
 
     fn call<T: ParserTrait>(cfg: Self::Cfg, parser: &T) -> Self::Res {
-        if let Some(good) = find(parser, &cfg.filters) {
-            if !good.is_empty() {
-                println!("In file {}", cfg.path.to_str().unwrap());
-                for node in good {
-                    dump_node(parser.get_code(), &node, 1, cfg.line_start, cfg.line_end)?;
-                }
-                println!();
+        if let Some(good) = find(parser, &cfg.filters)
+            && !good.is_empty()
+        {
+            println!("In file {}", cfg.path.to_str().unwrap());
+            for node in good {
+                dump_node(parser.get_code(), &node, 1, cfg.line_start, cfg.line_end)?;
             }
+            println!();
         }
         Ok(())
     }

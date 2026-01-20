@@ -328,10 +328,10 @@ impl Cognitive for RustCode {
                 increment_by_one(stats);
             }
             BreakExpression | ContinueExpression => {
-                if let Some(label_child) = node.child(1) {
-                    if let Label = label_child.kind_id().into() {
-                        increment_by_one(stats);
-                    }
+                if let Some(label_child) = node.child(1)
+                    && let Label = label_child.kind_id().into()
+                {
+                    increment_by_one(stats);
                 }
             }
             UnaryExpression => {
