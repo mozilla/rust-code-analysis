@@ -1,7 +1,7 @@
 [package]
 name = "tree-sitter-mozcpp"
 description = "Mozcpp grammar for the tree-sitter parsing library"
-version = "0.20.4"
+version = "0.20.5"
 authors = ["Calixte Denizet <cdenizet@mozilla.com>"]
 license = "MIT"
 readme = "bindings/rust/README.md"
@@ -33,4 +33,4 @@ tree-sitter-cpp = "0.23.4"
 build = ["tree-sitter-cpp"]
 
 [dev-dependencies]
-tree-sitter = "=0.25.3"
+tree-sitter = "=0.25.4"

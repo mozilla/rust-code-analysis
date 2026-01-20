@@ -8,7 +8,7 @@ way.)
 
 ``` toml
 [dependencies]
-tree-sitter = "0.25.3"
+tree-sitter = "0.25.4"
 tree-sitter-mozcpp = "0.20.4"
 ```
 
