@@ -575,4 +575,52 @@ impl Getter for JavaCode {
     }
 }
 
-impl Getter for KotlinCode {}
+impl Getter for KotlinCode {
+    fn get_space_kind(node: &Node) -> SpaceKind {
+        use Kotlin::*;
+
+        let typ = node.kind_id().into();
+        match typ {
+            ClassDeclaration => SpaceKind::Class,
+            FunctionDeclaration | Constructor | AnnotatedLambda => SpaceKind::Function,
+            SourceFile => SpaceKind::Unit,
+            _ => SpaceKind::Unknown,
+        }
+    }
+
+    fn get_op_type(node: &Node) -> HalsteadType {
+        use Kotlin::*;
+
+        let typ = node.kind_id();
+
+        match typ.into() {
+            // Operator: function calls
+            CallExpression
+            // Operator: control flow
+            | If | Else | When | Try | Catch | Throw | For | While | Continue | Break | Do | Finally
+            // Operator: keywords
+            | Return | Abstract | Final | Super | This
+            // Operator: brackets and comma and terminators (separators)
+            | SEMI | COMMA | COLONCOLON | LBRACE | LBRACK | LPAREN | RBRACE | RBRACK | RPAREN | DOTDOT | DOT
+            // Operator: operators
+            | EQ | LT | GT | BANG | QMARKCOLON | AsQMARK | COLON // no grammar for lambda operator ->
+            | EQEQ | LTEQ | GTEQ | BANGEQ | AMPAMP | PIPEPIPE | PLUSPLUS | DASHDASH
+            | PLUS | DASH | STAR | SLASH | PERCENT
+            | PLUSEQ | DASHEQ | STAREQ | SLASHEQ |  PERCENTEQ => {
+                HalsteadType::Operator
+            }
+            // Operands: variables, constants, literals
+            // StringLiteral covers both line strings and multi-line strings in this grammar
+            RealLiteral | IntegerLiteral | HexLiteral | BinLiteral | CharacterLiteralToken1 | UniCharacterLiteralToken1
+            | LiteralConstant | StringLiteral | StringContent | LambdaLiteral | FunctionLiteral
+            | ObjectLiteral | UnsignedLiteral | LongLiteral | BooleanLiteral | CharacterLiteral => {
+                HalsteadType::Operand
+            },
+            _ => {
+                HalsteadType::Unknown
+            },
+        }
+    }
+
+    get_operator!(Kotlin);
+}

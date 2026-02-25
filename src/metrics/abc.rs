@@ -293,8 +293,7 @@ fn java_inspect_container(container_node: &Node, conditions: &mut f64) {
 
         // Parenthesized expressions and `Not` operators nodes
         // always store their expressions in the children nodes of index one
-        // https://github.com/tree-sitter/tree-sitter-java/blob/master/src/grammar.json#L2472
-        // https://github.com/tree-sitter/tree-sitter-java/blob/master/src/grammar.json#L2150
+        // Reference: tree-sitter-kotlin grammar for parenthesized_expression and prefix_expression
         node = node.child(1).unwrap();
         node_kind = node.kind_id().into();
 
@@ -352,8 +351,7 @@ implement_metric_trait!(
     RustCode,
     CppCode,
     PreprocCode,
-    CcommentCode,
-    KotlinCode
+    CcommentCode
 );
 
 // Fitzpatrick, Jerry (1997). "Applying the ABC metric to C, C++ and Java". C++ Report.
@@ -441,7 +439,7 @@ impl Abc for JavaCode {
                     java_inspect_container(&condition, &mut stats.conditions);
                 }
             }
-            // Counts unary conditions do-while statements
+            // Counts unary conditions inside do-while statements
             DoStatement => {
                 // The child node of index 3 contains the condition
                 if let Some(condition) = node.child(3)
@@ -539,6 +537,237 @@ impl Abc for JavaCode {
                     )
                 {
                     java_inspect_container(&expression, &mut stats.conditions);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+// Inspects the content of Kotlin parenthesized expressions
+// and `Not` operators to find unary conditional expressions
+fn kotlin_inspect_container(container_node: &Node, conditions: &mut f64) {
+    use Kotlin::*;
+
+    let mut node = *container_node;
+    let mut node_kind = node.kind_id().into();
+
+    // Initializes the flag to true if the container is known to contain a boolean value
+    let mut has_boolean_content = matches!(
+        node.parent().unwrap().kind_id().into(),
+        BinaryExpression | IfExpression | WhileStatement | DoWhileStatement | ForStatement
+    );
+
+    // Looks inside parenthesized expressions and `Not` operators to find what they contain
+    loop {
+        // Checks if the node is a parenthesized expression or a `Not` operator
+        // The child node of index 0 contains the unary expression operator (we look for the `!` operator)
+        let is_parenthesised_exp = matches!(node_kind, ParenthesizedExpression);
+        let is_not_operator = matches!(node_kind, UnaryExpression)
+            && matches!(node.child(0).unwrap().kind_id().into(), BANG);
+
+        // Stops the exploration if the node is neither
+        // a parenthesized expression nor a `Not` operator
+        if !is_parenthesised_exp && !is_not_operator {
+            break;
+        }
+
+        // Sets the flag to true if a `Not` operator is found
+        // This is used to prove if a variable or a value returned by a method is actually boolean
+        // e.g. `return (!x);`
+        if !has_boolean_content && is_not_operator {
+            has_boolean_content = true;
+        }
+
+        // Parenthesized expressions and `Not` operators nodes
+        // always store their expressions in the children nodes of index one
+        // Reference: tree-sitter-kotlin grammar for parenthesized_expression and prefix_expression
+        node = node.child(1).unwrap();
+        node_kind = node.kind_id().into();
+
+        // Stops the exploration when the content is found
+        if matches!(node_kind, CallExpression | Identifier | True | False) {
+            if has_boolean_content {
+                *conditions += 1.;
+            }
+            break;
+        }
+    }
+}
+
+// Inspects a list of elements and counts any unary conditional expression found
+fn kotlin_count_unary_conditions(list_node: &Node, conditions: &mut f64) {
+    use Kotlin::*;
+
+    let list_kind = list_node.kind_id().into();
+    let mut cursor = list_node.cursor();
+
+    // Scans the immediate children nodes of the argument node
+    if cursor.goto_first_child() {
+        loop {
+            // Gets the current child node and its kind
+            let node = cursor.node();
+            let node_kind = node.kind_id().into();
+
+            // Checks if the node is a unary condition
+            if matches!(node_kind, CallExpression | Identifier | True | False)
+                && matches!(list_kind, BinaryExpression)
+            {
+                *conditions += 1.;
+            } else {
+                // Checks if the node is a unary condition container
+                kotlin_inspect_container(&node, conditions);
+            }
+
+            // Moves the cursor to the next sibling node of the current node
+            // Exits the scan if there is no next sibling node
+            if !cursor.goto_next_sibling() {
+                break;
+            }
+        }
+    }
+}
+
+impl Abc for KotlinCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Kotlin::*;
+
+        match node.kind_id().into() {
+            STAREQ | SLASHEQ | PERCENTEQ | DASHEQ | PLUSEQ | PLUSPLUS | DASHDASH => {
+                stats.assignments += 1.;
+            }
+            VariableDeclaration | PropertyDeclaration => {
+                stats.declaration.push(DeclKind::Var);
+            }
+            Final => {
+                if let Some(DeclKind::Var) = stats.declaration.last() {
+                    stats.declaration.push(DeclKind::Const);
+                }
+            }
+            SEMI => {
+                if let Some(DeclKind::Const | DeclKind::Var) = stats.declaration.last() {
+                    stats.declaration.clear();
+                }
+            }
+            EQ => {
+                // Excludes constant declarations
+                stats
+                    .declaration
+                    .last()
+                    .map(|decl| {
+                        if matches!(decl, DeclKind::Var) {
+                            stats.assignments += 1.;
+                        }
+                    })
+                    .unwrap_or_else(|| {
+                        stats.assignments += 1.;
+                    });
+            }
+            CallExpression => {
+                stats.branches += 1.;
+            }
+            GTEQ | LTEQ | EQEQ | BANGEQ | Else | Try | Catch => {
+                stats.conditions += 1.;
+            }
+            GT | LT => {
+                // Excludes `<` and `>` used for generic types
+                if let Some(parent) = node.parent()
+                    && !matches!(parent.kind_id().into(), TypeArguments)
+                {
+                    stats.conditions += 1.;
+                }
+            }
+            // Counts unary conditions in elements separated by `&&` or `||` boolean operators
+            AMPAMP | PIPEPIPE => {
+                if let Some(parent) = node.parent() {
+                    kotlin_count_unary_conditions(&parent, &mut stats.conditions);
+                }
+            }
+            // Counts unary conditions inside assignments
+            Assignment => {
+                // The child node of index 2 contains the right operand of an assignment operation
+                if let Some(right_operand) = node.child(2)
+                    && matches!(
+                        right_operand.kind_id().into(),
+                        ParenthesizedExpression | UnaryExpression
+                    )
+                {
+                    kotlin_inspect_container(&right_operand, &mut stats.conditions);
+                }
+            }
+            // Counts unary conditions inside if and while statements
+            IfExpression | WhileStatement => {
+                // The child node of index 1 contains the condition
+                if let Some(condition) = node.child(1)
+                    && matches!(condition.kind_id().into(), ParenthesizedExpression)
+                {
+                    kotlin_inspect_container(&condition, &mut stats.conditions);
+                }
+            }
+            // Counts unary conditions inside do-while statements
+            DoWhileStatement => {
+                // The child node of index 3 contains the condition
+                if let Some(condition) = node.child(3)
+                    && matches!(condition.kind_id().into(), ParenthesizedExpression)
+                {
+                    kotlin_inspect_container(&condition, &mut stats.conditions);
+                }
+            }
+            // Counts unary conditions inside for statements
+            ForStatement => {
+                // The child node of index 3 contains the `condition` when
+                // the initialization expression is a variable declaration
+                // e.g. `for ( int i=0; `condition`; ... ) {}`
+                if let Some(condition) = node.child(3) {
+                    match condition.kind_id().into() {
+                        SEMI => {
+                            // The child node of index 4 contains the `condition` when
+                            // the initialization expression is not a variable declaration
+                            // e.g. `for ( i=0; `condition`; ... ) {}`
+                            if let Some(cond) = node.child(4) {
+                                match cond.kind_id().into() {
+                                    CallExpression | Identifier | True | False | SEMI | RPAREN => {
+                                        stats.conditions += 1.;
+                                    }
+                                    ParenthesizedExpression | UnaryExpression => {
+                                        kotlin_inspect_container(&cond, &mut stats.conditions);
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                        CallExpression | Identifier | True | False => {
+                            stats.conditions += 1.;
+                        }
+                        ParenthesizedExpression | UnaryExpression => {
+                            kotlin_inspect_container(&condition, &mut stats.conditions);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            // Counts unary conditions inside return statements
+            Return => {
+                // The child node of index 1 contains the return value
+                if let Some(value) = node.child(1)
+                    && matches!(
+                        value.kind_id().into(),
+                        ParenthesizedExpression | UnaryExpression
+                    )
+                {
+                    kotlin_inspect_container(&value, &mut stats.conditions)
+                }
+            }
+            // Counts unary conditions inside implicit return statements in lambda expressions
+            AnnotatedLambda => {
+                // The child node of index 2 contains the return value
+                if let Some(value) = node.child(2)
+                    && matches!(
+                        value.kind_id().into(),
+                        ParenthesizedExpression | UnaryExpression
+                    )
+                {
+                    kotlin_inspect_container(&value, &mut stats.conditions)
                 }
             }
             _ => {}

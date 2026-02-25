@@ -221,7 +221,20 @@ impl Cyclomatic for JavaCode {
     }
 }
 
-implement_metric_trait!(Cyclomatic, KotlinCode, PreprocCode, CcommentCode);
+implement_metric_trait!(Cyclomatic, PreprocCode, CcommentCode);
+
+impl Cyclomatic for KotlinCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Kotlin::*;
+
+        match node.kind_id().into() {
+            If | For | While | WhenEntry | Catch | AMPAMP | PIPEPIPE => {
+                stats.cyclomatic += 1.;
+            }
+            _ => {}
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

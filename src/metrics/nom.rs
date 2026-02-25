@@ -237,19 +237,20 @@ mod tests {
                 // Number of spaces = 4
                 insta::assert_json_snapshot!(
                     metric.nom,
-                    @r###"
-                    {
-                      "functions": 3.0,
-                      "closures": 1.0,
-                      "functions_average": 0.75,
-                      "closures_average": 0.25,
-                      "total": 4.0,
-                      "average": 1.0,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 1.0
-                    }"###
+                    @r#"
+                {
+                  "functions": 3.0,
+                  "closures": 1.0,
+                  "functions_average": 0.75,
+                  "closures_average": 0.25,
+                  "total": 4.0,
+                  "average": 1.0,
+                  "functions_min": 0.0,
+                  "functions_max": 1.0,
+                  "closures_min": 0.0,
+                  "closures_max": 1.0
+                }
+                "#
                 );
             },
         );
@@ -369,19 +370,20 @@ mod tests {
                 // closures:  return function ()
                 insta::assert_json_snapshot!(
                     metric.nom,
-                    @r###"
-                    {
-                      "functions": 3.0,
-                      "closures": 1.0,
-                      "functions_average": 0.6,
-                      "closures_average": 0.2,
-                      "total": 4.0,
-                      "average": 0.8,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 1.0
-                    }"###
+                    @r#"
+                {
+                  "functions": 3.0,
+                  "closures": 1.0,
+                  "functions_average": 0.6,
+                  "closures_average": 0.2,
+                  "total": 4.0,
+                  "average": 0.8,
+                  "functions_min": 0.0,
+                  "functions_max": 1.0,
+                  "closures_min": 0.0,
+                  "closures_max": 1.0
+                }
+                "#
                 );
             },
         );
@@ -399,19 +401,20 @@ mod tests {
                 // functions: test_safe_mode
                 insta::assert_json_snapshot!(
                     metric.nom,
-                    @r###"
-                    {
-                      "functions": 1.0,
-                      "closures": 0.0,
-                      "functions_average": 0.5,
-                      "closures_average": 0.0,
-                      "total": 1.0,
-                      "average": 0.5,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 0.0
-                    }"###
+                    @r#"
+                {
+                  "functions": 1.0,
+                  "closures": 0.0,
+                  "functions_average": 0.5,
+                  "closures_average": 0.0,
+                  "total": 1.0,
+                  "average": 0.5,
+                  "functions_min": 0.0,
+                  "functions_max": 1.0,
+                  "closures_min": 0.0,
+                  "closures_max": 0.0
+                }
+                "#
                 );
             },
         );
@@ -426,19 +429,20 @@ mod tests {
                 // Number of spaces = 2
                 insta::assert_json_snapshot!(
                     metric.nom,
-                    @r###"
-                    {
-                      "functions": 1.0,
-                      "closures": 0.0,
-                      "functions_average": 0.5,
-                      "closures_average": 0.0,
-                      "total": 1.0,
-                      "average": 0.5,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 0.0
-                    }"###
+                    @r#"
+                {
+                  "functions": 1.0,
+                  "closures": 0.0,
+                  "functions_average": 0.5,
+                  "closures_average": 0.0,
+                  "total": 1.0,
+                  "average": 0.5,
+                  "functions_min": 0.0,
+                  "functions_max": 1.0,
+                  "closures_min": 0.0,
+                  "closures_max": 0.0
+                }
+                "#
                 );
             },
         );
@@ -455,19 +459,20 @@ mod tests {
                 // Number of spaces = 2
                 insta::assert_json_snapshot!(
                     metric.nom,
-                    @r###"
-                    {
-                      "functions": 1.0,
-                      "closures": 0.0,
-                      "functions_average": 0.5,
-                      "closures_average": 0.0,
-                      "total": 1.0,
-                      "average": 0.5,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 0.0
-                    }"###
+                    @r#"
+                {
+                  "functions": 1.0,
+                  "closures": 0.0,
+                  "functions_average": 0.5,
+                  "closures_average": 0.0,
+                  "total": 1.0,
+                  "average": 0.5,
+                  "functions_min": 0.0,
+                  "functions_max": 1.0,
+                  "closures_min": 0.0,
+                  "closures_max": 0.0
+                }
+                "#
                 );
             },
         );
@@ -515,19 +520,20 @@ mod tests {
                 // Number of spaces = 2
                 insta::assert_json_snapshot!(
                     metric.nom,
-                    @r###"
-                    {
-                      "functions": 1.0,
-                      "closures": 0.0,
-                      "functions_average": 0.5,
-                      "closures_average": 0.0,
-                      "total": 1.0,
-                      "average": 0.5,
-                      "functions_min": 0.0,
-                      "functions_max": 1.0,
-                      "closures_min": 0.0,
-                      "closures_max": 0.0
-                    }"###
+                    @r#"
+                {
+                  "functions": 1.0,
+                  "closures": 0.0,
+                  "functions_average": 0.5,
+                  "closures_average": 0.0,
+                  "total": 1.0,
+                  "average": 0.5,
+                  "functions_min": 0.0,
+                  "functions_max": 1.0,
+                  "closures_min": 0.0,
+                  "closures_max": 0.0
+                }
+                "#
                 );
             },
         );
@@ -546,19 +552,20 @@ mod tests {
                 // Number of spaces = 3
                 insta::assert_json_snapshot!(
                     metric.nom,
-                    @r###"
-                    {
-                      "functions": 0.0,
-                      "closures": 2.0,
-                      "functions_average": 0.0,
-                      "closures_average": 0.6666666666666666,
-                      "total": 2.0,
-                      "average": 0.6666666666666666,
-                      "functions_min": 0.0,
-                      "functions_max": 0.0,
-                      "closures_min": 0.0,
-                      "closures_max": 1.0
-                    }"###
+                    @r#"
+                {
+                  "functions": 0.0,
+                  "closures": 2.0,
+                  "functions_average": 0.0,
+                  "closures_average": 0.6666666666666666,
+                  "total": 2.0,
+                  "average": 0.6666666666666666,
+                  "functions_min": 0.0,
+                  "functions_max": 0.0,
+                  "closures_min": 0.0,
+                  "closures_max": 1.0
+                }
+                "#
                 );
             },
         );

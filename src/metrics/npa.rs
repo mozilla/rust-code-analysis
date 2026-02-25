@@ -265,9 +265,54 @@ implement_metric_trait!(
     RustCode,
     CppCode,
     PreprocCode,
-    CcommentCode,
-    KotlinCode
+    CcommentCode
 );
+
+impl Npa for KotlinCode {
+    fn compute(node: &Node, stats: &mut Stats) {
+        use Kotlin::*;
+
+        // Enables the `Npa` metric if computing stats of a class space
+        if Self::is_func_space(node) && stats.is_disabled() {
+            stats.is_class_space = true;
+        }
+
+        if node.kind_id() == ClassBody {
+            // Check if this node is an interface
+            let mut is_interface = false;
+            let mut node_sibling = *node;
+            while let Some(prev_sibling) = node_sibling.previous_sibling() {
+                if let Interface = prev_sibling.kind_id().into() {
+                    is_interface = true;
+                    break;
+                }
+                node_sibling = prev_sibling;
+            }
+
+            for node in node.children() {
+                if node.kind_id() == PropertyDeclaration
+                    && node
+                        .traverse_children(
+                            &[
+                                |c| c == Modifiers,
+                                |c| c == VisibilityModifier,
+                                |c| c == Private || c == Protected,
+                            ][..],
+                        )
+                        .is_none()
+                {
+                    if is_interface {
+                        stats.interface_na += 1;
+                        stats.interface_npa = stats.interface_na;
+                    } else {
+                        stats.class_npa += 1;
+                        stats.class_na = stats.class_npa;
+                    }
+                }
+            }
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
