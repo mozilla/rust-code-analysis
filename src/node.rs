@@ -116,7 +116,7 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn child(&self, pos: usize) -> Option<Node<'a>> {
-        self.0.child(pos).map(Node)
+        self.0.child(pos as u32).map(Node)
     }
 
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> + use<'a> {
