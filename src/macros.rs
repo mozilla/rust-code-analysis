@@ -8,6 +8,9 @@ macro_rules! get_language {
     (tree_sitter_tsx) => {
         tree_sitter_typescript::LANGUAGE_TSX.into()
     };
+    (tree_sitter_kotlin_codanna) => {
+        tree_sitter_kotlin_codanna::language().into()
+    };
     ($name:ident) => {
         $name::LANGUAGE.into()
     };
