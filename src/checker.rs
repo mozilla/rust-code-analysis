@@ -663,39 +663,64 @@ impl Checker for RustCode {
 }
 
 impl Checker for KotlinCode {
-    fn is_comment(_: &Node) -> bool {
-        false
+    fn is_comment(node: &Node) -> bool {
+        matches!(
+            node.kind_id().into(),
+            Kotlin::LineComment | Kotlin::MultilineComment
+        )
     }
 
     fn is_useful_comment(_: &Node, _: &[u8]) -> bool {
         false
     }
 
-    fn is_func_space(_: &Node) -> bool {
-        false
+    fn is_func_space(node: &Node) -> bool {
+        matches!(
+            node.kind_id().into(),
+            Kotlin::SourceFile | Kotlin::ClassDeclaration
+        )
     }
 
-    fn is_func(_: &Node) -> bool {
-        false
+    fn is_func(node: &Node) -> bool {
+        node.kind_id() == Kotlin::FunctionDeclaration
     }
 
-    fn is_closure(_: &Node) -> bool {
-        false
+    fn is_closure(node: &Node) -> bool {
+        node.kind_id() == Kotlin::LambdaLiteral
     }
 
-    fn is_call(_: &Node) -> bool {
-        false
+    fn is_call(node: &Node) -> bool {
+        node.kind_id() == Kotlin::CallExpression
     }
 
-    fn is_non_arg(_: &Node) -> bool {
-        false
+    fn is_non_arg(node: &Node) -> bool {
+        matches!(
+            node.kind_id().into(),
+            Kotlin::LPAREN
+                | Kotlin::COMMA
+                | Kotlin::RPAREN
+                | Kotlin::PIPEPIPE
+                | Kotlin::UnaryExpression
+        )
     }
 
-    fn is_string(_: &Node) -> bool {
-        false
+    fn is_string(node: &Node) -> bool {
+        // StringLiteral covers both single-line and multi-line strings in this grammar
+        // StringContent captures the text content within strings
+        matches!(
+            node.kind_id().into(),
+            Kotlin::StringLiteral | Kotlin::StringContent
+        )
     }
 
-    fn is_else_if(_: &Node) -> bool {
+    fn is_else_if(node: &Node) -> bool {
+        if node.kind_id() != Kotlin::IfExpression {
+            return false;
+        }
+        if let Some(parent) = node.parent() {
+            return parent.kind_id() == Kotlin::Else;
+        }
+
         false
     }
 

@@ -37,49 +37,60 @@ impl<'a> Node<'a> {
         self.0.has_error()
     }
 
-    pub(crate) fn id(&self) -> usize {
+    /// Returns a numeric id for this node that is unique within its tree.
+    pub fn id(&self) -> usize {
         self.0.id()
     }
 
-    pub(crate) fn kind(&self) -> &'static str {
+    /// Returns the node's type as a string.
+    pub fn kind(&self) -> &'static str {
         self.0.kind()
     }
 
-    pub(crate) fn kind_id(&self) -> u16 {
+    /// Returns the node's type as a numeric id.
+    pub fn kind_id(&self) -> u16 {
         self.0.kind_id()
     }
 
-    pub(crate) fn utf8_text(&self, data: &'a [u8]) -> Option<&'a str> {
+    /// Returns the node's text as a UTF-8 string, if valid.
+    pub fn utf8_text(&self, data: &'a [u8]) -> Option<&'a str> {
         self.0.utf8_text(data).ok()
     }
 
-    pub(crate) fn start_byte(&self) -> usize {
+    /// Returns the byte offset where this node starts.
+    pub fn start_byte(&self) -> usize {
         self.0.start_byte()
     }
 
-    pub(crate) fn end_byte(&self) -> usize {
+    /// Returns the byte offset where this node ends.
+    pub fn end_byte(&self) -> usize {
         self.0.end_byte()
     }
 
-    pub(crate) fn start_position(&self) -> (usize, usize) {
+    /// Returns the (row, column) position where this node starts.
+    pub fn start_position(&self) -> (usize, usize) {
         let temp = self.0.start_position();
         (temp.row, temp.column)
     }
 
-    pub(crate) fn end_position(&self) -> (usize, usize) {
+    /// Returns the (row, column) position where this node ends.
+    pub fn end_position(&self) -> (usize, usize) {
         let temp = self.0.end_position();
         (temp.row, temp.column)
     }
 
-    pub(crate) fn start_row(&self) -> usize {
+    /// Returns the row number where this node starts.
+    pub fn start_row(&self) -> usize {
         self.0.start_position().row
     }
 
-    pub(crate) fn end_row(&self) -> usize {
+    /// Returns the row number where this node ends.
+    pub fn end_row(&self) -> usize {
         self.0.end_position().row
     }
 
-    pub(crate) fn parent(&self) -> Option<Node<'a>> {
+    /// Returns this node's parent, if any.
+    pub fn parent(&self) -> Option<Node<'a>> {
         self.0.parent().map(Node)
     }
 
@@ -116,7 +127,7 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn child(&self, pos: usize) -> Option<Node<'a>> {
-        self.0.child(pos).map(Node)
+        self.0.child(pos as u32).map(Node)
     }
 
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> + use<'a> {
@@ -183,6 +194,41 @@ impl<'a> Node<'a> {
         }
         res
     }
+
+    /// Checks if this node has any ancestor that meets the given predicate.
+    ///
+    /// Traverses up the tree from this node's parent to the root,
+    /// returning true if any ancestor satisfies the predicate.
+    pub fn has_ancestor<F: Fn(&Node) -> bool>(&self, pred: F) -> bool {
+        let mut node = *self;
+        while let Some(parent) = node.parent() {
+            if pred(&parent) {
+                return true;
+            }
+            node = parent;
+        }
+        false
+    }
+
+    // Traverse a tree passing from children to children in search of a specific
+    // token or series of tokens
+    pub(crate) fn traverse_children<F>(&self, token_list: &[F]) -> Option<Node<'a>>
+    where
+        F: FnOnce(u16) -> bool + Copy,
+    {
+        let mut node = *self;
+        'outer: for token in token_list {
+            for temp_node in node.children() {
+                if token(temp_node.kind_id()) {
+                    node = temp_node;
+                    continue 'outer;
+                }
+            }
+            // If a token has not been found, return None
+            return None;
+        }
+        Some(node)
+    }
 }
 
 /// An `AST` cursor.
@@ -234,6 +280,35 @@ impl<'a> Search<'a> for Node<'a> {
         }
 
         None
+    }
+
+    fn all_occurrences(&self, pred: fn(u16) -> bool) -> Vec<Node<'a>> {
+        let mut cursor = self.cursor();
+        let mut stack = Vec::new();
+        let mut children = Vec::new();
+        let mut results = Vec::new();
+
+        stack.push(*self);
+
+        while let Some(node) = stack.pop() {
+            if pred(node.kind_id()) {
+                results.push(node);
+            }
+            cursor.reset(&node);
+            if cursor.goto_first_child() {
+                loop {
+                    children.push(cursor.node());
+                    if !cursor.goto_next_sibling() {
+                        break;
+                    }
+                }
+                for child in children.drain(..).rev() {
+                    stack.push(child);
+                }
+            }
+        }
+
+        results
     }
 
     fn act_on_node(&self, action: &mut dyn FnMut(&Node<'a>)) {
