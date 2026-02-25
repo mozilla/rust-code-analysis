@@ -438,31 +438,30 @@ impl Getter for CppCode {
                     return std::str::from_utf8(code).ok();
                 }
                 // we're in a function_definition so need to get the declarator
-                if let Some(declarator) = node.child_by_field_name("declarator") {
-                    let declarator_node = declarator;
-                    if let Some(fd) = declarator_node.first_occurrence(|id| {
+                if let Some(declarator) = node.child_by_field_name("declarator")
+                    && let Some(fd) = declarator.first_occurrence(|id| {
                         Cpp::FunctionDeclarator == id
                             || Cpp::FunctionDeclarator2 == id
                             || Cpp::FunctionDeclarator3 == id
-                    }) && let Some(first) = fd.child(0)
-                    {
-                        match first.kind_id().into() {
-                            Cpp::TypeIdentifier
-                            | Cpp::Identifier
-                            | Cpp::FieldIdentifier
-                            | Cpp::DestructorName
-                            | Cpp::OperatorName
-                            | Cpp::QualifiedIdentifier
-                            | Cpp::QualifiedIdentifier2
-                            | Cpp::QualifiedIdentifier3
-                            | Cpp::QualifiedIdentifier4
-                            | Cpp::TemplateFunction
-                            | Cpp::TemplateMethod => {
-                                let code = &code[first.start_byte()..first.end_byte()];
-                                return std::str::from_utf8(code).ok();
-                            }
-                            _ => {}
+                    })
+                    && let Some(first) = fd.child(0)
+                {
+                    match first.kind_id().into() {
+                        Cpp::TypeIdentifier
+                        | Cpp::Identifier
+                        | Cpp::FieldIdentifier
+                        | Cpp::DestructorName
+                        | Cpp::OperatorName
+                        | Cpp::QualifiedIdentifier
+                        | Cpp::QualifiedIdentifier2
+                        | Cpp::QualifiedIdentifier3
+                        | Cpp::QualifiedIdentifier4
+                        | Cpp::TemplateFunction
+                        | Cpp::TemplateMethod => {
+                            let code = &code[first.start_byte()..first.end_byte()];
+                            return std::str::from_utf8(code).ok();
                         }
+                        _ => {}
                     }
                 }
             }
