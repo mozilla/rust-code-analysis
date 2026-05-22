@@ -212,7 +212,7 @@ struct Yaml;
 
 impl WriteOnStdout for Yaml {
     fn format<T: Serialize>(content: T) -> String {
-        serde_yaml::to_string(&content).unwrap()
+        serde_yml::to_string(&content).unwrap()
     }
 }
 
@@ -220,7 +220,7 @@ impl WriteFile for Yaml {
     const EXTENSION: &'static str = ".yml";
 
     fn with_writer<T: Serialize>(content: T, path: PathBuf, output_path: &Path) {
-        serde_yaml::to_writer(Self::open_file(path, output_path), &content).unwrap()
+        serde_yml::to_writer(Self::open_file(path, output_path), &content).unwrap()
     }
 }
 
