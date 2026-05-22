@@ -12,12 +12,12 @@ license = "MPL-2.0"
 name = "rust-code-analysis-cli"
 
 [dependencies]
-clap = { version = "^4.0", features = ["derive"] }
+clap = { version = "^4.6", features = ["derive"] }
 globset = "^0.4"
-regex = "^1.7"
+regex = "^1.12"
 rust-code-analysis = { path = "..", version = "=0.0.25" }
 serde = "^1.0"
 serde_cbor = "^0.11"
 serde_json = "^1.0"
 serde_yaml = "^0.9"
-toml = "^0.9"
+toml = "^1.1"

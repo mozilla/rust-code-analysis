@@ -21,10 +21,10 @@ include = [
 path = "bindings/rust/lib.rs"
 
 [dependencies]
-tree-sitter-language="0.1.0"
+tree-sitter-language="0.1.7"
 
 [build-dependencies]
-cc = "^1.0"
+cc = "^1.2"
 # This dependency is not used at all for this crate, but it is here so that
 # dependabot can send notifications when there are updates for this grammar
 tree-sitter-cpp = "0.23.4"
@@ -33,4 +33,4 @@ tree-sitter-cpp = "0.23.4"
 build = ["tree-sitter-cpp"]
 
 [dev-dependencies]
-tree-sitter = "=0.26.8"
+tree-sitter = "=0.26.9"
