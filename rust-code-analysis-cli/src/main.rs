@@ -64,7 +64,7 @@ fn mk_globset(elems: Vec<String>) -> GlobSet {
             globset.add(glob);
         }
     });
-    globset.build().map_or(GlobSet::empty(), |globset| globset)
+    globset.build().unwrap_or(GlobSet::empty())
 }
 
 fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
@@ -132,17 +132,17 @@ fn act_on_file(path: PathBuf, cfg: &Config) -> std::io::Result<()> {
             line_end: cfg.line_end,
         };
         action::<Find>(&language, source, &path, pr, cfg)
-    } else if cfg.count_lock.is_some() {
+    } else if let Some(count_lock) = &cfg.count_lock {
         let cfg = CountCfg {
             filters: cfg.count_filter.clone(),
-            stats: cfg.count_lock.as_ref().unwrap().clone(),
+            stats: count_lock.clone(),
         };
         action::<Count>(&language, source, &path, pr, cfg)
-    } else if cfg.preproc_lock.is_some() {
+    } else if let Some(preproc_lock) = &cfg.preproc_lock {
         if let Some(language) = guess_language(&source, &path).0
             && language == LANG::Cpp
         {
-            let mut results = cfg.preproc_lock.as_ref().unwrap().lock().unwrap();
+            let mut results = preproc_lock.lock().unwrap();
             preprocess(
                 &PreprocParser::new(source, &path, None),
                 &path,
