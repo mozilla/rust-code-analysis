@@ -4,8 +4,17 @@ use crate::*;
 /// thought to be sent on the network.
 pub trait Alterator
 where
-    Self: Checker,
+    Self: Checker + LanguageInfo,
 {
+    /// Gets the kind of a node as a `'static` string.
+    ///
+    /// Since tree-sitter 0.27, `Node::kind` returns a string bound to the
+    /// lifetime of the tree, so the kind is resolved through the generated
+    /// language enum instead.
+    fn get_kind(node: &Node) -> &'static str {
+        Self::BaseLang::from(node.kind_id()).into()
+    }
+
     /// Creates a new `AST` node containing the code associated to the node,
     /// its span, and its children.
     ///
@@ -38,7 +47,7 @@ where
     /// its span, and its children.
     fn get_default(node: &Node, code: &[u8], span: bool, children: Vec<AstNode>) -> AstNode {
         let (text, span) = Self::get_text_span(node, code, span, node.child_count() == 0);
-        AstNode::new(node.kind(), text, span, children)
+        AstNode::new(Self::get_kind(node), text, span, children)
     }
 
     /// Gets a new `AST` node if and only if the code is not a comment,
@@ -67,7 +76,7 @@ impl Alterator for CppCode {
         match Cpp::from(node.kind_id()) {
             Cpp::StringLiteral | Cpp::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(Self::get_kind(node), text, span, Vec::new())
             }
             Cpp::PreprocDef | Cpp::PreprocFunctionDef | Cpp::PreprocCall => {
                 if let Some(last) = children.last()
@@ -94,7 +103,7 @@ impl Alterator for MozjsCode {
                 // TODO: have a thought about template_strings:
                 // they may have children for replacement...
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(Self::get_kind(node), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -106,7 +115,7 @@ impl Alterator for JavascriptCode {
         match Javascript::from(node.kind_id()) {
             Javascript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(Self::get_kind(node), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -118,7 +127,7 @@ impl Alterator for TypescriptCode {
         match Typescript::from(node.kind_id()) {
             Typescript::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(Self::get_kind(node), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -130,7 +139,7 @@ impl Alterator for TsxCode {
         match Tsx::from(node.kind_id()) {
             Tsx::String => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(Self::get_kind(node), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
@@ -142,9 +151,42 @@ impl Alterator for RustCode {
         match Rust::from(node.kind_id()) {
             Rust::StringLiteral | Rust::CharLiteral => {
                 let (text, span) = Self::get_text_span(node, code, span, true);
-                AstNode::new(node.kind(), text, span, Vec::new())
+                AstNode::new(Self::get_kind(node), text, span, Vec::new())
             }
             _ => Self::get_default(node, code, span, children),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // `Alterator::get_kind` relies on the generated language enums mapping
+    // every kind id to the same name tree-sitter reports.
+    fn check_kind_names<T: LanguageInfo>() {
+        let lang = T::get_lang().get_ts_language();
+        for id in (0..lang.node_kind_count() as u16).chain([u16::MAX]) {
+            let Some(expected) = lang.node_kind_for_id(id) else {
+                continue;
+            };
+            let got: &'static str = T::BaseLang::from(id).into();
+            assert_eq!(got, expected, "{} id={id}", T::get_lang_name());
+        }
+    }
+
+    #[test]
+    fn kind_names_match_tree_sitter() {
+        check_kind_names::<MozjsCode>();
+        check_kind_names::<JavascriptCode>();
+        check_kind_names::<JavaCode>();
+        check_kind_names::<KotlinCode>();
+        check_kind_names::<RustCode>();
+        check_kind_names::<CppCode>();
+        check_kind_names::<PythonCode>();
+        check_kind_names::<TsxCode>();
+        check_kind_names::<TypescriptCode>();
+        check_kind_names::<PreprocCode>();
+        check_kind_names::<CcommentCode>();
     }
 }
