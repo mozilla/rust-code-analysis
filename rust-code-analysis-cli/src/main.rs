@@ -2,14 +2,18 @@ mod formats;
 
 use std::cmp::Ordering;
 use std::collections::{HashMap, hash_map};
+use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use std::process;
+use std::sync::mpsc::{self, RecvTimeoutError};
 use std::sync::{Arc, Mutex};
-use std::thread::available_parallelism;
+use std::thread::{self, JoinHandle, available_parallelism};
+use std::time::{Duration, Instant};
 
 use clap::Parser;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
 use globset::{Glob, GlobSet, GlobSetBuilder};
+use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
 
 use formats::Format;
 
@@ -20,7 +24,7 @@ use rust_code_analysis::LANG;
 use rust_code_analysis::{
     CommentRm, CommentRmCfg, ConcurrentRunner, Count, CountCfg, Dump, DumpCfg, FilesData, Find,
     FindCfg, Function, FunctionCfg, Metrics, MetricsCfg, OpsCfg, OpsCode, PreprocParser,
-    PreprocResults,
+    PreprocResults, Progress,
 };
 
 // Functions
@@ -169,6 +173,76 @@ fn process_dir_path(all_files: &mut HashMap<String, Vec<PathBuf>>, path: &Path, 
     }
 }
 
+/// How often the progress bar is redrawn when stderr is a terminal.
+const PROGRESS_BAR_REFRESH: Duration = Duration::from_millis(100);
+/// How often a progress line is printed when stderr is not a terminal
+/// (e.g. in CI logs), where a progress bar cannot be redrawn.
+const PROGRESS_LOG_INTERVAL: Duration = Duration::from_secs(30);
+
+/// Reports the progress of a [`ConcurrentRunner`] on stderr until `stop` is
+/// dropped.
+fn report_progress(progress: Arc<Progress>, stop: mpsc::Receiver<()>) -> JoinHandle<()> {
+    thread::spawn(move || {
+        if std::io::stderr().is_terminal() {
+            show_progress_bar(&progress, &stop);
+        } else {
+            log_progress(&progress, &stop);
+        }
+    })
+}
+
+fn show_progress_bar(progress: &Progress, stop: &mpsc::Receiver<()>) {
+    let bar = ProgressBar::new(0).with_style(
+        ProgressStyle::with_template(
+            "[{elapsed_precise}] {wide_bar} {pos}/{len} files (ETA {eta}) {msg}",
+        )
+        .expect("Invalid progress bar template"),
+    );
+    loop {
+        let stopped = !matches!(
+            stop.recv_timeout(PROGRESS_BAR_REFRESH),
+            Err(RecvTimeoutError::Timeout)
+        );
+        bar.set_length(progress.found() as u64);
+        bar.set_position(progress.processed() as u64);
+        if stopped {
+            break;
+        }
+        if !progress.is_exploration_done() {
+            bar.set_message("searching for files...");
+        } else {
+            bar.set_message("");
+        }
+    }
+    bar.finish_and_clear();
+    eprintln!(
+        "Processed {} files in {}",
+        progress.processed(),
+        HumanDuration(bar.elapsed())
+    );
+}
+
+fn log_progress(progress: &Progress, stop: &mpsc::Receiver<()>) {
+    let start = Instant::now();
+    while let Err(RecvTimeoutError::Timeout) = stop.recv_timeout(PROGRESS_LOG_INTERVAL) {
+        let (processed, found) = (progress.processed(), progress.found());
+        let elapsed = HumanDuration(start.elapsed());
+        if progress.is_exploration_done() {
+            let percent = (processed * 100).checked_div(found).unwrap_or(100);
+            eprintln!("[{elapsed}] Processed {processed}/{found} files ({percent}%)");
+        } else {
+            eprintln!(
+                "[{elapsed}] Processed {processed}/{found} files (still searching for files)"
+            );
+        }
+    }
+    eprintln!(
+        "Processed {} files in {}",
+        progress.processed(),
+        HumanDuration(start.elapsed())
+    );
+}
+
 #[derive(Parser, Debug)]
 #[clap(
     name = "rust-code-analysis-cli",
@@ -238,6 +312,9 @@ struct Opts {
     /// Print the warnings.
     #[clap(long, short)]
     warning: bool,
+    /// Report the progress of the analysis on stderr.
+    #[clap(long)]
+    progress: bool,
 }
 
 fn main() {
@@ -326,10 +403,20 @@ fn main() {
         paths: opts.paths,
     };
 
-    let all_files = match ConcurrentRunner::new(num_jobs, act_on_file)
-        .set_proc_dir_paths(process_dir_path)
-        .run(cfg, files_data)
-    {
+    let runner = ConcurrentRunner::new(num_jobs, act_on_file).set_proc_dir_paths(process_dir_path);
+    let reporter = opts.progress.then(|| {
+        let (stop, stopped) = mpsc::channel();
+        (stop, report_progress(runner.progress(), stopped))
+    });
+
+    let result = runner.run(cfg, files_data);
+
+    if let Some((stop, reporter)) = reporter {
+        drop(stop);
+        reporter.join().expect("Progress reporter panicked");
+    }
+
+    let all_files = match result {
         Ok(all_files) => all_files,
         Err(e) => {
             eprintln!("{e:?}");

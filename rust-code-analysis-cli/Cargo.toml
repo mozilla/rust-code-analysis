@@ -14,6 +14,7 @@ name = "rust-code-analysis-cli"
 [dependencies]
 clap = { version = "^4.0", features = ["derive"] }
 globset = "^0.4"
+indicatif = "^0.18"
 regex = "^1.7"
 rust-code-analysis = { path = "..", version = "=0.0.25" }
 serde = "^1.0"

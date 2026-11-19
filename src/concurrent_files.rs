@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::thread;
 
 use crossbeam::channel::{Receiver, Sender, unbounded};
@@ -27,8 +28,43 @@ struct JobItem<Config> {
 type JobReceiver<Config> = Receiver<Option<JobItem<Config>>>;
 type JobSender<Config> = Sender<Option<JobItem<Config>>>;
 
-fn consumer<Config, ProcFiles>(receiver: JobReceiver<Config>, func: Arc<ProcFiles>)
-where
+/// Progress of a [`ConcurrentRunner`].
+///
+/// Obtained through [`ConcurrentRunner::progress`] before calling
+/// [`ConcurrentRunner::run`], it can be polled from another thread while the
+/// files are being processed.
+#[derive(Debug, Default)]
+pub struct Progress {
+    found: AtomicUsize,
+    processed: AtomicUsize,
+    exploration_done: AtomicBool,
+}
+
+impl Progress {
+    /// Number of files found so far.
+    ///
+    /// This is the total number of files to process once
+    /// [`Progress::is_exploration_done`] returns `true`.
+    pub fn found(&self) -> usize {
+        self.found.load(Ordering::Relaxed)
+    }
+
+    /// Number of files processed so far.
+    pub fn processed(&self) -> usize {
+        self.processed.load(Ordering::Relaxed)
+    }
+
+    /// Whether all the files to process have been found.
+    pub fn is_exploration_done(&self) -> bool {
+        self.exploration_done.load(Ordering::Relaxed)
+    }
+}
+
+fn consumer<Config, ProcFiles>(
+    receiver: JobReceiver<Config>,
+    func: Arc<ProcFiles>,
+    progress: Arc<Progress>,
+) where
     ProcFiles: Fn(PathBuf, &Config) -> std::io::Result<()> + Send + Sync,
 {
     while let Ok(job) = receiver.recv() {
@@ -42,6 +78,7 @@ where
         if let Err(err) = func(job.path, &job.cfg) {
             eprintln!("{err:?} for file {path:?}");
         }
+        progress.processed.fetch_add(1, Ordering::Relaxed);
     }
 }
 
@@ -49,7 +86,9 @@ fn send_file<T>(
     path: PathBuf,
     cfg: &Arc<T>,
     sender: &JobSender<T>,
+    progress: &Progress,
 ) -> Result<(), ConcurrentErrors> {
+    progress.found.fetch_add(1, Ordering::Relaxed);
     sender
         .send(Some(JobItem {
             path,
@@ -72,6 +111,7 @@ fn explore<Config, ProcDirPaths, ProcPath>(
     proc_dir_paths: ProcDirPaths,
     proc_path: ProcPath,
     sender: &JobSender<Config>,
+    progress: &Progress,
 ) -> Result<HashMap<String, Vec<PathBuf>>, ConcurrentErrors>
 where
     ProcDirPaths: Fn(&mut HashMap<String, Vec<PathBuf>>, &Path, &Config) + Send + Sync,
@@ -105,7 +145,7 @@ where
                     && path.is_file()
                 {
                     proc_dir_paths(&mut all_files, &path, cfg);
-                    send_file(path, cfg, sender)?;
+                    send_file(path, cfg, sender, progress)?;
                 }
             }
         } else if (include.is_empty() || include.is_match(&path))
@@ -113,7 +153,7 @@ where
             && path.is_file()
         {
             proc_path(&path, cfg);
-            send_file(path, cfg, sender)?;
+            send_file(path, cfg, sender, progress)?;
         }
     }
 
@@ -158,6 +198,7 @@ pub struct ConcurrentRunner<Config> {
     proc_dir_paths: Box<ProcDirPathsFunction<Config>>,
     proc_path: Box<ProcPathFunction<Config>>,
     num_jobs: usize,
+    progress: Arc<Progress>,
 }
 
 impl<Config: 'static + Send + Sync> ConcurrentRunner<Config> {
@@ -176,6 +217,7 @@ impl<Config: 'static + Send + Sync> ConcurrentRunner<Config> {
             proc_dir_paths: Box::new(null_proc_dir_paths),
             proc_path: Box::new(null_proc_path),
             num_jobs,
+            progress: Arc::default(),
         }
     }
 
@@ -199,6 +241,12 @@ impl<Config: 'static + Send + Sync> ConcurrentRunner<Config> {
         self
     }
 
+    /// Returns the [`Progress`] of this runner, which can be polled from
+    /// another thread while [`ConcurrentRunner::run`] is processing files.
+    pub fn progress(&self) -> Arc<Progress> {
+        Arc::clone(&self.progress)
+    }
+
     /// Runs the producer-consumer approach to process the files
     /// contained in a directory and in its own subdirectories.
     ///
@@ -216,17 +264,21 @@ impl<Config: 'static + Send + Sync> ConcurrentRunner<Config> {
 
         let producer = {
             let sender = sender.clone();
+            let progress = Arc::clone(&self.progress);
 
             match thread::Builder::new()
                 .name(String::from("Producer"))
                 .spawn(move || {
-                    explore(
+                    let all_files = explore(
                         files_data,
                         &cfg,
                         self.proc_dir_paths,
                         self.proc_path,
                         &sender,
-                    )
+                        &progress,
+                    );
+                    progress.exploration_done.store(true, Ordering::Relaxed);
+                    all_files
                 }) {
                 Ok(producer) => producer,
                 Err(e) => return Err(ConcurrentErrors::Thread(e.to_string())),
@@ -238,11 +290,12 @@ impl<Config: 'static + Send + Sync> ConcurrentRunner<Config> {
         for i in 0..self.num_jobs {
             let receiver = receiver.clone();
             let proc_files = proc_files.clone();
+            let progress = Arc::clone(&self.progress);
 
             let t = match thread::Builder::new()
                 .name(format!("Consumer {i}"))
                 .spawn(move || {
-                    consumer(receiver, proc_files);
+                    consumer(receiver, proc_files, progress);
                 }) {
                 Ok(receiver) => receiver,
                 Err(e) => return Err(ConcurrentErrors::Thread(e.to_string())),
