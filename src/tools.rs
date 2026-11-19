@@ -57,9 +57,9 @@ pub fn read_file_with_eol(path: &Path) -> std::io::Result<Option<Vec<u8>>> {
     let mut start = vec![0; 64.min(file_size)];
     let start = if file.read_exact(&mut start).is_ok() {
         // Skip the bom if one
-        if start[..2] == [b'\xFE', b'\xFF'] || start[..2] == [b'\xFF', b'\xFE'] {
+        if start[..2] == *b"\xFE\xFF" || start[..2] == *b"\xFF\xFE" {
             &start[2..]
-        } else if start[..3] == [b'\xEF', b'\xBB', b'\xBF'] {
+        } else if start[..3] == *b"\xEF\xBB\xBF" {
             &start[3..]
         } else {
             &start

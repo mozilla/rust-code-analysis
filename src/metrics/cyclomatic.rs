@@ -117,13 +117,12 @@ impl Cyclomatic for PythonCode {
             If | Elif | For | While | Except | With | Assert | And | Or => {
                 stats.cyclomatic += 1.;
             }
-            Else => {
-                if node.has_ancestors(
-                    |node| matches!(node.kind_id().into(), ForStatement | WhileStatement),
-                    |node| node.kind_id() == ElseClause,
-                ) {
-                    stats.cyclomatic += 1.;
-                }
+            Else if node.has_ancestors(
+                |node| matches!(node.kind_id().into(), ForStatement | WhileStatement),
+                |node| node.kind_id() == ElseClause,
+            ) =>
+            {
+                stats.cyclomatic += 1.;
             }
             _ => {}
         }
