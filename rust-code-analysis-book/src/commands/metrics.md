@@ -52,4 +52,10 @@ Analyzing a large directory can take a while. To report the progress of the anal
 rust-code-analysis-cli -m -p /path/to/your/directory -O json -o /path/to/output/directory --progress
 ```
 
-When stderr is a terminal, a progress bar is shown. Otherwise, for instance in CI logs, a status line is printed every 30 seconds.
+`--progress` accepts an optional mode:
+
+- `--progress=auto` (the default when no mode is given): a progress bar if stderr is a terminal, status lines otherwise.
+- `--progress=bar`: a progress bar, redrawn in place.
+- `--progress=log`: a status line every 30 seconds. Use this mode in CI, where stderr can be a terminal (e.g. with `docker run -t`) but the log keeps every redraw of a progress bar.
+
+In every mode, files taking longer than 5 minutes to be analyzed are reported by name, along with how long they took once they are done.

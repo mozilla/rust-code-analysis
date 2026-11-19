@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::thread;
+use std::sync::{Arc, Mutex};
+use std::thread::{self, ThreadId};
+use std::time::{Duration, Instant};
 
 use crossbeam::channel::{Receiver, Sender, unbounded};
 use globset::GlobSet;
@@ -38,6 +39,7 @@ pub struct Progress {
     found: AtomicUsize,
     processed: AtomicUsize,
     exploration_done: AtomicBool,
+    in_progress: Mutex<HashMap<ThreadId, (PathBuf, Instant)>>,
 }
 
 impl Progress {
@@ -58,6 +60,32 @@ impl Progress {
     pub fn is_exploration_done(&self) -> bool {
         self.exploration_done.load(Ordering::Relaxed)
     }
+
+    /// Files currently being processed, each with the time elapsed since
+    /// its processing started.
+    pub fn in_progress(&self) -> Vec<(PathBuf, Duration)> {
+        self.in_progress
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .values()
+            .map(|(path, start)| (path.clone(), start.elapsed()))
+            .collect()
+    }
+
+    fn start(&self, path: &Path) {
+        self.in_progress
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .insert(thread::current().id(), (path.to_path_buf(), Instant::now()));
+    }
+
+    fn finish(&self) {
+        self.in_progress
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .remove(&thread::current().id());
+        self.processed.fetch_add(1, Ordering::Relaxed);
+    }
 }
 
 fn consumer<Config, ProcFiles>(
@@ -75,10 +103,11 @@ fn consumer<Config, ProcFiles>(
         let job = job.unwrap();
         let path = job.path.clone();
 
+        progress.start(&path);
         if let Err(err) = func(job.path, &job.cfg) {
             eprintln!("{err:?} for file {path:?}");
         }
-        progress.processed.fetch_add(1, Ordering::Relaxed);
+        progress.finish();
     }
 }
 
