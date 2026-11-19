@@ -11,10 +11,10 @@
 #elif defined(__clang__)
 #pragma clang optimize off
 #elif defined(__GNUC__)
-#pragma GCC optimize ("O0")
+#pragma GCC optimize ("O0", "jump-tables")
 #endif
 
-#define LANGUAGE_VERSION 14
+#define LANGUAGE_VERSION 15
 #define STATE_COUNT 9298
 #define LARGE_STATE_COUNT 2795
 #define SYMBOL_COUNT 633
@@ -25,7 +25,7 @@
 #define MAX_ALIAS_SEQUENCE_LENGTH 9
 #define MAX_RESERVED_WORD_SET_SIZE 0
 #define PRODUCTION_ID_COUNT 229
-#define SUPERTYPE_COUNT 0
+#define SUPERTYPE_COUNT 7
 
 enum ts_symbol_identifiers {
   sym_identifier = 1,
@@ -14898,6 +14898,167 @@ static const TSStateId ts_primary_state_ids[STATE_COUNT] = {
   [9295] = 9061,
   [9296] = 9061,
   [9297] = 9297,
+};
+
+static const TSSymbol ts_supertype_symbols[SUPERTYPE_COUNT] = {
+  sym__abstract_declarator,
+  sym__declarator,
+  sym__field_declarator,
+  sym__type_declarator,
+  sym_expression,
+  sym_statement,
+  sym_type_specifier,
+};
+
+static const TSMapSlice ts_supertype_map_slices[] = {
+  [sym__abstract_declarator] = {.index = 0, .length = 5},
+  [sym__declarator] = {.index = 5, .length = 12},
+  [sym__field_declarator] = {.index = 17, .length = 20},
+  [sym__type_declarator] = {.index = 37, .length = 19},
+  [sym_expression] = {.index = 56, .length = 39},
+  [sym_statement] = {.index = 95, .length = 21},
+  [sym_type_specifier] = {.index = 116, .length = 15},
+};
+
+static const TSSymbol ts_supertype_map_entries[] = {
+  [0] =
+    sym_abstract_array_declarator,
+    sym_abstract_function_declarator,
+    sym_abstract_parenthesized_declarator,
+    sym_abstract_pointer_declarator,
+    sym_abstract_reference_declarator,
+  [5] =
+    sym_array_declarator,
+    sym_attributed_declarator,
+    sym_destructor_name,
+    sym_function_declarator,
+    sym_identifier,
+    sym_operator_name,
+    sym_parenthesized_declarator,
+    sym_pointer_declarator,
+    sym_qualified_identifier,
+    sym_reference_declarator,
+    sym_structured_binding_declarator,
+    sym_template_function,
+  [17] =
+    alias_sym_field_identifier,
+    sym_array_declarator,
+    sym_array_field_declarator,
+    sym_array_type_declarator,
+    sym_attributed_declarator,
+    sym_attributed_field_declarator,
+    sym_attributed_type_declarator,
+    sym_function_declarator,
+    sym_function_field_declarator,
+    sym_function_type_declarator,
+    sym_operator_name,
+    sym_parenthesized_declarator,
+    sym_parenthesized_field_declarator,
+    sym_parenthesized_type_declarator,
+    sym_pointer_declarator,
+    sym_reference_declarator,
+    sym_reference_field_declarator,
+    sym_reference_type_declarator,
+    sym_template_method,
+    sym_variadic_reference_declarator,
+  [37] =
+    alias_sym_type_identifier,
+    sym_array_declarator,
+    sym_array_field_declarator,
+    sym_array_type_declarator,
+    sym_attributed_declarator,
+    sym_attributed_field_declarator,
+    sym_attributed_type_declarator,
+    sym_function_declarator,
+    sym_function_field_declarator,
+    sym_function_type_declarator,
+    sym_parenthesized_declarator,
+    sym_parenthesized_field_declarator,
+    sym_parenthesized_type_declarator,
+    sym_pointer_declarator,
+    sym_primitive_type,
+    sym_reference_declarator,
+    sym_reference_field_declarator,
+    sym_reference_type_declarator,
+    sym_variadic_reference_declarator,
+  [56] =
+    sym_alignof_expression,
+    sym_assignment_expression,
+    sym_binary_expression,
+    sym_call_expression,
+    sym_cast_expression,
+    sym_char_literal,
+    sym_co_await_expression,
+    sym_compound_literal_expression,
+    sym_concatenated_string,
+    sym_conditional_expression,
+    sym_delete_expression,
+    sym_extension_expression,
+    sym_false,
+    sym_field_expression,
+    sym_fold_expression,
+    sym_generic_expression,
+    sym_gnu_asm_expression,
+    sym_identifier,
+    sym_lambda_expression,
+    sym_new_expression,
+    sym_null,
+    sym_number_literal,
+    sym_offsetof_expression,
+    sym_parameter_pack_expansion,
+    sym_parenthesized_expression,
+    sym_pointer_expression,
+    sym_qualified_identifier,
+    sym_raw_string_literal,
+    sym_requires_clause,
+    sym_requires_expression,
+    sym_sizeof_expression,
+    sym_string_literal,
+    sym_subscript_expression,
+    sym_template_function,
+    sym_this,
+    sym_true,
+    sym_unary_expression,
+    sym_update_expression,
+    sym_user_defined_literal,
+  [95] =
+    sym_attributed_statement,
+    sym_break_statement,
+    sym_case_statement,
+    sym_co_return_statement,
+    sym_co_yield_statement,
+    sym_compound_statement,
+    sym_continue_statement,
+    sym_do_statement,
+    sym_expression_statement,
+    sym_for_range_loop,
+    sym_for_statement,
+    sym_goto_statement,
+    sym_if_statement,
+    sym_labeled_statement,
+    sym_return_statement,
+    sym_seh_leave_statement,
+    sym_seh_try_statement,
+    sym_switch_statement,
+    sym_throw_statement,
+    sym_try_statement,
+    sym_while_statement,
+  [116] =
+    alias_sym_type_identifier,
+    sym_class_specifier,
+    sym_decltype,
+    sym_dependent_type,
+    sym_enum_specifier,
+    sym_placeholder_type_specifier,
+    sym_primitive_type,
+    sym_qualified_field_identifier,
+    sym_qualified_identifier,
+    sym_qualified_operator_cast_identifier,
+    sym_qualified_type_identifier,
+    sym_sized_type_specifier,
+    sym_struct_specifier,
+    sym_template_type,
+    sym_union_specifier,
 };
 
 static const TSCharacterRange sym_identifier_character_set_1[] = {
@@ -32131,7 +32292,7 @@ static bool ts_lex_keywords(TSLexer *lexer, TSStateId state) {
   }
 }
 
-static const TSLexMode ts_lex_modes[STATE_COUNT] = {
+static const TSLexerMode ts_lex_modes[STATE_COUNT] = {
   [0] = {.lex_state = 0, .external_lex_state = 1},
   [1] = {.lex_state = 344},
   [2] = {.lex_state = 176},
@@ -699550,6 +699711,7 @@ TS_PUBLIC const TSLanguage *tree_sitter_mozcpp(void) {
     .state_count = STATE_COUNT,
     .large_state_count = LARGE_STATE_COUNT,
     .production_id_count = PRODUCTION_ID_COUNT,
+    .supertype_count = SUPERTYPE_COUNT,
     .field_count = FIELD_COUNT,
     .max_alias_sequence_length = MAX_ALIAS_SEQUENCE_LENGTH,
     .parse_table = &ts_parse_table[0][0],
@@ -699560,6 +699722,9 @@ TS_PUBLIC const TSLanguage *tree_sitter_mozcpp(void) {
     .field_names = ts_field_names,
     .field_map_slices = ts_field_map_slices,
     .field_map_entries = ts_field_map_entries,
+    .supertype_map_slices = ts_supertype_map_slices,
+    .supertype_map_entries = ts_supertype_map_entries,
+    .supertype_symbols = ts_supertype_symbols,
     .symbol_metadata = ts_symbol_metadata,
     .public_symbol_map = ts_symbol_map,
     .alias_map = ts_non_terminal_alias_map,
@@ -699578,6 +699743,13 @@ TS_PUBLIC const TSLanguage *tree_sitter_mozcpp(void) {
       tree_sitter_mozcpp_external_scanner_deserialize,
     },
     .primary_state_ids = ts_primary_state_ids,
+    .name = "mozcpp",
+    .max_reserved_word_set_size = 0,
+    .metadata = {
+      .major_version = 0,
+      .minor_version = 0,
+      .patch_version = 0,
+    },
   };
   return &language;
 }
