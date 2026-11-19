@@ -53,7 +53,7 @@ mk_langs!(
         "kotlin",
         KotlinCode,
         KotlinParser,
-        tree_sitter_kotlin_codanna,
+        tree_sitter_kotlin_sg,
         [kt, kts],
         ["kotlin"]
     ),
