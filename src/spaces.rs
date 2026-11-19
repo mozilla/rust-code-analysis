@@ -5,7 +5,7 @@ use std::fmt;
 use std::path::{Path, PathBuf};
 
 use crate::checker::Checker;
-use crate::node::Node;
+use crate::node::{Node, Parents};
 
 use crate::abc::{self, Abc};
 use crate::cognitive::{self, Cognitive};
@@ -285,7 +285,11 @@ struct State<'a> {
 /// ```
 pub fn metrics<'a, T: ParserTrait>(parser: &'a T, path: &'a Path) -> Option<FuncSpace> {
     let code = parser.get_code();
-    let node = parser.get_root();
+    let root = parser.get_root();
+    // Some metrics walk up through the ancestors of a node, so look parents up
+    // in a map instead of using the O(depth) `tree_sitter::Node::parent`.
+    let parents = Parents::new(&root);
+    let node = root.with_parents(&parents);
     let mut cursor = node.cursor();
     let mut stack = Vec::new();
     let mut children = Vec::new();
