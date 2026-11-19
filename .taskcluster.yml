@@ -598,8 +598,8 @@ tasks:
               - cd rust-code-analysis
               - git -c advice.detachedHead=false checkout ${head_rev}
               - cargo build --workspace --release
-              - 7z a rust-code-analysis-win-cli-x86_64.zip "target\release\rust-code-analysis-cli.exe"
-              - 7z a rust-code-analysis-win-web-x86_64.zip "target\release\rust-code-analysis-web.exe"
+              - '%SystemRoot%\System32\tar.exe -a -cf rust-code-analysis-win-cli-x86_64.zip -C target\release rust-code-analysis-cli.exe'
+              - '%SystemRoot%\System32\tar.exe -a -cf rust-code-analysis-win-web-x86_64.zip -C target\release rust-code-analysis-web.exe'
             mounts:
               - content:
                   url: https://win.rustup.rs/
