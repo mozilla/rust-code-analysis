@@ -40,6 +40,23 @@ METRICS = [
 ]
 
 
+def print_summary(
+    metrics_saver: T.Dict[str, T.List[pathlib.Path]], threshold: T.Optional[int]
+) -> None:
+    differing = {name: files for name, files in metrics_saver.items() if files}
+    if not differing:
+        print("No metric differences found")
+        return
+
+    print("Number of files presenting differences for each metric:")
+    width = max(len(name) for name in differing)
+    for metric_name, metric_files in differing.items():
+        line = f"  {metric_name:<{width}} {len(metric_files)}"
+        if threshold and len(metric_files) > threshold:
+            line += f" (only {threshold} saved in the artifact)"
+        print(line)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="split-minimal-tests",
@@ -97,7 +114,7 @@ def main() -> None:
             # Iterate over metrics
             for metric_name, metric_files in metrics_saver.items():
                 # Check if there is a metric difference in a file
-                m = re.search(f"(\.{metric_name})", file_no_pre)
+                m = re.search(rf"(\.{metric_name})", file_no_pre)
 
                 # If some errors occurred, skip to the next metric
                 if m is None:
@@ -106,6 +123,9 @@ def main() -> None:
                 # Save path if there is a metric difference in a file
                 if m.group(1):
                     metric_files.append(path)
+
+    # Print the number of files presenting differences for each metric
+    print_summary(metrics_saver, args.threshold)
 
     # Iterate over metrics to print them
     for metric_name, metric_files in metrics_saver.items():
