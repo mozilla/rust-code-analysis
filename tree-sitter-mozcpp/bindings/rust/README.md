@@ -8,8 +8,8 @@ way.)
 
 ``` toml
 [dependencies]
-tree-sitter = "0.25.3"
-tree-sitter-mozcpp = "0.20.4"
+tree-sitter = "0.26.5"
+tree-sitter-mozcpp = "0.20.5"
 ```
 
 Typically, you will use the [LANGUAGE][] function to add this
