@@ -2,6 +2,7 @@ mod formats;
 
 use std::cmp::Ordering;
 use std::collections::{HashMap, hash_map};
+use std::fmt::Write;
 use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use std::process;
@@ -10,10 +11,10 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle, available_parallelism};
 use std::time::{Duration, Instant};
 
-use clap::Parser;
 use clap::builder::{PossibleValuesParser, TypedValueParser};
+use clap::{Parser, ValueEnum};
 use globset::{Glob, GlobSet, GlobSetBuilder};
-use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
+use indicatif::{HumanDuration, ProgressBar, ProgressState, ProgressStyle};
 
 use formats::Format;
 
@@ -173,17 +174,42 @@ fn process_dir_path(all_files: &mut HashMap<String, Vec<PathBuf>>, path: &Path, 
     }
 }
 
-/// How often the progress bar is redrawn when stderr is a terminal.
+/// How the progress of the analysis is reported.
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum ProgressMode {
+    /// A progress bar if stderr is a terminal, status lines otherwise.
+    Auto,
+    /// A progress bar, redrawn in place.
+    Bar,
+    /// A status line every 30 seconds, suitable for CI logs.
+    Log,
+}
+
+/// How often the progress bar is redrawn.
 const PROGRESS_BAR_REFRESH: Duration = Duration::from_millis(100);
-/// How often a progress line is printed when stderr is not a terminal
-/// (e.g. in CI logs), where a progress bar cannot be redrawn.
+/// How often a status line is printed in log mode.
 const PROGRESS_LOG_INTERVAL: Duration = Duration::from_secs(30);
+/// Files taking longer than this to be processed are reported, to make it
+/// easy to spot files that are slow to analyze, or that never finish.
+const SLOW_FILE_THRESHOLD: Duration = Duration::from_secs(5 * 60);
+/// ETAs above this are not meaningful, e.g. when progress is stalled on a
+/// slow file and the estimated rate drops to zero.
+const MAX_ETA: Duration = Duration::from_secs(30 * 24 * 60 * 60);
 
 /// Reports the progress of a [`ConcurrentRunner`] on stderr until `stop` is
 /// dropped.
-fn report_progress(progress: Arc<Progress>, stop: mpsc::Receiver<()>) -> JoinHandle<()> {
+fn report_progress(
+    mode: ProgressMode,
+    progress: Arc<Progress>,
+    stop: mpsc::Receiver<()>,
+) -> JoinHandle<()> {
     thread::spawn(move || {
-        if std::io::stderr().is_terminal() {
+        let bar = match mode {
+            ProgressMode::Auto => std::io::stderr().is_terminal(),
+            ProgressMode::Bar => true,
+            ProgressMode::Log => false,
+        };
+        if bar {
             show_progress_bar(&progress, &stop);
         } else {
             log_progress(&progress, &stop);
@@ -191,13 +217,63 @@ fn report_progress(progress: Arc<Progress>, stop: mpsc::Receiver<()>) -> JoinHan
     })
 }
 
+/// Keeps track of the files that are taking long to be processed.
+#[derive(Default)]
+struct SlowFiles(HashMap<PathBuf, Duration>);
+
+impl SlowFiles {
+    /// Returns a message for each file that just became slow, or that
+    /// finished after being reported as slow.
+    fn update(&mut self, progress: &Progress) -> Vec<String> {
+        let in_progress: HashMap<_, _> = progress.in_progress().into_iter().collect();
+        let mut messages = Vec::new();
+        self.0.retain(|path, elapsed| match in_progress.get(path) {
+            Some(current) => {
+                *elapsed = *current;
+                true
+            }
+            None => {
+                messages.push(format!(
+                    "Finished processing {} after more than {}",
+                    path.display(),
+                    HumanDuration(*elapsed)
+                ));
+                false
+            }
+        });
+        for (path, elapsed) in in_progress {
+            if elapsed >= SLOW_FILE_THRESHOLD && !self.0.contains_key(&path) {
+                messages.push(format!(
+                    "Still processing {} after {}",
+                    path.display(),
+                    HumanDuration(elapsed)
+                ));
+                self.0.insert(path, elapsed);
+            }
+        }
+        messages
+    }
+}
+
 fn show_progress_bar(progress: &Progress, stop: &mpsc::Receiver<()>) {
     let bar = ProgressBar::new(0).with_style(
         ProgressStyle::with_template(
-            "[{elapsed_precise}] {wide_bar} {pos}/{len} files (ETA {eta}) {msg}",
+            "[{elapsed_precise}] {wide_bar} {pos}/{len} files (ETA {eta_or_unknown}) {msg}",
         )
-        .expect("Invalid progress bar template"),
+        .expect("Invalid progress bar template")
+        .with_key(
+            "eta_or_unknown",
+            |state: &ProgressState, w: &mut dyn Write| {
+                let eta = state.eta();
+                let _ = if eta > MAX_ETA {
+                    write!(w, "?")
+                } else {
+                    write!(w, "{:#}", HumanDuration(eta))
+                };
+            },
+        ),
     );
+    let mut slow_files = SlowFiles::default();
     loop {
         let stopped = !matches!(
             stop.recv_timeout(PROGRESS_BAR_REFRESH),
@@ -205,6 +281,9 @@ fn show_progress_bar(progress: &Progress, stop: &mpsc::Receiver<()>) {
         );
         bar.set_length(progress.found() as u64);
         bar.set_position(progress.processed() as u64);
+        for message in slow_files.update(progress) {
+            bar.println(message);
+        }
         if stopped {
             break;
         }
@@ -224,6 +303,7 @@ fn show_progress_bar(progress: &Progress, stop: &mpsc::Receiver<()>) {
 
 fn log_progress(progress: &Progress, stop: &mpsc::Receiver<()>) {
     let start = Instant::now();
+    let mut slow_files = SlowFiles::default();
     while let Err(RecvTimeoutError::Timeout) = stop.recv_timeout(PROGRESS_LOG_INTERVAL) {
         let (processed, found) = (progress.processed(), progress.found());
         let elapsed = HumanDuration(start.elapsed());
@@ -235,6 +315,13 @@ fn log_progress(progress: &Progress, stop: &mpsc::Receiver<()>) {
                 "[{elapsed}] Processed {processed}/{found} files (still searching for files)"
             );
         }
+        for message in slow_files.update(progress) {
+            eprintln!("[{elapsed}] {message}");
+        }
+    }
+    let elapsed = HumanDuration(start.elapsed());
+    for message in slow_files.update(progress) {
+        eprintln!("[{elapsed}] {message}");
     }
     eprintln!(
         "Processed {} files in {}",
@@ -313,8 +400,14 @@ struct Opts {
     #[clap(long, short)]
     warning: bool,
     /// Report the progress of the analysis on stderr.
-    #[clap(long)]
-    progress: bool,
+    #[clap(
+        long,
+        value_enum,
+        num_args = 0..=1,
+        require_equals = true,
+        default_missing_value = "auto"
+    )]
+    progress: Option<ProgressMode>,
 }
 
 fn main() {
@@ -404,9 +497,9 @@ fn main() {
     };
 
     let runner = ConcurrentRunner::new(num_jobs, act_on_file).set_proc_dir_paths(process_dir_path);
-    let reporter = opts.progress.then(|| {
+    let reporter = opts.progress.map(|mode| {
         let (stop, stopped) = mpsc::channel();
-        (stop, report_progress(runner.progress(), stopped))
+        (stop, report_progress(mode, runner.progress(), stopped))
     });
 
     let result = runner.run(cfg, files_data);
