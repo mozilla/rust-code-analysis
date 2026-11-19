@@ -95,7 +95,7 @@ fn build<T: ParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNod
         cursor.reset(ts_node);
         if cursor.goto_first_child() {
             let node = cursor.node();
-            child_stack.push(Vec::with_capacity(node.child_count()));
+            child_stack.push(Vec::with_capacity(node.child_count() as usize));
             node_stack.push(node);
         } else {
             loop {
@@ -114,7 +114,7 @@ fn build<T: ParserTrait>(parser: &T, span: bool, comment: bool) -> Option<AstNod
                     }
                 }
                 if let Some(next_node) = ts_node.next_sibling() {
-                    child_stack.push(Vec::with_capacity(next_node.child_count()));
+                    child_stack.push(Vec::with_capacity(next_node.child_count() as usize));
                     node_stack.push(next_node);
                     break;
                 }

@@ -36,7 +36,7 @@ pub trait Callback {
 }
 
 pub trait LanguageInfo {
-    type BaseLang;
+    type BaseLang: From<u16> + Into<&'static str>;
 
     fn get_lang() -> LANG;
     fn get_lang_name() -> &'static str;

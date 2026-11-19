@@ -113,7 +113,7 @@ impl<'a> Node<'a> {
         self.0.id()
     }
 
-    pub(crate) fn kind(&self) -> &'static str {
+    pub(crate) fn kind(&self) -> &'a str {
         self.0.kind()
     }
 
@@ -185,7 +185,7 @@ impl<'a> Node<'a> {
             .any(|child| child.kind_id() == id)
     }
 
-    pub(crate) fn child_count(&self) -> usize {
+    pub(crate) fn child_count(&self) -> u32 {
         self.0.child_count()
     }
 
@@ -193,8 +193,8 @@ impl<'a> Node<'a> {
         self.0.child_by_field_name(name).map(|node| self.wrap(node))
     }
 
-    pub(crate) fn child(&self, pos: usize) -> Option<Node<'a>> {
-        self.0.child(pos as u32).map(|node| self.wrap(node))
+    pub(crate) fn child(&self, pos: u32) -> Option<Node<'a>> {
+        self.0.child(pos).map(|node| self.wrap(node))
     }
 
     pub(crate) fn children(&self) -> impl ExactSizeIterator<Item = Node<'a>> + use<'a> {
