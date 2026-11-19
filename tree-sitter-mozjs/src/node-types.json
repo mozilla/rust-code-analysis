@@ -20,6 +20,10 @@
         "named": true
       },
       {
+        "type": "using_declaration",
+        "named": true
+      },
+      {
         "type": "variable_declaration",
         "named": true
       }
@@ -1095,6 +1099,10 @@
         "required": false,
         "types": [
           {
+            "type": "default",
+            "named": false
+          },
+          {
             "type": "identifier",
             "named": true
           },
@@ -1108,6 +1116,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "default",
+            "named": false
+          },
           {
             "type": "identifier",
             "named": true
@@ -1282,15 +1294,23 @@
         ]
       },
       "kind": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
+          {
+            "type": "await",
+            "named": false
+          },
           {
             "type": "const",
             "named": false
           },
           {
             "type": "let",
+            "named": false
+          },
+          {
+            "type": "using",
             "named": false
           },
           {
@@ -1711,6 +1731,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "default",
+            "named": false
+          },
           {
             "type": "identifier",
             "named": true
@@ -2166,7 +2190,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "identifier",
@@ -2932,6 +2956,36 @@
     }
   },
   {
+    "type": "using_declaration",
+    "named": true,
+    "fields": {
+      "kind": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "await",
+            "named": false
+          },
+          {
+            "type": "using",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "variable_declarator",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "variable_declaration",
     "named": true,
     "fields": {},
@@ -3520,6 +3574,10 @@
   {
     "type": "undefined",
     "named": true
+  },
+  {
+    "type": "using",
+    "named": false
   },
   {
     "type": "var",
