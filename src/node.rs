@@ -138,11 +138,7 @@ impl<'a> Node<'a> {
         let mut level = level;
         let mut node = *self;
         while level != 0 {
-            if let Some(parent) = node.parent() {
-                node = parent;
-            } else {
-                return None;
-            }
+            node = node.parent()?;
             level -= 1;
         }
 
