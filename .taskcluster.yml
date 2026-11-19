@@ -173,11 +173,11 @@ tasks:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
-        deadline: {$fromNow: '3 hours'}
+        deadline: {$fromNow: '5 hours'}
         provisionerId: proj-relman
         workerType: ci
         payload:
-          maxRunTime: 10800
+          maxRunTime: 18000
           image: "rust:bookworm"
           command:
             - "/bin/bash"
@@ -207,11 +207,11 @@ tasks:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
-        deadline: {$fromNow: '3 hours'}
+        deadline: {$fromNow: '5 hours'}
         provisionerId: proj-relman
         workerType: ci
         payload:
-          maxRunTime: 10800
+          maxRunTime: 18000
           image: "rust:bookworm"
           command:
             - "/bin/bash"
@@ -241,11 +241,11 @@ tasks:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
-        deadline: {$fromNow: '3 hours'}
+        deadline: {$fromNow: '5 hours'}
         provisionerId: proj-relman
         workerType: ci
         payload:
-          maxRunTime: 10800
+          maxRunTime: 18000
           image: "rust:bookworm"
           command:
             - "/bin/bash"
@@ -275,11 +275,11 @@ tasks:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
-        deadline: {$fromNow: '3 hours'}
+        deadline: {$fromNow: '5 hours'}
         provisionerId: proj-relman
         workerType: ci
         payload:
-          maxRunTime: 10800
+          maxRunTime: 18000
           image: "rust:bookworm"
           command:
             - "/bin/bash"
@@ -309,11 +309,11 @@ tasks:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
-        deadline: {$fromNow: '3 hours'}
+        deadline: {$fromNow: '5 hours'}
         provisionerId: proj-relman
         workerType: ci
         payload:
-          maxRunTime: 10800
+          maxRunTime: 18000
           image: "rust:bookworm"
           command:
             - "/bin/bash"
@@ -343,11 +343,11 @@ tasks:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
-        deadline: {$fromNow: '3 hours'}
+        deadline: {$fromNow: '5 hours'}
         provisionerId: proj-relman
         workerType: ci
         payload:
-          maxRunTime: 10800
+          maxRunTime: 18000
           image: "rust:bookworm"
           command:
             - "/bin/bash"
@@ -377,11 +377,11 @@ tasks:
            - {$eval: as_slugid("lint_test_task")}
            - {$eval: as_slugid("windows_test_task")}
         created: {$fromNow: ''}
-        deadline: {$fromNow: '3 hours'}
+        deadline: {$fromNow: '5 hours'}
         provisionerId: proj-relman
         workerType: ci
         payload:
-          maxRunTime: 10800
+          maxRunTime: 18000
           image: "rust:bookworm"
           command:
             - "/bin/bash"
