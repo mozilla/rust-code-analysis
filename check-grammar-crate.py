@@ -88,6 +88,7 @@ def run_rca(
         "--metrics",
         "--output-format=json",
         "--pr",
+        "--progress",
         "-I",
         *include_grammars,
         "-p",

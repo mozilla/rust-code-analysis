@@ -43,3 +43,13 @@ rust-code-analysis-cli -m -p /path/to/your/file/or/directory --pr -O json
 ```
 
 This command prints the formatted metrics to the console or the specified output path.
+
+### Progress Reporting
+
+Analyzing a large directory can take a while. To report the progress of the analysis on stderr:
+
+```bash
+rust-code-analysis-cli -m -p /path/to/your/directory -O json -o /path/to/output/directory --progress
+```
+
+When stderr is a terminal, a progress bar is shown. Otherwise, for instance in CI logs, a status line is printed every 30 seconds.
