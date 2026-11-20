@@ -8,7 +8,7 @@ edition = "2024"
 clap = { version = "^4.0", features = ["derive"] }
 askama = "^0.15"
 
-tree-sitter = "=0.26.5"
+tree-sitter = "=0.27.2"
 tree-sitter-java = "=0.23.5"
 tree-sitter-kotlin-sg = "0.4.1"
 tree-sitter-typescript = "=0.23.2"
