@@ -66,9 +66,20 @@ pub trait ParserTrait {
     fn get_filters(&self, filters: &[String]) -> Filter;
 }
 
-pub(crate) trait Search<'a> {
+/// Search trait for AST node traversal.
+pub trait Search<'a> {
+    /// Starting from this node, gets the first occurrence that meets the predicate.
     fn first_occurrence(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
+
+    /// Starting from this node, gets all nodes that meet the given predicate.
+    fn all_occurrences(&self, pred: fn(u16) -> bool) -> Vec<Node<'a>>;
+
+    /// Apply the given predicate on this node and all descendants.
     fn act_on_node(&self, pred: &mut dyn FnMut(&Node<'a>));
+
+    /// Starting from this node, gets the first child that meets the predicate.
     fn first_child(&self, pred: fn(u16) -> bool) -> Option<Node<'a>>;
+
+    /// Apply the given action on node's immediate children.
     fn act_on_child(&self, action: &mut dyn FnMut(&Node<'a>));
 }
