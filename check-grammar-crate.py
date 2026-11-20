@@ -64,13 +64,6 @@ EXTENSIONS = {
     ],
 }
 
-# Files excluded from the metrics computation, because computing their metrics
-# takes hours (https://github.com/mozilla/rust-code-analysis/issues/1258).
-EXCLUDED_FILES = [
-    "*/security/manager/ssl/nsSTSPreloadList.inc",
-    "*/third_party/wasm2c/src/prebuilt/lexer-keywords.cc",
-]
-
 # Run a subprocess.
 def run_subprocess(cmd: str, *args: T.Union[str, pathlib.Path]) -> None:
     subprocess.run([cmd, *args])
@@ -98,8 +91,6 @@ def run_rca(
         "--progress=log",
         "-I",
         *include_grammars,
-        "-X",
-        *EXCLUDED_FILES,
         "-p",
         repo_dir,
         "-o",
