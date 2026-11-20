@@ -97,5 +97,5 @@ if [ "$(ls -A $COMPARE)" ]; then
     # their metric differences
     ./split-minimal-tests.py -i $COMPARE -o $OUTPUT_DIR -t $MT_THRESHOLD
 
-    tar -czvf /tmp/json-diffs-and-minimal-tests-$GRAMMAR_NAME.tar.gz $COMPARE $OUTPUT_DIR
+    tar -czf /tmp/json-diffs-and-minimal-tests-$GRAMMAR_NAME.tar.gz $COMPARE $OUTPUT_DIR
 fi
