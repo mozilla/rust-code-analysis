@@ -18116,6 +18116,22 @@
       "members": [
         {
           "type": "STRING",
+          "value": "JS_PUBLIC_API"
+        },
+        {
+          "type": "STRING",
+          "value": "JS_PUBLIC_DATA"
+        },
+        {
+          "type": "STRING",
+          "value": "MFBT_API"
+        },
+        {
+          "type": "STRING",
+          "value": "MFBT_DATA"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_ALLOCATOR"
         },
         {
@@ -18132,7 +18148,19 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_ANNOTATED"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_ASAN_BLACKLIST"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_ASAN_IGNORE"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_ASAN_VISIBILITY"
         },
         {
           "type": "STRING",
@@ -18144,6 +18172,10 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_CAN_RUN_SCRIPT_BOUNDARY_LAMBDA"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_CAN_RUN_SCRIPT_FOR_DEFINITION"
         },
         {
@@ -18152,11 +18184,39 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_EMPTY_BASES"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_EXPORT"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_FALLTHROUGH"
         },
         {
           "type": "STRING",
           "value": "MOZ_FORMAT_PRINTF"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_GLIBCXX_CONSTINIT"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_GLOBINIT"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_GSL_OWNER"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_GSL_POINTER"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_GUARDED_VAR"
         },
         {
           "type": "STRING",
@@ -18204,6 +18264,18 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_IMPORT_API"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_IMPORT_DATA"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_INFALLIBLE_ALLOCATOR"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_INHERIT_TYPE_ANNOTATIONS_FROM_TEMPLATE_ARGS"
         },
         {
@@ -18221,6 +18293,18 @@
         {
           "type": "STRING",
           "value": "MOZ_IS_SMARTPTR_TO_REFCOUNTED"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_KNOWN_LIVE"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_LIFETIME_BOUND"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_LIFETIME_CAPTURE_BY_THIS"
         },
         {
           "type": "STRING",
@@ -18248,6 +18332,10 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_NAKED"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_NEEDS_MEMMOVABLE_MEMBERS"
         },
         {
@@ -18265,6 +18353,14 @@
         {
           "type": "STRING",
           "value": "MOZ_NEVER_INLINE_DEBUG"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_NOINSTRUMENT"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_NOMERGE"
         },
         {
           "type": "STRING",
@@ -18300,6 +18396,14 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_NON_TERMINATED_STRING"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_NOPROFILE"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_NORETURN"
         },
         {
@@ -18328,6 +18432,22 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_NO_STACK_PROTECTOR"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_NO_THREAD_SAFETY_ANALYSIS"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_NO_UNIQUE_ADDRESS"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_NULL_AFTER_MOVE"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_ONLY_USED_TO_AVOID_STATIC_CONSTRUCTORS"
         },
         {
@@ -18344,6 +18464,10 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_PT_GUARDED_VAR"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_PUSH_DISABLE_NONTRIVIAL_UNION_WARNINGS"
         },
         {
@@ -18352,11 +18476,31 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_REINITIALIZES"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_RELEASE_CONSTINIT"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_REQUIRED_BASE_METHOD"
         },
         {
           "type": "STRING",
+          "value": "MOZ_RUNINIT"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_SCOPED_CAPABILITY"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_STACK_CLASS"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_STANDALONE_DEBUG"
         },
         {
           "type": "STRING",
@@ -18372,11 +18516,23 @@
         },
         {
           "type": "STRING",
+          "value": "MOZ_TRIVIAL_ABI"
+        },
+        {
+          "type": "STRING",
           "value": "MOZ_TRIVIAL_CTOR_DTOR"
         },
         {
           "type": "STRING",
           "value": "MOZ_TSAN_BLACKLIST"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_TSAN_IGNORE"
+        },
+        {
+          "type": "STRING",
+          "value": "MOZ_UNANNOTATED"
         },
         {
           "type": "STRING",
@@ -18388,7 +18544,31 @@
         },
         {
           "type": "STRING",
-          "value": "JS_PUBLIC_API"
+          "value": "NS_EXPORT"
+        },
+        {
+          "type": "STRING",
+          "value": "NS_EXTERNAL_VIS"
+        },
+        {
+          "type": "STRING",
+          "value": "NS_HIDDEN"
+        },
+        {
+          "type": "STRING",
+          "value": "NS_IMPORT"
+        },
+        {
+          "type": "STRING",
+          "value": "NS_NO_VTABLE"
+        },
+        {
+          "type": "STRING",
+          "value": "NS_VISIBILITY_DEFAULT"
+        },
+        {
+          "type": "STRING",
+          "value": "NS_VISIBILITY_HIDDEN"
         }
       ]
     }
