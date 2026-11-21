@@ -41,6 +41,32 @@ mod tests {
     }
 
     #[test]
+    fn test_annotation_macros() {
+        let samples = vec![
+            "MFBT_API void f();",
+            "MOZ_ASAN_IGNORE static void f() {}",
+            "extern MFBT_DATA const char gFoo[];",
+            "extern \"C\" MOZ_EXPORT void f();",
+            "MOZ_RUNINIT static Foo sFoo;",
+            "void f() MOZ_NO_THREAD_SAFETY_ANALYSIS {}",
+            "auto l = []() MOZ_CAN_RUN_SCRIPT_BOUNDARY_LAMBDA { g(); };",
+        ];
+        parse(&samples, false);
+    }
+
+    #[test]
+    fn test_annotation_macros_cpp() {
+        let samples = vec![
+            "class NS_NO_VTABLE nsIFoo : public nsISupports {};",
+            "class A { MOZ_KNOWN_LIVE RefPtr<B> mB; };",
+            "class A { MOZ_UNANNOTATED Mutex mMutex; };",
+            "class A { MOZ_NO_UNIQUE_ADDRESS Empty mE; int x; };",
+            "class A { T& get() MOZ_LIFETIME_BOUND { return x; } };",
+        ];
+        parse(&samples, false);
+    }
+
+    #[test]
     fn test_fn_id_strings() {
         let samples = vec![
             "nsPrintfCString(\"%\" PRIi32, lifetime.mTag);",
