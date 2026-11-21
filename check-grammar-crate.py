@@ -27,6 +27,7 @@ NOTE: Add the paths of the software above to the PATH environment variable!
 """
 
 import argparse
+import filecmp
 import pathlib
 import subprocess
 import sys
@@ -199,9 +200,15 @@ def compare_metrics(args: argparse.Namespace) -> None:
     # Create compare directory
     compare_dir.mkdir(parents=True, exist_ok=True)
 
-    # Get JSON differences and minimal tests
+    # Get JSON differences and minimal tests.
+    # Pair the files by their relative path: given two directories,
+    # json-minimal-tests walks them in parallel, so it compares unrelated files
+    # sharing the same name and skips most of the others.
     print("\nSave minimal tests in", compare_dir)
-    run_subprocess("json-minimal-tests", "-o", compare_dir, old_dir, new_dir)
+    for old_file in sorted(old_dir.rglob("*.json")):
+        new_file = new_dir / old_file.relative_to(old_dir)
+        if new_file.is_file() and not filecmp.cmp(old_file, new_file, shallow=False):
+            run_subprocess("json-minimal-tests", "-o", compare_dir, old_file, new_file)
 
 
 def main() -> None:
