@@ -629,9 +629,16 @@ impl Loc for MozjsCode {
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
-            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
-            | StatementIdentifier => {
+            | DebuggerStatement | ReturnStatement | ThrowStatement | StatementIdentifier => {
                 stats.lloc.logical_lines += 1;
+            }
+            EmptyStatement => {
+                // An empty initializer or condition in a `for` header is an
+                // `empty_statement`, while a non-empty one is a bare expression:
+                // count neither, the `for` statement is already counted.
+                if !node.parent().is_some_and(|p| p.kind_id() == ForStatement) {
+                    stats.lloc.logical_lines += 1;
+                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -655,9 +662,16 @@ impl Loc for JavascriptCode {
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
-            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
-            | StatementIdentifier => {
+            | DebuggerStatement | ReturnStatement | ThrowStatement | StatementIdentifier => {
                 stats.lloc.logical_lines += 1;
+            }
+            EmptyStatement => {
+                // An empty initializer or condition in a `for` header is an
+                // `empty_statement`, while a non-empty one is a bare expression:
+                // count neither, the `for` statement is already counted.
+                if !node.parent().is_some_and(|p| p.kind_id() == ForStatement) {
+                    stats.lloc.logical_lines += 1;
+                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -681,9 +695,16 @@ impl Loc for TypescriptCode {
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
-            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
-            | StatementIdentifier => {
+            | DebuggerStatement | ReturnStatement | ThrowStatement | StatementIdentifier => {
                 stats.lloc.logical_lines += 1;
+            }
+            EmptyStatement => {
+                // An empty initializer or condition in a `for` header is an
+                // `empty_statement`, while a non-empty one is a bare expression:
+                // count neither, the `for` statement is already counted.
+                if !node.parent().is_some_and(|p| p.kind_id() == ForStatement) {
+                    stats.lloc.logical_lines += 1;
+                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -707,9 +728,16 @@ impl Loc for TsxCode {
             ExpressionStatement | ExportStatement | ImportStatement | StatementBlock
             | IfStatement | SwitchStatement | ForStatement | ForInStatement | WhileStatement
             | DoStatement | TryStatement | WithStatement | BreakStatement | ContinueStatement
-            | DebuggerStatement | ReturnStatement | ThrowStatement | EmptyStatement
-            | StatementIdentifier => {
+            | DebuggerStatement | ReturnStatement | ThrowStatement | StatementIdentifier => {
                 stats.lloc.logical_lines += 1;
+            }
+            EmptyStatement => {
+                // An empty initializer or condition in a `for` header is an
+                // `empty_statement`, while a non-empty one is a bare expression:
+                // count neither, the `for` statement is already counted.
+                if !node.parent().is_some_and(|p| p.kind_id() == ForStatement) {
+                    stats.lloc.logical_lines += 1;
+                }
             }
             _ => {
                 check_comment_ends_on_code_line(stats, start);
@@ -2549,12 +2577,12 @@ mod tests {
                     {
                       "sloc": 5.0,
                       "ploc": 5.0,
-                      "lloc": 6.0,
+                      "lloc": 5.0,
                       "cloc": 0.0,
                       "blank": 0.0,
                       "sloc_average": 2.5,
                       "ploc_average": 2.5,
-                      "lloc_average": 3.0,
+                      "lloc_average": 2.5,
                       "cloc_average": 0.0,
                       "blank_average": 0.0,
                       "sloc_min": 5.0,
@@ -2563,8 +2591,8 @@ mod tests {
                       "cloc_max": 0.0,
                       "ploc_min": 5.0,
                       "ploc_max": 5.0,
-                      "lloc_min": 5.0,
-                      "lloc_max": 5.0,
+                      "lloc_min": 4.0,
+                      "lloc_max": 4.0,
                       "blank_min": 0.0,
                       "blank_max": 0.0
                     }"###
@@ -2590,12 +2618,12 @@ mod tests {
                     {
                       "sloc": 5.0,
                       "ploc": 5.0,
-                      "lloc": 6.0,
+                      "lloc": 5.0,
                       "cloc": 0.0,
                       "blank": 0.0,
                       "sloc_average": 2.5,
                       "ploc_average": 2.5,
-                      "lloc_average": 3.0,
+                      "lloc_average": 2.5,
                       "cloc_average": 0.0,
                       "blank_average": 0.0,
                       "sloc_min": 5.0,
@@ -2604,8 +2632,8 @@ mod tests {
                       "cloc_max": 0.0,
                       "ploc_min": 5.0,
                       "ploc_max": 5.0,
-                      "lloc_min": 5.0,
-                      "lloc_max": 5.0,
+                      "lloc_min": 4.0,
+                      "lloc_max": 4.0,
                       "blank_min": 0.0,
                       "blank_max": 0.0
                     }"###
@@ -2614,6 +2642,26 @@ mod tests {
         );
     }
 
+    #[test]
+    fn js_for_header_loc() {
+        // The initializer and the condition of a `for` header are not logical
+        // lines on their own, whether they are empty or not.
+        let code = "for (i = 0; i < 4; ++i) {} // +2 (for, block)
+             for (; i < 4; ++i) {} // +2
+             for (i = 0; ; ++i) {} // +2
+             for (;;) {} // +2";
+
+        fn check<T: ParserTrait>(code: &str, path: &str) {
+            check_metrics::<T>(code, path, |metric| {
+                assert_eq!(metric.loc.lloc(), 8.0);
+            });
+        }
+
+        check::<JavascriptParser>(code, "foo.js");
+        check::<MozjsParser>(code, "foo.js");
+        check::<TypescriptParser>(code, "foo.ts");
+        check::<TsxParser>(code, "foo.tsx");
+    }
     #[test]
     fn cpp_namespace_loc() {
         check_metrics::<CppParser>(
