@@ -152,10 +152,13 @@ impl<'a> Node<'a> {
     }
 
     pub(crate) fn parent(&self) -> Option<Node<'a>> {
-        match self.1 {
-            Some(parents) => parents.0.get(&self.0.id()).map(|&parent| self.wrap(parent)),
-            None => self.0.parent().map(|parent| self.wrap(parent)),
-        }
+        // The map only contains the nodes below the root it was computed
+        // from, which may be a subtree: fall back to tree-sitter for the
+        // others. For the root of the whole tree, this returns immediately.
+        self.1
+            .and_then(|parents| parents.0.get(&self.0.id()).copied())
+            .or_else(|| self.0.parent())
+            .map(|parent| self.wrap(parent))
     }
 
     #[inline(always)]
@@ -348,7 +351,10 @@ mod tests {
     use std::path::Path;
 
     use super::*;
-    use crate::{CppParser, ParserTrait, metrics};
+    use crate::{
+        Checker, CppParser, Javascript, JavascriptCode, JavascriptParser, ParserTrait, Search,
+        metrics,
+    };
 
     #[test]
     fn parents_match_tree_sitter() {
@@ -378,6 +384,27 @@ mod tests {
             count += 1;
         }
         assert_eq!(count, root.0.descendant_count());
+    }
+
+    // A parser can return a subtree as its root: the ancestors above it must
+    // still be found, e.g. to tell a function from a closure.
+    #[test]
+    fn parents_above_subtree_root() {
+        let code = "const f = () => 1;";
+        let parser = JavascriptParser::new(code.as_bytes().to_vec(), Path::new("foo.js"), None);
+        let arrow = parser
+            .get_root()
+            .first_occurrence(|id| id == Javascript::ArrowFunction)
+            .unwrap();
+        let parents = Parents::new(&arrow);
+        let arrow = arrow.with_parents(&parents);
+
+        assert_eq!(
+            arrow.parent().map(|parent| parent.kind_id()),
+            Some(Javascript::VariableDeclarator as u16)
+        );
+        assert!(JavascriptCode::is_func(&arrow));
+        assert!(!JavascriptCode::is_closure(&arrow));
     }
 
     // Every declaration below is nested in all the namespaces before it, and
