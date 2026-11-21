@@ -134,7 +134,8 @@ impl Cyclomatic for MozjsCode {
         use Mozjs::*;
 
         match node.kind_id().into() {
-            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE
+            | QMARKQMARK | AMPAMPEQ | PIPEPIPEEQ | QMARKQMARKEQ => {
                 stats.cyclomatic += 1.;
             }
             _ => {}
@@ -147,7 +148,8 @@ impl Cyclomatic for JavascriptCode {
         use Javascript::*;
 
         match node.kind_id().into() {
-            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE
+            | QMARKQMARK | AMPAMPEQ | PIPEPIPEEQ | QMARKQMARKEQ => {
                 stats.cyclomatic += 1.;
             }
             _ => {}
@@ -160,7 +162,8 @@ impl Cyclomatic for TypescriptCode {
         use Typescript::*;
 
         match node.kind_id().into() {
-            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE
+            | QMARKQMARK | AMPAMPEQ | PIPEPIPEEQ | QMARKQMARKEQ => {
                 stats.cyclomatic += 1.;
             }
             _ => {}
@@ -173,7 +176,8 @@ impl Cyclomatic for TsxCode {
         use Tsx::*;
 
         match node.kind_id().into() {
-            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE => {
+            If | For | While | Case | Catch | TernaryExpression | AMPAMP | PIPEPIPE
+            | QMARKQMARK | AMPAMPEQ | PIPEPIPEEQ | QMARKQMARKEQ => {
                 stats.cyclomatic += 1.;
             }
             _ => {}
@@ -551,6 +555,50 @@ mod tests {
             },
         );
     }
+
+    // `??`, `??=`, `||=` and `&&=` are lazily evaluated like `||` and `&&`
+    macro_rules! lazy_logical_operators_test {
+        ($name:ident, $parser:ty, $file:expr) => {
+            #[test]
+            fn $name() {
+                check_metrics::<$parser>(
+                    "function f(a, b) { // +2 (+1 unit space)
+                        a ??= b; // +1
+                        a ||= b; // +1
+                        a &&= b; // +1
+                        return a ?? b; // +1
+                    }",
+                    $file,
+                    |metric| {
+                        // nspace = 2 (func and unit)
+                        insta::assert_json_snapshot!(
+                            metric.cyclomatic,
+                            @r###"
+                            {
+                              "sum": 6.0,
+                              "average": 3.0,
+                              "min": 1.0,
+                              "max": 5.0
+                            }"###
+                        );
+                    },
+                );
+            }
+        };
+    }
+
+    lazy_logical_operators_test!(mozjs_lazy_logical_operators, MozjsParser, "foo.js");
+    lazy_logical_operators_test!(
+        javascript_lazy_logical_operators,
+        JavascriptParser,
+        "foo.js"
+    );
+    lazy_logical_operators_test!(
+        typescript_lazy_logical_operators,
+        TypescriptParser,
+        "foo.ts"
+    );
+    lazy_logical_operators_test!(tsx_lazy_logical_operators, TsxParser, "foo.tsx");
 
     // As reported here:
     // https://github.com/sebastianbergmann/php-code-coverage/issues/607
