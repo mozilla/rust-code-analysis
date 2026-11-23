@@ -18102,8 +18102,17 @@
         "type": "PREC",
         "value": 1,
         "content": {
-          "type": "PATTERN",
-          "value": "(PRI|SCN)[diouxX](8|16|32|64|FAST(8|16|32|64)|LEAST(8|16|32|64)|MAX|PTR)"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "(PRI|SCN)[diouxX](8|16|32|64|FAST(8|16|32|64)|LEAST(8|16|32|64)|MAX|PTR)"
+            },
+            {
+              "type": "STRING",
+              "value": "PRIPID"
+            }
+          ]
         }
       }
     },

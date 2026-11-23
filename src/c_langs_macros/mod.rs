@@ -46,6 +46,7 @@ mod tests {
             "nsPrintfCString(\"%\" PRIi32, lifetime.mTag);",
             "printf(\"x = %\" PRIu64 \"\\n\", x);",
             "sscanf(s, \"%\" SCNx32, &x);",
+            "printf(\"pid %\" PRIPID \"\\n\", pid);",
         ];
         parse(&samples, false);
     }

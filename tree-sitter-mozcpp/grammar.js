@@ -100,7 +100,8 @@ module.exports = grammar(CPP, {
     // Unlike tree-sitter-c, tree-sitter-cpp doesn't accept an identifier
     // right after the first string literal of a concatenation, which is how
     // the <inttypes.h> format macros are commonly used: `"%" PRIu32`.
-    // Accept those macros only, to avoid ambiguities like `extern "C" FOO`.
+    // Accept those macros only, plus Chromium IPC's PRIPID, to avoid
+    // ambiguities like `extern "C" FOO`.
     concatenated_string: $ => prec.right(seq(
       choice(
         seq(
@@ -115,9 +116,10 @@ module.exports = grammar(CPP, {
       repeat(choice($.identifier, $.string_literal, $.raw_string_literal)),
     )),
 
-    _format_macro: $ => token(prec(1,
+    _format_macro: $ => token(prec(1, choice(
       /(PRI|SCN)[diouxX](8|16|32|64|FAST(8|16|32|64)|LEAST(8|16|32|64)|MAX|PTR)/,
-    )),
+      'PRIPID',
+    ))),
 
     macro_statement: $ => 'MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER',
     
