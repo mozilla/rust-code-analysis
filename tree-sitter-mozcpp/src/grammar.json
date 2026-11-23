@@ -11552,29 +11552,66 @@
             "type": "CHOICE",
             "members": [
               {
-                "type": "SYMBOL",
-                "name": "identifier"
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "identifier"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "string_literal"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "raw_string_literal"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "string_literal"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "raw_string_literal"
+                      }
+                    ]
+                  }
+                ]
               },
               {
-                "type": "SYMBOL",
-                "name": "string_literal"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "raw_string_literal"
-              }
-            ]
-          },
-          {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "string_literal"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "raw_string_literal"
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "string_literal"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "raw_string_literal"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_format_macro"
+                    },
+                    "named": true,
+                    "value": "identifier"
+                  }
+                ]
               }
             ]
           },
@@ -18058,6 +18095,26 @@
           }
         }
       ]
+    },
+    "_format_macro": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "(PRI|SCN)[diouxX](8|16|32|64|FAST(8|16|32|64)|LEAST(8|16|32|64)|MAX|PTR)"
+            },
+            {
+              "type": "STRING",
+              "value": "PRIPID"
+            }
+          ]
+        }
+      }
     },
     "macro_statement": {
       "type": "STRING",
