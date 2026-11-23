@@ -7643,6 +7643,10 @@
     "named": false
   },
   {
+    "type": "JS_PUBLIC_DATA",
+    "named": false
+  },
+  {
     "type": "L\"",
     "named": false
   },
@@ -7663,6 +7667,14 @@
     "named": false
   },
   {
+    "type": "MFBT_API",
+    "named": false
+  },
+  {
+    "type": "MFBT_DATA",
+    "named": false
+  },
+  {
     "type": "MOZ_ALLOCATOR",
     "named": false
   },
@@ -7679,7 +7691,19 @@
     "named": false
   },
   {
+    "type": "MOZ_ANNOTATED",
+    "named": false
+  },
+  {
     "type": "MOZ_ASAN_BLACKLIST",
+    "named": false
+  },
+  {
+    "type": "MOZ_ASAN_IGNORE",
+    "named": false
+  },
+  {
+    "type": "MOZ_ASAN_VISIBILITY",
     "named": false
   },
   {
@@ -7691,6 +7715,10 @@
     "named": false
   },
   {
+    "type": "MOZ_CAN_RUN_SCRIPT_BOUNDARY_LAMBDA",
+    "named": false
+  },
+  {
     "type": "MOZ_CAN_RUN_SCRIPT_FOR_DEFINITION",
     "named": false
   },
@@ -7699,11 +7727,39 @@
     "named": false
   },
   {
+    "type": "MOZ_EMPTY_BASES",
+    "named": false
+  },
+  {
+    "type": "MOZ_EXPORT",
+    "named": false
+  },
+  {
     "type": "MOZ_FALLTHROUGH",
     "named": false
   },
   {
     "type": "MOZ_FORMAT_PRINTF",
+    "named": false
+  },
+  {
+    "type": "MOZ_GLIBCXX_CONSTINIT",
+    "named": false
+  },
+  {
+    "type": "MOZ_GLOBINIT",
+    "named": false
+  },
+  {
+    "type": "MOZ_GSL_OWNER",
+    "named": false
+  },
+  {
+    "type": "MOZ_GSL_POINTER",
+    "named": false
+  },
+  {
+    "type": "MOZ_GUARDED_VAR",
     "named": false
   },
   {
@@ -7751,6 +7807,18 @@
     "named": false
   },
   {
+    "type": "MOZ_IMPORT_API",
+    "named": false
+  },
+  {
+    "type": "MOZ_IMPORT_DATA",
+    "named": false
+  },
+  {
+    "type": "MOZ_INFALLIBLE_ALLOCATOR",
+    "named": false
+  },
+  {
     "type": "MOZ_INHERIT_TYPE_ANNOTATIONS_FROM_TEMPLATE_ARGS",
     "named": false
   },
@@ -7768,6 +7836,18 @@
   },
   {
     "type": "MOZ_IS_SMARTPTR_TO_REFCOUNTED",
+    "named": false
+  },
+  {
+    "type": "MOZ_KNOWN_LIVE",
+    "named": false
+  },
+  {
+    "type": "MOZ_LIFETIME_BOUND",
+    "named": false
+  },
+  {
+    "type": "MOZ_LIFETIME_CAPTURE_BY_THIS",
     "named": false
   },
   {
@@ -7795,6 +7875,10 @@
     "named": false
   },
   {
+    "type": "MOZ_NAKED",
+    "named": false
+  },
+  {
     "type": "MOZ_NEEDS_MEMMOVABLE_MEMBERS",
     "named": false
   },
@@ -7812,6 +7896,14 @@
   },
   {
     "type": "MOZ_NEVER_INLINE_DEBUG",
+    "named": false
+  },
+  {
+    "type": "MOZ_NOINSTRUMENT",
+    "named": false
+  },
+  {
+    "type": "MOZ_NOMERGE",
     "named": false
   },
   {
@@ -7847,6 +7939,14 @@
     "named": false
   },
   {
+    "type": "MOZ_NON_TERMINATED_STRING",
+    "named": false
+  },
+  {
+    "type": "MOZ_NOPROFILE",
+    "named": false
+  },
+  {
     "type": "MOZ_NORETURN",
     "named": false
   },
@@ -7875,6 +7975,22 @@
     "named": false
   },
   {
+    "type": "MOZ_NO_STACK_PROTECTOR",
+    "named": false
+  },
+  {
+    "type": "MOZ_NO_THREAD_SAFETY_ANALYSIS",
+    "named": false
+  },
+  {
+    "type": "MOZ_NO_UNIQUE_ADDRESS",
+    "named": false
+  },
+  {
+    "type": "MOZ_NULL_AFTER_MOVE",
+    "named": false
+  },
+  {
     "type": "MOZ_ONLY_USED_TO_AVOID_STATIC_CONSTRUCTORS",
     "named": false
   },
@@ -7891,6 +8007,10 @@
     "named": false
   },
   {
+    "type": "MOZ_PT_GUARDED_VAR",
+    "named": false
+  },
+  {
     "type": "MOZ_PUSH_DISABLE_NONTRIVIAL_UNION_WARNINGS",
     "named": false
   },
@@ -7899,11 +8019,31 @@
     "named": false
   },
   {
+    "type": "MOZ_REINITIALIZES",
+    "named": false
+  },
+  {
+    "type": "MOZ_RELEASE_CONSTINIT",
+    "named": false
+  },
+  {
     "type": "MOZ_REQUIRED_BASE_METHOD",
     "named": false
   },
   {
+    "type": "MOZ_RUNINIT",
+    "named": false
+  },
+  {
+    "type": "MOZ_SCOPED_CAPABILITY",
+    "named": false
+  },
+  {
     "type": "MOZ_STACK_CLASS",
+    "named": false
+  },
+  {
+    "type": "MOZ_STANDALONE_DEBUG",
     "named": false
   },
   {
@@ -7919,6 +8059,10 @@
     "named": false
   },
   {
+    "type": "MOZ_TRIVIAL_ABI",
+    "named": false
+  },
+  {
     "type": "MOZ_TRIVIAL_CTOR_DTOR",
     "named": false
   },
@@ -7927,11 +8071,47 @@
     "named": false
   },
   {
+    "type": "MOZ_TSAN_IGNORE",
+    "named": false
+  },
+  {
+    "type": "MOZ_UNANNOTATED",
+    "named": false
+  },
+  {
     "type": "MOZ_UNSAFE_REF",
     "named": false
   },
   {
     "type": "MOZ_XPCOM_ABI",
+    "named": false
+  },
+  {
+    "type": "NS_EXPORT",
+    "named": false
+  },
+  {
+    "type": "NS_EXTERNAL_VIS",
+    "named": false
+  },
+  {
+    "type": "NS_HIDDEN",
+    "named": false
+  },
+  {
+    "type": "NS_IMPORT",
+    "named": false
+  },
+  {
+    "type": "NS_NO_VTABLE",
+    "named": false
+  },
+  {
+    "type": "NS_VISIBILITY_DEFAULT",
+    "named": false
+  },
+  {
+    "type": "NS_VISIBILITY_HIDDEN",
     "named": false
   },
   {
